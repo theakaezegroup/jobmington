@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <path d="M12 1L14.09 3.26L17 2.27L17.64 5.27L20.73 5.64L20.27 8.73L23 10.18L21.18 13L23 15.82L20.27 17.27L20.73 20.36L17.64 20.73L17 23.73L14.09 22.74L12 25L9.91 22.74L7 23.73L6.36 20.73L3.27 20.36L3.73 17.27L1 15.82L2.82 13L1 10.18L3.73 8.73L3.27 5.64L6.36 5.27L7 2.27L9.91 3.26L12 1Z" fill="url(#blueGrad)"/>
+  <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,13 @@
+.env
+.env.local
+
+logs/*
+!logs/.gitkeep
+
+uploads/*
+!uploads/.gitkeep
+!uploads/.htaccess
+
+*.log
+.DS_Store
+Thumbs.db

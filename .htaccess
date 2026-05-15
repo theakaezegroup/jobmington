@@ -1,0 +1,26 @@
+RewriteEngine On
+
+# 1. Base Directory
+# This tells the server your site lives in the "Jobmington" folder.
+# IMPORTANT: Keep the Capital J if your folder is named Jobmington.
+RewriteBase /jobmington/
+
+# 2. Blog Post Routing
+# When someone visits: /blog/my-cool-post
+# The server loads:    /blog/post.php?slug=my-cool-post
+RewriteRule ^blog/([a-zA-Z0-9-]+)/?$ blog/post.php?slug=$1 [L,QSA]
+
+# 3. Blog Category Routing
+# When someone visits: /blog/category/tech
+# The server loads:    /blog/category.php?slug=tech
+RewriteRule ^blog/category/([a-zA-Z0-9-]+)/?$ blog/category.php?slug=$1 [L,QSA]
+
+# 4. Hide .php Extensions (Optional but Cleaner)
+# Allows you to link to /auth/login instead of /auth/login.php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# 5. Security: Prevent File Listings
+# Stops people from seeing a list of your files if they visit a folder without an index.php
+Options -Indexes

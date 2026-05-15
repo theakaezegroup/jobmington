@@ -1,0 +1,378 @@
+```html
+<!-- ====== MOBILE MENU ====== -->
+<div 
+    id="mobile-menu" 
+    class="mobile-menu lg:hidden" 
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Navigation menu"
+>
+    <div class="mobile-menu-overlay" aria-hidden="true"></div>
+    
+    <div class="mobile-menu-panel">
+        <!-- Mobile Menu Header -->
+        <div class="mobile-menu-header">
+            <a href="/jobmington/" class="flex items-center gap-2">
+                <img 
+                    src="<?= $asset('images/logo.png') ?>" 
+                    alt="" 
+                    class="h-8 w-auto"
+                >
+                <span class="text-lg font-bold text-primary font-heading">
+                    <?= $escape($siteName) ?>
+                </span>
+            </a>
+            <button 
+                type="button"
+                id="mobile-menu-close"
+                class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Close navigation menu"
+            >
+                <?= Navigation::getIcon('close', 'w-5 h-5') ?>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Body -->
+        <div class="mobile-menu-body">
+            <!-- Main Navigation -->
+            <nav aria-label="Mobile navigation">
+                <?php foreach ($mobileMenuItems as $item): ?>
+                <a 
+                    href="<?= $escape($item['url']) ?>" 
+                    class="mobile-nav-item <?= Navigation::isActive($item['url'], $currentUri) ? 'active' : '' ?>"
+                >
+                    <span class="mobile-nav-icon"><?= Navigation::getIcon($item['icon']) ?></span>
+                    <span><?= $escape($item['label']) ?></span>
+                    <?php if (!empty($item['badge'])): ?>
+                    <span class="ml-auto px-2 py-0.5 bg-secondary text-white text-xs font-semibold rounded-full">
+                        New
+                    </span>
+                    <?php endif; ?>
+                </a>
+                <?php endforeach; ?>
+            </nav>
+            
+            <div class="my-4 border-t border-gray-200"></div>
+            
+            <!-- User Section -->
+            <?php if ($isLoggedIn): ?>
+            <div class="mb-4 p-4 bg-gray-50 rounded-xl">
+                <div class="flex items-center gap-3">
+                    <img 
+                        src="<?= $getProfileImage($currentUser['profile_image'] ?? null) ?>" 
+                        alt="" 
+                        class="w-12 h-12 rounded-full object-cover border-2 border-primary"
+                    >
+                    <div class="min-w-0">
+                        <p class="font-semibold text-gray-900 truncate">
+                            <?= $escape($currentUser['full_name'] ?? 'User') ?>
+                        </p>
+                        <p class="text-sm text-gray-500 truncate">
+                            <?= $escape($currentUser['email'] ?? '') ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="/jobmington/seeker/dashboard.php" class="mobile-nav-item">
+                <?= Navigation::getIcon('dashboard', 'mobile-nav-icon') ?>
+                <span>Dashboard</span>
+            </a>
+            <a href="/jobmington/seeker/profile.php" class="mobile-nav-item">
+                <?= Navigation::getIcon('profile', 'mobile-nav-icon') ?>
+                <span>Profile</span>
+            </a>
+            
+            <div class="my-4 border-t border-gray-200"></div>
+            
+            <a href="/jobmington/auth/logout.php" class="mobile-nav-item danger">
+                <?= Navigation::getIcon('logout', 'mobile-nav-icon') ?>
+                <span>Logout</span>
+            </a>
+            
+            <?php else: ?>
+            
+            <a href="/jobmington/auth/login.php" class="mobile-nav-item">
+                <?= Navigation::getIcon('login', 'mobile-nav-icon') ?>
+                <span>Login</span>
+            </a>
+            <a href="/jobmington/auth/register.php" class="mobile-nav-item">
+                <?= Navigation::getIcon('register', 'mobile-nav-icon') ?>
+                <span>Sign Up</span>
+            </a>
+            
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+```
+
+```css
+/* ===== MOBILE MENU ===== */
+.mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    pointer-events: none;
+}
+
+.mobile-menu.is-open {
+    pointer-events: auto;
+}
+
+.mobile-menu-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity var(--transition-normal) var(--ease-smooth);
+}
+
+.mobile-menu.is-open .mobile-menu-overlay {
+    opacity: 1;
+}
+
+.mobile-menu-panel {
+    position: relative;
+    width: 100%;
+    max-width: 20rem;
+    height: 100%;
+    background: var(--color-surface);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal) var(--ease-smooth);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mobile-menu.is-open .mobile-menu-panel {
+    transform: translateX(0);
+}
+
+.mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.mobile-menu-body {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.mobile-menu-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mobile-menu-body::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+.mobile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    margin: 0.25rem 0;
+    border-radius: var(--radius-lg);
+    font-weight: 500;
+    color: #374151; /* Dark gray text for high contrast */
+    text-decoration: none;
+    transition: all var(--transition-fast) var(--ease-smooth);
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item:focus {
+    background: #eff6ff; /* Light blue hover, copied from desktop dropdown */
+    color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+.mobile-nav-item.active {
+    background: rgba(30, 64, 175, 0.1);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.mobile-nav-item.danger {
+    color: #dc2626;
+}
+
+.mobile-nav-item.danger:hover {
+    background: #fef2f2; /* Copied from desktop dropdown */
+    color: #b91c1c;
+}
+
+.mobile-nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: #6b7280; /* Explicit gray for icons */
+    transition: color var(--transition-fast) var(--ease-smooth);
+}
+
+.mobile-nav-item:hover .mobile-nav-icon,
+.mobile-nav-item:focus .mobile-nav-icon,
+.mobile-nav-item.active .mobile-nav-icon {
+    color: var(--color-primary);
+}
+
+/* ===== HAMBURGER ANIMATION (controls mobile menu) ===== */
+.hamburger-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #d1d5db;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast) var(--ease-smooth);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.hamburger-btn:hover {
+    background: #ffffff;
+    border-color: #9ca3af;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.hamburger-icon {
+    width: 1.5rem;
+    height: 1.25rem;
+    position: relative;
+}
+
+.hamburger-line {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2.5px;
+    background: #1f2937; /* Dark gray - high contrast */
+    border-radius: var(--radius-full);
+    transition: all var(--transition-normal) var(--ease-smooth);
+}
+
+.hamburger-line:nth-child(1) { top: 0; }
+.hamburger-line:nth-child(2) { top: 50%; transform: translateY(-50%); }
+.hamburger-line:nth-child(3) { bottom: 0; }
+
+.hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+    background: #1e40af; /* Primary color when open */
+}
+
+.hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.hamburger-btn[aria-expanded="true"] .hamburger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+    background: #1e40af; /* Primary color when open */
+}
+```
+
+```javascript
+// ===== MOBILE MENU =====
+// NOTE: DOM elements like `mobileMenuToggle`, `mobileMenuClose`, etc. are defined at the top of the script.
+
+let focusableElements = [];
+let firstFocusable = null;
+let lastFocusable = null;
+let previousActiveElement = null;
+
+function openMobileMenu() {
+    if (!mobileMenu) return;
+    
+    previousActiveElement = document.activeElement;
+    
+    mobileMenu.classList.add('is-open');
+    mobileMenu.setAttribute('aria-hidden', 'false');
+    mobileMenuToggle.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+    
+    // Get focusable elements
+    focusableElements = mobileMenu.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    
+    if (focusableElements.length) {
+        firstFocusable = focusableElements[0];
+        lastFocusable = focusableElements[focusableElements.length - 1];
+        
+        // Focus first element after animation
+        setTimeout(() => firstFocusable.focus(), 100);
+    }
+    
+    // Add event listeners
+    document.addEventListener('keydown', handleMenuKeydown);
+}
+
+function closeMobileMenu() {
+    if (!mobileMenu) return;
+    
+    mobileMenu.classList.remove('is-open');
+    mobileMenu.setAttribute('aria-hidden', 'true');
+    mobileMenuToggle.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    
+    // Remove event listeners
+    document.removeEventListener('keydown', handleMenuKeydown);
+    
+    // Restore focus
+    if (previousActiveElement) {
+        previousActiveElement.focus();
+    }
+}
+
+function handleMenuKeydown(e) {
+    if (e.key === 'Escape') {
+        closeMobileMenu();
+        return;
+    }
+    
+    if (e.key === 'Tab') {
+        if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+                e.preventDefault();
+                lastFocusable.focus();
+            }
+        } else {
+            if (document.activeElement === lastFocusable) {
+                e.preventDefault();
+                firstFocusable.focus();
+            }
+        }
+    }
+}
+
+// Event listeners
+mobileMenuToggle?.addEventListener('click', openMobileMenu);
+mobileMenuClose?.addEventListener('click', closeMobileMenu);
+mobileMenuOverlay?.addEventListener('click', closeMobileMenu);
+
+// Close on resize to desktop
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 1024 && mobileMenu?.classList.contains('is-open')) {
+        closeMobileMenu();
+    }
+});
+```

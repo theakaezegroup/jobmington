@@ -1,0 +1,325 @@
+/* ============================================================================
+   JOBMINGTON - Universal Dark Mode Enhancements
+   Complete contrast fix for light and dark modes across all pages
+   ============================================================================ */
+
+/* GENERAL BACKGROUNDS & TEXT */
+:root {
+    color-scheme: light dark;
+}
+
+html.light {
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+/* FORMS & INPUTS */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea,
+.dark .form-input,
+.dark [type="text"],
+.dark [type="email"],
+.dark [type="password"],
+.dark [type="number"],
+.dark [type="date"],
+.dark [type="datetime-local"],
+.dark [type="month"],
+.dark [type="tel"],
+.dark [type="time"],
+.dark [type="url"],
+.dark [type="search"] {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder,
+.dark select,
+.dark .form-input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* CARDS & PANELS */
+.dark .bg-white {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .bg-white\/.5 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .bg-white\/10 {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .bg-white\/20 {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* TEXT COLORS FOR WHITE BG */
+.dark .text-slate-900,
+.dark .text-gray-900,
+.dark .text-slate-800,
+.dark .text-gray-800,
+.dark .text-slate-700,
+.dark .text-gray-700,
+.dark .text-black {
+    color: #f1f5f9 !important;
+}
+
+.dark .text-slate-600,
+.dark .text-gray-600,
+.dark .text-slate-500,
+.dark .text-gray-500 {
+    color: #cbd5e1 !important;
+}
+
+.dark .text-slate-400,
+.dark .text-gray-400 {
+    color: #94a3b8 !important;
+}
+
+/* BORDERS */
+.dark .border-slate-100,
+.dark .border-gray-100,
+.dark .border-slate-200,
+.dark .border-gray-200,
+.dark .border-slate-300,
+.dark .border-gray-300 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* BUTTONS */
+.dark .bg-slate-50,
+.dark .bg-gray-50,
+.dark .bg-slate-100,
+.dark .bg-gray-100 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .bg-slate-200,
+.dark .bg-gray-200 {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-gray-50:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .hover\:bg-slate-100:hover,
+.dark .hover\:bg-gray-100:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.dark .hover\:bg-slate-200:hover,
+.dark .hover\:bg-gray-200:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* SHADOWS */
+.dark .shadow-sm {
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark .shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6) !important;
+}
+
+.dark .shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* SPECIFIC COMPONENT FIXES */
+
+/* Job Cards */
+.dark .mission-card {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .tech-panel {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Application Panels */
+.dark .bg-white.rounded-xl {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: #f1f5f9 !important;
+}
+
+/* Course Cards */
+.dark .bg-white.rounded-xl.overflow-hidden {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Filter Buttons */
+.dark [class*="bg-white"] {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+/* Ensure brand colors stay visible */
+.dark .bg-brand-600,
+.dark .bg-blue-600,
+.dark .bg-purple-600,
+.dark .bg-amber-600,
+.dark .bg-emerald-600 {
+    opacity: 0.95;
+}
+
+/* Links and interactive elements */
+.dark a:not(.no-dark-mode) {
+    color: #60a5fa !important;
+}
+
+.dark a:hover:not(.no-dark-mode) {
+    color: #93c5fd !important;
+}
+
+/* Tables */
+.dark table {
+    background-color: transparent;
+    color: #f1f5f9;
+}
+
+.dark tbody tr {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.dark thead {
+    background-color: rgba(15, 23, 42, 0.8) !important;
+    color: #cbd5e1;
+}
+
+/* Badges & Tags */
+.dark [class*="badge"],
+.dark [class*="tag"],
+.dark [class*="pill"] {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Dropdowns */
+.dark .dropdown-menu,
+.dark [role="listbox"],
+.dark [role="menu"] {
+    background-color: #0f172a !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Modals */
+.dark .modal-content,
+.dark [role="dialog"] {
+    background-color: #0f172a !important;
+    color: #f1f5f9 !important;
+}
+
+/* Alerts */
+.dark .alert,
+.dark [role="alert"] {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #cbd5e1 !important;
+}
+
+/* Navigation Pills & Nav Items */
+.dark .nav-pill {
+    background-color: transparent;
+    color: #cbd5e1;
+}
+
+.dark .nav-pill:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #f1f5f9;
+}
+
+.dark .nav-pill.active {
+    color: #fbbf24;
+    background-color: rgba(251, 191, 36, 0.1);
+}
+
+/* Progress Bars */
+.dark .progress,
+.dark [role="progressbar"] {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Scrollbars for webkit browsers */
+.dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Code blocks */
+.dark pre,
+.dark code {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    color: #f1f5f9 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Dividers */
+.dark hr,
+.dark [role="separator"] {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ensure proper contrast for help text */
+.dark .text-xs,
+.dark .text-sm,
+.dark .help-text {
+    color: #cbd5e1 !important;
+}
+
+/* Disabled states */
+.dark :disabled,
+.dark .disabled,
+.dark [aria-disabled="true"] {
+    opacity: 0.5;
+    color: #94a3b8 !important;
+}
+
+/* Focus states */
+.dark *:focus {
+    outline-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+.dark *:focus-visible {
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px;
+}

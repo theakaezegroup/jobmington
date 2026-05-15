@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="topGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b"/>
+      <stop offset="50%" style="stop-color:#ef4444"/>
+      <stop offset="100%" style="stop-color:#ec4899"/>
+    </linearGradient>
+    <filter id="topGlow">
+      <feGaussianBlur stdDeviation="1" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path d="M12 2L14.5 7H19.5L15.5 10.5L17 16L12 13L7 16L8.5 10.5L4.5 7H9.5L12 2Z" fill="url(#topGrad)" filter="url(#topGlow)"/>
+  <text x="12" y="10" font-family="Arial, sans-serif" font-size="4" font-weight="bold" fill="white" text-anchor="middle">TOP</text>
+  <text x="12" y="21" font-family="Arial, sans-serif" font-size="3.5" font-weight="bold" fill="#f59e0b" text-anchor="middle">RATED</text>
+</svg>

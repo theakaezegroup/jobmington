@@ -1,0 +1,21 @@
+/* Body background removed - let pages control their own backgrounds */
+
+/* Login button contrast */
+.btn-login:hover {
+    background-color: #0051a3; /* Increased contrast from #0056b3 */
+}
+
+/* Form field visibility */
+input, textarea {
+    color: #333; /* Ensures text is always visible */
+}
+
+input::placeholder {
+    color: #2c2c2c; /* More visible placeholder text */
+}
+
+/* Jobi AI navbar new tag text color */
+.navbar .jobi-new {
+    color: #ffffff !important;
+    background-color: #0051a3 !important;
+}

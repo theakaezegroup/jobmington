@@ -1,0 +1,704 @@
+/**
+ * JOBMINGTON - PROFESSIONAL SOFT NEO-BRUTALIST DESIGN SYSTEM
+ * ===========================================================
+ * Version: 3.0 - Complete Refactor
+ * Aesthetic: Neo-Brutalist (Hard Borders, Hard Shadows, NO Blur)
+ * Purpose: Serious Tech Job Board
+ */
+
+/* ==========================================
+   1. CSS CUSTOM PROPERTIES (Neo-Brutalist Palette)
+   ========================================== */
+/* Core Color Palette - Restored Royal Blue Identity */
+:root {
+    --color-ink: #051B3B;
+    /* Midnight - Borders and Text */
+    --color-primary: #0640a3;
+    /* Royal Blue - Primary Brand Color */
+    --color-secondary: #FFE135;
+    /* Nano Banana - Accents / Secondary */
+    --color-accent: #FF9800;
+    /* Hyper Orange - Highlight Badges */
+    --color-canvas: #f3f4f8;
+    /* Soft Wash - Page background */
+    --color-surface: #ffffff;
+    /* Pure White - Card backgrounds */
+
+    /* Typography Weights */
+    --weight-regular: 400;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Border Radius - Friendly but distinct */
+    --radius-standard: 8px;
+    --radius-pill: 50px;
+
+    /* Shadows - Hard Drop (NO BLUR) */
+    --shadow-standard: 4px 4px 0px 0px var(--color-ink);
+    --shadow-hover: 6px 6px 0px 0px var(--color-ink);
+
+    /* Borders */
+    --border-standard: 2px solid var(--color-ink);
+    --border-thick: 3px solid var(--color-ink);
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s ease;
+}
+
+/* ==========================================
+   2. TYPOGRAPHY SYSTEM - "The Serious Tech Stack"
+   ========================================== */
+
+/* Import Secondary Fonts (Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;600&display=swap');
+
+/* Global Typography */
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: var(--weight-regular);
+    line-height: 1.6;
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+}
+
+/* Headings - Futura Cyrillic Demi ONLY */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Futura Cyrillic Demi', sans-serif;
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: var(--weight-bold);
+}
+
+h2 {
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: var(--weight-semibold);
+}
+
+/* UI Data & Technical Elements - JetBrains Mono */
+.ui-data,
+.salary-label,
+.date-label,
+.tech-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ==========================================
+   3. CORE COMPONENT STYLES
+   ========================================== */
+
+/* === PRIMARY BUTTON === */
+.btn-apply,
+.btn-primary,
+.jm-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    background: var(--color-primary);
+    color: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.btn-apply:hover,
+.btn-primary:hover,
+.jm-btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
+.btn-apply:active,
+.btn-primary:active,
+.jm-btn-primary:active {
+    transform: translate(0, 0);
+    box-shadow: var(--shadow-standard);
+}
+
+/* === SECONDARY BUTTON === */
+.btn-secondary,
+.jm-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.btn-secondary:hover,
+.jm-btn-secondary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+    background: var(--color-canvas);
+}
+
+/* === ACCENT BUTTON (CTA) === */
+.btn-accent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    background: var(--color-accent);
+    color: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.btn-accent:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ==========================================
+   4. JOB CARD COMPONENT
+   ========================================== */
+
+.job-card,
+.home-job-card {
+    background: var(--color-surface);
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    padding: var(--space-lg);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.job-card:hover,
+.home-job-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.job-card h3,
+.home-job-card h3 {
+    font-family: 'Futura Cyrillic Demi', 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: var(--weight-semibold);
+    color: var(--color-ink);
+    margin-bottom: var(--space-sm);
+}
+
+/* Company Name */
+.job-card .company-name,
+.home-job-card .company-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: var(--weight-regular);
+    color: var(--color-ink);
+    opacity: 0.7;
+    font-size: 0.95rem;
+}
+
+/* Salary Label - JetBrains Mono */
+.job-card .salary,
+.home-job-card .salary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--color-accent);
+}
+
+/* Job Title */
+.job-title-home {
+    font-family: 'Futura Cyrillic Demi', 'Montserrat', sans-serif;
+    color: var(--color-ink);
+}
+
+/* Job Tags */
+.job-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--color-canvas);
+    border: var(--border-standard);
+    border-radius: var(--radius-pill);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--color-ink);
+}
+
+/* ==========================================
+   5. SEARCH INPUTS & FORM ELEMENTS
+   ========================================== */
+
+/* Text Input Fields */
+.search-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+.jm-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--color-ink);
+    transition: all var(--transition-fast);
+}
+
+.search-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+.jm-input:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: var(--color-primary);
+}
+
+.search-input::placeholder,
+input::placeholder,
+textarea::placeholder,
+.jm-input::placeholder {
+    color: var(--color-ink);
+    opacity: 0.5;
+}
+
+/* Dropdown / Select */
+select {
+    padding: 12px 16px;
+    background: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+select:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: var(--color-primary);
+}
+
+/* ==========================================
+   6. BADGES & STATUS PILLS
+   ========================================== */
+
+.badge,
+.jm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border: var(--border-standard);
+    border-radius: var(--radius-pill);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-primary,
+.jm-badge-primary {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.badge-accent {
+    background: var(--color-accent);
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.badge-outline {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+}
+
+/* Experience badges for job cards */
+.exp-badge-sm {
+    font-size: 9px;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: var(--border-standard);
+}
+
+.exp-entry-sm {
+    background: #22c55e;
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.exp-mid-sm {
+    background: #3b82f6;
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.exp-senior-sm {
+    background: #a855f7;
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.exp-executive-sm {
+    background: var(--color-accent);
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+/* ==========================================
+   7. CARDS & PANELS
+   ========================================== */
+
+.jm-card,
+.jm-card-elevated {
+    background: var(--color-surface);
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow-standard);
+    transition: all var(--transition-normal);
+}
+
+.jm-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.jm-widget {
+    background: var(--color-surface);
+    border: var(--border-standard);
+    padding: 18px;
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    transition: all var(--transition-normal);
+}
+
+.jm-widget:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ==========================================
+   8. LAYOUT UTILITIES
+   ========================================== */
+
+.container,
+.jm-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+.section,
+.jm-section {
+    padding: var(--space-2xl) 0;
+}
+
+.divider,
+.jm-divider {
+    height: 2px;
+    background: var(--color-ink);
+    margin: var(--space-lg) 0;
+    border: none;
+}
+
+/* ==========================================
+   9. ANTI-GLASSMORPHISM OVERRIDES
+   ========================================== */
+
+/* CRITICAL: Remove ALL blur effects */
+* {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure ALL backgrounds are 100% opaque */
+.bg-white,
+.card,
+.panel,
+.modal {
+    background: var(--color-surface) !important;
+    background-color: var(--color-surface) !important;
+}
+
+/* Override any glassmorphism classes */
+.glass-search-container,
+.glass-panel,
+.frosted,
+.obsidian-card {
+    background: var(--color-surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* ==========================================
+   10. TEXT UTILITIES
+   ========================================== */
+
+.jm-text-display {
+    font-size: 2rem;
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--color-ink);
+}
+
+.jm-text-title {
+    font-size: 1.25rem;
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    color: var(--color-ink);
+}
+
+.jm-text-heading {
+    font-size: 1rem;
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    color: var(--color-ink);
+}
+
+.jm-text-body {
+    font-size: 0.9375rem;
+    font-weight: var(--weight-regular);
+    line-height: 1.6;
+    color: var(--color-ink);
+}
+
+.jm-text-body-sm {
+    font-size: 0.875rem;
+    font-weight: var(--weight-regular);
+    line-height: 1.5;
+    color: var(--color-ink);
+    opacity: 0.8;
+}
+
+.jm-text-caption {
+    font-size: 0.8125rem;
+    font-weight: var(--weight-regular);
+    color: var(--color-ink);
+    opacity: 0.7;
+    line-height: 1.4;
+}
+
+.jm-text-overline {
+    font-size: 0.6875rem;
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-ink);
+    opacity: 0.6;
+}
+
+/* ==========================================
+   11. RESPONSIVE TYPOGRAPHY
+   ========================================== */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    .btn-apply,
+    .btn-primary,
+    .btn-secondary,
+    .btn-accent {
+        padding: 10px 20px;
+        font-size: 0.8rem;
+    }
+
+    .jm-text-display {
+        font-size: 1.5rem;
+    }
+
+    .jm-text-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* ==========================================
+   12. ACCESSIBILITY & FOCUS STATES
+   ========================================== */
+
+:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+    background: var(--color-accent);
+    color: #ffffff;
+}
+
+/* ==========================================
+   13. SCROLLBAR STYLING
+   ========================================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-ink);
+    border-radius: var(--radius-standard);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+}
+
+/* ==========================================
+   14. ANIMATION UTILITIES
+   ========================================== */
+
+@keyframes jm-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes jm-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes jm-scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.jm-animate-fadeIn {
+    animation: jm-fadeIn 0.3s ease forwards;
+}
+
+.jm-animate-slideIn {
+    animation: jm-slideIn 0.3s ease forwards;
+}
+
+.jm-animate-scaleIn {
+    animation: jm-scaleIn 0.2s ease forwards;
+}
+
+/* ==========================================
+   15. PRINT STYLES
+   ========================================== */
+
+@media print {
+    :root {
+        --color-canvas: #ffffff;
+        --color-surface: #ffffff;
+    }
+
+    body {
+        background: #ffffff;
+    }
+}

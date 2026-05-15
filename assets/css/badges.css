@@ -1,0 +1,251 @@
+/**
+ * Verification Badges Styles
+ * Premium badge animations and hover effects
+ */
+
+/* Base badge styling */
+.verification-badge {
+    cursor: pointer;
+    position: relative;
+}
+
+.verification-badge img {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.verification-badge:hover img {
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15));
+    transform: translateY(-2px);
+}
+
+/* Badge tooltip */
+.verification-badge[data-tooltip] {
+    position: relative;
+}
+
+.verification-badge[data-tooltip]::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    padding: 8px 12px;
+    background: rgba(15, 23, 42, 0.95);
+    color: white;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    border-radius: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 50;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.verification-badge[data-tooltip]::after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(15, 23, 42, 0.95);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.verification-badge[data-tooltip]:hover::before,
+.verification-badge[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) scale(1);
+}
+
+/* Badge row */
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.badge-row .verification-badge {
+    transition: transform 0.2s ease;
+}
+
+.badge-row .verification-badge:hover {
+    z-index: 10;
+}
+
+/* Badge card */
+.badge-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.badge-card:hover::before {
+    left: 100%;
+}
+
+/* Badge with label */
+.badge-with-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.badge-with-label:active {
+    transform: scale(0.98);
+}
+
+/* Animated badge glow effect */
+@keyframes badgePulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 0 rgba(245, 158, 11, 0));
+    }
+    50% {
+        filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+    }
+}
+
+.verification-badge.pulse img {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+/* Rotating shine effect for premium badges */
+@keyframes badgeShine {
+    0% {
+        filter: brightness(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+    50% {
+        filter: brightness(1.2) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+    }
+    100% {
+        filter: brightness(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    }
+}
+
+.verification-badge.shine img {
+    animation: badgeShine 3s ease-in-out infinite;
+}
+
+/* Badge unlock animation */
+@keyframes badgeUnlock {
+    0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    70% {
+        transform: scale(0.9) rotate(-5deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.verification-badge.unlock {
+    animation: badgeUnlock 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Size variations */
+.badge-xs { width: 16px; height: 16px; }
+.badge-sm { width: 20px; height: 20px; }
+.badge-md { width: 24px; height: 24px; }
+.badge-lg { width: 32px; height: 32px; }
+.badge-xl { width: 40px; height: 40px; }
+.badge-2xl { width: 48px; height: 48px; }
+
+/* Badge stack (overlapping badges) */
+.badge-stack {
+    display: flex;
+}
+
+.badge-stack .verification-badge {
+    margin-left: -8px;
+}
+
+.badge-stack .verification-badge:first-child {
+    margin-left: 0;
+}
+
+.badge-stack .verification-badge:hover {
+    z-index: 10;
+    transform: scale(1.15) translateY(-2px);
+}
+
+/* Profile badge display */
+.profile-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+}
+
+/* Badge grid for showcase */
+.badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+}
+
+/* Locked badge state */
+.badge-locked {
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+.badge-locked:hover {
+    filter: grayscale(0.5);
+    opacity: 0.6;
+}
+
+/* Badge notification dot */
+.badge-new::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .verification-badge[data-tooltip]::before {
+        font-size: 11px;
+        padding: 6px 10px;
+        max-width: 200px;
+        white-space: normal;
+        text-align: center;
+    }
+    
+    .badge-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+    }
+}

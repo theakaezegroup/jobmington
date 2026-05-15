@@ -1,0 +1,452 @@
+/**
+ * JOBMINGTON - PROFESSIONAL SOFT NEO-BRUTALIST DESIGN SYSTEM
+ * ===========================================================
+ * Version: 2.0 - Complete Refactor
+ * Aesthetic: Neo-Brutalist (Hard Borders, Hard Shadows, NO Blur)
+ * Purpose: Serious Tech Job Board
+ */
+
+/* ==========================================
+   1. CSS CUSTOM PROPERTIES (Neo-Brutalist Palette)
+   ========================================== */
+:root {
+    /* Core Color Palette - "Jobmington Professional" */
+    --color-ink: #0c2a4c;        /* Midnight Navy - ALL text, borders, icons */
+    --color-primary: #0f4a98;    /* Royal Blue - Primary buttons, active states */
+    --color-accent: #fe9506;     /* Safety Orange - CTAs, badges, hover interactions */
+    --color-canvas: #f3f4f8;     /* Soft Wash - Page background */
+    --color-surface: #ffffff;    /* Pure White - Card backgrounds */
+    
+    /* Typography Weights */
+    --weight-regular: 400;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+    
+    /* Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    
+    /* Border Radius - Friendly but distinct */
+    --radius-standard: 8px;
+    --radius-pill: 50px;
+    
+    /* Shadows - Hard Drop (NO BLUR) */
+    --shadow-standard: 4px 4px 0px 0px var(--color-ink);
+    --shadow-hover: 6px 6px 0px 0px var(--color-ink);
+    
+    /* Borders */
+    --border-standard: 2px solid var(--color-ink);
+    --border-thick: 3px solid var(--color-ink);
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.2s ease;
+    --transition-slow: 0.3s ease;
+}
+
+/* ==========================================
+   2. TYPOGRAPHY SYSTEM - "The Serious Tech Stack"
+   ========================================== */
+
+/* Import Secondary Fonts (Google Fonts) */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Plus+Jakarta+Sans:wght@400;600&display=swap');
+
+/* Global Typography */
+body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: var(--weight-regular);
+    line-height: 1.6;
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings - Futura Cyrillic Demi (Fallback to geometric sans) */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Futura Cyrillic Demi', 'Montserrat', 'Outfit', sans-serif;
+    font-weight: var(--weight-semibold);
+    letter-spacing: -0.01em;
+    color: var(--color-ink);
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 3rem;
+    font-weight: var(--weight-bold);
+}
+
+h2 {
+    font-size: 2.25rem;
+    font-weight: var(--weight-bold);
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: var(--weight-semibold);
+}
+
+/* UI Data & Technical Elements - JetBrains Mono */
+.ui-data,
+.salary-label,
+.date-label,
+.tech-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* ==========================================
+   3. CORE COMPONENT STYLES
+   ========================================== */
+
+/* === PRIMARY BUTTON === */
+.btn-apply,
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    background: var(--color-primary);
+    color: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.btn-apply:hover,
+.btn-primary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+    background: var(--color-primary);
+}
+
+.btn-apply:active,
+.btn-primary:active {
+    transform: translate(0, 0);
+    box-shadow: var(--shadow-standard);
+}
+
+/* === SECONDARY BUTTON === */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+    background: var(--color-canvas);
+}
+
+/* === ACCENT BUTTON (CTA) === */
+.btn-accent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    background: var(--color-accent);
+    color: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+}
+
+.btn-accent:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* ==========================================
+   4. JOB CARD COMPONENT
+   ========================================== */
+
+.job-card {
+    background: var(--color-surface);
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    box-shadow: var(--shadow-standard);
+    padding: var(--space-lg);
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+}
+
+.job-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.job-card h3 {
+    font-family: 'Futura Cyrillic Demi', 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: var(--weight-semibold);
+    color: var(--color-ink);
+    margin-bottom: var(--space-sm);
+}
+
+/* Company Name */
+.job-card .company-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: var(--weight-regular);
+    color: var(--color-ink);
+    opacity: 0.7;
+    font-size: 0.95rem;
+}
+
+/* Salary Label - JetBrains Mono */
+.job-card .salary {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--color-accent);
+}
+
+/* Job Tags */
+.job-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--color-canvas);
+    border: var(--border-standard);
+    border-radius: var(--radius-pill);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--color-ink);
+}
+
+/* ==========================================
+   5. SEARCH INPUTS & FORM ELEMENTS
+   ========================================== */
+
+/* Text Input Fields */
+.search-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--color-ink);
+    transition: all var(--transition-fast);
+}
+
+.search-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: var(--color-primary);
+}
+
+.search-input::placeholder,
+input::placeholder,
+textarea::placeholder {
+    color: var(--color-ink);
+    opacity: 0.5;
+}
+
+/* Dropdown / Select */
+select {
+    padding: 12px 16px;
+    background: #ffffff;
+    border: var(--border-standard);
+    border-radius: var(--radius-standard);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+select:focus {
+    outline: none;
+    border-width: 3px;
+    border-color: var(--color-primary);
+}
+
+/* ==========================================
+   6. BADGES & STATUS PILLS
+   ========================================== */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border: var(--border-standard);
+    border-radius: var(--radius-pill);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-primary {
+    background: var(--color-primary);
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.badge-accent {
+    background: var(--color-accent);
+    color: #ffffff;
+    border-color: var(--color-ink);
+}
+
+.badge-outline {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+}
+
+/* ==========================================
+   7. LAYOUT UTILITIES
+   ========================================== */
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+.section {
+    padding: var(--space-2xl) 0;
+}
+
+.divider {
+    height: 2px;
+    background: var(--color-ink);
+    margin: var(--space-lg) 0;
+    border: none;
+}
+
+/* ==========================================
+   8. ANTI-GLASSMORPHISM OVERRIDES
+   ========================================== */
+
+/* CRITICAL: Remove ALL blur effects */
+* {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure ALL backgrounds are 100% opaque */
+.bg-white,
+.card,
+.panel,
+.modal {
+    background: var(--color-surface) !important;
+    background-color: var(--color-surface) !important;
+}
+
+/* ==========================================
+   9. RESPONSIVE TYPOGRAPHY
+   ========================================== */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem;
+    }
+    
+    .btn-apply,
+    .btn-primary,
+    .btn-secondary,
+    .btn-accent {
+        padding: 10px 20px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ==========================================
+   10. ACCESSIBILITY & FOCUS STATES
+   ========================================== */
+
+:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+    background: var(--color-accent);
+    color: #ffffff;
+}
+
+/* ==========================================
+   11. SCROLLBAR STYLING
+   ========================================== */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-canvas);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-ink);
+    border-radius: var(--radius-standard);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
+}

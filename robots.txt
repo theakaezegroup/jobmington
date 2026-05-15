@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /config/
+Disallow: /includes/
+Disallow: /learn/
+
+Sitemap: https://jobmington.com/jobmington/sitemap.xml

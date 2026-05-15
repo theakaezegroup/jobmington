@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="proGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <path d="M12 2L15.09 5.09L19.5 4.5L18.91 8.91L22 12L18.91 15.09L19.5 19.5L15.09 18.91L12 22L8.91 18.91L4.5 19.5L5.09 15.09L2 12L5.09 8.91L4.5 4.5L8.91 5.09L12 2Z" fill="url(#proGrad)"/>
+  <text x="12" y="15" text-anchor="middle" fill="white" font-size="8" font-weight="bold" font-family="Arial">PRO</text>
+</svg>

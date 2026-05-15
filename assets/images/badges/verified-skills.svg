@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <defs>
+    <linearGradient id="skillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f43f5e"/>
+      <stop offset="100%" style="stop-color:#be123c"/>
+    </linearGradient>
+  </defs>
+  <path d="M12 2L14.5 7H20L15.5 10.5L17.5 16L12 12.5L6.5 16L8.5 10.5L4 7H9.5L12 2Z" fill="url(#skillGrad)"/>
+  <path d="M12 17V22M8 20H16" stroke="url(#skillGrad)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="12" cy="9" r="2" fill="white"/>
+</svg>
