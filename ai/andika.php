@@ -14,15 +14,25 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/seeds.php';
+require_once __DIR__ . '/../includes/monetization.php';
+require_once __DIR__ . '/../includes/seeker_premium.php';
 
 Session::start();
+Session::requireLogin();
 
-// Get real user credits
-$userId = Session::userId();
-$userCredits = $userId ? getSeedBalance($userId) : 0;
-$isLoggedIn = Session::isLoggedIn();
-$pageTitle = 'Andika AI | Jobmington';
+$pdo        = db();
+$userId     = (int) Session::userId();
+$isPremium  = jm_seeker_is_premium($pdo, $userId);
+$userCredits = jm_seeker_credit_balance($pdo, $userId);
+$isLoggedIn  = true;
+
+// Redirect to paywall if neither premium nor has credits
+if (!$isPremium && $userCredits < 1) {
+    Session::flash('info', 'Andika AI requires a Premium subscription or tool credits.');
+    redirect(SITE_URL . '/payments/seeker-premium.php?from=andika');
+}
+
+$pageTitle   = 'Andika AI | Jobmington';
 $activeAIPage = 'andika';
 
 require_once __DIR__ . '/../includes/ai-header.php';

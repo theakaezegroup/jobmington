@@ -15,6 +15,8 @@ require_once __DIR__ . '/../../config/constants.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/paystack.php';
 require_once __DIR__ . '/../../includes/seeds.php';
+require_once __DIR__ . '/../../includes/monetization.php';
+require_once __DIR__ . '/../../includes/seeker_premium.php';
 
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -106,89 +108,92 @@ try {
 }
 
 /**
- * Handle successful charge
+ * Handle successful charge — routes to the correct fulfillment based on transaction type.
  */
 function handleChargeSuccess($pdo, $data) {
     $reference = $data['reference'] ?? '';
-    $amount = ($data['amount'] ?? 0) / 100; // Convert from kobo
-    $metadata = $data['metadata'] ?? [];
-    
     if (empty($reference)) {
         throw new Exception('Missing reference in charge.success');
     }
-    
-    // Check if we have this transaction
+
     $stmt = $pdo->prepare("SELECT * FROM transactions WHERE txn_ref = ?");
     $stmt->execute([$reference]);
     $transaction = $stmt->fetch();
-    
+
     if (!$transaction) {
         error_log("Paystack Webhook: Transaction not found: {$reference}");
-        return; // Not our transaction, ignore
-    }
-    
-    // Already processed?
-    if ($transaction['status'] === 'completed') {
-        error_log("Paystack Webhook: Transaction already completed: {$reference}");
         return;
     }
-    
-    $userId = $transaction['user_id'];
-    $credits = $transaction['credits'];
-    
+    if ($transaction['status'] === 'completed') {
+        error_log("Paystack Webhook: Already completed: {$reference}");
+        return;
+    }
+
+    $userId  = (int) $transaction['user_id'];
+    $txnType = $transaction['type'] ?? TXN_TYPE_SEEDS_PURCHASE;
+
     $pdo->beginTransaction();
-    
     try {
-        // Update transaction status
-        $stmt = $pdo->prepare("
-            UPDATE transactions 
-            SET status = 'completed',
-                paystack_ref = ?,
-                paystack_data = ?,
-                completed_at = NOW()
+        // Mark transaction complete
+        $pdo->prepare("
+            UPDATE transactions
+            SET status = 'completed', paystack_ref = ?, paystack_data = ?, completed_at = NOW()
             WHERE txn_ref = ?
-        ");
-        $stmt->execute([
-            $data['id'] ?? null,
-            json_encode($data),
-            $reference
-        ]);
-        
-        // Credit wallet
-        $stmt = $pdo->prepare("
-            UPDATE wallets 
-            SET balance = balance + ?,
-                lifetime_earned = lifetime_earned + ?,
-                updated_at = NOW()
-            WHERE user_id = ?
-        ");
-        $result = $stmt->execute([$credits, $credits, $userId]);
-        
-        // If no wallet exists, create one
-        if ($stmt->rowCount() === 0) {
-            $stmt = $pdo->prepare("
-                INSERT INTO wallets (user_id, balance, lifetime_earned, created_at)
-                VALUES (?, ?, ?, NOW())
-            ");
-            $stmt->execute([$userId, $credits, $credits]);
+        ")->execute([$data['id'] ?? null, json_encode($data), $reference]);
+
+        switch ($txnType) {
+            case TXN_TYPE_SEEKER_PREMIUM:
+                $plan      = str_contains(strtolower((string) $transaction['plan']), 'annual') ? 'annual' : 'monthly';
+                $amountNgn = (float) $transaction['amount'];
+                jm_activate_seeker_subscription(
+                    $pdo, $userId, $plan, $amountNgn, $reference,
+                    $data['subscription'] ?? '',
+                    $data['customer']['customer_code'] ?? ''
+                );
+                error_log("Webhook: Seeker premium ({$plan}) activated for user {$userId}");
+                break;
+
+            case TXN_TYPE_SEEKER_CREDITS:
+            case TXN_TYPE_BUNDLE:
+                $credits = (int) $transaction['credits'];
+                jm_seeker_add_credits($pdo, $userId, $credits, $reference);
+                error_log("Webhook: {$credits} tool credits added to user {$userId}");
+                break;
+
+            case TXN_TYPE_EMPLOYER_POST:
+                // Job activation is handled by the job-posting-callback; webhook is a safety net
+                $plan = (string) $transaction['plan'];
+                if (preg_match('/job:(\d+)/', $plan, $m)) {
+                    $jobId = (int) $m[1];
+                    $pdo->prepare("
+                        UPDATE jobs SET is_active = 1, status = 'active' WHERE job_id = ?
+                    ")->execute([$jobId]);
+                    error_log("Webhook: Job {$jobId} activated for user {$userId}");
+                }
+                break;
+
+            case TXN_TYPE_SEEDS_PURCHASE:
+            default:
+                // Legacy Seeds wallet credit
+                $credits = (int) $transaction['credits'];
+                $stmt = $pdo->prepare("
+                    UPDATE wallets SET balance = balance + ?, lifetime_earned = lifetime_earned + ?, updated_at = NOW()
+                    WHERE user_id = ?
+                ");
+                $stmt->execute([$credits, $credits, $userId]);
+                if ($stmt->rowCount() === 0) {
+                    $pdo->prepare("INSERT INTO wallets (user_id, balance, lifetime_earned) VALUES (?, ?, ?)")
+                        ->execute([$userId, $credits, $credits]);
+                }
+                $pdo->prepare("
+                    INSERT INTO seed_transactions (user_id, type, amount, source, description, reference, created_at)
+                    VALUES (?, 'purchase', ?, 'purchase', ?, ?, NOW())
+                ")->execute([$userId, $credits, 'Purchased ' . number_format($credits) . ' Seeds via Paystack', $reference]);
+                error_log("Webhook: {$credits} Seeds credited to user {$userId}");
+                break;
         }
-        
-        // Record seed transaction
-        $stmt = $pdo->prepare("
-            INSERT INTO seed_transactions (user_id, type, amount, source, description, reference, created_at)
-            VALUES (?, 'purchase', ?, 'purchase', ?, ?, NOW())
-        ");
-        $stmt->execute([
-            $userId,
-            $credits,
-            'Purchased ' . number_format($credits) . ' Seeds via Paystack',
-            $reference
-        ]);
-        
+
         $pdo->commit();
-        
-        error_log("Paystack Webhook: Successfully credited {$credits} seeds to user {$userId}");
-        
     } catch (Exception $e) {
         $pdo->rollBack();
         throw $e;
@@ -237,24 +242,47 @@ function handleTransferFailed($pdo, $data) {
 }
 
 /**
- * Handle subscription creation
+ * Handle subscription creation — update our records with Paystack sub code.
  */
 function handleSubscriptionCreate($pdo, $data) {
-    $subscriptionCode = $data['subscription_code'] ?? '';
-    $customerEmail = $data['customer']['email'] ?? '';
-    $planCode = $data['plan']['plan_code'] ?? '';
-    
-    error_log("Paystack Webhook: Subscription created - {$subscriptionCode} for {$customerEmail}");
-    
-    // Update user subscription status if needed
+    $subscriptionCode  = $data['subscription_code']           ?? '';
+    $customerCode      = $data['customer']['customer_code']   ?? '';
+    $emailToken        = $data['email_token']                 ?? '';
+    $nextPayment       = $data['next_payment_date']           ?? null;
+
+    if ($subscriptionCode) {
+        $pdo->prepare("
+            UPDATE seeker_subscriptions
+            SET paystack_sub_code = ?, paystack_customer_code = ?, paystack_email_token = ?
+            WHERE paystack_sub_code = '' OR paystack_sub_code IS NULL
+            ORDER BY created_at DESC LIMIT 1
+        ")->execute([$subscriptionCode, $customerCode, $emailToken]);
+
+        $pdo->prepare("
+            UPDATE employer_subscriptions
+            SET paystack_sub_code = ?, paystack_customer_code = ?, paystack_email_token = ?
+            WHERE paystack_sub_code = '' OR paystack_sub_code IS NULL
+            ORDER BY created_at DESC LIMIT 1
+        ")->execute([$subscriptionCode, $customerCode, $emailToken]);
+    }
+
+    error_log("Webhook: Subscription created - {$subscriptionCode}");
 }
 
 /**
- * Handle subscription disable/cancel
+ * Handle subscription disable/cancel.
  */
 function handleSubscriptionDisable($pdo, $data) {
     $subscriptionCode = $data['subscription_code'] ?? '';
-    error_log("Paystack Webhook: Subscription disabled - {$subscriptionCode}");
+    if ($subscriptionCode) {
+        $pdo->prepare("
+            UPDATE seeker_subscriptions SET status = 'cancelled' WHERE paystack_sub_code = ?
+        ")->execute([$subscriptionCode]);
+        $pdo->prepare("
+            UPDATE employer_subscriptions SET status = 'cancelled' WHERE paystack_sub_code = ?
+        ")->execute([$subscriptionCode]);
+    }
+    error_log("Webhook: Subscription disabled - {$subscriptionCode}");
 }
 
 /**

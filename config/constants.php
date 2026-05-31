@@ -72,6 +72,36 @@ define('ANDIKA_MAX_TOKENS', 1024);
 define('DEFAULT_COUNTRY_CODE', 'ng');
 define('DEFAULT_COUNTRY_NAME', 'Nigeria');
 
+// ── Monetization: Employer ────────────────────────────────────────────────────
+// All amounts in NGN. Paystack receives values in kobo (×100).
+define('PRICE_EMPLOYER_SINGLE_POST',      (int)(getenv('PRICE_EMPLOYER_SINGLE_POST')      ?: 30000));  // ₦30,000
+define('PRICE_EMPLOYER_FEATURED_ADDON',   (int)(getenv('PRICE_EMPLOYER_FEATURED_ADDON')   ?: 3000));   // ₦3,000
+define('PRICE_EMPLOYER_BASIC_MONTHLY',    (int)(getenv('PRICE_EMPLOYER_BASIC_MONTHLY')    ?: 7500));   // ₦7,500/mo
+define('PRICE_EMPLOYER_PRO_MONTHLY',      (int)(getenv('PRICE_EMPLOYER_PRO_MONTHLY')      ?: 15000));  // ₦15,000/mo
+define('EMPLOYER_BASIC_POST_LIMIT',       (int)(getenv('EMPLOYER_BASIC_POST_LIMIT')       ?: 3));
+
+// ── Monetization: Seeker ──────────────────────────────────────────────────────
+define('PRICE_SEEKER_PREMIUM_MONTHLY',    (int)(getenv('PRICE_SEEKER_PREMIUM_MONTHLY')    ?: 3000));   // ₦3,000/mo
+define('PRICE_SEEKER_PREMIUM_ANNUAL',     (int)(getenv('PRICE_SEEKER_PREMIUM_ANNUAL')     ?: 30000));  // ₦30,000/yr (2 months free)
+
+// ── Monetization: Credit Packs ────────────────────────────────────────────────
+define('PRICE_CREDITS_SINGLE',            (int)(getenv('PRICE_CREDITS_SINGLE')            ?: 500));    // ₦500 × 1
+define('PRICE_CREDITS_PACK_5',            (int)(getenv('PRICE_CREDITS_PACK_5')            ?: 2000));   // ₦2,000 × 5
+define('PRICE_CREDITS_PACK_10',           (int)(getenv('PRICE_CREDITS_PACK_10')           ?: 3000));   // ₦3,000 × 10
+
+// ── Monetization: Per-Tool (credits) ─────────────────────────────────────────
+define('TOOL_COST_CV_OPTIMIZER',          (int)(getenv('TOOL_COST_CV_OPTIMIZER')          ?: 1));
+define('TOOL_COST_COVER_LETTER',          (int)(getenv('TOOL_COST_COVER_LETTER')          ?: 1));
+define('TOOL_COST_INTERVIEW_PREP',        (int)(getenv('TOOL_COST_INTERVIEW_PREP')        ?: 2));  // ₦800 equiv
+define('TOOL_COST_SKILLS_GAP_REPORT',     (int)(getenv('TOOL_COST_SKILLS_GAP_REPORT')     ?: 1));  // ₦300 equiv
+
+// ── Monetization: Bundles ─────────────────────────────────────────────────────
+define('PRICE_BUNDLE_JOB_TOOLKIT',        (int)(getenv('PRICE_BUNDLE_JOB_TOOLKIT')        ?: 1500));   // ₦1,500
+
+// ── Exchange rate (NGN per 1 USD) — update via env var as rate changes ────────
+// CBN mid-market rate, 2026: ~1,600 NGN/USD
+define('NGN_USD_RATE', (int)(getenv('NGN_USD_RATE') ?: 1600));
+
 // User Types
 define('USER_TYPE_SEEKER', 'seeker');
 define('USER_TYPE_EMPLOYER', 'employer');
