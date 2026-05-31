@@ -3917,8 +3917,25 @@ body.jm-home-page {
         flex-direction: column;
     }
 
+    /* Footer: brand full-width, 4 nav cols in 2×2 grid */
+    .jm-footer-inner {
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+    }
+    .jm-footer-brand {
+        grid-column: 1 / -1;
+        padding-bottom: 28px;
+        margin-bottom: 28px;
+        border-bottom: 1px solid var(--jm-line);
+    }
+    .jm-footer-links {
+        padding: 0 0 28px;
+    }
+    .jm-footer-links:nth-child(odd) {
+        padding-right: 20px;
+    }
+
     .jm-hero,
-    .jm-footer-inner,
     .jm-search,
     .jm-filter-grid,
     .jm-job-row,
