@@ -33,6 +33,8 @@ if (!is_array($input)) {
 $pdo            = db();
 $userId         = (int) Session::userId();
 $cvId           = (int) ($input['cv_id'] ?? 0);
+$rawCvText      = trim((string) ($input['cv_text'] ?? ''));   // from file upload path
+$isJobmington   = (bool) ($input['is_jobmington'] ?? false);  // detected by cv-extract.php
 $targetRole     = trim((string) ($input['target_role'] ?? ''));
 $jobDescription = trim((string) ($input['job_description'] ?? ''));
 $shouldCharge   = (bool) ($input['charge'] ?? true);
@@ -85,6 +87,11 @@ function jm_cv_roast_load_cv(PDO $pdo, int $userId, int $cvId): ?array {
 }
 
 function jm_cv_roast_text(array $cv): string {
+    // File upload path — use extracted raw text directly
+    if (!empty($cv['raw_text'])) {
+        return $cv['raw_text'];
+    }
+
     $profile = $cv['profile'];
     $parts = [
         'Name: ' . ($profile['full_name'] ?? ''),
@@ -154,6 +161,7 @@ function jm_cv_roast_fallback(array $cv, string $targetRole, string $jobDescript
     if ($hasMetrics) $score += 10;
     if (!empty($cv['projects'])) $score += 4;
     if ($targetText !== '' && count($missingKeywords) <= max(2, floor(count($targetKeywords) / 2))) $score += 5;
+    if (!empty($cv['is_jobmington'])) $score += 12; // ATS-optimised structure bonus
     $score = max(28, min(98, $score));
 
     $issues = [];
@@ -228,7 +236,10 @@ function jm_cv_roast_fallback(array $cv, string $targetRole, string $jobDescript
 
 function jm_cv_roast_ai_report(array $cv, string $targetRole, string $jobDescription, array $fallback): array {
     $cvText = jm_cv_roast_text($cv);
-    $prompt = "Return strict JSON only with keys score, status, summary, issues, strengths, optimized_summary, target_keywords, missing_keywords, next_steps. Each issue must have title, critique, fix. Be direct but constructive.\n\nTarget role/job description:\n{$targetRole}\n{$jobDescription}\n\nCV:\n{$cvText}";
+    $jobmingtonNote = !empty($cv['is_jobmington'])
+        ? "\n\nNOTE: This CV was built with the Jobmington CV Builder. It already follows ATS best practices (clean formatting, standard sections, no tables/columns). Acknowledge this positively in your feedback and reflect it in a higher baseline score."
+        : '';
+    $prompt = "Return strict JSON only with keys score, status, summary, issues, strengths, optimized_summary, target_keywords, missing_keywords, next_steps. Each issue must have title, critique, fix. Be direct but constructive.{$jobmingtonNote}\n\nTarget role/job description:\n{$targetRole}\n{$jobDescription}\n\nCV:\n{$cvText}";
     $messages = [
         ['role' => 'system', 'content' => 'You are Andika, Jobmington career AI. You roast CVs constructively and optimize them for African and remote hiring markets. Return valid JSON only.'],
         ['role' => 'user', 'content' => $prompt],
@@ -304,9 +315,30 @@ function jm_cv_roast_ai_report(array $cv, string $targetRole, string $jobDescrip
     return $fallback;
 }
 
-$cv = jm_cv_roast_load_cv($pdo, $userId, $cvId);
-if (!$cv) {
-    jsonError('No saved CV found. Create a CV first, then run the optimizer.', 404);
+// If raw text provided (file upload path), build a synthetic CV structure
+if ($rawCvText !== '') {
+    $cv = [
+        'cv_id'   => 0,
+        'profile' => [
+            'cv_id'    => 0,
+            'headline' => '',
+            'summary'  => '',
+            'full_name'=> '',
+        ],
+        'skills'         => [],
+        'experience'     => [],
+        'education'      => [],
+        'certifications' => [],
+        'raw_text'       => $rawCvText,
+        'is_jobmington'  => $isJobmington,
+    ];
+} else {
+    $cv = jm_cv_roast_load_cv($pdo, $userId, $cvId);
+    if (!$cv) {
+        jsonError('No saved CV found. Create a CV first, then run the optimizer.', 404);
+    }
+    $cv['is_jobmington'] = false;
+    $cv['raw_text']      = '';
 }
 
 if ($shouldCharge && !$isPremium) {
@@ -333,9 +365,10 @@ if ($shouldCharge && !$isPremium) {
 }
 
 jsonSuccess([
-    'cv_id'   => (int) $cv['profile']['cv_id'],
-    'premium' => $isPremium,
-    'cost'    => ($shouldCharge && !$isPremium) ? $cost : 0,
-    'balance' => jm_seeker_credit_balance($pdo, $userId),
-    'report'  => $report,
+    'cv_id'        => (int) ($cv['profile']['cv_id'] ?? 0),
+    'premium'      => $isPremium,
+    'is_jobmington'=> !empty($cv['is_jobmington']),
+    'cost'         => ($shouldCharge && !$isPremium) ? $cost : 0,
+    'balance'      => jm_seeker_credit_balance($pdo, $userId),
+    'report'       => $report,
 ], 'CV optimizer report ready.');

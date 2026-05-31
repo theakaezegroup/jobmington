@@ -1068,6 +1068,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         </div>
         <span class="cv-footer-date">Generated <?= date('M Y') ?></span>
     </footer>
+    <!-- JOBMINGTON_CV_BUILDER_EXPORT cv_id:<?= $cvId ?> user:<?= $userId ?> generated:<?= date('Y-m-d') ?> -->
     
 </div>
 
