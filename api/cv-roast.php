@@ -11,7 +11,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/seeds.php';
+require_once __DIR__ . '/../includes/monetization.php';
+require_once __DIR__ . '/../includes/seeker_premium.php';
 
 header('Content-Type: application/json');
 Session::start();
@@ -29,13 +30,15 @@ if (!is_array($input)) {
     jsonError('Invalid JSON payload.');
 }
 
-$pdo = db();
-$userId = (int) Session::userId();
-$cvId = (int) ($input['cv_id'] ?? 0);
-$targetRole = trim((string) ($input['target_role'] ?? ''));
+$pdo            = db();
+$userId         = (int) Session::userId();
+$cvId           = (int) ($input['cv_id'] ?? 0);
+$targetRole     = trim((string) ($input['target_role'] ?? ''));
 $jobDescription = trim((string) ($input['job_description'] ?? ''));
-$shouldCharge = (bool) ($input['charge'] ?? true);
-$cost = getActionCostWithFallback('cv_roast', 50);
+$shouldCharge   = (bool) ($input['charge'] ?? true);
+$toolId         = 'cv_optimizer';
+$cost           = TOOL_COST_CV_OPTIMIZER;
+$isPremium      = jm_seeker_is_premium($pdo, $userId);
 
 function jm_cv_roast_fetch_rows(PDO $pdo, string $sql, array $params): array {
     try {
@@ -306,30 +309,33 @@ if (!$cv) {
     jsonError('No saved CV found. Create a CV first, then run the optimizer.', 404);
 }
 
-if ($shouldCharge) {
-    $balance = getSeedBalance($userId);
+if ($shouldCharge && !$isPremium) {
+    $balance = jm_seeker_credit_balance($pdo, $userId);
     if ($balance < $cost) {
         jsonResponse([
-            'success' => false,
-            'error' => 'insufficient_seeds',
-            'message' => "You need {$cost} Seeds but only have " . number_format($balance) . '.',
+            'success'  => false,
+            'error'    => 'insufficient_credits',
+            'message'  => "You need {$cost} credit to run the CV Roast. Your balance: {$balance}.",
             'required' => $cost,
-            'balance' => $balance,
+            'balance'  => $balance,
+            'upgrade'  => SITE_URL . '/payments/seeker-premium.php',
+            'buy'      => SITE_URL . '/payments/credits.php?tool=' . urlencode($toolId),
         ], 402);
-    }
-
-    $payment = spendSeeds($userId, 'cv_roast', (int) $cv['profile']['cv_id'], 'CV Roast optimizer report', $cost);
-    if (!$payment['success']) {
-        jsonError($payment['message'] ?? 'Could not process Seeds payment.', 402);
     }
 }
 
 $fallback = jm_cv_roast_fallback($cv, $targetRole, $jobDescription);
-$report = jm_cv_roast_ai_report($cv, $targetRole, $jobDescription, $fallback);
+$report   = jm_cv_roast_ai_report($cv, $targetRole, $jobDescription, $fallback);
+
+// Deduct credit after successful analysis
+if ($shouldCharge && !$isPremium) {
+    jm_seeker_spend_credit($pdo, $userId, $toolId);
+}
 
 jsonSuccess([
-    'cv_id' => (int) $cv['profile']['cv_id'],
-    'cost' => $shouldCharge ? $cost : 0,
-    'balance' => getSeedBalance($userId),
-    'report' => $report,
+    'cv_id'   => (int) $cv['profile']['cv_id'],
+    'premium' => $isPremium,
+    'cost'    => ($shouldCharge && !$isPremium) ? $cost : 0,
+    'balance' => jm_seeker_credit_balance($pdo, $userId),
+    'report'  => $report,
 ], 'CV optimizer report ready.');
