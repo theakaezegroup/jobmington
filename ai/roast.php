@@ -14,14 +14,18 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/seeds.php';
+require_once __DIR__ . '/../includes/monetization.php';
+require_once __DIR__ . '/../includes/seeker_premium.php';
 
 Session::start();
+Session::requireLogin();
 
-// Get real user credits
-$userId = Session::userId();
-$userCredits = $userId ? getSeedBalance($userId) : 0;
-$isLoggedIn = Session::isLoggedIn();
+$pdo         = db();
+$userId      = (int) Session::userId();
+$isPremium   = jm_seeker_is_premium($pdo, $userId);
+$userCredits = jm_seeker_credit_balance($pdo, $userId);
+$isLoggedIn  = true;
+$toolCost    = TOOL_COST_CV_OPTIMIZER;
 $pageTitle = 'CV Roast | Jobmington';
 $activeAIPage = 'roast';
 
@@ -143,10 +147,18 @@ require_once __DIR__ . '/../includes/ai-header.php';
                 <h2 class="text-2xl font-black text-white mb-2">Unlock the Fix</h2>
                 <p class="text-slate-400 text-sm mb-6">See exactly what to change to double your callbacks.</p>
                 <button class="btn-unlock" onclick="Roast.unlock()">
-                    <span>Use 50 Seeds</span>
+                    <?php if ($isPremium): ?>
+                        <span>Unlock — Premium</span>
+                    <?php else: ?>
+                        <span>Use <?= $toolCost ?> credit<?= $toolCost > 1 ? 's' : '' ?></span>
+                    <?php endif; ?>
                     <i class="fas fa-arrow-right"></i>
                 </button>
-                <p class="text-[10px] text-slate-500 mt-4">Balance: <?= number_format($userCredits) ?> Seeds</p>
+                <?php if ($isPremium): ?>
+                    <p class="text-[10px] text-slate-500 mt-4">Premium — unlimited access</p>
+                <?php else: ?>
+                    <p class="text-[10px] text-slate-500 mt-4">Balance: <?= number_format($userCredits) ?> credit<?= $userCredits !== 1 ? 's' : '' ?></p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -321,24 +333,19 @@ const Roast = {
 
         const balanceEl = document.querySelector('.btn-unlock + p');
         if (balanceEl && balance !== undefined) {
-            balanceEl.textContent = `Balance: ${Number(balance).toLocaleString()} Seeds`;
+            const isPrem = <?= $isPremium ? 'true' : 'false' ?>;
+            balanceEl.textContent = isPrem ? 'Premium — unlimited access' : `Balance: ${Number(balance).toLocaleString()} credit${balance !== 1 ? 's' : ''}`;
         }
     },
 
     analyzeSavedCv: async (fromUnlock = false) => {
-        const isLoggedIn = <?= $isLoggedIn ? 'true' : 'false' ?>;
+        const isPremium      = <?= $isPremium ? 'true' : 'false' ?>;
         const currentBalance = <?= $userCredits ?>;
-        const cost = 50;
-        
-        if (!isLoggedIn) {
-            JM.toast('Please log in to unlock the full report', 'warning', 'Login Required');
-            setTimeout(() => window.location.href = `${JOBMINGTON_SITE_URL}/auth/login.php`, 1500);
-            return;
-        }
-        
-        if (currentBalance < cost) {
-            JM.toast(`You need ${cost} Seeds but only have ${currentBalance}`, 'error', 'Insufficient Seeds');
-            setTimeout(() => window.location.href = `${JOBMINGTON_SITE_URL}/wallet/`, 2000);
+        const cost           = <?= $toolCost ?>;
+
+        if (!isPremium && currentBalance < cost) {
+            JM.toast(`You need ${cost} credit${cost > 1 ? 's' : ''} but only have ${currentBalance}. Buy credits to continue.`, 'error', 'Insufficient credits');
+            setTimeout(() => window.location.href = `${JOBMINGTON_SITE_URL}/payments/credits.php?tool=cv_optimizer&paywall=1`, 2000);
             return;
         }
         
@@ -365,17 +372,25 @@ const Roast = {
             
             if (data.success) {
                 Roast.renderReport(data.data.report, data.data.balance);
-                JM.toast(`Report unlocked! -${data.data.cost} Seeds`, 'success', 'Unlocked!');
+                const costMsg = data.data.premium ? 'Premium — unlimited' : `-${data.data.cost} credit${data.data.cost !== 1 ? 's' : ''}`;
+                JM.toast(`Report unlocked! ${costMsg}`, 'success', 'Unlocked!');
             } else {
                 if (btn) {
-                    btn.innerHTML = originalHtml || `<span>Use 50 Seeds</span><i class="fas fa-arrow-right"></i>`;
+                    const btnLabel = isPremium ? '<span>Unlock — Premium</span>' : `<span>Use ${cost} credit${cost > 1 ? 's' : ''}</span>`;
+                    btn.innerHTML = originalHtml || `${btnLabel}<i class="fas fa-arrow-right"></i>`;
                     btn.disabled = false;
                 }
-                JM.toast(data.message || 'Payment failed. Please try again.', 'error');
+                if (data.error === 'insufficient_credits') {
+                    JM.toast(data.message, 'error', 'Insufficient credits');
+                    setTimeout(() => window.location.href = data.buy || `${JOBMINGTON_SITE_URL}/payments/credits.php`, 2000);
+                } else {
+                    JM.toast(data.message || 'Something went wrong. Please try again.', 'error');
+                }
             }
         } catch (error) {
             if (btn) {
-                btn.innerHTML = originalHtml || `<span>Use 50 Seeds</span><i class="fas fa-arrow-right"></i>`;
+                const btnLabel = isPremium ? '<span>Unlock — Premium</span>' : `<span>Use ${cost} credit${cost > 1 ? 's' : ''}</span>`;
+                btn.innerHTML = originalHtml || `${btnLabel}<i class="fas fa-arrow-right"></i>`;
                 btn.disabled = false;
             }
             JM.toast('Connection error. Please try again.', 'error');
