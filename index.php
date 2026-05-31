@@ -889,16 +889,13 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         padding: 2px 7px; border-radius: 99px; color: #fff;
         margin-top: 5px;
     }
-    .jm-fomo-controls { display: flex; align-items: center; gap: 2px; flex-shrink: 0; margin-top: -1px; }
-    .jm-fomo-close,
-    .jm-fomo-sound {
+    .jm-fomo-close {
         background: none; border: none; cursor: pointer; padding: 3px;
-        color: var(--jm-muted); line-height: 1;
+        color: var(--jm-muted); flex-shrink: 0; line-height: 1;
         border-radius: 5px; transition: color .15s, background .15s;
+        margin-top: -1px;
     }
-    .jm-fomo-close:hover,
-    .jm-fomo-sound:hover { color: var(--jm-ink); background: var(--jm-soft); }
-    .jm-fomo-sound.muted { color: #cbd5e1; }
+    .jm-fomo-close:hover { color: var(--jm-ink); background: var(--jm-soft); }
     .jm-fomo-bar {
         position: absolute; bottom: 0; left: 0; height: 2.5px;
         width: 100%; transform-origin: left; transform: scaleX(1);
@@ -1447,15 +1444,9 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
                     <span class="jm-fomo-badge" id="jm-fomo-badge"></span>
                     <span class="jm-fomo-time" id="jm-fomo-time"></span>
                 </div>
-                <div class="jm-fomo-controls">
-                    <button class="jm-fomo-sound" id="jm-fomo-sound" aria-label="Toggle notification sound">
-                        <svg id="jm-fomo-icon-on" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-                        <svg id="jm-fomo-icon-off" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-                    </button>
-                    <button class="jm-fomo-close" id="jm-fomo-close" aria-label="Dismiss notification">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                </div>
+                <button class="jm-fomo-close" id="jm-fomo-close" aria-label="Dismiss notification">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
                 <div class="jm-fomo-bar" id="jm-fomo-bar"></div>
             </div>
         </div>
@@ -1650,85 +1641,18 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     var showStart = 0;
     var remaining = SHOW_MS;
 
-    var wrap      = document.getElementById('jm-fomo-wrap');
-    var toast     = document.getElementById('jm-fomo-toast');
-    var avatarEl  = document.getElementById('jm-fomo-avatar');
-    var nameEl    = document.getElementById('jm-fomo-name');
-    var locEl     = document.getElementById('jm-fomo-location');
-    var actEl     = document.getElementById('jm-fomo-action');
-    var badgeEl   = document.getElementById('jm-fomo-badge');
-    var timeEl    = document.getElementById('jm-fomo-time');
-    var barEl     = document.getElementById('jm-fomo-bar');
-    var closeBtn  = document.getElementById('jm-fomo-close');
-    var soundBtn  = document.getElementById('jm-fomo-sound');
-    var iconOn    = document.getElementById('jm-fomo-icon-on');
-    var iconOff   = document.getElementById('jm-fomo-icon-off');
+    var wrap     = document.getElementById('jm-fomo-wrap');
+    var toast    = document.getElementById('jm-fomo-toast');
+    var avatarEl = document.getElementById('jm-fomo-avatar');
+    var nameEl   = document.getElementById('jm-fomo-name');
+    var locEl    = document.getElementById('jm-fomo-location');
+    var actEl    = document.getElementById('jm-fomo-action');
+    var badgeEl  = document.getElementById('jm-fomo-badge');
+    var timeEl   = document.getElementById('jm-fomo-time');
+    var barEl    = document.getElementById('jm-fomo-bar');
+    var closeBtn = document.getElementById('jm-fomo-close');
 
     if (!wrap) return;
-
-    /* ── Audio chime ────────────────────────────────────────────── */
-    var muted    = false;
-    var audioCtx = null;
-
-    /* unlock AudioContext on first user gesture */
-    function unlockAudio() {
-        if (audioCtx) return;
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        } catch(e) {}
-    }
-    ['click','touchstart','keydown'].forEach(function(ev) {
-        document.addEventListener(ev, unlockAudio, { once: false, passive: true });
-    });
-
-    function playChime() {
-        if (muted || !audioCtx) return;
-        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-        try {
-            /* Two-note ascending chime: C6 (1047 Hz) → E6 (1319 Hz) */
-            var notes = [
-                { freq: 1047, delay: 0,    vol: 0.10, dur: 0.75 },
-                { freq: 1319, delay: 0.13, vol: 0.07, dur: 0.65 },
-            ];
-            var master = audioCtx.createGain();
-            master.gain.setValueAtTime(1, audioCtx.currentTime);
-            master.connect(audioCtx.destination);
-
-            notes.forEach(function(n) {
-                var t = audioCtx.currentTime + n.delay;
-
-                /* primary sine */
-                var osc = audioCtx.createOscillator();
-                var env = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = n.freq;
-                env.gain.setValueAtTime(0, t);
-                env.gain.linearRampToValueAtTime(n.vol, t + 0.008);
-                env.gain.exponentialRampToValueAtTime(0.0001, t + n.dur);
-                osc.connect(env); env.connect(master);
-                osc.start(t); osc.stop(t + n.dur);
-
-                /* octave overtone for warmth */
-                var osc2 = audioCtx.createOscillator();
-                var env2 = audioCtx.createGain();
-                osc2.type = 'sine';
-                osc2.frequency.value = n.freq * 2;
-                env2.gain.setValueAtTime(0, t);
-                env2.gain.linearRampToValueAtTime(n.vol * 0.25, t + 0.008);
-                env2.gain.exponentialRampToValueAtTime(0.0001, t + n.dur * 0.6);
-                osc2.connect(env2); env2.connect(master);
-                osc2.start(t); osc2.stop(t + n.dur * 0.6);
-            });
-        } catch(e) {}
-    }
-
-    soundBtn.addEventListener('click', function () {
-        muted = !muted;
-        soundBtn.classList.toggle('muted', muted);
-        iconOn.style.display  = muted ? 'none'  : '';
-        iconOff.style.display = muted ? ''      : 'none';
-        if (!muted) unlockAudio();
-    });
 
     function initials(name) {
         return name.replace(/\./g, '').trim().split(/\s+/).map(function(p){ return p[0] || ''; }).join('').toUpperCase().slice(0, 2);
@@ -1762,7 +1686,6 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         toast.classList.remove('jm-fomo-leaving');
         void toast.offsetWidth; /* force reflow */
         toast.classList.add('jm-fomo-visible');
-        playChime();
 
         /* start bar depletion */
         remaining  = SHOW_MS;
