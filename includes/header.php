@@ -145,7 +145,7 @@ if ($isAdminArea) {
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -356,7 +356,7 @@ ob_start();
     
     <!-- Premium Design System -->
     <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css?v=brand-10">
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
     
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

@@ -19,7 +19,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= e($aiPageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
     <script>
         window.tailwind = window.tailwind || {};
         window.tailwind.config = {

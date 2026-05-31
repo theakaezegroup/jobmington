@@ -183,7 +183,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <meta name="theme-color" content="#0640a3">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-11">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
     <style>
     /* ── Homepage overrides ───────────────────────────────────────── */
     @keyframes jmFadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
