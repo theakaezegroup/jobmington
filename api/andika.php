@@ -43,36 +43,34 @@ if (!array_key_exists($tool, $toolCosts)) {
 
 $cost = $toolCosts[$tool];
 
-// Get user location from session (geo_data is set by LocationDetector)
-// Keys: code, name, city, region, lat, lon, timezone, isp, currency, symbol, db_id
-$geoData = $_SESSION['geo_data'] ?? null;
+// Resolve user location — priority: profile country > session geo_data > default (Nigeria)
+$geoData    = $_SESSION['geo_data'] ?? null;
+$userCountry = DEFAULT_COUNTRY_NAME;
+$userRegion  = '';
+$userCity    = '';
+$userName    = '';
 
-// Debug: Log what we're getting
-error_log("ANDIKA DEBUG - geo_data: " . json_encode($geoData));
-
-$userCountry = ($geoData && isset($geoData['name']) && !empty($geoData['name'])) ? $geoData['name'] : DEFAULT_COUNTRY_NAME;
-$userRegion = ($geoData && isset($geoData['region'])) ? $geoData['region'] : '';
-$userCity = ($geoData && isset($geoData['city'])) ? $geoData['city'] : '';
-
-// Debug: Log the extracted values
-error_log("ANDIKA DEBUG - userCountry: $userCountry, userRegion: $userRegion, userCity: $userCity");
-
-$userName = '';
 if ($userId) {
-    $pdo = db();
-    $stmt = $pdo->prepare("SELECT first_name, country_id FROM users WHERE user_id = ?");
+    $pdo  = db();
+    $stmt = $pdo->prepare("SELECT first_name, country_id FROM users WHERE user_id = ? LIMIT 1");
     $stmt->execute([$userId]);
     $userData = $stmt->fetch();
     $userName = $userData['first_name'] ?? '';
-    
-    // If user has a country set in profile, use that instead
-    if ($userData['country_id']) {
-        $stmt = $pdo->prepare("SELECT name FROM countries WHERE country_id = ?");
-        $stmt->execute([$userData['country_id']]);
-        $countryData = $stmt->fetch();
-        if ($countryData['name']) {
-            $userCountry = $countryData['name'];
+
+    // Profile country is source of truth — always wins over IP detection
+    if (!empty($userData['country_id'])) {
+        $cStmt = $pdo->prepare("SELECT name, region FROM countries WHERE country_id = ? LIMIT 1");
+        $cStmt->execute([$userData['country_id']]);
+        $cRow = $cStmt->fetch();
+        if (!empty($cRow['name'])) {
+            $userCountry = $cRow['name'];
+            $userRegion  = $cRow['region'] ?? '';
         }
+    } elseif ($geoData && !empty($geoData['name'])) {
+        // Fall back to IP-based detection only if profile has no country set
+        $userCountry = $geoData['name'];
+        $userRegion  = $geoData['region'] ?? '';
+        $userCity    = $geoData['city']   ?? '';
     }
 }
 
