@@ -578,8 +578,8 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     .jm-hero2-h1-accent::after {
         content: '';
         position: absolute;
-        inset: -8px -12px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 60' preserveAspectRatio='none'%3E%3Cpath d='M8 30 C10 10 28 4 60 3 C95 2 148 2 182 7 C204 11 214 20 212 31 C210 43 196 52 164 55 C128 58 78 58 46 55 C18 52 5 44 8 30Z' fill='none' stroke='%23f59f22' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center;
+        inset: -4px -14px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 32' preserveAspectRatio='none'%3E%3Cellipse cx='110' cy='16' rx='104' ry='14' fill='none' stroke='%23f59f22' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center;
         background-size: 100% 100%;
         pointer-events: none;
     }
@@ -1058,8 +1058,8 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
             </div>
 
             </div><!-- /jm-hero2-inner (grid) -->
-            <div class="jm-hero2-inner">
-            <!-- Company ticker -->
+
+            <!-- Company ticker – full width -->
             <div class="jm-hero2-ticker-section">
                 <p class="jm-hero2-ticker-label">Trusted by professionals at Africa's top companies</p>
                 <div class="jm-hero2-ticker-wrap">
@@ -1079,7 +1079,6 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
                     </div>
                 </div>
             </div>
-            </div><!-- /jm-hero2-inner (ticker) -->
         </section>
 
         <!-- ── AI Tools ───────────────────────────────────────────────── -->
