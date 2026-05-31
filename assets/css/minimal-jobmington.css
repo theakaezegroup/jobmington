@@ -266,14 +266,14 @@ body.jm-home-page {
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    padding: 14px 0 22px;
-    margin-bottom: 34px;
+    padding: 8px 0 12px;
+    margin-bottom: 16px;
     border-bottom: 1px solid var(--jm-line);
 }
 
 .jm-home-page .jm-header {
     border-bottom: 0;
-    margin-bottom: 18px;
+    margin-bottom: 10px;
 }
 
 body.jm-ai-page {
