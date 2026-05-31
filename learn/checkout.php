@@ -316,7 +316,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <i class="fas fa-exclamation-circle text-red-500 text-xl mb-2"></i>
                                 <p class="text-red-700 font-medium">Insufficient seeds</p>
                                 <p class="text-red-600 text-sm">You need <?= number_format($course['seed_price'] - $seedBalance) ?> more seeds</p>
-                                <a href="/jobmington/wallet/buy-seeds.php" 
+                                <a href="/jobmington/wallet/?topup=1"
                                    class="inline-block mt-3 text-sm text-primary hover:underline font-medium">
                                     <i class="fas fa-plus-circle mr-1"></i> Get more seeds
                                 </a>

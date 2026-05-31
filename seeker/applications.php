@@ -60,7 +60,7 @@ $pageTitle = 'Applications | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=footer-unified-1">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
     <style>
         .jm-tabs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
         .jm-tabs a { border:1px solid var(--jm-line); color:var(--jm-ink); padding:8px 12px; text-decoration:none; font-size:14px; font-weight:600; }
@@ -70,7 +70,7 @@ $pageTitle = 'Applications | ' . SITE_NAME;
 <body class="jm-minimal">
     <div class="jm-shell">
         <header class="jm-header">
-            <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png" alt=""><span>Jobmington</span></a>
+            <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
             <nav class="jm-nav" aria-label="Main navigation">
                 <a href="/jobmington/seeker/dashboard.php">Dashboard</a>
                 <a href="/jobmington/jobs/">Find jobs</a>

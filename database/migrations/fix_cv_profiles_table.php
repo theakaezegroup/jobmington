@@ -134,7 +134,7 @@ try {
     echo " cv_skills table ready<br>";
     
     echo "<hr><h3> CV Tables Fixed!</h3>";
-    echo "<p><a href='/Jobmington/cv-builder/' style='color: #60a5fa;'>← Back to CV Builder</a></p>";
+    echo "<p><a href='/jobmington/cv-builder/' style='color: #60a5fa;'>← Back to CV Builder</a></p>";
     
 } catch (PDOException $e) {
     echo "<p style='color: #ef4444;'> Error: " . htmlspecialchars($e->getMessage()) . "</p>";

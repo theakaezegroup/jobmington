@@ -31,13 +31,17 @@ $userId = Session::userId();
 // Define tool costs (must match seed_rates table)
 $toolCosts = [
     'chat' => 0,                // Free basic chat
-    'interview_practice' => 100,
+    'interview_practice' => getActionCostWithFallback('interview_practice', 100),
     'salary_guide' => 0,        // Free
-    'career_roadmap' => 75,
-    'cv_roast' => 50
+    'career_roadmap' => getActionCostWithFallback('career_roadmap', 75),
+    'cv_roast' => getActionCostWithFallback('cv_roast', 50)
 ];
 
-$cost = $toolCosts[$tool] ?? 0;
+if (!array_key_exists($tool, $toolCosts)) {
+    $tool = 'chat';
+}
+
+$cost = $toolCosts[$tool];
 
 // Get user location from session (geo_data is set by LocationDetector)
 // Keys: code, name, city, region, lat, lon, timezone, isp, currency, symbol, db_id
@@ -105,12 +109,13 @@ if ($cost > 0) {
     }
     
     // Deduct seeds
-    $result = spendSeeds($userId, $tool, null, "Used {$tool} feature");
+    $result = spendSeeds($userId, $tool, null, "Used {$tool} feature", $cost);
     if (!$result['success']) {
         echo json_encode([
             "success" => false,
             "error" => "payment_failed", 
-            "message" => $result['message']
+            "message" => $result['message'],
+            "balance" => $result['balance'] ?? getSeedBalance($userId)
         ]);
         exit;
     }
@@ -118,6 +123,7 @@ if ($cost > 0) {
 
 // Get current balance for response
 $newBalance = $userId ? getSeedBalance($userId) : 0;
+$responseCost = $cost;
 
 // Check if this is the first message in the session
 $isFirstMessage = !isset($_SESSION['andika_chat_started']);
@@ -171,70 +177,96 @@ $systemPrompts = [
 
 $systemPrompt = $systemPrompts[$tool] ?? $systemPrompts['chat'];
 
-// Groq API (free tier)
-$groqKey = getenv('GROQ_API_KEY');
-if (empty($groqKey)) {
-    $groqKey = 'YOUR_GROQ_API_KEY'; // Get free key at https://console.groq.com/keys
-}
-
-$data = [
-    "model" => "llama-3.3-70b-versatile",
-    "messages" => [
-        ["role" => "system", "content" => $systemPrompt],
-        ["role" => "user", "content" => $message]
-    ],
-    "temperature" => 0.7,
-    "max_tokens" => 1024
-];
-
-$ch = curl_init("https://api.groq.com/openai/v1/chat/completions");
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Content-Type: application/json",
-    "Authorization: Bearer " . $groqKey
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlError = curl_error($ch);
-curl_close($ch);
-
-if ($curlError) {
-    echo json_encode([
-        "success" => false,
-        "error" => "connection_error",
-        "message" => "Connection failed: " . $curlError
-    ]);
-    exit;
-}
-
-if ($httpCode !== 200) {
-    // Refund seeds if API call failed
-    if ($cost > 0 && $userId) {
-        awardSeeds($userId, 'refund', null, "Refund for failed {$tool} request", $cost);
+function jm_andika_local_reply(string $message, string $tool, string $locationContext): string {
+    $message = trim($message);
+    if ($tool === 'salary_guide') {
+        return "I can help with salary direction for {$locationContext}. Share the role title, seniority, and industry, and I will compare market expectations, negotiation angles, and what to ask before accepting.";
     }
-    $errorData = json_decode($response, true);
-    $errorMsg = $errorData['error']['message'] ?? "HTTP Error $httpCode";
-    echo json_encode([
-        "success" => false,
-        "error" => "api_error",
-        "message" => "API Error: " . $errorMsg,
-        "debug" => $response
-    ]);
-    exit;
+    if ($tool === 'career_roadmap') {
+        return "Here is a practical roadmap: define your target role, list the 5 most repeated job-posting skills, close the largest 2 gaps first, update your CV with measurable proof, then apply in focused batches each week. Tell me the role you want and I will tailor this.";
+    }
+    if ($tool === 'interview_practice') {
+        return "Let's practice. First question: tell me about a recent project or responsibility where your work created measurable value. Answer in 60-90 seconds, and I will give feedback.";
+    }
+    if ($tool === 'cv_roast') {
+        return "For the full CV Roast, open the CV Roast page so Andika can read your saved Jobmington CV and produce a score, weak points, keyword gaps, and an optimized summary.";
+    }
+    if (preg_match('/^(hi|hello|hey|good\s*(morning|afternoon|evening))\b/i', $message)) {
+        return "Hey! I'm Andika, your Jobmington career assistant. I can help you find roles, improve your CV, prepare for interviews, or think through a career move. What are we working on today?";
+    }
+    return "I can help with that. For the best answer, tell me your target role, location, current experience level, and whether you want jobs, CV help, interview prep, or a career plan.";
 }
 
-$result = json_decode($response, true);
-$reply = $result['choices'][0]['message']['content'] ?? "Sorry, I couldn't process that.";
+$providers = [];
+$groqKey = trim((string) getenv('GROQ_API_KEY'));
+if ($groqKey !== '' && stripos($groqKey, 'your_') === false && stripos($groqKey, 'YOUR_') === false) {
+    $providers[] = [
+        'url' => 'https://api.groq.com/openai/v1/chat/completions',
+        'model' => 'llama-3.3-70b-versatile',
+        'headers' => ['Authorization: Bearer ' . $groqKey],
+    ];
+}
+
+$openRouterKey = trim((string) getenv('OPENROUTER_API_KEY'));
+if ($openRouterKey !== '' && stripos($openRouterKey, 'your_') === false && stripos($openRouterKey, 'YOUR_') === false) {
+    $providers[] = [
+        'url' => 'https://openrouter.ai/api/v1/chat/completions',
+        'model' => defined('ANDIKA_MODEL') ? ANDIKA_MODEL : 'meta-llama/llama-3.2-3b-instruct:free',
+        'headers' => [
+            'Authorization: Bearer ' . $openRouterKey,
+            'HTTP-Referer: ' . (defined('SITE_URL') ? SITE_URL : 'https://jobmington.com'),
+            'X-Title: Jobmington',
+        ],
+    ];
+}
+
+$reply = null;
+$lastError = null;
+
+foreach ($providers as $provider) {
+    $data = [
+        "model" => $provider['model'],
+        "messages" => [
+            ["role" => "system", "content" => $systemPrompt],
+            ["role" => "user", "content" => $message]
+        ],
+        "temperature" => 0.7,
+        "max_tokens" => 1024
+    ];
+
+    $ch = curl_init($provider['url']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge(["Content-Type: application/json"], $provider['headers']));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+    $response = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($curlError || $httpCode < 200 || $httpCode >= 300) {
+        $lastError = $curlError ?: "HTTP Error {$httpCode}";
+        continue;
+    }
+
+    $result = json_decode((string) $response, true);
+    $reply = $result['choices'][0]['message']['content'] ?? null;
+    if ($reply) {
+        break;
+    }
+}
+
+if (!$reply) {
+    $reply = jm_andika_local_reply($message, $tool, $locationContext);
+}
 
 echo json_encode([
     "success" => true,
     "reply" => $reply,
     "tool" => $tool,
-    "cost" => $cost,
+    "cost" => $responseCost,
     "balance" => $newBalance
 ]);
 ?>

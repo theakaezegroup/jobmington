@@ -111,7 +111,7 @@ require_once __DIR__ . '/../includes/header.php';
     }
     
     .cert-header h1 {
-        font-family: 'Georgia', serif;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 28px;
         color: #fff;
         margin: 0;
@@ -155,7 +155,7 @@ require_once __DIR__ . '/../includes/header.php';
     }
     
     .recipient-name {
-        font-family: 'Georgia', serif;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 42px;
         color: #0a1628;
         margin-bottom: 8px;
@@ -182,7 +182,7 @@ require_once __DIR__ . '/../includes/header.php';
     }
     
     .course-title {
-        font-family: 'Georgia', serif;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 22px;
         color: #0a1628;
         margin-bottom: 32px;
@@ -217,7 +217,7 @@ require_once __DIR__ . '/../includes/header.php';
     }
     
     .detail-value {
-        font-family: 'Georgia', serif;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 14px;
         color: #333;
         font-weight: 600;
@@ -245,7 +245,7 @@ require_once __DIR__ . '/../includes/header.php';
     }
     
     .qr-text .cert-id {
-        font-family: monospace;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 14px;
         color: #0a1628;
         font-weight: 700;

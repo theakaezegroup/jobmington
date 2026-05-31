@@ -141,7 +141,7 @@ require_once __DIR__ . '/../includes/header.php';
     .form-textarea {
         resize: vertical;
         min-height: 100px;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Futura Cyrillic Demi';
     }
     
     .two-col {

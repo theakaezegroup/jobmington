@@ -330,7 +330,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         
         /* Blueprint: technical section markers */
         [data-template="blueprint"] .section-title {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Futura Cyrillic Demi';
             letter-spacing: 3px;
             font-size: 9pt;
         }
@@ -424,7 +424,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         
         [data-template="blueprint"] .skill-pill {
             border-radius: 0;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 8pt;
         }
         
@@ -527,7 +527,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         }
 
         [data-template="blueprint"] .cv-name {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 25pt;
             letter-spacing: 0.5px;
         }
@@ -581,7 +581,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         }
 
         [data-template="blueprint"] .section-title {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Futura Cyrillic Demi';
             letter-spacing: 1.6px;
         }
 
@@ -620,7 +620,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
 
         [data-template="blueprint"] .skill-pill {
             border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Futura Cyrillic Demi';
         }
 
         .tech-tag {
@@ -1055,7 +1055,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
     <!-- Jobmington Branding Footer -->
     <footer class="cv-footer">
         <div class="cv-footer-brand">
-            <img src="<?= SITE_URL ?>/assets/images/badge.png" alt="Jobmington" class="cv-footer-logo">
+            <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-7" alt="Jobmington" class="cv-footer-logo">
             <span class="cv-footer-text">
                 Created with <a href="<?= SITE_URL ?>" target="_blank">Jobmington</a>
             </span>

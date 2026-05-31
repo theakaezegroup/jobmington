@@ -62,6 +62,7 @@ final class Navigation {
             ['url' => '/jobmington/', 'label' => 'Home', 'icon' => 'home'],
             ['url' => '/jobmington/jobs', 'label' => 'Find Jobs', 'icon' => 'briefcase'],
             ['url' => '/jobmington/cv-builder/', 'label' => 'CV Builder', 'icon' => 'document'],
+            ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles'],
             ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus'],
             ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users'],
         ];
@@ -72,6 +73,7 @@ final class Navigation {
             'home' => '<path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',
             'briefcase' => '<path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 12v.01"/>',
             'plus' => '<path d="M12 5v14"/><path d="M5 12h14"/>',
+            'sparkles' => '<path d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"/><path d="M5 3v4"/><path d="M3 5h4"/>',
             'graduation' => '<path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/><path d="M22 10v6"/>',
             'users' => '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
             'document' => '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
@@ -121,6 +123,224 @@ if (empty($locationData['flagUrl'])) {
 
 $navItems = Navigation::getMainItems();
 $currentUri = $_SERVER['REQUEST_URI'] ?? '/';
+$currentPath = parse_url($currentUri, PHP_URL_PATH) ?: $currentUri;
+$isAdminArea = (bool) preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $currentPath);
+
+if ($isAdminArea) {
+    $adminNavItems = [
+        ['href' => '/jobmington/admin/', 'label' => 'Command', 'icon' => 'fa-gauge-high'],
+        ['href' => '/jobmington/admin/users.php', 'label' => 'Users', 'icon' => 'fa-users'],
+        ['href' => '/jobmington/admin/jobs.php', 'label' => 'Jobs', 'icon' => 'fa-briefcase'],
+        ['href' => '/jobmington/admin/operations.php', 'label' => 'Operations', 'icon' => 'fa-heartbeat'],
+        ['href' => '/jobmington/admin/courses.php', 'label' => 'Learning', 'icon' => 'fa-graduation-cap'],
+        ['href' => '/jobmington/admin/settings.php', 'label' => 'Settings', 'icon' => 'fa-sliders'],
+    ];
+    ?>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0640a3">
+    <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
+    <title><?= htmlspecialchars($headerConfig->title) ?></title>
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --admin-bg: #f5f8fc;
+            --admin-ink: #061426;
+            --admin-muted: #53667f;
+            --admin-line: #d8e4f4;
+            --admin-card: #ffffff;
+            --admin-blue: #0640a3;
+            --admin-green: #0f766e;
+            --admin-amber: #b66b00;
+            --admin-red: #b42318;
+        }
+        body.jm-admin {
+            margin: 0;
+            background: var(--admin-bg);
+            color: var(--admin-ink);
+            font-family: "Futura Cyrillic Demi", sans-serif !important;
+        }
+        .jm-admin-shell {
+            width: min(100%, 1440px);
+            margin: 0 auto;
+            padding: 18px;
+        }
+        .jm-admin-topbar {
+            align-items: center;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid var(--admin-line);
+            border-radius: 8px;
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding: 12px 14px;
+            position: sticky;
+            top: 10px;
+            z-index: 40;
+        }
+        .jm-admin-brand,
+        .jm-admin-brand:hover {
+            align-items: center;
+            color: var(--admin-ink);
+            display: inline-flex;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .jm-admin-brand img {
+            height: 36px;
+            object-fit: contain;
+            width: 36px;
+        }
+        .jm-admin-nav {
+            align-items: center;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+        .jm-admin-nav a {
+            align-items: center;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: var(--admin-muted);
+            display: inline-flex;
+            font-size: 13px;
+            gap: 8px;
+            min-height: 38px;
+            padding: 8px 11px;
+            text-decoration: none;
+        }
+        .jm-admin-nav a:hover,
+        .jm-admin-nav a.is-active {
+            background: #eef5ff;
+            border-color: #cfe0f7;
+            color: var(--admin-blue);
+        }
+        .jm-admin-actions {
+            align-items: center;
+            display: inline-flex;
+            gap: 8px;
+        }
+        .jm-admin-visit,
+        .jm-admin-logout {
+            align-items: center;
+            border: 1px solid var(--admin-line);
+            border-radius: 8px;
+            color: var(--admin-ink);
+            display: inline-flex;
+            font-size: 13px;
+            gap: 8px;
+            min-height: 38px;
+            padding: 8px 11px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .jm-admin-logout {
+            background: #fff5f5;
+            border-color: #ffd7d7;
+            color: var(--admin-red);
+        }
+        .jm-admin-content {
+            min-height: calc(100vh - 132px);
+        }
+        .jm-admin-footer {
+            color: var(--admin-muted);
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 12px;
+            gap: 10px;
+            justify-content: space-between;
+            padding: 24px 2px 6px;
+        }
+        .jm-admin .bg-gray-100,
+        .jm-admin .bg-slate-950,
+        .jm-admin .bg-slate-900 {
+            background: transparent !important;
+        }
+        .jm-admin .shadow-md,
+        .jm-admin .shadow-xl,
+        .jm-admin .shadow-2xl {
+            box-shadow: none !important;
+        }
+        .jm-admin .rounded-lg,
+        .jm-admin .rounded-xl,
+        .jm-admin .rounded-2xl,
+        .jm-admin .rounded-3xl {
+            border-radius: 8px !important;
+        }
+        .jm-admin .bg-white,
+        .jm-admin .bg-white\/5,
+        .jm-admin .bg-slate-900\/80 {
+            background: var(--admin-card) !important;
+        }
+        .jm-admin .text-white {
+            color: var(--admin-ink) !important;
+        }
+        .jm-admin .text-slate-400,
+        .jm-admin .text-slate-500,
+        .jm-admin .text-gray-500 {
+            color: var(--admin-muted) !important;
+        }
+        .jm-admin table {
+            color: var(--admin-ink);
+        }
+        @media (max-width: 900px) {
+            .jm-admin-topbar {
+                align-items: flex-start;
+                flex-direction: column;
+                position: static;
+            }
+            .jm-admin-nav,
+            .jm-admin-actions {
+                justify-content: flex-start;
+                width: 100%;
+            }
+            .jm-admin-nav a {
+                flex: 1 1 145px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="jm-admin">
+    <div class="jm-admin-shell">
+        <header class="jm-admin-topbar">
+            <a class="jm-admin-brand" href="/jobmington/admin/">
+                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                <span>Jobmington Admin</span>
+            </a>
+            <nav class="jm-admin-nav" aria-label="Admin navigation">
+                <?php foreach ($adminNavItems as $item): ?>
+                    <?php
+                        $normalizedCurrentPath = preg_replace('~^/jobmington~i', '', $currentPath);
+                        $normalizedItemPath = preg_replace('~^/jobmington~i', '', $item['href']);
+                        $active = rtrim($normalizedCurrentPath, '/') === rtrim($normalizedItemPath, '/');
+                    ?>
+                    <a class="<?= $active ? 'is-active' : '' ?>" href="<?= htmlspecialchars($item['href']) ?>">
+                        <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                        <span><?= htmlspecialchars($item['label']) ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+            <div class="jm-admin-actions">
+                <a class="jm-admin-visit" href="/jobmington/"><i class="fas fa-up-right-from-square"></i> View site</a>
+                <a class="jm-admin-logout" href="/jobmington/auth/logout.php"><i class="fas fa-right-from-bracket"></i> Log out</a>
+            </div>
+        </header>
+        <main class="jm-admin-content">
+    <?php
+    return;
+}
 
 ob_start();
 ?>
@@ -130,15 +350,13 @@ ob_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#030303">
+    <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <!-- Premium Design System -->
-    <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css">
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=state-icons-1">
+    <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
     
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -156,7 +374,7 @@ ob_start();
             darkMode: false,
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
+                    fontFamily: { sans: ['Futura Cyrillic Demi'] },
                     colors: { 
                         brand: { 
                             400: '#e5e5e5',
@@ -450,7 +668,7 @@ ob_start();
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
         .geo-region-title {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Futura Cyrillic Demi';
             letter-spacing: 0.05em;
             text-transform: uppercase;
             font-size: 0.65rem;
@@ -516,7 +734,7 @@ ob_start();
             position: fixed; inset: 0; z-index: 99999; 
             background: #0f172a;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            font-family: 'Futura Cyrillic Demi';
             transition: opacity 0.6s ease-out, visibility 0.6s;
             overflow: hidden;
         }
@@ -582,7 +800,7 @@ ob_start();
             font-weight: 900; 
             letter-spacing: -0.04em; 
             color: #ffffff; 
-            font-family: 'Inter', sans-serif;
+            font-family: 'Futura Cyrillic Demi';
             text-shadow: 0 2px 20px rgba(255,255,255,0.1);
         }
         
@@ -626,7 +844,7 @@ ob_start();
             font-weight: 700;
             color: #f59e0b;
             margin-top: 12px;
-            font-family: 'Inter', monospace;
+            font-family: 'Futura Cyrillic Demi';
             letter-spacing: 0.05em;
         }
         .loader-text { 
@@ -728,7 +946,7 @@ ob_start();
     <div id="preloader">
         <div class="preloader-content">
             <div class="preloader-brand">
-                <img src="/jobmington/assets/images/badge.png" alt="Badge" class="preloader-badge">
+                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="Badge" class="preloader-badge">
                 <span class="preloader-name">JOBMINGTON</span>
             </div>
             <div class="loader-bar-track">
@@ -829,10 +1047,10 @@ ob_start();
             <div class="flex items-center gap-6">
                 <a href="/jobmington/" class="flex items-center gap-3 group relative">
                     <div class="relative w-10 h-10 flex items-center justify-center group-hover:scale-105 transition duration-300">
-                        <img src="/jobmington/assets/images/badge.png" class="relative z-10 w-8 h-8 object-contain drop-shadow-sm">
+                        <img src="/jobmington/assets/images/badge.png?v=logo-7" class="relative z-10 w-8 h-8 object-contain drop-shadow-sm">
                     </div>
                     <div class="hidden sm:flex flex-col">
-                        <span class="font-bold tracking-tight text-xl jm-brand-text" style="font-family: 'Futura Cyrillic Demi', sans-serif; letter-spacing: -0.025em; color: #101828;">
+                        <span class="font-bold tracking-tight text-xl jm-brand-text" style="font-family: 'Futura Cyrillic Demi'; letter-spacing: 0; color: #101828;">
                             Jobmington
                         </span>
                     </div>

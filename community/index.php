@@ -89,7 +89,7 @@ require_once __DIR__ . '/../includes/header.php';
         background: var(--bg-app); 
         background-image: linear-gradient(180deg, #030303 0%, #0a0a0a 50%, #0f0f0f 100%);
         background-attachment: fixed;
-        font-family: 'Inter', sans-serif; 
+        font-family: 'Futura Cyrillic Demi';
         color: var(--text-main); 
         transition: 0.3s; 
         overflow-x: hidden; 

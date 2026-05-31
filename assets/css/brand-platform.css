@@ -1,0 +1,77 @@
+@font-face {
+    font-family: "Futura Cyrillic Demi";
+    src: url("../fonts/FuturaCyrillicDemi.ttf") format("truetype"),
+         local("Futura Cyrillic Demi"),
+         local("FuturaCyrillicDemi");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Futura Cyrillic Book";
+    src: url("../fonts/FuturaCyrillicBook.ttf") format("truetype"),
+         local("Futura Cyrillic Book"),
+         local("FuturaCyrillicBook");
+    font-display: swap;
+}
+
+:root {
+    --jm-brand-font: "Futura Cyrillic Demi";
+    --jm-brand-font-mobile: "Futura Cyrillic Book";
+}
+
+html,
+body,
+body *:not(i):not(.fa):not(.fas):not(.far):not(.fab):not(svg):not(path),
+button,
+input,
+select,
+textarea {
+    font-family: var(--jm-brand-font) !important;
+    letter-spacing: 0;
+}
+
+@media (max-width: 768px) {
+    :root {
+        --jm-brand-font: var(--jm-brand-font-mobile);
+        --jm-font: var(--jm-brand-font-mobile);
+    }
+
+    html,
+    body,
+    body *:not(i):not(.fa):not(.fas):not(.far):not(.fab):not(svg):not(path),
+    button,
+    input,
+    select,
+    textarea {
+        font-family: var(--jm-brand-font-mobile) !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b,
+    button,
+    .font-bold,
+    .font-semibold {
+        font-weight: 500 !important;
+    }
+
+    .jm-brand-text,
+    .jm-logo span,
+    body.jm-home-page .jm-hero-copy h1,
+    body.jm-home-page .jm-hero-copy h1 * {
+        font-family: "Futura Cyrillic Demi" !important;
+        font-weight: 700 !important;
+    }
+}
+
+.jm-logo img,
+.admin-brand img,
+.preloader-badge,
+.cv-footer-logo {
+    object-fit: contain;
+}

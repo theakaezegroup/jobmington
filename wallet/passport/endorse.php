@@ -155,7 +155,7 @@ $level = $levelConfig[$endorsement['level']];
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Futura Cyrillic Demi'; }
     </style>
 </head>
 <body class="bg-slate-950 min-h-screen">
@@ -165,7 +165,7 @@ $level = $levelConfig[$endorsement['level']];
         <!-- Logo -->
         <div class="text-center mb-8">
             <a href="<?= SITE_URL ?>">
-                <img src="<?= SITE_URL ?>/assets/images/logo.png" alt="Jobmington" class="h-8 mx-auto">
+                <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-7" alt="Jobmington" class="h-8 mx-auto">
             </a>
         </div>
         

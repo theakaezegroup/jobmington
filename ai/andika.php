@@ -22,14 +22,16 @@ Session::start();
 $userId = Session::userId();
 $userCredits = $userId ? getSeedBalance($userId) : 0;
 $isLoggedIn = Session::isLoggedIn();
+$pageTitle = 'Andika AI | Jobmington';
+$activeAIPage = 'andika';
 
-require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 
 <style>
-    /* --- NEO-BRUTALIST ANDIKA THEME --- */
+    /* --- SMOOTH ANDIKA BRAND THEME --- */
     :root {
-        /* Core palette - Neo-Brutalist (matching homepage) */
+        /* Core palette */
         --color-ink: #051B3B;
         --color-primary: #0640a3;
         --color-secondary: #FFE135;
@@ -61,7 +63,7 @@ require_once __DIR__ . '/../includes/header.php';
         --semantic-warning: #ca8a04;
         --semantic-error: #dc2626;
         
-        /* Neo-Brutalist borders & shadows */
+        /* Legacy border tokens, softened by the final brand shell below */
         --border-standard: 2px solid var(--color-ink);
         --border-subtle: 1px solid rgba(5, 27, 59, 0.1);
         --border-default: 2px solid var(--color-ink);
@@ -132,7 +134,7 @@ require_once __DIR__ . '/../includes/header.php';
         height: 100%; 
         margin: 0; 
         background-color: var(--bg-app); 
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+        font-family: 'Futura Cyrillic Demi';
         overflow: hidden; 
         color: var(--text-primary);
         font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -179,8 +181,7 @@ require_once __DIR__ . '/../includes/header.php';
         background: rgba(100, 116, 139, 0.5);
     }
     
-    /* Neo-Brutalist backgrounds don't use ambient glows or noise typically, 
-       but we can keep a very subtle grain if desired, or remove it for a clean 'paper' look. */
+    /* Decorative layers are disabled for a clean product surface. */
     .noise-overlay { display: none; }
     .ambient-glow { display: none; }
     
@@ -198,9 +199,9 @@ require_once __DIR__ . '/../includes/header.php';
         z-index: 5;
     }
 
-    #app-workspace { display: flex; height: calc(100vh - 80px); margin-top: 80px; width: 100vw; position: relative; }
+    #app-workspace { display: flex; height: calc(100dvh - 98px); margin-top: 0; width: 100%; position: relative; }
 
-    /* --- SIDEBARS (Neo-Brutalist) --- */
+    /* --- SIDEBARS --- */
     .glass-panel {
         width: 280px; 
         height: 100%; 
@@ -226,7 +227,7 @@ require_once __DIR__ . '/../includes/header.php';
         background: var(--color-canvas); /* Soft wash for card contrast */
     }
     
-    /* Scrollbars (Neo-Brutalist Refinement) */
+    /* Scrollbars */
     .glass-panel::-webkit-scrollbar {
         width: 8px;
     }
@@ -309,7 +310,7 @@ require_once __DIR__ . '/../includes/header.php';
         margin-bottom: 0;
     }
     
-    /* Widget Internals (Neo-Brutalist) */
+    /* Widget Internals */
     .strength-bar-bg {
         height: 10px;
         background: #e2e8f0;
@@ -383,7 +384,7 @@ require_once __DIR__ . '/../includes/header.php';
         color: var(--color-ink);
         margin-top: 10px;
         letter-spacing: -0.02em;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Futura Cyrillic Demi';
     }
     .credit-balance .seeds-label {
         font-size: 0.875rem;
@@ -563,7 +564,7 @@ require_once __DIR__ . '/../includes/header.php';
         text-transform: uppercase;
         letter-spacing: 0.05em;
         box-shadow: 3px 3px 0px 0px var(--color-ink);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Futura Cyrillic Demi';
     }
     .new-chat-btn:hover { 
         transform: translate(-1px, -1px);
@@ -761,7 +762,7 @@ require_once __DIR__ . '/../includes/header.php';
         font-size: 0.9375rem;
         padding: 10px 4px;
         outline: none;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: 'Futura Cyrillic Demi';
         font-weight: 500;
     }
     
@@ -1174,7 +1175,7 @@ require_once __DIR__ . '/../includes/header.php';
         padding: 3px 8px;
         border-radius: 4px;
         border: 1px solid var(--color-ink);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 0.875em;
         color: var(--color-primary);
         font-weight: 600;
@@ -1221,7 +1222,7 @@ require_once __DIR__ . '/../includes/header.php';
         gap: 6px;
         margin-top: 16px;
         box-shadow: 2px 2px 0px 0px var(--color-ink);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Futura Cyrillic Demi';
         font-weight: 600;
         text-transform: uppercase;
     }
@@ -1899,8 +1900,8 @@ require_once __DIR__ . '/../includes/header.php';
     @media (max-width: 1024px) {
         /* 1. Dynamic Viewport Height */
         #app-workspace { 
-            height: calc(100dvh - 60px);
-            margin-top: 60px;
+            height: calc(100dvh - 82px);
+            margin-top: 0;
             overflow: hidden;
         }
         
@@ -2260,6 +2261,975 @@ require_once __DIR__ . '/../includes/header.php';
             position: relative;
         }
     }
+
+    /* === ANDIKA 2026 REFRESH === */
+    body {
+        background: #f6f9fd !important;
+        color: #061426 !important;
+        overflow: hidden;
+    }
+
+    .noise-overlay,
+    .ambient-glow,
+    .top-blend {
+        display: none !important;
+    }
+
+    #app-workspace {
+        background: linear-gradient(180deg, #f6f9fd 0%, #eef5ff 100%);
+        gap: 16px;
+        height: calc(100dvh - 98px);
+        margin-top: 0;
+        padding: 16px;
+        width: 100%;
+    }
+
+    .glass-panel {
+        background: #ffffff;
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: 0 14px 34px rgba(10, 28, 48, 0.08);
+        direction: ltr;
+        padding-top: 14px;
+    }
+
+    .glass-panel.right-panel {
+        background: #ffffff;
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: 0 14px 34px rgba(10, 28, 48, 0.08);
+    }
+
+    .glass-panel > * {
+        direction: ltr;
+    }
+
+    .panel-header {
+        color: #334766;
+        letter-spacing: 0.12em;
+    }
+
+    .panel-header::after {
+        display: none;
+    }
+
+    .new-chat-btn,
+    .drawer-new-chat {
+        background: #0640a3;
+        border: 1px solid #0640a3;
+        border-radius: 8px;
+        box-shadow: none;
+        color: #ffffff;
+        font-family: inherit;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .new-chat-btn:hover,
+    .drawer-new-chat:hover {
+        background: #07357f;
+        box-shadow: none;
+        transform: translateY(-1px);
+    }
+
+    .nav-item {
+        border: 1px solid transparent;
+        border-radius: 8px;
+        box-shadow: none;
+        color: #30445f;
+    }
+
+    .nav-item:hover {
+        background: #f3f7fc;
+        color: #0640a3;
+    }
+
+    .nav-item.active {
+        background: #edf5ff;
+        border-color: #c9dcf4;
+        color: #0640a3;
+    }
+
+    #main-chat-view {
+        background: #ffffff;
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: 0 18px 42px rgba(10, 28, 48, 0.1);
+        min-width: 0;
+    }
+
+    #chat-header {
+        background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+        border-bottom: 1px solid #e3ecf7;
+        padding: 28px 24px 18px;
+    }
+
+    .ai-greeting {
+        align-items: center;
+        flex-direction: row;
+        gap: 14px;
+        margin-bottom: 18px;
+        text-align: left;
+    }
+
+    .ai-icon-sphere,
+    .greeting-avatar {
+        background: #0640a3;
+        border: 0;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .greeting-avatar::before {
+        display: none;
+    }
+
+    .greeting-content {
+        text-align: left;
+    }
+
+    .greeting-text {
+        color: #061426;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .greeting-sub {
+        color: #52647c;
+        font-size: 0.95rem;
+    }
+
+    .trust-note {
+        align-items: center;
+        color: #637691;
+        display: inline-flex;
+        gap: 6px;
+        margin: 8px 0 0;
+        opacity: 1;
+    }
+
+    .main-input-area {
+        max-width: 720px;
+    }
+
+    .input-wrapper {
+        border: 1px solid #bfd0e7;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .input-wrapper:focus-within {
+        box-shadow: 0 0 0 4px rgba(6, 64, 163, 0.12);
+        transform: none;
+    }
+
+    .input-action,
+    .send-action,
+    .mobile-action-btn,
+    .drawer-close {
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .input-action,
+    .mobile-action-btn,
+    .drawer-close {
+        background: #f4f8fc;
+        color: #334766;
+    }
+
+    .send-action {
+        background: #0640a3;
+        color: #ffffff;
+    }
+
+    .quick-chips {
+        gap: 8px;
+        justify-content: center;
+        margin-top: 14px;
+    }
+
+    .chip {
+        background: #ffffff;
+        border: 1px solid #c9dcf4;
+        border-radius: 999px;
+        box-shadow: none;
+        color: #334766;
+    }
+
+    .chip:hover {
+        background: #f3f7fc;
+        color: #0640a3;
+        transform: translateY(-1px);
+    }
+
+    .chip-primary {
+        background: #0640a3;
+        border-color: #0640a3;
+        color: #ffffff;
+    }
+
+    .chip-primary:hover {
+        background: #07357f;
+        color: #ffffff;
+    }
+
+    #scroll-container {
+        background: #fbfdff;
+    }
+
+    #chat-thread {
+        max-width: 940px;
+        padding: 24px 24px 44px;
+    }
+
+    #welcome-ui {
+        align-items: stretch;
+        text-align: left;
+    }
+
+    .section-label {
+        color: #334766;
+        letter-spacing: 0.12em;
+        text-align: left;
+    }
+
+    .chat-placeholder {
+        background: #ffffff;
+        border: 1px dashed #b9cbe1;
+        border-radius: 8px;
+        color: #52647c;
+    }
+
+    .tools-section {
+        width: 100%;
+    }
+
+    .tools-grid {
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tool-card {
+        align-items: flex-start;
+        background: #ffffff;
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: none;
+        text-align: left;
+    }
+
+    .tool-card:hover {
+        box-shadow: 0 12px 26px rgba(10, 28, 48, 0.09);
+        transform: translateY(-2px);
+    }
+
+    .tool-icon {
+        border: 0;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .tool-cost {
+        border-radius: 999px;
+    }
+
+    .powered-by {
+        color: #637691;
+        justify-content: flex-start;
+    }
+
+    .credit-balance {
+        color: #061426;
+    }
+
+    .chat-messages .msg-user {
+        border: 1px solid #c9dcf4;
+        box-shadow: none;
+    }
+
+    .chat-messages .msg-ai .ai-icon {
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    @media (max-width: 1024px) {
+        body {
+            overflow: hidden;
+        }
+
+        #app-workspace {
+            background: #f6f9fd;
+            gap: 0;
+            height: calc(100dvh - 82px);
+            margin-top: 0;
+            padding: 10px;
+        }
+
+        #main-chat-view {
+            border-radius: 8px;
+        }
+
+        #chat-header {
+            padding: 56px 14px 14px;
+        }
+
+        .mobile-header-actions {
+            left: 14px;
+            top: 12px;
+        }
+
+        .ai-greeting {
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .greeting-content {
+            text-align: center;
+        }
+
+        .greeting-text {
+            font-size: 1.28rem;
+        }
+
+        .main-input-area {
+            max-width: none;
+        }
+
+        .quick-chips {
+            justify-content: flex-start;
+            margin-left: -14px;
+            padding: 2px 14px 4px;
+            width: calc(100% + 28px);
+        }
+
+        #chat-thread {
+            padding: 14px 12px 92px;
+        }
+
+        .tools-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 560px) {
+        .greeting-sub {
+            font-size: 0.85rem;
+        }
+
+        .trust-note {
+            display: none;
+        }
+
+        .input-wrapper input {
+            min-width: 0;
+        }
+
+        .tools-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tool-card {
+            align-items: center;
+            text-align: center;
+        }
+    }
+
+    /* === ANDIKA FLAT BRAND SHELL === */
+    body.jm-ai-page {
+        background: #f6f9fd !important;
+        color: #061426 !important;
+        overflow: hidden;
+    }
+
+    body.jm-ai-page .jm-shell {
+        background: #f6f9fd;
+    }
+
+    body.jm-ai-page .noise-overlay,
+    body.jm-ai-page .top-blend,
+    body.jm-ai-page .ambient-glow {
+        display: none !important;
+    }
+
+    #app-workspace {
+        align-items: stretch;
+        background: #f6f9fd;
+        display: flex;
+        gap: 0;
+        height: calc(100dvh - 82px);
+        justify-content: center;
+        margin: 0;
+        overflow: hidden;
+        padding: 0 20px 12px;
+        width: 100%;
+    }
+
+    #app-workspace .glass-panel {
+        display: none !important;
+    }
+
+    #main-chat-view {
+        background: #f6f9fd;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        margin: 0 auto;
+        max-width: 1120px;
+        min-height: 0;
+        min-width: 0;
+        width: 100%;
+    }
+
+    #chat-header,
+    #scroll-container {
+        background: #f6f9fd;
+    }
+
+    #chat-header {
+        border: 0;
+        padding: 16px 20px 12px;
+    }
+
+    #chat-thread {
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        max-width: 860px;
+        padding: 10px 20px 0;
+        width: 100%;
+    }
+
+    #welcome-ui {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        height: 100%;
+        justify-content: flex-start;
+        margin: 0 auto;
+        max-width: 860px;
+        padding: 0;
+        width: 100%;
+    }
+
+    @media (min-width: 1025px) {
+        #welcome-ui {
+            flex-direction: column;
+        }
+
+        .chat-area,
+        .tools-section {
+            max-width: none;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .tools-grid {
+            gap: 10px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        .powered-by {
+            bottom: auto;
+            left: auto;
+            margin-top: 4px;
+            position: static;
+            transform: none;
+        }
+    }
+
+    .mobile-header-actions {
+        align-items: center;
+        display: flex !important;
+        gap: 8px;
+        left: 20px;
+        position: absolute;
+        top: 20px;
+    }
+
+    .ai-greeting {
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .greeting-content {
+        text-align: center;
+    }
+
+    .greeting-text {
+        color: #061426;
+        font-size: clamp(1.25rem, 2.4vw, 1.7rem);
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .greeting-sub,
+    .input-hint,
+    .trust-note {
+        color: #53667f;
+        opacity: 1;
+    }
+
+    .ai-icon-sphere,
+    .ai-icon-sphere.sm,
+    .greeting-avatar {
+        background: #0640a3;
+        border: 0;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .greeting-avatar::before,
+    .chat-messages .msg-ai .ai-icon::before {
+        display: none;
+    }
+
+    .main-input-area {
+        margin: 0 auto;
+        max-width: 760px;
+    }
+
+    #scroll-container {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        scrollbar-width: none;
+    }
+
+    #scroll-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    #main-chat-view.is-chat-active #scroll-container {
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+
+    #main-chat-view.is-chat-active #scroll-container::-webkit-scrollbar {
+        display: block;
+        width: 4px;
+    }
+
+    .input-wrapper {
+        background: #f6f9fd;
+        border: 1px solid #bfd0e7;
+        border-radius: 8px;
+        box-shadow: none;
+        padding: 7px 8px 7px 16px;
+    }
+
+    .input-wrapper:focus-within {
+        box-shadow: 0 0 0 4px rgba(6, 64, 163, 0.12);
+        transform: none;
+    }
+
+    .input-action,
+    .send-action,
+    .mobile-action-btn,
+    .drawer-close,
+    .copy-btn,
+    .modal-btn {
+        border-radius: 8px;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .input-action,
+    .mobile-action-btn,
+    .drawer-close {
+        background: #f6f9fd !important;
+        border: 1px solid #d9e5f3;
+        color: #334766;
+    }
+
+    .input-action:hover,
+    .mobile-action-btn:hover,
+    .drawer-close:hover {
+        background: #eef5ff !important;
+        color: #0640a3;
+    }
+
+    .mobile-action-btn {
+        aspect-ratio: 1 / 1;
+        align-items: center !important;
+        box-sizing: border-box;
+        border-radius: 999px !important;
+        display: inline-flex !important;
+        flex: 0 0 42px;
+        height: 42px !important;
+        justify-content: center !important;
+        line-height: 1;
+        max-height: 42px;
+        max-width: 42px;
+        min-height: 42px;
+        min-width: 42px;
+        overflow: visible !important;
+        padding: 0 !important;
+        position: relative !important;
+        width: 42px !important;
+    }
+
+    .mobile-action-btn .badge {
+        align-items: center;
+        background: #f59f22;
+        border: 2px solid #f6f9fd;
+        border-radius: 999px;
+        color: #061426;
+        display: flex;
+        font-size: 0.66rem;
+        font-weight: 700;
+        height: 19px;
+        justify-content: center;
+        line-height: 1;
+        min-width: 19px;
+        padding: 0 5px;
+        pointer-events: none;
+        position: absolute;
+        right: -8px;
+        top: -8px;
+        z-index: 3;
+    }
+
+    .mobile-action-btn .icon {
+        align-items: center;
+        display: inline-flex;
+        height: 18px;
+        justify-content: center;
+        line-height: 0;
+        width: 18px;
+    }
+
+    .mobile-action-btn svg {
+        display: block;
+        height: 18px;
+        width: 18px;
+    }
+
+    .send-action {
+        background: #0640a3;
+        border: 1px solid #0640a3;
+        color: #ffffff;
+    }
+
+    .send-action:hover,
+    .send-action:active,
+    .copy-btn:hover,
+    .modal-btn:hover {
+        box-shadow: none;
+        transform: none;
+    }
+
+    .quick-chips {
+        gap: 8px;
+        justify-content: center;
+        margin-top: 14px;
+    }
+
+    .chip,
+    .chip.chip-primary {
+        border: 1px solid #c9dcf4;
+        border-radius: 999px;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .chip {
+        background: #f6f9fd;
+        color: #334766;
+    }
+
+    .chip:hover {
+        background: #edf5ff;
+        color: #0640a3;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .chip.chip-primary {
+        background: #0640a3;
+        color: #ffffff;
+    }
+
+    .chip.chip-primary:hover {
+        background: #07357f;
+        color: #ffffff;
+    }
+
+    .section-label {
+        color: #334766;
+        letter-spacing: 0;
+        text-align: left;
+        text-transform: none;
+    }
+
+    .chat-placeholder {
+        background: #f6f9fd;
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: none;
+        color: #53667f;
+        margin: 0;
+        min-height: 76px;
+        opacity: 1;
+        padding: 14px 18px;
+    }
+
+    .section-divider {
+        margin: 4px 0 0;
+        padding: 0;
+    }
+
+    .section-divider span {
+        color: #637691;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .tool-card,
+    .hud-widget,
+    .match-item,
+    .toast,
+    .modal-dialog,
+    .chat-messages .msg-user,
+    .chat-messages .msg-ai .ai-icon,
+    .chat-messages .msg-ai .ai-text pre,
+    .copy-btn {
+        border: 1px solid #d9e5f3;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    .tool-card {
+        background: #f6f9fd;
+        min-height: 72px;
+        padding: 12px;
+    }
+
+    .tool-card:hover,
+    .match-item:hover {
+        background: #f3f7fc;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .tool-icon {
+        border-radius: 8px;
+    }
+
+    .tool-cost {
+        background: #edf5ff;
+        border-radius: 999px;
+        color: #334766;
+    }
+
+    .chat-messages .msg-user {
+        background: #0640a3;
+        color: #ffffff;
+        margin-left: auto;
+        max-width: min(680px, 84%);
+    }
+
+    .chat-messages .msg-ai {
+        padding-right: 0;
+    }
+
+    .chat-messages .msg-ai .ai-icon {
+        background: #0640a3;
+        color: #ffffff;
+    }
+
+    .chat-messages .msg-ai .ai-text {
+        color: #061426;
+    }
+
+    .chat-messages .msg-ai .ai-text pre,
+    .chat-messages .msg-ai .ai-text code {
+        background: #eef5ff;
+        border: 1px solid #d9e5f3;
+        color: #061426;
+    }
+
+    .modal-overlay {
+        background: rgba(6, 20, 38, 0.42);
+    }
+
+    .modal-btn-primary {
+        background: #0640a3;
+        color: #ffffff;
+    }
+
+    .mobile-drawer {
+        background: #f6f9fd;
+        border-right: 0;
+        box-shadow: none;
+        height: 100dvh;
+        max-width: 420px;
+        top: 0;
+        width: min(420px, calc(100vw - 48px));
+        z-index: 10020;
+    }
+
+    .mobile-drawer-overlay {
+        bottom: 0;
+        top: 0;
+        z-index: 10010;
+    }
+
+    body.jm-ai-page #main-chat-view,
+    body.jm-ai-page #chat-header,
+    body.jm-ai-page #scroll-container,
+    body.jm-ai-page #welcome-ui,
+    body.jm-ai-page .input-wrapper,
+    body.jm-ai-page .chip:not(.chip-primary),
+    body.jm-ai-page .tool-card,
+    body.jm-ai-page .chat-placeholder,
+    body.jm-ai-page .mobile-drawer,
+    body.jm-ai-page .drawer-header,
+    body.jm-ai-page .drawer-content,
+    body.jm-ai-page .modal-dialog {
+        background: #f6f9fd !important;
+    }
+
+    .drawer-new-chat {
+        background: #0640a3;
+        border: 1px solid #0640a3;
+        color: #ffffff;
+    }
+
+    @media (max-width: 1024px) {
+        #app-workspace {
+            height: calc(100dvh - 66px);
+            padding: 0 8px max(8px, env(safe-area-inset-bottom));
+        }
+
+        #chat-header {
+            padding: 10px 8px 8px;
+        }
+
+        .mobile-header-actions {
+            left: auto;
+            margin-bottom: 8px;
+            position: static;
+            top: auto;
+        }
+
+        .mobile-action-btn .badge {
+            height: 18px;
+            min-width: 18px;
+            padding: 0 4px;
+            right: -4px;
+            top: -4px;
+        }
+
+        .ai-greeting {
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .ai-icon-sphere {
+            height: 34px;
+            width: 34px;
+        }
+
+        .ai-icon-sphere svg {
+            height: 18px;
+            width: 18px;
+        }
+
+        .greeting-text {
+            font-size: 1.05rem;
+        }
+
+        .greeting-sub {
+            font-size: 0.78rem;
+        }
+
+        .trust-note {
+            display: none;
+        }
+
+        .input-wrapper {
+            padding: 4px 6px 4px 10px;
+        }
+
+        .input-action,
+        .send-action {
+            height: 34px;
+            width: 34px;
+        }
+
+        .quick-chips {
+            justify-content: flex-start;
+            margin-top: 8px;
+        }
+
+        #chat-thread {
+            display: block;
+            padding: 6px 4px max(14px, env(safe-area-inset-bottom));
+        }
+
+        #welcome-ui {
+            gap: 8px;
+            height: auto;
+            min-height: max-content;
+        }
+
+        #scroll-container {
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        #scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chat-placeholder {
+            min-height: 58px;
+            padding: 10px;
+        }
+
+        .section-divider {
+            display: none;
+        }
+
+        .tools-grid {
+            gap: 8px;
+        }
+
+        .tool-card {
+            min-height: 58px;
+            padding: 8px;
+        }
+
+        .tool-icon {
+            height: 30px;
+            width: 30px;
+        }
+
+        .powered-by {
+            margin-top: 0;
+            padding: 0;
+        }
+
+        .mobile-drawer {
+            max-width: none;
+            width: 100%;
+        }
+    }
 </style>
 
 <!-- Noise Texture Overlay -->
@@ -2326,7 +3296,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </div>
         <div class="panel-header">Platform</div>
-        <a href="/Jobmington/ai/andika.php" class="nav-item active">
+        <a href="<?= SITE_URL ?>/ai/andika.php" class="nav-item active">
             <div class="ai-icon-sphere sm">
                 <svg viewBox="0 0 24 24" fill="white">
                     <circle cx="8" cy="12" r="5.5" opacity="1"/>
@@ -2335,13 +3305,13 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <span>Andika AI</span>
         </a>
-        <a href="/Jobmington/jobs/" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></span><span>Find Jobs</span></a>
-        <a href="/Jobmington/jobs/" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span><span>Job Board</span></a>
-        <a href="/Jobmington/cv-builder/" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span>CV Builder</span></a>
-        <a href="/Jobmington/ai/roast.php" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></span><span>CV Roast</span></a>
+        <a href="<?= SITE_URL ?>/jobs/" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></span><span>Find Jobs</span></a>
+        <a href="<?= SITE_URL ?>/jobs/" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span><span>Job Board</span></a>
+        <a href="<?= SITE_URL ?>/cv-builder/" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span><span>CV Builder</span></a>
+        <a href="<?= SITE_URL ?>/ai/roast.php" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></span><span>CV Roast</span></a>
         <div class="panel-header" style="margin-top: 20px;">Account</div>
-        <a href="/Jobmington/seeker/dashboard.php" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span>Dashboard</span></a>
-        <a href="/Jobmington/seeker/settings.php" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span><span>Settings</span></a>
+        <a href="<?= SITE_URL ?>/seeker/dashboard.php" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span>Dashboard</span></a>
+        <a href="<?= SITE_URL ?>/seeker/settings.php" class="nav-item"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span><span>Settings</span></a>
     </aside>
 
     <section id="main-chat-view">
@@ -2522,7 +3492,7 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     <div class="matches-empty" id="matches-empty" style="display: none;">
                         <p style="opacity: 0.7; font-size: 0.75rem;">Complete your CV to get job matches</p>
-                        <a href="/Jobmington/cv-builder/" class="matches-link">Build CV →</a>
+                        <a href="<?= SITE_URL ?>/cv-builder/" class="matches-link">Build CV →</a>
                     </div>
                 </div>
             </div>
@@ -2534,7 +3504,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <span class="seeds-info-trigger" title="Seeds are credits you use to access premium AI tools. Earn them by completing courses or purchase more."><span class="icon" style="opacity: 0.5; cursor: help;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></span>
                 </div>
                 <div class="credit-balance"><?= number_format($userCredits) ?> <span class="seeds-label">Seeds</span></div>
-                <a href="/Jobmington/wallet/" class="seeds-link">What are Seeds?</a>
+                <a href="<?= SITE_URL ?>/wallet/" class="seeds-link">What are Seeds?</a>
             </div>
             
             <!-- Market Radar -->
@@ -2548,19 +3518,19 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="hud-widget">
                 <span class="text-[10px] font-bold opacity-60 block">QUICK ACTIONS</span>
                 <div class="quick-actions-grid">
-                    <a href="/Jobmington/cv-builder/" class="quick-action-btn">
+                    <a href="<?= SITE_URL ?>/cv-builder/" class="quick-action-btn">
                         <span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
                         <span>My CV</span>
                     </a>
-                    <a href="/Jobmington/seeker/profile.php" class="quick-action-btn">
+                    <a href="<?= SITE_URL ?>/seeker/profile.php" class="quick-action-btn">
                         <span class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
                         <span>Profile</span>
                     </a>
-                    <a href="/Jobmington/seeker/applications.php" class="quick-action-btn">
+                    <a href="<?= SITE_URL ?>/seeker/applications.php" class="quick-action-btn">
                         <span class="icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
                         <span>Applications</span>
                     </a>
-                    <a href="/Jobmington/jobs/saved.php" class="quick-action-btn">
+                    <a href="<?= SITE_URL ?>/jobs/saved.php" class="quick-action-btn">
                         <span class="icon"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></span>
                         <span>Saved Jobs</span>
                     </a>
@@ -2571,6 +3541,8 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <script>
+const JOBMINGTON_SITE_URL = <?= json_encode(SITE_URL) ?>;
+
 const Andika = {
     elements: {},
     recognition: null,
@@ -2819,6 +3791,10 @@ const Andika = {
         if (welcomeUI) {
             welcomeUI.classList.remove('chat-active');
         }
+        const mainView = document.getElementById('main-chat-view');
+        if (mainView) {
+            mainView.classList.remove('is-chat-active');
+        }
         
         this.loadHistoryList();
     },
@@ -2885,7 +3861,7 @@ const Andika = {
         
         if (cost > 0 && !isLoggedIn) {
             this.toast('Please log in to use this feature', 'warning', 'Login Required');
-            setTimeout(() => window.location.href = '/jobmington/auth/login.php', 1500);
+            setTimeout(() => window.location.href = `${JOBMINGTON_SITE_URL}/auth/login.php`, 1500);
             return;
         }
         
@@ -3028,6 +4004,10 @@ const Andika = {
         if (welcomeUI) {
             welcomeUI.classList.add('chat-active');
         }
+        const mainView = document.getElementById('main-chat-view');
+        if (mainView) {
+            mainView.classList.add('is-chat-active');
+        }
     },
 
     isGenerating: false,
@@ -3092,7 +4072,7 @@ const Andika = {
         
         try {
             // Call the real API with tool type
-            const response = await fetch('/jobmington/api/andika.php', {
+            const response = await fetch(`${JOBMINGTON_SITE_URL}/api/andika.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -3121,7 +4101,7 @@ const Andika = {
                 // Handle errors
                 if (data.error === 'login_required') {
                     this.addMessage("Please log in to continue. Redirecting...", 'ai');
-                    setTimeout(() => window.location.href = '/jobmington/auth/login.php', 2000);
+                    setTimeout(() => window.location.href = `${JOBMINGTON_SITE_URL}/auth/login.php`, 2000);
                 } else if (data.error === 'insufficient_seeds') {
                     this.addMessage(`${data.message} Visit your wallet to get more seeds!`, 'ai');
                 } else {
@@ -3371,18 +4351,19 @@ const Andika = {
         if (content) content.style.display = 'none';
         if (empty) empty.style.display = 'none';
         
-        fetch('/Jobmington/api/job-matches.php?limit=5')
+        fetch(`${JOBMINGTON_SITE_URL}/api/job-matches.php?limit=5`)
             .then(response => response.json())
             .then(data => {
                 if (loading) loading.style.display = 'none';
+                const payload = data.data || data;
                 
-                if (data.success && data.matches && data.matches.length > 0) {
-                    this.displayMatches(data.matches, data.count);
-                } else if (data.success && (!data.matches || data.matches.length === 0)) {
+                if (data.success && payload.matches && payload.matches.length > 0) {
+                    this.displayMatches(payload.matches, payload.count);
+                } else if (data.success && (!payload.matches || payload.matches.length === 0)) {
                     if (empty) {
                         empty.style.display = 'block';
-                        if (data.tip) {
-                            empty.querySelector('p').textContent = data.tip;
+                        if (payload.tip) {
+                            empty.querySelector('p').textContent = payload.tip;
                         }
                     }
                 } else {
@@ -3413,7 +4394,7 @@ const Andika = {
             listEl.innerHTML = matches.slice(0, 3).map(match => {
                 const scoreClass = match.score >= 70 ? 'high' : (match.score >= 50 ? 'medium' : 'low');
                 return `
-                    <a href="/Jobmington/jobs/view.php?id=${match.job_id}" class="match-item" title="${this.escapeHtml(match.title)} at ${this.escapeHtml(match.company)}">
+                    <a href="${JOBMINGTON_SITE_URL}/jobs/view.php?id=${match.job_id}" class="match-item" title="${this.escapeHtml(match.title)} at ${this.escapeHtml(match.company)}">
                         <span class="match-title">${this.escapeHtml(match.title)}</span>
                         <span class="match-score ${scoreClass}">${match.score}%</span>
                     </a>
@@ -3436,4 +4417,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>

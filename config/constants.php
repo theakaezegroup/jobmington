@@ -14,7 +14,11 @@ define('SITE_NAME', 'Jobmington');
 define('SITE_TAGLINE', 'Preparing Africa\'s Workforce for the Future');
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-define('SITE_URL', $protocol . '://' . $host . '/jobmington');
+if ($host === 'localhost' || $host === '127.0.0.1' || strpos($host, 'jobmington.local') !== false) {
+    define('SITE_URL', $protocol . '://' . $host . '/jobmington');
+} else {
+    define('SITE_URL', $protocol . '://' . $host);
+}
 define('SITE_EMAIL', 'hello@jobmington.com');
 define('SITE_PHONE', '+234 800 000 0000');
 

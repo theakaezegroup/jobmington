@@ -135,14 +135,14 @@ class Mailer {
      * Construct Holographic Template
      */
     private function buildTemplate(string $subject, string $content): string {
-        $logo = SITE_URL . '/assets/images/logo.png'; // Ensure you have a logo here
+        $logo = SITE_URL . '/assets/images/badge.png?v=logo-7';
         
         return <<<HTML
         <!DOCTYPE html>
         <html>
         <head>
             <style>
-                body { background: #0f172a; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+                body { background: #0f172a; color: #e2e8f0; font-family: 'Futura Cyrillic Demi'; margin: 0; padding: 0; }
                 .wrapper { max-width: 600px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; }
                 .header { background: #0f172a; padding: 20px; text-align: center; border-bottom: 2px solid #a855f7; }
                 .logo { height: 40px; }

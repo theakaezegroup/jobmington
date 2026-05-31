@@ -19,7 +19,7 @@ $pageTitle = 'State Icons | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=state-icons-1">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
     <style>
         body.jm-minimal {
             background: #f6f9fd;
@@ -79,7 +79,7 @@ $pageTitle = 'State Icons | ' . SITE_NAME;
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/admin/">
-                <img src="/jobmington/assets/images/badge.png" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
                 <span>Jobmington Admin</span>
             </a>
             <nav class="jm-nav" aria-label="Admin navigation">

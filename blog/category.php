@@ -17,39 +17,45 @@ Session::start();
 $pdo = db();
 
 $slug = Security::clean(get('slug', ''));
-if (empty($slug)) redirect('/jobmington/blog');
+if (empty($slug)) redirect(SITE_URL . '/blog/');
 
-// 1. Fetch Category Info
-$stmt = $pdo->prepare("SELECT * FROM blog_categories WHERE slug = ?");
-$stmt->execute([$slug]);
-$category = $stmt->fetch();
+try {
+    // 1. Fetch Category Info
+    $stmt = $pdo->prepare("SELECT * FROM blog_categories WHERE slug = ?");
+    $stmt->execute([$slug]);
+    $category = $stmt->fetch();
 
-if (!$category) { Session::flash('error', 'Category not found.'); redirect('/jobmington/blog'); }
+    if (!$category) { Session::flash('error', 'Category not found.'); redirect(SITE_URL . '/blog/'); }
 
-// 2. Pagination
-$page = max(1, (int) get('page', 1));
-$perPage = 10; 
+    // 2. Pagination
+    $page = max(1, (int) get('page', 1));
+    $perPage = 10;
 
-// 3. Fetch Posts in Category
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE category_id = ? AND is_published = 1 AND published_at <= NOW()");
-$countStmt->execute([$category['id']]);
-$totalPosts = $countStmt->fetchColumn();
+    // 3. Fetch Posts in Category
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE category_id = ? AND is_published = 1 AND published_at <= NOW()");
+    $countStmt->execute([$category['id']]);
+    $totalPosts = $countStmt->fetchColumn();
 
-$pagination = paginate($totalPosts, $perPage, $page);
+    $pagination = paginate($totalPosts, $perPage, $page);
 
-$stmt = $pdo->prepare("
-    SELECT bp.*, u.full_name as author_name, u.profile_image as author_image
-    FROM blog_posts bp
-    LEFT JOIN users u ON bp.author_id = u.user_id
-    WHERE bp.category_id = ? AND bp.is_published = 1 AND bp.published_at <= NOW()
-    ORDER BY bp.published_at DESC
-    LIMIT ? OFFSET ?
-");
-$stmt->execute([$category['id'], $perPage, $pagination['offset']]);
-$posts = $stmt->fetchAll();
+    $stmt = $pdo->prepare("
+        SELECT bp.*, u.full_name as author_name, u.profile_image as author_image
+        FROM blog_posts bp
+        LEFT JOIN users u ON bp.author_id = u.user_id
+        WHERE bp.category_id = ? AND bp.is_published = 1 AND bp.published_at <= NOW()
+        ORDER BY bp.published_at DESC
+        LIMIT ? OFFSET ?
+    ");
+    $stmt->execute([$category['id'], $perPage, $pagination['offset']]);
+    $posts = $stmt->fetchAll();
 
-// 4. Fetch All Categories (For Sidebar)
-$allCats = $pdo->query("SELECT * FROM blog_categories ORDER BY name")->fetchAll();
+    // 4. Fetch All Categories (For Sidebar)
+    $allCats = $pdo->query("SELECT * FROM blog_categories ORDER BY name")->fetchAll();
+} catch (Throwable $e) {
+    error_log('Blog category unavailable: ' . $e->getMessage());
+    Session::flash('info', 'Career articles are being prepared.');
+    redirect(SITE_URL . '/blog/');
+}
 
 $pageTitle = e($category['name']) . ' | Career Articles';
 require_once __DIR__ . '/../includes/header.php';
@@ -57,7 +63,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <style>
     /* --- THEME: CYBER OBSIDIAN --- */
-    body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; }
+    body { background-color: #020617; color: #f8fafc; font-family: 'Futura Cyrillic Demi'; }
 
     /* Header */
     .cat-header {

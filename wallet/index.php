@@ -69,7 +69,7 @@ require_once __DIR__ . '/../includes/header.php';
         background-image: 
             radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
             radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.05), transparent 25%);
-        font-family: 'Inter', sans-serif;
+        font-family: 'Futura Cyrillic Demi';
         color: #f8fafc;
         overflow-x: hidden;
     }
@@ -146,7 +146,7 @@ require_once __DIR__ . '/../includes/header.php';
         display: flex; align-items: center; justify-content: space-between;
         padding: 8px 0;
         border-bottom: 1px solid rgba(255,255,255,0.03);
-        font-family: 'JetBrains Mono', monospace;
+        font-family: 'Futura Cyrillic Demi';
         font-size: 0.8rem;
     }
     .ledger-row:last-child { border-bottom: none; }
@@ -667,6 +667,13 @@ function selectPackage(plan, amount, credits) {
         document.getElementById('topupForm').submit();
     }, 200);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('topup') === '1') {
+        document.getElementById('topupModal')?.showModal();
+    }
+});
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

@@ -123,6 +123,33 @@ $employerSteps = [
     ['Move hiring forward', 'Shortlist, interview, reject, or hire without losing the trail.'],
 ];
 
+$aiHighlights = [
+    [
+        'label' => 'Andika AI',
+        'title' => 'Ask for career help in plain language.',
+        'description' => 'Draft cover notes, prepare for interviews, and get practical career guidance tuned to your market.',
+        'href' => '/jobmington/ai/andika.php',
+        'image' => '/jobmington/assets/images/features/andika_ai.png',
+        'tone' => 'blue',
+    ],
+    [
+        'label' => 'AI Matching',
+        'title' => 'See the roles that fit your profile.',
+        'description' => 'Jobmington compares your CV skills, headline, location, and experience against live roles.',
+        'href' => '/jobmington/ai/andika.php#job-matches-widget',
+        'image' => '/jobmington/assets/images/features/job_matching.png',
+        'tone' => 'green',
+    ],
+    [
+        'label' => 'CV Roast',
+        'title' => 'Fix weak CV points before recruiters see them.',
+        'description' => 'Get a direct CV score, missing keywords, rewrite guidance, and a sharper summary.',
+        'href' => '/jobmington/ai/roast.php',
+        'image' => '/jobmington/assets/images/features/cv_review.png',
+        'tone' => 'orange',
+    ],
+];
+
 $isLoggedIn = Session::isLoggedIn();
 $dashboardUrl = Session::isAdmin()
     ? '/jobmington/admin/'
@@ -135,23 +162,27 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Jobmington is a simple African job board for finding jobs, posting roles, and managing applications without the noise.">
-    <link rel="canonical" href="/jobmington/">
+    <link rel="canonical" href="/">
+    <link rel="manifest" href="/jobmington/manifest.json?v=clean-urls">
+    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
+    <meta name="theme-color" content="#0640a3">
     <title><?= e($pageTitle) ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=home-heroo-1">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
 </head>
 <body class="jm-minimal jm-home-page">
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">
-                <img src="/jobmington/assets/images/badge.png" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
                 <span>Jobmington</span>
             </a>
-            <nav class="jm-nav" aria-label="Main navigation">
+            <button class="jm-mobile-nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="jm-home-nav">
+                <span></span>
+            </button>
+            <nav class="jm-nav" id="jm-home-nav" aria-label="Main navigation">
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/cv-builder/">CV Builder</a>
+                <a href="/jobmington/ai/andika.php">Andika AI</a>
                 <a href="/jobmington/employer/">Employers</a>
                 <a href="/jobmington/pricing.php">Pricing</a>
                 <?php if ($isLoggedIn): ?>
@@ -268,7 +299,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
             </div>
 
             <div class="jm-hero-media">
-                <img src="https://images.unsplash.com/photo-1758611972515-23399a8786df?auto=format&fit=crop&w=1200&q=80" alt="Woman working on a laptop in a modern office">
+                <img src="/jobmington/assets/images/hero2.png?v=hero-6" alt="Jobmington talent marketplace">
             </div>
         </section>
 
@@ -283,6 +314,31 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
                             <span class="jm-small"><?= e($label) ?></span>
                         </span>
                     </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+        <section class="jm-section jm-ai-suite" aria-labelledby="ai-suite-title">
+            <div class="jm-section-head">
+                <div>
+                    <p class="jm-kicker">Andika career intelligence</p>
+                    <h2 id="ai-suite-title">AI that moves the job search forward.</h2>
+                    <p>Use Jobmington's AI layer to understand fit, improve applications, and turn a rough CV into a sharper pitch.</p>
+                </div>
+                <a class="jm-muted-link" href="/jobmington/ai/andika.php">Open Andika</a>
+            </div>
+            <div class="jm-ai-grid">
+                <?php foreach ($aiHighlights as $item): ?>
+                    <a class="jm-ai-card tone-<?= e($item['tone']) ?>" href="<?= e($item['href']) ?>">
+                        <span class="jm-ai-card-image">
+                            <img src="<?= e($item['image']) ?>" alt="" loading="lazy">
+                        </span>
+                        <span class="jm-ai-card-copy">
+                            <span><?= e($item['label']) ?></span>
+                            <strong><?= e($item['title']) ?></strong>
+                            <small><?= e($item['description']) ?></small>
+                        </span>
+                    </a>
                 <?php endforeach; ?>
             </div>
         </section>

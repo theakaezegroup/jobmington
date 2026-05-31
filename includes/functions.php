@@ -408,12 +408,13 @@ if (!function_exists('sendNotification')) {
 
 function renderPagination(array $pagination, string $baseUrl): string {
     if ($pagination['total_pages'] <= 1) return '';
+    $separator = str_contains($baseUrl, '?') ? '&' : '?';
     
     $html = '<nav class="flex justify-center mt-8"><ul class="flex flex-wrap justify-center gap-2">';
     
     // Previous
     if ($pagination['has_previous']) {
-        $prevUrl = $baseUrl . '?page=' . $pagination['previous_page'];
+        $prevUrl = $baseUrl . $separator . 'page=' . $pagination['previous_page'];
         $html .= '<li><a href="' . e($prevUrl) . '" class="px-4 py-2 rounded-lg font-bold transition hover:translate-y-[-2px]" style="background: white; border: 2px solid var(--color-ink); color: var(--color-ink);"><i class="fas fa-chevron-left"></i></a></li>';
     }
     
@@ -422,7 +423,7 @@ function renderPagination(array $pagination, string $baseUrl): string {
         if ($i === 1 || $i === $pagination['total_pages'] || 
            ($i >= $pagination['current_page'] - 2 && $i <= $pagination['current_page'] + 2)) {
             
-            $pageUrl = $baseUrl . '?page=' . $i;
+            $pageUrl = $baseUrl . $separator . 'page=' . $i;
             if ($i === $pagination['current_page']) {
                 // Active page - Royal Blue background
                 $html .= '<li><a href="' . e($pageUrl) . '" class="px-4 py-2 rounded-lg font-bold transition" style="background: var(--color-primary); color: white; border: 2px solid var(--color-ink); box-shadow: 2px 2px 0px 0px var(--color-ink);">' . $i . '</a></li>';
@@ -437,7 +438,7 @@ function renderPagination(array $pagination, string $baseUrl): string {
     
     // Next
     if ($pagination['has_next']) {
-        $nextUrl = $baseUrl . '?page=' . $pagination['next_page'];
+        $nextUrl = $baseUrl . $separator . 'page=' . $pagination['next_page'];
         $html .= '<li><a href="' . e($nextUrl) . '" class="px-4 py-2 rounded-lg font-bold transition hover:translate-y-[-2px]" style="background: white; border: 2px solid var(--color-ink); color: var(--color-ink);"><i class="fas fa-chevron-right"></i></a></li>';
     }
     
@@ -490,7 +491,7 @@ if (!function_exists('jm_minimal_footer')) {
             <div class="jm-footer-inner">
                 <div class="jm-footer-brand">
                     <a class="jm-logo" href="/jobmington/">
-                        <img src="/jobmington/assets/images/badge.png" alt="">
+                        <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
                         <span>Jobmington</span>
                     </a>
                     <p>Simple hiring for African talent. Find jobs, apply quickly, and manage hiring without the noise.</p>
@@ -535,6 +536,82 @@ if (!function_exists('jm_minimal_footer')) {
                 <span>Lagos, Nigeria</span>
             </div>
         </footer>
+        <script>
+        (() => {
+            const body = document.body;
+            const headers = document.querySelectorAll('.jm-header');
+            const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';
+
+            if (!document.querySelector('link[rel="manifest"]')) {
+                const manifest = document.createElement('link');
+                manifest.rel = 'manifest';
+                manifest.href = `${pathBase}/manifest.json?v=brand-10`;
+                document.head.appendChild(manifest);
+            }
+
+            if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+                const icon = document.createElement('link');
+                icon.rel = 'apple-touch-icon';
+                icon.href = `${pathBase}/assets/images/pwa-icon-192.png?v=brand-10`;
+                document.head.appendChild(icon);
+            }
+
+            let nav = null;
+            let toggle = null;
+
+            headers.forEach((header, index) => {
+                const headerNav = header.querySelector('.jm-nav');
+                if (!headerNav) return;
+
+                headerNav.id = headerNav.id || `jm-mobile-nav-${index + 1}`;
+                let button = header.querySelector('.jm-mobile-nav-toggle');
+
+                if (!button) {
+                    button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'jm-mobile-nav-toggle';
+                    button.innerHTML = '<span></span>';
+                    header.insertBefore(button, headerNav);
+                }
+
+                button.setAttribute('aria-label', 'Open menu');
+                button.setAttribute('aria-expanded', 'false');
+                button.setAttribute('aria-controls', headerNav.id);
+
+                if (!nav) {
+                    nav = headerNav;
+                    toggle = button;
+                }
+            });
+
+            if (!nav || !toggle) return;
+
+            const backdrop = document.createElement('div');
+            backdrop.className = 'jm-nav-backdrop';
+            backdrop.setAttribute('aria-hidden', 'true');
+            body.appendChild(backdrop);
+            body.classList.add('jm-mobile-nav-ready');
+
+            const setOpen = (open) => {
+                body.classList.toggle('jm-nav-open', open);
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+            };
+
+            toggle.addEventListener('click', () => setOpen(!body.classList.contains('jm-nav-open')));
+            backdrop.addEventListener('click', () => setOpen(false));
+            nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') setOpen(false);
+            });
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-10`).catch(() => {});
+                });
+            }
+        })();
+        </script>
         <?php
     }
 }

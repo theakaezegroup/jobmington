@@ -17,13 +17,13 @@ $pageTitle = 'Verify Email | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=footer-unified-1">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
 </head>
 <body class="jm-minimal">
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">
-                <img src="/jobmington/assets/images/badge.png" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
                 <span>Jobmington</span>
             </a>
             <nav class="jm-nav" aria-label="Main navigation">

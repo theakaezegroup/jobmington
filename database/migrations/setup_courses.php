@@ -408,7 +408,7 @@ try {
     echo "</div>";
 
     echo "<div style='margin-top: 30px;'>";
-    echo "<a href='/Jobmington/learn/' style='display: inline-block; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;'> View Learning Academy →</a>";
+    echo "<a href='/jobmington/learn/' style='display: inline-block; background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;'> View Learning Academy →</a>";
     echo "</div>";
 
 } catch (Exception $e) {

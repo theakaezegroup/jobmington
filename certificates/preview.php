@@ -35,7 +35,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         }
         
         body {
-            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-family: 'Futura Cyrillic Demi';
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             padding: 20px;
@@ -58,7 +58,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         
         .preview-controls h1 {
             color: #d4af37;
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 1.5rem;
         }
         
@@ -80,7 +80,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
             padding: 12px 24px;
             border: none;
             border-radius: 8px;
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -204,7 +204,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         }
         
         .company-name {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 28pt;
             font-weight: 700;
             color: #0a1628;
@@ -213,7 +213,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         }
         
         .cert-title {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 42pt;
             font-weight: 600;
             color: #d4af37;
@@ -257,7 +257,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         }
         
         .recipient-name {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 36pt;
             font-weight: 600;
             color: #0a1628;
@@ -274,7 +274,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         }
         
         .course-name {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 22pt;
             font-weight: 600;
             color: #0a1628;
@@ -325,7 +325,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         .cert-id {
             font-size: 7pt;
             color: #999;
-            font-family: monospace;
+            font-family: 'Futura Cyrillic Demi';
         }
         
         .signature-section {
@@ -345,7 +345,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
         }
         
         .signature-text {
-            font-family: 'Dancing Script', cursive;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 14pt;
             color: #333;
         }
@@ -403,7 +403,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 120pt;
             color: rgba(212, 175, 55, 0.03);
             letter-spacing: 20px;
@@ -458,7 +458,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . 
                 </svg>
                 Print / Save as PDF
             </button>
-            <a href="/Jobmington/certificates/" class="btn btn-secondary">← Back to Certificates</a>
+            <a href="/jobmington/certificates/" class="btn btn-secondary">← Back to Certificates</a>
         </div>
     </div>
     

@@ -1,1 +1,54 @@
-{}
+{
+  "name": "Jobmington",
+  "short_name": "Jobmington",
+  "description": "Find jobs, build a sharper CV, and get Andika AI career guidance for African talent.",
+  "id": ".",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "background_color": "#ffffff",
+  "theme_color": "#0640a3",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "education"],
+  "icons": [
+    {
+      "src": "assets/images/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find Jobs",
+      "short_name": "Jobs",
+      "url": "jobs/",
+      "icons": [{ "src": "assets/images/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Open Andika AI",
+      "short_name": "Andika",
+      "url": "ai/andika",
+      "icons": [{ "src": "assets/images/pwa-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "CV Builder",
+      "short_name": "CV",
+      "url": "cv-builder/",
+      "icons": [{ "src": "assets/images/pwa-icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

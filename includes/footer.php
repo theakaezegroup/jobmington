@@ -7,6 +7,28 @@
  * - Interactive Hover Effects
  * - Focused job-board footer
  */
+$footerPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
+?>
+        </main>
+        <footer class="jm-admin-footer">
+            <span>&copy; <?= date('Y') ?> Jobmington Admin</span>
+            <span><?= e(date('D, M d, Y H:i T')) ?></span>
+        </footer>
+    </div>
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';
+            navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-10`).catch(() => {});
+        });
+    }
+    </script>
+</body>
+</html>
+<?php
+    return;
+}
 ?>
 </main>
 
@@ -40,7 +62,7 @@
             
             <div class="lg:col-span-4 space-y-6">
                 <a href="/jobmington/" class="flex items-center gap-3 group w-fit">
-                    <img src="/jobmington/assets/images/badge.png" alt="<?= SITE_NAME ?>" class="w-10 h-10 object-contain group-hover:scale-105 transition duration-300">
+                    <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="<?= SITE_NAME ?>" class="w-10 h-10 object-contain group-hover:scale-105 transition duration-300">
                     <span class="text-2xl font-heading font-extrabold tracking-tight" style="color: var(--color-ink);"><?= SITE_NAME ?></span>
                 </a>
                 
@@ -211,7 +233,8 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 <script>
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch(err => console.log('SW fail:', err));
+        const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';
+        navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-10`).catch(err => console.log('SW fail:', err));
     });
 }
 </script>

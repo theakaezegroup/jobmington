@@ -266,7 +266,7 @@ $pageTitle = 'Admin Command Center - ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
     <style>
         :root {
             --admin-bg: #f5f8fc;
@@ -284,7 +284,7 @@ $pageTitle = 'Admin Command Center - ' . SITE_NAME;
             margin: 0;
             background: var(--admin-bg);
             color: var(--admin-ink);
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 15px;
             line-height: 1.55;
         }
@@ -758,7 +758,7 @@ $pageTitle = 'Admin Command Center - ' . SITE_NAME;
     <div class="admin-shell">
         <header class="admin-topbar">
             <a class="admin-brand" href="/jobmington/admin/">
-                <img src="/jobmington/assets/images/badge.png" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
                 <span>Jobmington Admin</span>
             </a>
             <nav class="admin-nav" aria-label="Admin navigation">

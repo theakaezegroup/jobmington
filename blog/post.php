@@ -37,7 +37,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <style>
-    body { background-color: #020617; color: #cbd5e1; font-family: 'Inter', sans-serif; }
+    body { background-color: #020617; color: #cbd5e1; font-family: 'Futura Cyrillic Demi'; }
     .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; overflow: hidden; }
     .prose-cyber { color: #cbd5e1; line-height: 1.8; font-size: 1.125rem; }
     .prose-cyber h2 { color: white; font-weight: 800; font-size: 1.8rem; margin: 2rem 0 1rem; border-left: 4px solid #a855f7; padding-left: 1rem; }

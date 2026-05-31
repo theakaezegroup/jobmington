@@ -459,7 +459,7 @@ class JobMatcher {
         // Get skills
         $skills = [];
         if ($cvId) {
-            $stmt = $this->pdo->prepare("SELECT skill_name, level FROM cv_skills WHERE cv_id = ?");
+            $stmt = $this->pdo->prepare("SELECT skill_name FROM cv_skills WHERE cv_id = ?");
             $stmt->execute([$cvId]);
             $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }

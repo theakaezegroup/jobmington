@@ -1,9 +1,11 @@
+@import url("./brand-platform.css?v=brand-10");
+
 /* --- SYSTEM CORE --- */
 html, body {
     height: 100vh;
     overflow: hidden; /* Lock the page scroll */
     background-color: #0f172a;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Futura Cyrillic Demi';
 }
 
 #app-workspace {

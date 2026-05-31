@@ -60,7 +60,7 @@ function generatePremiumCertificate($cert) {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-family: 'Futura Cyrillic Demi';
             background: linear-gradient(135deg, #0a1628 0%, #1a1a2e 50%, #16213e 100%);
             min-height: 100vh;
             display: flex;
@@ -84,7 +84,7 @@ function generatePremiumCertificate($cert) {
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Futura Cyrillic Demi';
         }
         
         .btn-print {
@@ -158,7 +158,7 @@ function generatePremiumCertificate($cert) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 160px;
             font-weight: 700;
             color: rgba(212, 175, 55, 0.04);
@@ -199,14 +199,14 @@ function generatePremiumCertificate($cert) {
         }
         
         .brand-logo span {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 20px;
             font-weight: 700;
             color: #d4af37;
         }
         
         .brand-text {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 16px;
             font-weight: 600;
             color: #0a1628;
@@ -222,7 +222,7 @@ function generatePremiumCertificate($cert) {
         
         /* Title section */
         .cert-label {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 6px;
@@ -232,7 +232,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .cert-title {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 48px;
             font-weight: 700;
             color: #0a1628;
@@ -243,7 +243,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .cert-subtitle {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 15px;
             color: #d4af37;
             letter-spacing: 5px;
@@ -260,7 +260,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .recipient-name {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 42px;
             font-weight: 600;
             color: #0a1628;
@@ -289,7 +289,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .course-title {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 20px;
             font-weight: 500;
             color: #0a1628;
@@ -325,7 +325,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .detail-value {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 12px;
             font-weight: 500;
             color: #333;
@@ -378,7 +378,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .seal-text {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 7px;
             color: #fff;
             text-transform: uppercase;
@@ -429,7 +429,7 @@ function generatePremiumCertificate($cert) {
         }
         
         .signature-name {
-            font-family: 'Cinzel', serif;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 11px;
             font-weight: 600;
             color: #333;

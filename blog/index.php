@@ -18,20 +18,29 @@ $pdo = db();
 
 $page = max(1, (int) get('page', 1));
 $perPage = 10;
+$featured = null;
+$posts = [];
+$pagination = paginate(0, $perPage, $page);
+$blogUnavailable = false;
 
-// 1. Featured Intel
-$stmt = $pdo->query("SELECT bp.*, u.full_name, bc.name as cat_name, bc.slug as cat_slug FROM blog_posts bp LEFT JOIN users u ON bp.author_id = u.user_id LEFT JOIN blog_categories bc ON bp.category_id = bc.id WHERE bp.is_published = 1 ORDER BY bp.published_at DESC LIMIT 1");
-$featured = $stmt->fetch();
-$featuredId = $featured['post_id'] ?? 0;
+try {
+    // 1. Featured Intel
+    $stmt = $pdo->query("SELECT bp.*, u.full_name, bc.name as cat_name, bc.slug as cat_slug FROM blog_posts bp LEFT JOIN users u ON bp.author_id = u.user_id LEFT JOIN blog_categories bc ON bp.category_id = bc.id WHERE bp.is_published = 1 ORDER BY bp.published_at DESC LIMIT 1");
+    $featured = $stmt->fetch();
+    $featuredId = $featured['post_id'] ?? 0;
 
-// 2. Grid Intel
-$countStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE is_published = 1 AND post_id != ?");
-$countStmt->execute([$featuredId]);
-$pagination = paginate($countStmt->fetchColumn(), $perPage, $page);
+    // 2. Grid Intel
+    $countStmt = $pdo->prepare("SELECT COUNT(*) FROM blog_posts WHERE is_published = 1 AND post_id != ?");
+    $countStmt->execute([$featuredId]);
+    $pagination = paginate($countStmt->fetchColumn(), $perPage, $page);
 
-$stmt = $pdo->prepare("SELECT bp.*, u.full_name, bc.name as cat_name FROM blog_posts bp LEFT JOIN users u ON bp.author_id = u.user_id LEFT JOIN blog_categories bc ON bp.category_id = bc.id WHERE bp.is_published = 1 AND bp.post_id != ? ORDER BY bp.published_at DESC LIMIT ? OFFSET ?");
-$stmt->execute([$featuredId, $perPage, $pagination['offset']]);
-$posts = $stmt->fetchAll();
+    $stmt = $pdo->prepare("SELECT bp.*, u.full_name, bc.name as cat_name FROM blog_posts bp LEFT JOIN users u ON bp.author_id = u.user_id LEFT JOIN blog_categories bc ON bp.category_id = bc.id WHERE bp.is_published = 1 AND bp.post_id != ? ORDER BY bp.published_at DESC LIMIT ? OFFSET ?");
+    $stmt->execute([$featuredId, $perPage, $pagination['offset']]);
+    $posts = $stmt->fetchAll();
+} catch (Throwable $e) {
+    $blogUnavailable = true;
+    error_log('Blog index unavailable: ' . $e->getMessage());
+}
 
 // 3. SHOWCASE DATA (With Safety Shield)
 $jobs = [];
@@ -57,7 +66,7 @@ require_once __DIR__ . '/../includes/header.php';
     body { 
         background-color: #0f172a; 
         color: #e2e8f0; 
-        font-family: 'Inter', sans-serif; 
+        font-family: 'Futura Cyrillic Demi';
         background-image: 
             radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.03), transparent 40%),
             radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.03), transparent 40%);
@@ -151,6 +160,18 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                     </div>
                 </a>
+                <?php endif; ?>
+
+                <?php if ($blogUnavailable || (!$featured && empty($posts))): ?>
+                <div class="glass-card p-10 text-center mb-12">
+                    <div class="text-4xl mb-4">JM</div>
+                    <h2 class="text-2xl md:text-3xl font-black text-white mb-3">Career articles are being prepared</h2>
+                    <p class="text-slate-400 max-w-xl mx-auto">The blog library is not published yet. You can still explore live jobs, build your CV, and use Andika AI while the resource center is being set up.</p>
+                    <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+                        <a href="/jobmington/jobs/" class="px-5 py-3 rounded-xl bg-amber-500 text-black font-black">Browse jobs</a>
+                        <a href="/jobmington/ai/andika.php" class="px-5 py-3 rounded-xl bg-white/10 text-white font-black border border-white/10">Ask Andika</a>
+                    </div>
+                </div>
                 <?php endif; ?>
 
                 <div class="grid md:grid-cols-2 gap-6">

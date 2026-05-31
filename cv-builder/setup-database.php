@@ -213,7 +213,7 @@ try {
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Futura Cyrillic Demi';
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             min-height: 100vh;
             padding: 40px 20px;
@@ -249,7 +249,7 @@ try {
         .result-item {
             padding: 10px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-family: 'Monaco', 'Consolas', monospace;
+            font-family: 'Futura Cyrillic Demi';
             font-size: 0.875rem;
         }
         .result-item:last-child { border-bottom: none; }

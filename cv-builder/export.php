@@ -45,7 +45,7 @@ $pdo = db();
         }
         
         body { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Futura Cyrillic Demi';
             background: #f3f2ef;
             color: #000000;
             line-height: 1.5;

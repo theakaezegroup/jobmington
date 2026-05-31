@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/logo.png" alt="Jobmington" width="200">
+  <img src="assets/images/badge.png" alt="Jobmington" width="200">
 </p>
 
 <h1 align="center">Jobmington</h1>

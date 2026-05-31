@@ -5,6 +5,11 @@ RewriteEngine On
 # IMPORTANT: Keep the Capital J if your folder is named Jobmington.
 RewriteBase /jobmington/
 
+# Canonical clean URLs: browser GET requests for .php pages redirect to extensionless paths.
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.php[?\s] [NC]
+RewriteCond %{REQUEST_METHOD} GET
+RewriteRule ^(.+)\.php$ $1 [R=301,L,QSA]
+
 # 2. Blog Post Routing
 # When someone visits: /blog/my-cool-post
 # The server loads:    /blog/post.php?slug=my-cool-post
