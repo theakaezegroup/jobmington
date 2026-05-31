@@ -849,6 +849,62 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         padding: 80px max(24px, calc(50vw - 586px)) !important;
     }
 
+    /* ── Social-proof FOMO toasts ──────────────────────────────────── */
+    #jm-fomo-wrap {
+        position: fixed; bottom: 28px; left: 24px;
+        z-index: 9000; pointer-events: none;
+    }
+    .jm-fomo-toast {
+        width: 296px; pointer-events: auto;
+        background: #fff; border: 1px solid var(--jm-line);
+        border-radius: 14px; padding: 14px 14px 14px 16px;
+        box-shadow: 0 8px 32px rgba(6,20,38,.14), 0 2px 8px rgba(6,20,38,.06);
+        display: flex; align-items: flex-start; gap: 12px;
+        position: relative; overflow: hidden;
+        opacity: 0; transform: translateY(18px);
+        transition: opacity .35s ease, transform .4s cubic-bezier(.22,.68,0,1.1);
+    }
+    .jm-fomo-toast.jm-fomo-visible { opacity: 1; transform: translateY(0); }
+    .jm-fomo-toast.jm-fomo-leaving {
+        opacity: 0; transform: translateY(10px);
+        transition: opacity .25s ease, transform .25s ease;
+    }
+    .jm-fomo-avatar {
+        width: 40px; height: 40px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0;
+        letter-spacing: -.02em;
+    }
+    .jm-fomo-body { flex: 1; min-width: 0; }
+    .jm-fomo-body strong { display: block; font-size: 13px; font-weight: 700; color: var(--jm-ink); line-height: 1.3; }
+    .jm-fomo-location { display: block; font-size: 11.5px; color: var(--jm-muted); margin-top: 1px; }
+    .jm-fomo-action {
+        display: block; font-size: 12.5px; font-weight: 600;
+        color: var(--jm-ink); margin-top: 5px; line-height: 1.35;
+    }
+    .jm-fomo-time { display: block; font-size: 11px; color: var(--jm-muted); margin-top: 4px; }
+    .jm-fomo-badge {
+        display: inline-block; font-size: 10px; font-weight: 800;
+        text-transform: uppercase; letter-spacing: .06em;
+        padding: 2px 7px; border-radius: 99px; color: #fff;
+        margin-top: 5px;
+    }
+    .jm-fomo-close {
+        background: none; border: none; cursor: pointer; padding: 3px;
+        color: var(--jm-muted); flex-shrink: 0; line-height: 1;
+        border-radius: 5px; transition: color .15s, background .15s;
+        margin-top: -1px;
+    }
+    .jm-fomo-close:hover { color: var(--jm-ink); background: var(--jm-soft); }
+    .jm-fomo-bar {
+        position: absolute; bottom: 0; left: 0; height: 2.5px;
+        width: 100%; transform-origin: left; transform: scaleX(1);
+    }
+    @media(max-width:480px) {
+        #jm-fomo-wrap { left: 12px; right: 12px; bottom: 16px; }
+        .jm-fomo-toast { width: 100%; }
+    }
+
     /* Testimonials section – full-bleed soft bg */
     .jm-testimonials-section {
         background: var(--jm-soft);
@@ -1377,6 +1433,24 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         </section>
         <?php endif; ?>
 
+        <!-- ── Social-proof FOMO toast ───────────────────────────────── -->
+        <div id="jm-fomo-wrap">
+            <div id="jm-fomo-toast" class="jm-fomo-toast" role="status" aria-live="polite">
+                <div class="jm-fomo-avatar" id="jm-fomo-avatar"></div>
+                <div class="jm-fomo-body">
+                    <strong id="jm-fomo-name"></strong>
+                    <span class="jm-fomo-location" id="jm-fomo-location"></span>
+                    <span class="jm-fomo-action" id="jm-fomo-action"></span>
+                    <span class="jm-fomo-badge" id="jm-fomo-badge"></span>
+                    <span class="jm-fomo-time" id="jm-fomo-time"></span>
+                </div>
+                <button class="jm-fomo-close" id="jm-fomo-close" aria-label="Dismiss notification">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+                <div class="jm-fomo-bar" id="jm-fomo-bar"></div>
+            </div>
+        </div>
+
         <?php jm_minimal_footer(); ?>
 <script>
 (function () {
@@ -1500,6 +1574,160 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     window.addEventListener('resize', resize);
     resize();
     raf = requestAnimationFrame(frame);
+})();
+</script>
+<script>
+/* ── Social-proof FOMO toasts ─────────────────────────────────────── */
+(function () {
+    'use strict';
+
+    var EVENTS = [
+        { name:'Chidi B.',      city:'Lagos',           country:'Nigeria',        action:'subscribed to Premium',           type:'premium' },
+        { name:'Amina K.',      city:'Nairobi',         country:'Kenya',          action:'just joined Jobmington',          type:'join'    },
+        { name:'Kwame A.',      city:'Accra',           country:'Ghana',          action:'posted a Senior Dev role',        type:'job'     },
+        { name:'Fatima D.',     city:'Dakar',           country:'Senegal',        action:'uploaded their CV',               type:'cv'      },
+        { name:'Emeka N.',      city:'Abuja',           country:'Nigeria',        action:'subscribed to Pro Plan',          type:'pro'     },
+        { name:'Zainab M.',     city:'Kumasi',          country:'Ghana',          action:'got matched with 9 open roles',   type:'match'   },
+        { name:'Tunde A.',      city:'Lagos',           country:'Nigeria',        action:'just roasted their CV',           type:'roast'   },
+        { name:'Njeri W.',      city:'Nairobi',         country:'Kenya',          action:'just joined Jobmington',          type:'join'    },
+        { name:'Seun F.',       city:'Port Harcourt',   country:'Nigeria',        action:'subscribed to Premium',           type:'premium' },
+        { name:'Kofi M.',       city:'Tema',            country:'Ghana',          action:'posted a Marketing Manager role', type:'job'     },
+        { name:'Aisha B.',      city:'Kano',            country:'Nigeria',        action:'got matched with 6 open roles',   type:'match'   },
+        { name:'Sipho N.',      city:'Johannesburg',    country:'South Africa',   action:'just joined Jobmington',          type:'join'    },
+        { name:'Chiamaka O.',   city:'Enugu',           country:'Nigeria',        action:'subscribed to Premium',           type:'premium' },
+        { name:'Brian O.',      city:'Kampala',         country:'Uganda',         action:'posted a Data Analyst role',      type:'job'     },
+        { name:'Adaeze E.',     city:'Lagos',           country:'Nigeria',        action:'uploaded their CV',               type:'cv'      },
+        { name:'Moses K.',      city:'Nairobi',         country:'Kenya',          action:'subscribed to Pro Plan',          type:'pro'     },
+        { name:'Grace A.',      city:'Accra',           country:'Ghana',          action:'just joined Jobmington',          type:'join'    },
+        { name:'Chukwudi E.',   city:'Onitsha',         country:'Nigeria',        action:'got matched with 5 open roles',   type:'match'   },
+        { name:'Amara S.',      city:'Dar es Salaam',   country:'Tanzania',       action:'subscribed to Premium',           type:'premium' },
+        { name:'Yemi L.',       city:'Ibadan',          country:'Nigeria',        action:'just roasted their CV',           type:'roast'   },
+        { name:'Patrick M.',    city:'Mombasa',         country:'Kenya',          action:'posted a UX Designer role',       type:'job'     },
+        { name:'Blessing O.',   city:'Lagos',           country:'Nigeria',        action:'unlocked the AI career tools',    type:'premium' },
+        { name:'Nadia H.',      city:'Casablanca',      country:'Morocco',        action:'just joined Jobmington',          type:'join'    },
+        { name:'Dami A.',       city:'Ibadan',          country:'Nigeria',        action:'got matched with 7 open roles',   type:'match'   },
+        { name:'Tariq M.',      city:'Accra',           country:'Ghana',          action:'subscribed to Pro Plan',          type:'pro'     },
+        { name:'Ife B.',        city:'Abuja',           country:'Nigeria',        action:'uploaded their CV',               type:'cv'      },
+        { name:'Amaka O.',      city:'Enugu',           country:'Nigeria',        action:'just joined Jobmington',          type:'join'    },
+        { name:'Lemi A.',       city:'Lagos',           country:'Nigeria',        action:'subscribed to Premium',           type:'premium' },
+    ];
+
+    var TYPE_COLOR = {
+        join:    '#0640a3',
+        premium: '#c47d00',
+        pro:     '#059669',
+        job:     '#6d28d9',
+        cv:      '#0284c7',
+        match:   '#0640a3',
+        roast:   '#c2410c',
+    };
+
+    var TYPE_LABEL = {
+        join:    'New member',
+        premium: 'Premium',
+        pro:     'Pro Plan',
+        job:     'Employer',
+        cv:      'CV Upload',
+        match:   'AI Match',
+        roast:   'CV Roast',
+    };
+
+    var SHOW_MS  = 5500;
+    var GAP_MS   = 8000;
+    var FIRST_MS = 7000;
+
+    var idx      = Math.floor(Math.random() * EVENTS.length);
+    var timer    = null;
+    var showStart = 0;
+    var remaining = SHOW_MS;
+
+    var wrap     = document.getElementById('jm-fomo-wrap');
+    var toast    = document.getElementById('jm-fomo-toast');
+    var avatarEl = document.getElementById('jm-fomo-avatar');
+    var nameEl   = document.getElementById('jm-fomo-name');
+    var locEl    = document.getElementById('jm-fomo-location');
+    var actEl    = document.getElementById('jm-fomo-action');
+    var badgeEl  = document.getElementById('jm-fomo-badge');
+    var timeEl   = document.getElementById('jm-fomo-time');
+    var barEl    = document.getElementById('jm-fomo-bar');
+    var closeBtn = document.getElementById('jm-fomo-close');
+
+    if (!wrap) return;
+
+    function initials(name) {
+        return name.replace(/\./g, '').trim().split(/\s+/).map(function(p){ return p[0] || ''; }).join('').toUpperCase().slice(0, 2);
+    }
+
+    function timeAgo() {
+        var m = Math.floor(Math.random() * 11) + 1;
+        return m === 1 ? 'Just now' : m + ' minutes ago';
+    }
+
+    function showNext() {
+        var e = EVENTS[idx];
+        idx = (idx + 1) % EVENTS.length;
+
+        var color = TYPE_COLOR[e.type];
+
+        avatarEl.textContent       = initials(e.name);
+        avatarEl.style.background  = color;
+        nameEl.textContent         = e.name;
+        locEl.textContent          = e.city + ', ' + e.country;
+        actEl.textContent          = e.action;
+        badgeEl.textContent        = TYPE_LABEL[e.type];
+        badgeEl.style.background   = color;
+        timeEl.textContent         = timeAgo();
+        barEl.style.background     = color;
+
+        /* reset bar without transition */
+        barEl.style.transition = 'none';
+        barEl.style.transform  = 'scaleX(1)';
+
+        toast.classList.remove('jm-fomo-leaving');
+        void toast.offsetWidth; /* force reflow */
+        toast.classList.add('jm-fomo-visible');
+
+        /* start bar depletion */
+        remaining  = SHOW_MS;
+        showStart  = Date.now();
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){
+            barEl.style.transition = 'transform ' + SHOW_MS + 'ms linear';
+            barEl.style.transform  = 'scaleX(0)';
+        }); });
+
+        timer = setTimeout(hide, SHOW_MS);
+    }
+
+    function hide() {
+        clearTimeout(timer);
+        toast.classList.remove('jm-fomo-visible');
+        toast.classList.add('jm-fomo-leaving');
+        barEl.style.transition = 'none';
+        barEl.style.transform  = 'scaleX(0)';
+        timer = setTimeout(showNext, GAP_MS);
+    }
+
+    /* pause on hover */
+    toast.addEventListener('mouseenter', function () {
+        if (!toast.classList.contains('jm-fomo-visible')) return;
+        clearTimeout(timer);
+        remaining = Math.max(0, remaining - (Date.now() - showStart));
+        var scale = remaining / SHOW_MS;
+        barEl.style.transition = 'none';
+        barEl.style.transform  = 'scaleX(' + scale + ')';
+    });
+
+    toast.addEventListener('mouseleave', function () {
+        if (!toast.classList.contains('jm-fomo-visible')) return;
+        showStart = Date.now();
+        barEl.style.transition = 'transform ' + remaining + 'ms linear';
+        barEl.style.transform  = 'scaleX(0)';
+        timer = setTimeout(hide, remaining);
+    });
+
+    closeBtn.addEventListener('click', function () { hide(); });
+
+    timer = setTimeout(showNext, FIRST_MS);
 })();
 </script>
     </div>
