@@ -3911,8 +3911,7 @@ body.jm-home-page {
     }
 
     .jm-header,
-    .jm-section-head,
-    .jm-footer-bottom {
+    .jm-section-head {
         align-items: flex-start;
         flex-direction: column;
     }
