@@ -57,10 +57,13 @@ try {
     error_log('email_campaigns migration error: ' . $e->getMessage());
 }
 
-/* Ensure upload directory exists */
+/* Ensure upload directory exists and is writable by the web server */
 $posterUploadDir = rtrim(UPLOADS_PATH, '/') . '/campaign-posters';
 if (!is_dir($posterUploadDir)) {
-    @mkdir($posterUploadDir, 0755, true);
+    mkdir($posterUploadDir, 0755, true);
+}
+if (!is_writable($posterUploadDir)) {
+    error_log('email-campaigns: poster upload dir not writable — ' . $posterUploadDir);
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
