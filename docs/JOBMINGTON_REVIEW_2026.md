@@ -164,11 +164,11 @@ URLs are hardcoded as `/jobmington/...` throughout, and the VPS papers over this
 - [ ] Add nginx `/uploads` PHP-exec deny block.
 - [ ] Confirm `APP_DEBUG=false`, `APP_ENV=production` on VPS.
 
-**This week**
-- [ ] Add a working unsubscribe + suppression list to campaigns.
-- [ ] Add stuck-`sending`-campaign recovery.
-- [ ] Strip unreplaced `{{tokens}}` before send; verify blank-name fallback.
-- [ ] Consolidate runtime `CREATE/ALTER` into ordered migrations + a runner.
+**This week** — ✅ all done 2026-06-01
+- [x] Working unsubscribe + suppression list (`email_unsubscribes`, HMAC-signed `/unsubscribe`, per-recipient footer link, send-loop skip).
+- [x] Stuck-`sending` recovery (`started_at` column; >15 min in `sending` → `failed` on load).
+- [x] Strip unreplaced `{{tokens}}` before send; blank-name falls back to "there".
+- [x] Ordered migration runner (`database/migrate.php` + `database/migrations/schema/`, `schema_migrations` tracking); inline `CREATE/ALTER` removed from login/users/forgot-password/email-campaigns.
 
 **This month**
 - [ ] Introduce a cron queue; move campaign + match-alert emails onto it.

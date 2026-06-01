@@ -196,8 +196,11 @@ A Mailchimp-style tool built on the Brevo sending layer.
   - **Poster/flier upload:** drag-and-drop or browse (JPG/PNG/GIF/WebP, ≤8 MB), stored under `uploads/campaign-posters/`, rendered full-width (email-safe table markup) above the body in every recipient's email. Edit view shows the current poster with a remove option.
   - **HTML body editor** with toolbar shortcuts (H2, paragraph, CTA button, divider, footer note, jobs list) and a **live preview** that renders the content inside the real Jobmington email template.
   - **Personalisation tokens:** `{{name}}`, `{{first_name}}`, `{{email}}`.
-  - **Save draft** or **Send now**. Sending loops recipients via Brevo and records sent/failed counts.
-- **Storage:** `email_campaigns` table (auto-created; `poster_url` and `custom_emails` columns auto-migrated).
+  - **Save draft** or **Send now**. Sending loops recipients via Brevo and records sent/failed/skipped counts.
+  - **Unsubscribe & suppression:** every campaign email carries a per-recipient HMAC-signed unsubscribe link (`/unsubscribe`). Unsubscribes land in `email_unsubscribes` and are skipped on future sends (counted as "skipped", not failed). Transactional emails are exempt.
+  - **Stuck-send recovery:** a send that dies mid-loop (PHP timeout) leaves `status='sending'`; anything in that state >15 min is auto-marked `failed` on the next page load (`started_at` column).
+  - **Token safety:** blank names fall back to "there"; any unreplaced `{{token}}` is stripped before send.
+- **Storage:** `email_campaigns` + `email_unsubscribes` tables, created by the migration runner (see §23).
 
 ---
 
@@ -265,13 +268,25 @@ Endpoints: `jobs`, `job-matches`, `auth`, `user`, `countries`, `courses`, `certi
 
 ---
 
-## 22. Known issues & roadmap
+## 22. Database migrations & deployment
 
-See **[JOBMINGTON_REVIEW_2026.md](JOBMINGTON_REVIEW_2026.md)** for the full audit. Headline items:
+Schema changes are managed by an ordered, idempotent runner — **schema is no longer created at runtime in request paths**.
 
-- 🔴 Remove publicly-exposed debug/setup scripts + the committed admin session file.
-- 🔴 Fix the `jobs.status` column reference in the Paystack webhook.
-- 🔴 Block PHP execution under `/uploads` in nginx.
-- 🟠 Move runtime `CREATE/ALTER` into ordered migrations.
-- 🟠 Add a real unsubscribe + queue-based sending for campaigns.
-- 🟢 Implement the job-match alert cron (template already exists).
+- **Runner:** `database/migrate.php` (CLI-only). Tracks applied versions in `schema_migrations`; safe to run on every deploy (no-op when current).
+- **Migrations:** `database/migrations/schema/NNNN_*.php`, each returning `function (PDO $pdo): void { … }`, guarded with `jm_mig_has_table` / `jm_mig_has_column` so first runs are safe on databases whose columns predate the runner. Current set: `0001` user security columns, `0002` password-reset columns, `0003` email_campaigns, `0004` email_unsubscribes.
+- **Deploy:** `git pull` on the VPS, then `php database/migrate.php`.
+- Legacy ad-hoc scripts in `database/migrations/` (`*.sql`, older `*.php`) are **not** picked up by the runner (it only matches `NNNN_*.php`).
+
+---
+
+## 23. Known issues & roadmap
+
+See **[JOBMINGTON_REVIEW_2026.md](JOBMINGTON_REVIEW_2026.md)** for the full audit. Status:
+
+- ✅ Removed publicly-exposed debug/setup scripts + committed admin session file.
+- ✅ Fixed the `jobs.status` column reference in the Paystack webhook.
+- ✅ Blocked PHP execution under `/uploads` in nginx (images still served).
+- ✅ Consolidated runtime `CREATE/ALTER` into ordered migrations + runner.
+- ✅ Real unsubscribe + suppression list for campaigns.
+- 🟠 Move campaign + match-alert sending onto an async cron queue (sends are still synchronous).
+- 🟢 Implement the job-match alert cron (template already exists, not yet triggered).
