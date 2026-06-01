@@ -1160,6 +1160,47 @@ body.jm-nav-open {
     color: var(--jm-blue);
 }
 
+/* Bookmark wrapper — moves border to the wrap so button is flush */
+.jm-job-row-wrap {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--jm-line);
+}
+.jm-job-row-wrap .jm-job-row {
+    flex: 1;
+    min-width: 0;
+    border-bottom: none;
+}
+
+/* Bookmark icon button — listing cards */
+.jm-bookmark-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 14px;
+    color: var(--jm-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 8px;
+    transition: color .18s, background .18s;
+}
+.jm-bookmark-btn:hover { color: var(--jm-blue); background: var(--jm-soft); }
+.jm-bookmark-btn[aria-pressed="true"] { color: var(--jm-blue); }
+.jm-bookmark-btn[aria-pressed="true"] svg { fill: var(--jm-blue); stroke: var(--jm-blue); }
+
+/* Bookmark button on job detail page */
+.jm-bookmark-btn-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: color .18s, background .18s, border-color .18s;
+}
+.jm-bookmark-btn-lg[aria-pressed="true"] { color: var(--jm-blue); border-color: var(--jm-blue); }
+.jm-bookmark-btn-lg[aria-pressed="true"] svg { fill: var(--jm-blue); stroke: var(--jm-blue); }
+
 .jm-grid-2 {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

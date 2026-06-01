@@ -121,13 +121,14 @@ jm_jobs_header($pageTitle, 'jobs');
             <?php else: ?>
                 <a class="jm-button" href="/jobmington/jobs/apply.php?id=<?= (int) $jobId ?>">Apply now</a>
             <?php endif; ?>
-            <?php if (Session::isLoggedIn() && !Session::isEmployer() && !$isSaved): ?>
-                <form method="post" style="margin:0;">
-                    <?= Security::csrfField() ?>
-                    <button class="jm-button secondary" type="submit" name="save_job" value="1">Save job</button>
-                </form>
-            <?php elseif ($isSaved): ?>
-                <a class="jm-button secondary" href="/jobmington/jobs/saved.php">Saved</a>
+            <?php if (Session::isLoggedIn() && !Session::isEmployer()): ?>
+                <button class="jm-button secondary jm-bookmark-btn-lg"
+                        data-bookmark="<?= (int) $jobId ?>"
+                        aria-pressed="<?= $isSaved ? 'true' : 'false' ?>"
+                        aria-label="<?= $isSaved ? 'Unsave job' : 'Save job' ?>">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                    <span data-bookmark-text><?= $isSaved ? 'Saved' : 'Save job' ?></span>
+                </button>
             <?php endif; ?>
         </div>
     </div>
@@ -315,3 +316,28 @@ jm_jobs_header($pageTitle, 'jobs');
 <?php endif; ?>
 
 <?php jm_jobs_footer('/jobmington/jobs/', 'Browse jobs'); ?>
+<script>
+(function () {
+    document.querySelectorAll('.jm-bookmark-btn-lg[data-bookmark], .jm-bookmark-btn[data-bookmark]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            var id = btn.dataset.bookmark;
+            btn.disabled = true;
+            fetch('/jobmington/jobs/saved.php?action=toggle&job_id=' + id, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.success) {
+                    var saved = d.data.saved;
+                    btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+                    btn.setAttribute('aria-label', saved ? 'Unsave job' : 'Save job');
+                    var txt = btn.querySelector('[data-bookmark-text]');
+                    if (txt) txt.textContent = saved ? 'Saved' : 'Save job';
+                }
+            })
+            .finally(function () { btn.disabled = false; });
+        });
+    });
+})();
+</script>

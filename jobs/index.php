@@ -78,6 +78,17 @@ $jobs = $stmt->fetchAll();
 
 $countries = $pdo->query("SELECT country_id, name FROM countries WHERE is_active = 1 ORDER BY name")->fetchAll();
 $categories = $pdo->query("SELECT category_id, name, slug FROM job_categories ORDER BY name")->fetchAll();
+
+$savedJobIds = [];
+$canBookmark = Session::isLoggedIn() && !Session::isEmployer();
+if ($canBookmark && !empty($jobs)) {
+    $ids = array_column($jobs, 'job_id');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $s = $pdo->prepare("SELECT job_id FROM saved_jobs WHERE user_id = ? AND job_id IN ($placeholders)");
+    $s->execute(array_merge([(int) Session::userId()], $ids));
+    $savedJobIds = array_column($s->fetchAll(PDO::FETCH_ASSOC), 'job_id');
+}
+
 $pageTitle = 'Find Jobs | ' . SITE_NAME;
 
 jm_jobs_header($pageTitle, 'jobs');
@@ -135,7 +146,9 @@ jm_jobs_header($pageTitle, 'jobs');
         ]) ?>
     <?php else: ?>
         <div class="jm-job-list">
-            <?php foreach ($jobs as $job): ?>
+            <?php foreach ($jobs as $job):
+                $jobSaved = in_array($job['job_id'], $savedJobIds); ?>
+            <div class="jm-job-row-wrap">
                 <a class="jm-job-row" href="/jobmington/jobs/view.php?id=<?= (int) $job['job_id'] ?>">
                     <strong>
                         <?= e($job['title']) ?>
@@ -150,6 +163,16 @@ jm_jobs_header($pageTitle, 'jobs');
                     </strong>
                     <span><?= e(jm_job_salary($job)) ?><br><?= e($job['job_type']) ?> / <?= e(timeAgo($job['posted_at'])) ?></span>
                 </a>
+                <?php if ($canBookmark): ?>
+                <button class="jm-bookmark-btn"
+                        data-bookmark="<?= (int) $job['job_id'] ?>"
+                        aria-pressed="<?= $jobSaved ? 'true' : 'false' ?>"
+                        aria-label="<?= $jobSaved ? 'Unsave job' : 'Save job' ?>"
+                        title="<?= $jobSaved ? 'Unsave' : 'Save job' ?>">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+                <?php endif; ?>
+            </div>
             <?php endforeach; ?>
         </div>
 
@@ -171,3 +194,27 @@ jm_jobs_header($pageTitle, 'jobs');
 </section>
 
 <?php jm_jobs_footer('/jobmington/employer/post-job.php', 'Post a job'); ?>
+<script>
+(function () {
+    document.querySelectorAll('.jm-bookmark-btn[data-bookmark]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
+            var id = btn.dataset.bookmark;
+            btn.disabled = true;
+            fetch('/jobmington/jobs/saved.php?action=toggle&job_id=' + id, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.success) {
+                    var saved = d.data.saved;
+                    btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+                    btn.setAttribute('aria-label', saved ? 'Unsave job' : 'Save job');
+                    btn.title = saved ? 'Unsave' : 'Save job';
+                }
+            })
+            .finally(function () { btn.disabled = false; });
+        });
+    });
+})();
+</script>
