@@ -173,70 +173,98 @@ class Mailer {
      * Build branded email template
      */
     private function buildTemplate(string $subject, string $content): string {
-        $logo    = SITE_URL . '/assets/images/badge.png?v=logo-7';
+        $logo    = 'https://jobmington.com/assets/images/badge.png';
         $year    = date('Y');
-        $siteUrl = SITE_URL;
+        $siteUrl = 'https://jobmington.com';
 
         return <<<HTML
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{$subject}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{$subject}</title>
 </head>
-<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#eef2f7;-webkit-font-smoothing:antialiased;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 16px;">
+<!-- Pre-header preview text -->
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#eef2f7;">Jobmington &mdash; Africa's career platform&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef2f7;padding:40px 16px;">
 <tr><td align="center">
 
-  <!-- Card -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(6,20,38,.08);">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
 
-    <!-- Header -->
+    <!-- Brand strip above card -->
     <tr>
-      <td style="background:#0640a3;padding:28px 40px;text-align:left;">
-        <table cellpadding="0" cellspacing="0">
+      <td align="center" style="padding-bottom:20px;">
+        <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="padding-right:12px;vertical-align:middle;">
-              <img src="{$logo}" alt="Jobmington" height="36" style="display:block;">
+            <td style="padding-right:10px;vertical-align:middle;">
+              <img src="{$logo}" alt="" width="28" height="28" style="display:block;border-radius:6px;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span>
+              <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#0640a3;letter-spacing:-0.01em;">Jobmington</span>
             </td>
           </tr>
         </table>
       </td>
     </tr>
 
-    <!-- Orange accent line -->
-    <tr><td style="height:4px;background:#f59f22;font-size:0;">&nbsp;</td></tr>
-
-    <!-- Body -->
+    <!-- Main card -->
     <tr>
-      <td style="padding:40px 40px 32px;color:#06142a;font-size:15px;line-height:1.7;">
-        {$content}
+      <td style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(6,20,38,.07),0 0 0 1px rgba(6,20,38,.05);">
+
+        <!-- Hero banner -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="background:linear-gradient(135deg,#0533a0 0%,#0a5fcc 100%);padding:36px 44px 32px;border-radius:16px 16px 0 0;">
+              <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);">Jobmington</p>
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:rgba(255,255,255,.7);">Africa's career platform</p>
+            </td>
+          </tr>
+          <!-- Orange accent bar -->
+          <tr><td style="height:3px;background:linear-gradient(90deg,#f59f22,#f7b944);font-size:0;">&zwnj;</td></tr>
+        </table>
+
+        <!-- Body content -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="padding:40px 44px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;color:#374151;">
+              {$content}
+            </td>
+          </tr>
+        </table>
+
+        <!-- Divider -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="padding:0 44px;"><div style="height:1px;background:#e5e7eb;font-size:0;">&zwnj;</div></td></tr>
+        </table>
+
+        <!-- Footer inside card -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="padding:24px 44px;text-align:center;">
+              <p style="margin:0 0 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#9ca3af;">
+                <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;font-weight:600;">jobmington.com</a>
+                &nbsp;&bull;&nbsp;
+                <a href="{$siteUrl}/privacy-policy.php" style="color:#9ca3af;text-decoration:none;">Privacy</a>
+                &nbsp;&bull;&nbsp;
+                <a href="{$siteUrl}/terms-of-service.php" style="color:#9ca3af;text-decoration:none;">Terms</a>
+              </p>
+              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;color:#d1d5db;">
+                &copy; {$year} Jobmington &mdash; Simple hiring for African talent.
+              </p>
+            </td>
+          </tr>
+        </table>
+
       </td>
     </tr>
-
-    <!-- Footer -->
-    <tr>
-      <td style="padding:24px 40px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
-        <p style="margin:0 0 6px;font-size:13px;color:#64748b;">
-          &copy; {$year} Jobmington &mdash; Simple hiring for African talent.
-        </p>
-        <p style="margin:0;font-size:12px;color:#94a3b8;">
-          <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;">jobmington.com</a>
-          &nbsp;&middot;&nbsp;
-          <a href="{$siteUrl}/privacy-policy.php" style="color:#94a3b8;text-decoration:none;">Privacy</a>
-          &nbsp;&middot;&nbsp;
-          <a href="{$siteUrl}/unsubscribe.php" style="color:#94a3b8;text-decoration:none;">Unsubscribe</a>
-        </p>
-      </td>
-    </tr>
+    <!-- /card -->
 
   </table>
-  <!-- /Card -->
 
 </td></tr>
 </table>
