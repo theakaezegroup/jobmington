@@ -25,6 +25,7 @@ try {
             subject       VARCHAR(255)  NOT NULL,
             preview_text  VARCHAR(255)  NOT NULL DEFAULT '',
             body_html     TEXT          NOT NULL,
+            poster_url    VARCHAR(500)  DEFAULT NULL,
             segment       VARCHAR(50)   NOT NULL DEFAULT 'all',
             recipient_count INT UNSIGNED NOT NULL DEFAULT 0,
             sent_count    INT UNSIGNED  NOT NULL DEFAULT 0,
@@ -37,6 +38,25 @@ try {
     ");
 } catch (Throwable $e) {
     error_log('email_campaigns table error: ' . $e->getMessage());
+}
+
+/* Migrate: add poster_url column to existing tables */
+try {
+    $hasPoster = (int) $pdo->query("
+        SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'email_campaigns' AND COLUMN_NAME = 'poster_url'
+    ")->fetchColumn();
+    if (!$hasPoster) {
+        $pdo->exec("ALTER TABLE email_campaigns ADD COLUMN poster_url VARCHAR(500) DEFAULT NULL AFTER body_html");
+    }
+} catch (Throwable $e) {
+    error_log('email_campaigns migration error: ' . $e->getMessage());
+}
+
+/* Ensure upload directory exists */
+$posterUploadDir = rtrim(UPLOADS_PATH, '/') . '/campaign-posters';
+if (!is_dir($posterUploadDir)) {
+    @mkdir($posterUploadDir, 0755, true);
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -106,10 +126,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $bodyHtml    = trim($_POST['body_html']    ?? '');
         $segment     = Security::clean($_POST['segment'] ?? 'all');
         $editId      = (int) ($_POST['edit_id'] ?? 0);
+        $keepPoster  = Security::clean($_POST['keep_poster'] ?? '');
 
         if ($subject === '' || $bodyHtml === '') {
             Session::flash('error', 'Subject and body are required.');
             redirect('/jobmington/admin/email-campaigns.php?view=compose' . ($editId ? '&id=' . $editId : ''));
+        }
+
+        /* Handle poster upload */
+        $posterUrl = $keepPoster ?: null;
+        if (!empty($_FILES['poster']['name'])) {
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $ext     = strtolower(pathinfo($_FILES['poster']['name'], PATHINFO_EXTENSION));
+            $mime    = mime_content_type($_FILES['poster']['tmp_name']);
+            if (in_array($mime, $allowed, true) && $_FILES['poster']['size'] <= 8 * 1024 * 1024) {
+                $filename = 'poster_' . uniqid() . '.' . $ext;
+                $dest     = $posterUploadDir . '/' . $filename;
+                if (move_uploaded_file($_FILES['poster']['tmp_name'], $dest)) {
+                    $posterUrl = SITE_URL . '/uploads/campaign-posters/' . $filename;
+                }
+            } else {
+                Session::flash('error', 'Poster must be JPG, PNG, GIF or WebP and under 8 MB.');
+                redirect('/jobmington/admin/email-campaigns.php?view=compose' . ($editId ? '&id=' . $editId : ''));
+            }
         }
 
         $recipients    = ec_segment_query($pdo, $segment);
@@ -117,15 +156,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($editId > 0) {
             $pdo->prepare("
-                UPDATE email_campaigns SET subject=?, preview_text=?, body_html=?, segment=?, recipient_count=?, status='draft'
+                UPDATE email_campaigns SET subject=?, preview_text=?, body_html=?, poster_url=?, segment=?, recipient_count=?, status='draft'
                 WHERE id=? AND status='draft'
-            ")->execute([$subject, $previewText, $bodyHtml, $segment, $recipientCount, $editId]);
+            ")->execute([$subject, $previewText, $bodyHtml, $posterUrl, $segment, $recipientCount, $editId]);
             $campaignId = $editId;
         } else {
             $pdo->prepare("
-                INSERT INTO email_campaigns (subject, preview_text, body_html, segment, recipient_count, status, created_by)
-                VALUES (?, ?, ?, ?, ?, 'draft', ?)
-            ")->execute([$subject, $previewText, $bodyHtml, $segment, $recipientCount, (int) Session::userId()]);
+                INSERT INTO email_campaigns (subject, preview_text, body_html, poster_url, segment, recipient_count, status, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, 'draft', ?)
+            ")->execute([$subject, $previewText, $bodyHtml, $posterUrl, $segment, $recipientCount, (int) Session::userId()]);
             $campaignId = (int) $pdo->lastInsertId();
         }
 
@@ -142,6 +181,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->prepare("UPDATE email_campaigns SET status='sending' WHERE id=?")->execute([$campaignId]);
 
+        /* Prepend poster to body if present */
+        $posterHtml = $posterUrl
+            ? "<div style='margin:0 0 24px;'><img src='" . htmlspecialchars($posterUrl, ENT_QUOTES) . "' alt='Campaign image' style='width:100%;max-width:600px;display:block;border-radius:4px;'></div>\n"
+            : '';
+
         $sentCount   = 0;
         $failedCount = 0;
         $mailer      = new Mailer();
@@ -152,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $personalised = str_replace(
                 ['{{name}}', '{{first_name}}', '{{email}}'],
                 [e($name), e(explode(' ', $name)[0]), e($to)],
-                $bodyHtml
+                $posterHtml . $bodyHtml
             );
             $ok = $mailer->send($to, $subject, $personalised);
             $ok ? $sentCount++ : $failedCount++;
@@ -299,9 +343,12 @@ require_once __DIR__ . '/../includes/header.php';
     </a>
 </div>
 
-<form method="POST" id="ec-form">
+<form method="POST" id="ec-form" enctype="multipart/form-data">
     <?= Security::csrfField() ?>
     <input type="hidden" name="edit_id" value="<?= $editId ?>">
+    <input type="hidden" name="keep_poster" id="ec-keep-poster"
+           value="<?= e($editCampaign['poster_url'] ?? '') ?>"
+           data-orig="<?= e($editCampaign['poster_url'] ?? '') ?>">
 
     <div class="ec-compose">
 
@@ -323,6 +370,37 @@ require_once __DIR__ . '/../includes/header.php';
                            placeholder="Short summary shown in inbox before opening"
                            value="<?= e($editCampaign['preview_text'] ?? '') ?>">
                     <p class="ec-help">Displayed by Gmail, Apple Mail, etc. before the email is opened.</p>
+                </div>
+
+                <!-- Poster / Flier upload -->
+                <div class="ec-field">
+                    <label class="ec-label">Poster / Flier image</label>
+                    <?php if (!empty($editCampaign['poster_url'])): ?>
+                        <div id="ec-poster-current" style="margin-bottom:10px;">
+                            <img src="<?= e($editCampaign['poster_url']) ?>" alt="Current poster"
+                                 style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--admin-line);display:block;margin-bottom:8px;">
+                            <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--admin-muted);cursor:pointer;">
+                                <input type="checkbox" id="ec-remove-poster" onchange="togglePosterRemove(this)"> Remove current poster
+                            </label>
+                        </div>
+                    <?php endif; ?>
+                    <div id="ec-poster-upload" <?= !empty($editCampaign['poster_url']) ? 'style="display:none;"' : '' ?>>
+                        <div id="ec-drop-zone" style="border:2px dashed var(--admin-line);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .15s;"
+                             onclick="document.getElementById('ec-poster-file').click()"
+                             ondragover="event.preventDefault();this.style.borderColor='var(--admin-blue)'"
+                             ondragleave="this.style.borderColor='var(--admin-line)'"
+                             ondrop="handleDrop(event)">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 10px;display:block;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:var(--admin-ink);">Drop your poster here or click to browse</p>
+                            <p style="margin:0;font-size:12px;color:var(--admin-muted);">JPG, PNG, GIF, WebP — max 8 MB</p>
+                        </div>
+                        <input type="file" id="ec-poster-file" name="poster" accept="image/jpeg,image/png,image/gif,image/webp" style="display:none;" onchange="previewPoster(this)">
+                        <div id="ec-poster-preview" style="display:none;margin-top:10px;position:relative;">
+                            <img id="ec-poster-img" src="" alt="" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid var(--admin-line);display:block;">
+                            <button type="button" onclick="clearPoster()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>
+                        </div>
+                    </div>
+                    <p class="ec-help">Appears full-width at the top of the email before your body text.</p>
                 </div>
 
                 <div class="ec-field">
@@ -540,15 +618,72 @@ function updateCount(seg) {
         });
 }
 
+/* ── Poster upload handlers ──────────────────────────────────── */
+function previewPoster(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById('ec-poster-img').src = e.target.result;
+        document.getElementById('ec-poster-preview').style.display = 'block';
+        document.getElementById('ec-drop-zone').style.display = 'none';
+        livePreview();
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+function clearPoster() {
+    document.getElementById('ec-poster-file').value = '';
+    document.getElementById('ec-poster-preview').style.display = 'none';
+    document.getElementById('ec-drop-zone').style.display = 'block';
+    livePreview();
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    event.currentTarget.style.borderColor = 'var(--admin-line)';
+    const file = event.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    const input = document.getElementById('ec-poster-file');
+    input.files = dt.files;
+    previewPoster(input);
+}
+
+function togglePosterRemove(cb) {
+    const uploadZone = document.getElementById('ec-poster-upload');
+    const keepInput  = document.getElementById('ec-keep-poster');
+    if (cb.checked) {
+        uploadZone.style.display = 'block';
+        keepInput.value = '';
+    } else {
+        uploadZone.style.display = 'none';
+        keepInput.value = keepInput.dataset.orig || keepInput.value;
+    }
+    livePreview();
+}
+
 /* ── Live preview ────────────────────────────────────────────── */
 function livePreview() {
     const body  = document.getElementById('ec-body');
     const frame = document.getElementById('ec-preview-frame');
     if (!body || !frame) return;
 
-    const logo    = 'https://jobmington.com/assets/images/badge.png';
-    const ff      = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
-    const ffd     = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+    const logo = 'https://jobmington.com/assets/images/badge.png';
+    const ff   = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+    const ffd  = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+
+    /* Poster: use uploaded preview OR existing URL */
+    let posterHtml = '';
+    const previewImg = document.getElementById('ec-poster-img');
+    const keepPoster = document.getElementById('ec-keep-poster');
+    const removeChk  = document.getElementById('ec-remove-poster');
+    const posterSrc  = (previewImg && previewImg.src && previewImg.closest('#ec-poster-preview')?.style.display !== 'none')
+        ? previewImg.src
+        : (!removeChk?.checked && keepPoster?.value ? keepPoster.value : null);
+    if (posterSrc) {
+        posterHtml = `<tr><td style="padding:0;"><img src="${posterSrc}" alt="Poster" style="width:100%;display:block;"></td></tr>`;
+    }
 
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f4f4f4;">
@@ -563,6 +698,7 @@ function livePreview() {
       </tr></table>
     </td></tr>
     <tr><td style="height:3px;background:#f59f22;"></td></tr>
+    ${posterHtml}
     <tr><td style="${ff}padding:28px;font-size:14px;line-height:1.8;color:#374151;">${body.value || '<p style="color:#94a3b8;">Start typing your email body...</p>'}</td></tr>
     <tr><td style="padding:16px 28px;text-align:center;background:#f7f9fc;font-size:11px;color:#9ca3af;${ff}">
       &copy; ${new Date().getFullYear()} Jobmington &middot; <a href="#" style="color:#9ca3af;">Unsubscribe</a>
