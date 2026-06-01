@@ -10,43 +10,81 @@ if (!defined('JOBMINGTON')) {
 }
 
 class Mailer {
-    
+
     private $fromEmail;
     private $fromName;
+    private $apiKey;
     private $useSmtp;
     private $smtpHost;
     private $smtpPort;
     private $smtpUsername;
     private $smtpPassword;
-    
+
     public function __construct() {
-        // Load credentials from ENV or constants
-        $this->fromEmail = getenv('MAIL_FROM_ADDRESS') ?: 'system@jobmington.com';
-        $this->fromName = getenv('MAIL_FROM_NAME') ?: SITE_NAME;
-        $this->useSmtp = !empty(getenv('MAIL_HOST'));
-        $this->smtpHost = getenv('MAIL_HOST');
-        $this->smtpPort = getenv('MAIL_PORT') ?: 587;
+        $this->fromEmail    = getenv('MAIL_FROM_ADDRESS') ?: 'noreply@jobmington.com';
+        $this->fromName     = getenv('MAIL_FROM_NAME')    ?: SITE_NAME;
+        $this->apiKey       = getenv('BREVO_API_KEY')     ?: '';
+        $this->useSmtp      = !empty(getenv('MAIL_HOST'));
+        $this->smtpHost     = getenv('MAIL_HOST');
+        $this->smtpPort     = getenv('MAIL_PORT') ?: 587;
         $this->smtpUsername = getenv('MAIL_USERNAME');
         $this->smtpPassword = getenv('MAIL_PASSWORD');
     }
-    
+
     /**
-     * Send Message
+     * Send — prefers Brevo HTTP API, falls back to SMTP, then PHP mail()
      */
     public function send(string $to, string $subject, string $body, array $options = []): bool {
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            error_log("Comm Error: Invalid Target Frequency - " . $to);
+            error_log("Mailer: invalid address — " . $to);
             return false;
         }
-        
+
         $htmlBody = $this->buildTemplate($subject, $body);
-        
-        // Try High-Speed Relay (SMTP) first, then fallback to Standard Channel (PHP Mail)
+
+        if ($this->apiKey !== '') {
+            return $this->sendViaBrevoApi($to, $subject, $htmlBody);
+        }
         if ($this->useSmtp) {
             return $this->sendSmtp($to, $subject, $htmlBody, $options);
-        } else {
-            return $this->sendMail($to, $subject, $htmlBody, $options);
         }
+        return $this->sendMail($to, $subject, $htmlBody, $options);
+    }
+
+    /**
+     * Brevo Transactional Email API (v3) — works over HTTPS, no IP whitelist needed
+     */
+    private function sendViaBrevoApi(string $to, string $subject, string $html): bool {
+        $payload = json_encode([
+            'sender'      => ['name' => $this->fromName, 'email' => $this->fromEmail],
+            'to'          => [['email' => $to]],
+            'subject'     => $subject,
+            'htmlContent' => $html,
+        ]);
+
+        $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_HTTPHEADER     => [
+                'accept: application/json',
+                'content-type: application/json',
+                'api-key: ' . $this->apiKey,
+            ],
+            CURLOPT_POSTFIELDS     => $payload,
+        ]);
+
+        $response = curl_exec($ch);
+        $status   = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err      = curl_error($ch);
+        curl_close($ch);
+
+        if ($status < 200 || $status >= 300) {
+            error_log("Brevo API error {$status}: {$response} | curl: {$err}");
+            return false;
+        }
+        return true;
     }
     
     /**
