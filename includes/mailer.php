@@ -219,7 +219,7 @@ class Mailer {
               <img src="{$logo}" alt="" width="28" height="28" style="display:block;border-radius:6px;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#0640a3;letter-spacing:-0.01em;">Jobmington</span>
+              <span style="font-family:Futura,Century Gothic,Trebuchet MS,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#0640a3;letter-spacing:-0.01em;">Jobmington</span>
             </td>
           </tr>
         </table>
@@ -294,8 +294,8 @@ HTML;
         $firstName = explode(' ', trim($name))[0];
         $url = SITE_URL . '/auth/verify-email.php?token=' . rawurlencode($token);
         $content = "
-            <h2 style='font-family:"Futura Cyrillic Demi","Century Gothic","Trebuchet MS",Helvetica,Arial,sans-serif;color:#06142a;margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.2;'>Verify your email, {$firstName}.</h2>
-            <p style='color:#475569;margin:0 0 28px;line-height:1.75;'>You're one step away. Click the button below to confirm your email address and unlock full access to Jobmington &mdash; job listings, AI tools, and more.</p>
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Verify your email, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 28px;line-height:1.75;'>You are one step away. Click the button below to confirm your email address and unlock full access to Jobmington &mdash; job listings, AI tools, and more.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 28px;'>
               <tr><td style='border-radius:8px;background:#0640a3;'>
                 <a href='{$url}' style='display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;'>Verify my email</a>
@@ -311,7 +311,7 @@ HTML;
         $firstName = explode(' ', trim($name))[0];
         $url = SITE_URL . '/jobs/';
         $content = "
-            <h2 style='font-family:"Futura Cyrillic Demi","Century Gothic","Trebuchet MS",Helvetica,Arial,sans-serif;color:#06142a;margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.2;'>Welcome to Jobmington, {$firstName}.</h2>
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Welcome to Jobmington, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>Your account is verified. Start browsing open roles, use AI tools to sharpen your CV, and apply to jobs that match your skills.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
               <tr><td style='border-radius:8px;background:#0640a3;'>
@@ -325,7 +325,7 @@ HTML;
     public static function sendPasswordReset(string $email, string $name, string $link): bool {
         $firstName = explode(' ', trim($name))[0];
         $content = "
-            <h2 style='font-family:"Futura Cyrillic Demi","Century Gothic","Trebuchet MS",Helvetica,Arial,sans-serif;color:#06142a;margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.2;'>Reset your password, {$firstName}.</h2>
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Reset your password, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>We received a request to reset your Jobmington password. Click below to choose a new one. This link expires in 60 minutes.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
               <tr><td style='border-radius:8px;background:#0640a3;'>
