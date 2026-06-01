@@ -654,11 +654,12 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
                 </a>
                 <nav class="jm-nav" aria-label="Main navigation">
                     <a class="<?= $active === 'jobs' ? 'active' : '' ?>" href="/jobmington/jobs/">Find jobs</a>
-                    <?php if (!$isLoggedIn || !Session::isEmployer()): ?><a class="<?= $active === 'cv' ? 'active' : '' ?>" href="/jobmington/cv-builder/">CV Builder</a><?php endif; ?>
+                    <a href="/jobmington/cv-builder/">CV Builder</a>
+                    <a href="/jobmington/ai/andika.php">Andika AI</a>
                     <a href="/jobmington/employer/">Employers</a>
+                    <a href="/jobmington/pricing.php">Pricing</a>
                     <?php if ($isLoggedIn): ?>
                         <a href="<?= e($dashboardUrl) ?>">Dashboard</a>
-                        <?php if (!Session::isEmployer()): ?><a href="/jobmington/jobs/saved.php">Saved jobs</a><?php endif; ?>
                         <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
                     <?php else: ?>
                         <a href="/jobmington/auth/login.php">Sign in</a>

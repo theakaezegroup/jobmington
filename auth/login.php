@@ -152,11 +152,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
                 <span>Jobmington</span>
             </a>
-            <nav class="jm-nav" aria-label="Primary">
+            <nav class="jm-nav" aria-label="Main navigation">
                 <a href="/jobmington/jobs/">Find jobs</a>
+                <a href="/jobmington/cv-builder/">CV Builder</a>
                 <a href="/jobmington/employer/">Employers</a>
-                <a href="/jobmington/auth/login.php">Sign in</a>
-                <a href="/jobmington/employer/post-job.php" class="jm-button secondary">Post a job</a>
+                <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
             </nav>
         </header>
 

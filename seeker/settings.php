@@ -155,9 +155,12 @@ $pageTitle = 'Settings | ' . SITE_NAME;
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
             <nav class="jm-nav" aria-label="Main navigation">
+                <a href="/jobmington/jobs/">Find jobs</a>
+                <a href="/jobmington/cv-builder/">CV Builder</a>
                 <a href="/jobmington/seeker/dashboard.php">Dashboard</a>
-                <a href="/jobmington/seeker/profile.php">Profile</a>
                 <a href="/jobmington/seeker/applications.php">Applications</a>
+                <a href="/jobmington/jobs/saved.php">Saved jobs</a>
+                <a href="/jobmington/seeker/profile.php">Profile</a>
                 <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
             </nav>
         </header>

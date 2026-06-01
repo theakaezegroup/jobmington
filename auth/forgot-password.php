@@ -81,9 +81,9 @@ $pageTitle = 'Forgot Password | ' . SITE_NAME;
             </a>
             <nav class="jm-nav" aria-label="Main navigation">
                 <a href="/jobmington/jobs/">Find jobs</a>
+                <a href="/jobmington/cv-builder/">CV Builder</a>
                 <a href="/jobmington/employer/">Employers</a>
-                <a href="/jobmington/auth/login.php">Sign in</a>
-                <a class="jm-button secondary" href="/jobmington/employer/post-job.php">Post a job</a>
+                <a class="jm-button secondary" href="/jobmington/auth/login.php">Sign in</a>
             </nav>
         </header>
 
