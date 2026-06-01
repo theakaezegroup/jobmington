@@ -250,7 +250,11 @@ A verifiable skills/assessment profile with public verification — positions a 
 
 - `run_job_scrapers.php` / `fetch_wwr_jobs.php` — pull external roles (e.g. WeWorkRemotely), geo-filtered toward Africa, deduplicated; status tracked for the admin Operations panel.
 - `run_backup.php` — database + uploads backups with retention, surfaced in admin Operations and downloadable via `backup-download.php`.
+- `process_email_queue.php` — **async email worker** (every 2 min). Delivers queued campaign + match-alert emails via Brevo, retries up to 3×, updates campaign counts, reconciles finished campaigns. Backed by `email_queue` + `includes/email_queue.php`.
+- `send_job_match_alerts.php` — **job-match alerts** (daily 07:00). Matches verified seekers to new jobs in their country and enqueues the alert email. **Gated by `JOB_MATCH_ALERTS_ENABLED` (off by default)**; supports `--dry-run` / `--force`; dedupes via `users.last_job_match_alert`.
 - Cron commands are documented in the admin Operations page and `cron/README.md`.
+
+**Testing:** `tests/run.php` is a dependency-free runner — unit checks (Paystack math, password hashing/strength, escaping, unsubscribe HMAC, match composer) plus opt-in HTTP smoke checks (`--base=URL`, includes an `/uploads` PHP-exec-blocked regression guard). Run `php tests/run.php` (unit) or `php tests/run.php --base=https://jobmington.com` (full).
 
 ---
 
@@ -288,5 +292,9 @@ See **[JOBMINGTON_REVIEW_2026.md](JOBMINGTON_REVIEW_2026.md)** for the full audi
 - ✅ Blocked PHP execution under `/uploads` in nginx (images still served).
 - ✅ Consolidated runtime `CREATE/ALTER` into ordered migrations + runner.
 - ✅ Real unsubscribe + suppression list for campaigns.
-- 🟠 Move campaign + match-alert sending onto an async cron queue (sends are still synchronous).
-- 🟢 Implement the job-match alert cron (template already exists, not yet triggered).
+- ✅ Async cron queue (`email_queue`); campaign + match-alert sends are now queued, not synchronous.
+- ✅ Job-match alert cron implemented (env-gated off until opted in).
+- ✅ `session.php` reformatted; smoke-test suite added (`tests/run.php`).
+- 🟠 **Unify header scaffolding** — 5 header patterns remain (deferred; multi-page regression risk).
+- 🟠 **One CSS system** — still ships Tailwind CDN + hand-written CSS + premium-design-system. Open decision: compile/purge Tailwind vs. remove utilities.
+- 🟢 Enable `JOB_MATCH_ALERTS_ENABLED` once the matching logic (currently country-based) is tuned to taste.

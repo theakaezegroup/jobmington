@@ -157,12 +157,12 @@ URLs are hardcoded as `/jobmington/...` throughout, and the VPS papers over this
 
 ## 6. Prioritised action checklist
 
-**Today**
-- [ ] Remove all debug/setup/session files from repo + disk; push + pull.
-- [ ] Rotate the exposed admin's password; rotate Paystack/AI/DB secrets.
-- [ ] Fix the `jobs.status` webhook bug.
-- [ ] Add nginx `/uploads` PHP-exec deny block.
-- [ ] Confirm `APP_DEBUG=false`, `APP_ENV=production` on VPS.
+**Today** — ✅ done 2026-06-01
+- [x] Removed all debug/setup/session files from repo + disk; verified content gone.
+- [x] Admin password reset by owner via forgot-password; `.env` verified not web-reachable, so DB/API secrets were never exposed (rotation deemed unnecessary).
+- [x] Fixed the `jobs.status` webhook bug.
+- [x] Added nginx `/uploads` PHP-exec deny block (images still served).
+- [x] Confirmed `APP_DEBUG=false`, `APP_ENV=production` on VPS.
 
 **This week** — ✅ all done 2026-06-01
 - [x] Working unsubscribe + suppression list (`email_unsubscribes`, HMAC-signed `/unsubscribe`, per-recipient footer link, send-loop skip).
@@ -171,8 +171,9 @@ URLs are hardcoded as `/jobmington/...` throughout, and the VPS papers over this
 - [x] Ordered migration runner (`database/migrate.php` + `database/migrations/schema/`, `schema_migrations` tracking); inline `CREATE/ALTER` removed from login/users/forgot-password/email-campaigns.
 
 **This month**
-- [ ] Introduce a cron queue; move campaign + match-alert emails onto it.
-- [ ] Implement the job-match alert cron (use the existing template).
-- [ ] Reformat `session.php`; unify header scaffolding.
-- [ ] Decide on one CSS system; stop shipping Tailwind CDN to production.
-- [ ] Add a smoke-test suite around auth + payments.
+- [x] Cron queue (`email_queue` + `includes/email_queue.php` + `cron/process_email_queue.php`, every 2 min); campaign sends now enqueue.
+- [x] Job-match alert cron (`cron/send_job_match_alerts.php`, daily 07:00) — **gated by `JOB_MATCH_ALERTS_ENABLED` (off until opted in)**; supports `--dry-run`.
+- [x] Reformatted `session.php`.
+- [x] Smoke-test suite (`tests/run.php`): unit checks + opt-in HTTP smoke (`--base`), incl. `/uploads` PHP-block regression guard. 22/22 green against prod.
+- [ ] **Unify header scaffolding** — still 5 header patterns; deferred (touches many pages, higher regression risk). Needs a dedicated pass.
+- [ ] **Decide on one CSS system; stop shipping Tailwind CDN** — open decision. Ripping out the CDN breaks admin/blog/learn utility-class styling unless Tailwind is compiled or those pages are rewritten. Recommend: add a built/purged Tailwind stylesheet (keep classes working, drop the runtime CDN) rather than remove utilities.
