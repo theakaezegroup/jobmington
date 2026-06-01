@@ -157,6 +157,51 @@ if (isPost()) {
     redirect('/jobmington/admin/users.php' . ($returnQuery ? '?' . $returnQuery : ''));
 }
 
+/* ── CSV Export ─────────────────────────────────────────────────── */
+if (($_GET['action'] ?? '') === 'export') {
+    $exportRole   = Security::clean($_GET['role']   ?? 'all');
+    $exportStatus = Security::clean($_GET['status'] ?? 'all');
+
+    $where  = ['1=1'];
+    $params = [];
+
+    if (in_array($exportRole, [USER_TYPE_ADMIN, USER_TYPE_EMPLOYER, USER_TYPE_SEEKER], true)) {
+        $where[] = 'user_type = ?';
+        $params[] = $exportRole;
+    }
+    if ($exportStatus === 'active')     { $where[] = 'is_active = 1'; }
+    if ($exportStatus === 'suspended')  { $where[] = 'is_active = 0'; }
+    if ($exportStatus === 'unverified') { $where[] = 'is_verified = 0'; }
+    if ($exportStatus === 'locked')     { $where[] = 'locked_until IS NOT NULL AND locked_until > NOW()'; }
+
+    $sql  = 'SELECT user_id, full_name, email, user_type, is_verified, is_active, created_at, last_login FROM users WHERE ' . implode(' AND ', $where) . ' ORDER BY created_at DESC';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $filename = 'jobmington-users-' . date('Y-m-d') . '.csv';
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Pragma: no-cache');
+    echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
+    $out = fopen('php://output', 'w');
+    fputcsv($out, ['ID', 'Full Name', 'Email', 'Role', 'Verified', 'Active', 'Joined', 'Last Login']);
+    foreach ($rows as $row) {
+        fputcsv($out, [
+            $row['user_id'],
+            $row['full_name'],
+            $row['email'],
+            $row['user_type'],
+            $row['is_verified'] ? 'Yes' : 'No',
+            $row['is_active']   ? 'Yes' : 'No',
+            $row['created_at']  ?? '',
+            $row['last_login']  ?? '',
+        ]);
+    }
+    fclose($out);
+    exit;
+}
+
 $query = trim((string) get('q', ''));
 $roleFilter = (string) get('role', 'all');
 $statusFilter = (string) get('status', 'all');
@@ -507,6 +552,10 @@ require_once __DIR__ . '/../includes/header.php';
         </select>
     </div>
     <button class="admin-users-btn" type="submit"><i class="fas fa-filter"></i> Apply</button>
+    <a class="admin-users-btn" style="background:#0640a3;color:#fff;border-color:#0640a3;text-decoration:none;"
+       href="<?= e('/jobmington/admin/users.php?action=export&role=' . urlencode($roleFilter) . '&status=' . urlencode($statusFilter)) ?>">
+        <i class="fas fa-download"></i> Download CSV
+    </a>
 </form>
 
 <section class="admin-users-table">

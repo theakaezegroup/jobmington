@@ -133,6 +133,7 @@ if ($isAdminArea) {
         ['href' => '/jobmington/admin/jobs.php', 'label' => 'Jobs', 'icon' => 'fa-briefcase'],
         ['href' => '/jobmington/admin/operations.php', 'label' => 'Operations', 'icon' => 'fa-heartbeat'],
         ['href' => '/jobmington/admin/courses.php', 'label' => 'Learning', 'icon' => 'fa-graduation-cap'],
+        ['href' => '/jobmington/admin/email-campaigns.php', 'label' => 'Outreach', 'icon' => 'fa-envelope-open-text'],
         ['href' => '/jobmington/admin/settings.php', 'label' => 'Settings', 'icon' => 'fa-sliders'],
     ];
     ?>
