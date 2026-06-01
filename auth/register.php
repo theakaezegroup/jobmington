@@ -99,10 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['login_time'] = time();
 
             Security::regenerateCSRF();
-            if ($hasSafeRedirect) {
-                redirect($redirectTo);
-            }
-            redirect($form['user_type'] === USER_TYPE_EMPLOYER ? '/jobmington/employer/company-profile.php?setup=1' : '/jobmington/seeker/dashboard.php');
+            redirect('/jobmington/auth/verify-email.php');
         }
     }
 }

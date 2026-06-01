@@ -114,6 +114,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('remember_token', $token, $expiry, '/', '', isset($_SERVER['HTTPS']), true);
             }
 
+            /* Block unverified users — send to verification page */
+            if (!$_SESSION['is_verified'] && $user['user_type'] !== USER_TYPE_ADMIN) {
+                redirect('/jobmington/auth/verify-email.php');
+            }
+
             if ($hasSafeRedirect) {
                 redirect($redirectTo);
             }
