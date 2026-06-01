@@ -10,13 +10,28 @@
 $footerPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
 ?>
-        </main>
-        <footer class="jm-admin-footer">
-            <span>&copy; <?= date('Y') ?> Jobmington Admin</span>
-            <span><?= e(date('D, M d, Y H:i T')) ?></span>
-        </footer>
-    </div>
+            </main>
+            <footer class="jm-admin-footer">
+                <span>&copy; <?= date('Y') ?> Jobmington Admin</span>
+                <span><?= e(date('D, M d, Y H:i T')) ?></span>
+            </footer>
+        </div><!-- /jm-admin-main -->
+    </div><!-- /jm-admin-layout -->
+    <div class="jm-admin-backdrop" id="jmAdminBackdrop" aria-hidden="true"></div>
     <script>
+    (function () {
+        var body = document.body;
+        var burger = document.getElementById('jmAdminBurger');
+        var backdrop = document.getElementById('jmAdminBackdrop');
+        function close() { body.classList.remove('nav-open'); }
+        if (burger) burger.addEventListener('click', function () { body.classList.toggle('nav-open'); });
+        if (backdrop) backdrop.addEventListener('click', close);
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+        // Close the drawer after tapping a nav link on mobile.
+        document.querySelectorAll('.jm-admin-navgroup a').forEach(function (a) {
+            a.addEventListener('click', close);
+        });
+    })();
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';

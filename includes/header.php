@@ -127,15 +127,41 @@ $currentPath = parse_url($currentUri, PHP_URL_PATH) ?: $currentUri;
 $isAdminArea = (bool) preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $currentPath);
 
 if ($isAdminArea) {
-    $adminNavItems = [
-        ['href' => '/jobmington/admin/', 'label' => 'Command', 'icon' => 'fa-gauge-high'],
-        ['href' => '/jobmington/admin/users.php', 'label' => 'Users', 'icon' => 'fa-users'],
-        ['href' => '/jobmington/admin/jobs.php', 'label' => 'Jobs', 'icon' => 'fa-briefcase'],
-        ['href' => '/jobmington/admin/operations.php', 'label' => 'Operations', 'icon' => 'fa-heartbeat'],
-        ['href' => '/jobmington/admin/courses.php', 'label' => 'Learning', 'icon' => 'fa-graduation-cap'],
-        ['href' => '/jobmington/admin/email-campaigns.php', 'label' => 'Outreach', 'icon' => 'fa-envelope-open-text'],
-        ['href' => '/jobmington/admin/settings.php', 'label' => 'Settings', 'icon' => 'fa-sliders'],
+    $adminNavGroups = [
+        'Overview' => [
+            ['href' => '/jobmington/admin/', 'label' => 'Dashboard', 'icon' => 'fa-gauge-high', 'match' => '/admin'],
+        ],
+        'Manage' => [
+            ['href' => '/jobmington/admin/users.php', 'label' => 'Users', 'icon' => 'fa-users', 'match' => '/admin/users'],
+            ['href' => '/jobmington/admin/jobs.php', 'label' => 'Jobs', 'icon' => 'fa-briefcase', 'match' => '/admin/jobs'],
+            ['href' => '/jobmington/admin/operations.php', 'label' => 'Operations', 'icon' => 'fa-heartbeat', 'match' => '/admin/operations'],
+        ],
+        'Learning' => [
+            ['href' => '/jobmington/admin/courses.php', 'label' => 'Courses', 'icon' => 'fa-graduation-cap', 'match' => '/admin/courses'],
+            ['href' => '/jobmington/admin/modules.php', 'label' => 'Modules', 'icon' => 'fa-book-open', 'match' => '/admin/modules'],
+            ['href' => '/jobmington/admin/quizzes.php', 'label' => 'Quizzes', 'icon' => 'fa-tasks', 'match' => '/admin/quizzes'],
+            ['href' => '/jobmington/admin/certificates.php', 'label' => 'Certificates', 'icon' => 'fa-certificate', 'match' => '/admin/certificates'],
+        ],
+        'Engagement' => [
+            ['href' => '/jobmington/admin/badges.php', 'label' => 'Badges & Seeds', 'icon' => 'fa-medal', 'match' => '/admin/badges'],
+            ['href' => '/jobmington/admin/blog.php', 'label' => 'Blog', 'icon' => 'fa-pen', 'match' => '/admin/blog'],
+            ['href' => '/jobmington/admin/forum.php', 'label' => 'Forum', 'icon' => 'fa-comments', 'match' => '/admin/forum'],
+            ['href' => '/jobmington/admin/email-campaigns.php', 'label' => 'Outreach', 'icon' => 'fa-envelope-open-text', 'match' => '/admin/email-campaigns'],
+        ],
+        'System' => [
+            ['href' => '/jobmington/admin/categories.php', 'label' => 'Categories', 'icon' => 'fa-layer-group', 'match' => '/admin/categories'],
+            ['href' => '/jobmington/admin/countries.php', 'label' => 'Countries', 'icon' => 'fa-globe-africa', 'match' => '/admin/countries'],
+            ['href' => '/jobmington/admin/settings.php', 'label' => 'Settings', 'icon' => 'fa-sliders', 'match' => '/admin/settings'],
+        ],
     ];
+    $adminCurrentPath = rtrim(preg_replace('~^/jobmington~i', '', $currentPath), '/') ?: '/admin';
+    $jmAdminActive = function (string $match) use ($adminCurrentPath): bool {
+        $match = rtrim($match, '/');
+        if ($match === '/admin') {
+            return $adminCurrentPath === '/admin';
+        }
+        return $adminCurrentPath === $match || str_starts_with($adminCurrentPath, $match);
+    };
     ?>
 <!doctype html>
 <html lang="en">
@@ -151,194 +177,252 @@ if ($isAdminArea) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --admin-bg: #f5f8fc;
-            --admin-ink: #061426;
-            --admin-muted: #53667f;
-            --admin-line: #d8e4f4;
+            --admin-bg: #f4f7fb;
+            --admin-ink: #0b1b33;
+            --admin-muted: #5b6b82;
+            --admin-line: #e4eaf3;
             --admin-card: #ffffff;
             --admin-blue: #0640a3;
+            --admin-blue-soft: #eef4ff;
+            --admin-orange: #f59f22;
             --admin-green: #0f766e;
             --admin-amber: #b66b00;
             --admin-red: #b42318;
+            --admin-sidebar-w: 250px;
         }
         body.jm-admin {
             margin: 0;
             background: var(--admin-bg);
             color: var(--admin-ink);
             font-family: "Futura Cyrillic Demi", sans-serif !important;
+            font-size: 15px;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
         }
-        .jm-admin-shell {
-            width: min(100%, 1440px);
-            margin: 0 auto;
-            padding: 18px;
+        body.jm-admin * { box-sizing: border-box; }
+
+        /* ── Layout ─────────────────────────────────────────────── */
+        .jm-admin-layout { display: flex; min-height: 100vh; }
+
+        .jm-admin-sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: var(--admin-sidebar-w);
+            background: #ffffff;
+            border-right: 1px solid var(--admin-line);
+            display: flex; flex-direction: column;
+            z-index: 60;
+            transition: transform .22s ease;
         }
+        .jm-admin-sidebar-brand {
+            display: flex; align-items: center; gap: 11px;
+            padding: 18px 20px; text-decoration: none;
+            border-bottom: 1px solid var(--admin-line);
+        }
+        .jm-admin-sidebar-brand img { width: 34px; height: 34px; object-fit: contain; }
+        .jm-admin-sidebar-brand b { color: var(--admin-ink); font-size: 16px; font-weight: 800; letter-spacing: -.01em; line-height: 1; }
+        .jm-admin-sidebar-brand span { display: block; color: var(--admin-muted); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; margin-top: 3px; }
+
+        .jm-admin-navwrap { flex: 1; overflow-y: auto; padding: 14px 12px; }
+        .jm-admin-navgroup { margin-bottom: 16px; }
+        .jm-admin-navgroup h6 {
+            margin: 0 0 6px; padding: 0 10px;
+            font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em;
+            color: #9aa7ba;
+        }
+        .jm-admin-navgroup a {
+            display: flex; align-items: center; gap: 11px;
+            padding: 9px 10px; margin-bottom: 2px;
+            border-radius: 9px;
+            color: var(--admin-muted); text-decoration: none;
+            font-size: 13.5px; font-weight: 600;
+            transition: background .12s, color .12s;
+        }
+        .jm-admin-navgroup a i { width: 18px; text-align: center; font-size: 14px; color: #9aa7ba; transition: color .12s; }
+        .jm-admin-navgroup a:hover { background: #f3f6fb; color: var(--admin-ink); }
+        .jm-admin-navgroup a:hover i { color: var(--admin-blue); }
+        .jm-admin-navgroup a.is-active {
+            background: var(--admin-blue-soft); color: var(--admin-blue);
+            box-shadow: inset 3px 0 0 var(--admin-blue);
+        }
+        .jm-admin-navgroup a.is-active i { color: var(--admin-blue); }
+
+        .jm-admin-sidebar-foot { padding: 12px; border-top: 1px solid var(--admin-line); display: grid; gap: 6px; }
+        .jm-admin-sidebar-foot a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 10px; border-radius: 9px;
+            font-size: 13px; font-weight: 600; text-decoration: none; color: var(--admin-ink);
+        }
+        .jm-admin-sidebar-foot a:hover { background: #f3f6fb; }
+        .jm-admin-sidebar-foot a.logout { color: var(--admin-red); }
+        .jm-admin-sidebar-foot a.logout:hover { background: #fff5f5; }
+
+        /* ── Main column ────────────────────────────────────────── */
+        .jm-admin-main { flex: 1; min-width: 0; margin-left: var(--admin-sidebar-w); display: flex; flex-direction: column; }
         .jm-admin-topbar {
-            align-items: center;
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid var(--admin-line);
-            border-radius: 8px;
-            display: flex;
-            gap: 16px;
-            justify-content: space-between;
-            margin-bottom: 18px;
-            padding: 12px 14px;
-            position: sticky;
-            top: 10px;
-            z-index: 40;
+            display: none; align-items: center; gap: 12px;
+            padding: 12px 16px; background: #fff; border-bottom: 1px solid var(--admin-line);
+            position: sticky; top: 0; z-index: 50;
         }
-        .jm-admin-brand,
-        .jm-admin-brand:hover {
-            align-items: center;
-            color: var(--admin-ink);
-            display: inline-flex;
-            gap: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            text-decoration: none;
-            white-space: nowrap;
+        .jm-admin-burger {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border: 1px solid var(--admin-line);
+            border-radius: 9px; background: #fff; color: var(--admin-ink); cursor: pointer; font-size: 16px;
         }
-        .jm-admin-brand img {
-            height: 36px;
-            object-fit: contain;
-            width: 36px;
-        }
-        .jm-admin-nav {
-            align-items: center;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: flex-end;
-        }
-        .jm-admin-nav a {
-            align-items: center;
-            border: 1px solid transparent;
-            border-radius: 8px;
-            color: var(--admin-muted);
-            display: inline-flex;
-            font-size: 13px;
-            gap: 8px;
-            min-height: 38px;
-            padding: 8px 11px;
-            text-decoration: none;
-        }
-        .jm-admin-nav a:hover,
-        .jm-admin-nav a.is-active {
-            background: #eef5ff;
-            border-color: #cfe0f7;
-            color: var(--admin-blue);
-        }
-        .jm-admin-actions {
-            align-items: center;
-            display: inline-flex;
-            gap: 8px;
-        }
-        .jm-admin-visit,
-        .jm-admin-logout {
-            align-items: center;
-            border: 1px solid var(--admin-line);
-            border-radius: 8px;
-            color: var(--admin-ink);
-            display: inline-flex;
-            font-size: 13px;
-            gap: 8px;
-            min-height: 38px;
-            padding: 8px 11px;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-        .jm-admin-logout {
-            background: #fff5f5;
-            border-color: #ffd7d7;
-            color: var(--admin-red);
-        }
-        .jm-admin-content {
-            min-height: calc(100vh - 132px);
-        }
+        .jm-admin-topbar-brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; color: var(--admin-ink); text-decoration: none; }
+        .jm-admin-topbar-brand img { width: 28px; height: 28px; }
+
+        .jm-admin-content { padding: 26px; min-height: calc(100vh - 120px); }
+
         .jm-admin-footer {
-            color: var(--admin-muted);
-            display: flex;
-            flex-wrap: wrap;
-            font-size: 12px;
-            gap: 10px;
-            justify-content: space-between;
-            padding: 24px 2px 6px;
+            color: var(--admin-muted); display: flex; flex-wrap: wrap;
+            font-size: 12px; gap: 10px; justify-content: space-between;
+            padding: 16px 26px 22px;
         }
-        .jm-admin .bg-gray-100,
-        .jm-admin .bg-slate-950,
-        .jm-admin .bg-slate-900 {
-            background: transparent !important;
+
+        .jm-admin-backdrop {
+            display: none; position: fixed; inset: 0;
+            background: rgba(11,27,51,.45); z-index: 55;
         }
-        .jm-admin .shadow-md,
-        .jm-admin .shadow-xl,
-        .jm-admin .shadow-2xl {
-            box-shadow: none !important;
+        body.jm-admin.nav-open .jm-admin-backdrop { display: block; }
+
+        /* ── Reusable dashboard components (.ja-*) ──────────────── */
+        .ja-pagehead { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
+        .ja-pagehead h1 { margin: 0 0 4px; font-size: 26px; font-weight: 800; letter-spacing: -.02em; color: var(--admin-ink); }
+        .ja-pagehead p { margin: 0; font-size: 14px; color: var(--admin-muted); }
+        .ja-statuschip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700; background: #fff; border: 1px solid var(--admin-line); }
+        .ja-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--admin-green); }
+        .ja-dot.down { background: var(--admin-red); }
+
+        .ja-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
+        .ja-kpi { position: relative; display: block; text-decoration: none; background: var(--admin-card); border: 1px solid var(--admin-line); border-radius: 14px; padding: 18px; transition: box-shadow .15s, transform .15s, border-color .15s; }
+        .ja-kpi:hover { box-shadow: 0 10px 26px rgba(11,27,51,.07); transform: translateY(-2px); border-color: #cfdcef; }
+        .ja-kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .ja-kpi-ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; background: var(--admin-blue-soft); color: var(--admin-blue); }
+        .ja-kpi-val { font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: var(--admin-ink); }
+        .ja-kpi-lab { font-size: 13px; font-weight: 700; color: var(--admin-ink); margin-top: 8px; }
+        .ja-kpi-det { font-size: 11.5px; color: var(--admin-muted); margin-top: 3px; line-height: 1.45; }
+        .ja-kpi.tone-good .ja-kpi-ico { background: #e7f6f2; color: var(--admin-green); }
+        .ja-kpi.tone-warning .ja-kpi-ico { background: #fdf3e3; color: var(--admin-amber); }
+        .ja-kpi.tone-blue .ja-kpi-ico { background: var(--admin-blue-soft); color: var(--admin-blue); }
+        .ja-kpi.tone-neutral .ja-kpi-ico { background: #eef1f6; color: #64748b; }
+
+        .ja-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 22px; }
+        .ja-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; margin-bottom: 22px; }
+
+        .ja-card { background: var(--admin-card); border: 1px solid var(--admin-line); border-radius: 14px; overflow: hidden; }
+        .ja-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--admin-line); }
+        .ja-card-head h2 { margin: 0; font-size: 15px; font-weight: 800; color: var(--admin-ink); }
+        .ja-card-head a { font-size: 12.5px; font-weight: 700; color: var(--admin-blue); text-decoration: none; }
+        .ja-card-body { padding: 8px 18px 14px; }
+
+        .ja-attention { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .ja-att { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border: 1px solid var(--admin-line); border-radius: 12px; text-decoration: none; background: #fff; transition: border-color .12s, background .12s; }
+        .ja-att:hover { border-color: #cfdcef; background: #fafcff; }
+        .ja-att-count { font-size: 22px; font-weight: 800; line-height: 1; color: var(--admin-ink); min-width: 34px; }
+        .ja-att-lab { font-size: 13px; font-weight: 700; color: var(--admin-ink); }
+        .ja-att-det { font-size: 11.5px; color: var(--admin-muted); margin-top: 2px; }
+        .ja-att.tone-warning { border-left: 3px solid var(--admin-amber); }
+        .ja-att.tone-danger  { border-left: 3px solid var(--admin-red); }
+        .ja-att.tone-good    { border-left: 3px solid var(--admin-green); }
+
+        .ja-health-row { padding: 11px 0; border-bottom: 1px solid #eef2f7; }
+        .ja-health-row:last-child { border-bottom: none; }
+        .ja-health-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+        .ja-health-lab { font-size: 13px; font-weight: 700; color: var(--admin-ink); }
+        .ja-health-val { font-size: 12px; font-weight: 700; }
+        .ja-health-det { font-size: 11px; color: var(--admin-muted); margin-top: 5px; }
+        .ja-bar { height: 6px; border-radius: 999px; background: #eef2f7; overflow: hidden; }
+        .ja-bar > span { display: block; height: 100%; border-radius: 999px; }
+        .tone-good .ja-bar > span,    .ja-bar > span.tone-good    { background: var(--admin-green); }
+        .tone-warning .ja-bar > span, .ja-bar > span.tone-warning { background: var(--admin-amber); }
+        .tone-danger .ja-bar > span,  .ja-bar > span.tone-danger  { background: var(--admin-red); }
+        .tone-neutral .ja-bar > span, .ja-bar > span.tone-neutral { background: #94a3b8; }
+        .ja-tone-good { color: var(--admin-green); } .ja-tone-warning { color: var(--admin-amber); }
+        .ja-tone-danger { color: var(--admin-red); } .ja-tone-neutral { color: #64748b; }
+
+        .ja-quick { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 22px; }
+        .ja-tile { display: flex; gap: 12px; align-items: center; padding: 14px; background: var(--admin-card); border: 1px solid var(--admin-line); border-radius: 12px; text-decoration: none; transition: border-color .12s, box-shadow .12s, transform .12s; }
+        .ja-tile:hover { border-color: #cfdcef; box-shadow: 0 8px 20px rgba(11,27,51,.06); transform: translateY(-2px); }
+        .ja-tile i { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--admin-blue-soft); color: var(--admin-blue); font-size: 15px; flex-shrink: 0; }
+        .ja-tile b { display: block; font-size: 13.5px; font-weight: 700; color: var(--admin-ink); }
+        .ja-tile span { font-size: 11.5px; color: var(--admin-muted); }
+
+        .ja-feed { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ja-feed td { padding: 10px 6px; border-bottom: 1px solid #eef2f7; vertical-align: middle; color: var(--admin-ink); }
+        .ja-feed tr:last-child td { border-bottom: none; }
+        .ja-feed .sub { font-size: 11.5px; color: var(--admin-muted); }
+        .ja-feed-empty { padding: 24px 6px; text-align: center; color: var(--admin-muted); font-size: 13px; }
+
+        .ja-pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+        .ja-pill.good    { background: #e7f6f2; color: var(--admin-green); }
+        .ja-pill.warning { background: #fdf3e3; color: var(--admin-amber); }
+        .ja-pill.danger  { background: #fdecea; color: var(--admin-red); }
+        .ja-pill.neutral { background: #eef1f6; color: #64748b; }
+
+        /* ── Tailwind compatibility (legacy admin pages) ────────── */
+        .jm-admin .bg-gray-100, .jm-admin .bg-slate-950, .jm-admin .bg-slate-900 { background: transparent !important; }
+        .jm-admin .shadow-md, .jm-admin .shadow-xl, .jm-admin .shadow-2xl { box-shadow: none !important; }
+        .jm-admin .rounded-lg, .jm-admin .rounded-xl, .jm-admin .rounded-2xl, .jm-admin .rounded-3xl { border-radius: 10px !important; }
+        .jm-admin .bg-white, .jm-admin .bg-white\/5, .jm-admin .bg-slate-900\/80 { background: var(--admin-card) !important; }
+        .jm-admin .text-white { color: var(--admin-ink) !important; }
+        .jm-admin .text-slate-400, .jm-admin .text-slate-500, .jm-admin .text-gray-500 { color: var(--admin-muted) !important; }
+        .jm-admin table { color: var(--admin-ink); }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+        @media (max-width: 1100px) {
+            .ja-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .ja-quick { grid-template-columns: repeat(2, minmax(0,1fr)); }
+            .ja-grid-3 { grid-template-columns: 1fr; }
         }
-        .jm-admin .rounded-lg,
-        .jm-admin .rounded-xl,
-        .jm-admin .rounded-2xl,
-        .jm-admin .rounded-3xl {
-            border-radius: 8px !important;
+        @media (max-width: 1024px) {
+            .jm-admin-sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(11,27,51,.18); }
+            body.jm-admin.nav-open .jm-admin-sidebar { transform: translateX(0); }
+            .jm-admin-main { margin-left: 0; }
+            .jm-admin-topbar { display: flex; }
         }
-        .jm-admin .bg-white,
-        .jm-admin .bg-white\/5,
-        .jm-admin .bg-slate-900\/80 {
-            background: var(--admin-card) !important;
-        }
-        .jm-admin .text-white {
-            color: var(--admin-ink) !important;
-        }
-        .jm-admin .text-slate-400,
-        .jm-admin .text-slate-500,
-        .jm-admin .text-gray-500 {
-            color: var(--admin-muted) !important;
-        }
-        .jm-admin table {
-            color: var(--admin-ink);
-        }
-        @media (max-width: 900px) {
-            .jm-admin-topbar {
-                align-items: flex-start;
-                flex-direction: column;
-                position: static;
-            }
-            .jm-admin-nav,
-            .jm-admin-actions {
-                justify-content: flex-start;
-                width: 100%;
-            }
-            .jm-admin-nav a {
-                flex: 1 1 145px;
-                justify-content: center;
-            }
+        @media (max-width: 680px) {
+            .ja-kpis { grid-template-columns: 1fr; }
+            .ja-grid-2 { grid-template-columns: 1fr; }
+            .ja-quick { grid-template-columns: 1fr; }
+            .ja-attention { grid-template-columns: 1fr; }
+            .jm-admin-content { padding: 18px 14px; }
         }
     </style>
 </head>
 <body class="jm-admin">
-    <div class="jm-admin-shell">
-        <header class="jm-admin-topbar">
-            <a class="jm-admin-brand" href="/jobmington/admin/">
+    <div class="jm-admin-layout">
+        <aside class="jm-admin-sidebar" id="jmAdminSidebar">
+            <a class="jm-admin-sidebar-brand" href="/jobmington/admin/">
                 <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
-                <span>Jobmington Admin</span>
+                <span><b>Jobmington</b>Admin Console</span>
             </a>
-            <nav class="jm-admin-nav" aria-label="Admin navigation">
-                <?php foreach ($adminNavItems as $item): ?>
-                    <?php
-                        $normalizedCurrentPath = preg_replace('~^/jobmington~i', '', $currentPath);
-                        $normalizedItemPath = preg_replace('~^/jobmington~i', '', $item['href']);
-                        $active = rtrim($normalizedCurrentPath, '/') === rtrim($normalizedItemPath, '/');
-                    ?>
-                    <a class="<?= $active ? 'is-active' : '' ?>" href="<?= htmlspecialchars($item['href']) ?>">
-                        <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
-                        <span><?= htmlspecialchars($item['label']) ?></span>
-                    </a>
+            <nav class="jm-admin-navwrap" aria-label="Admin navigation">
+                <?php foreach ($adminNavGroups as $groupName => $items): ?>
+                    <div class="jm-admin-navgroup">
+                        <h6><?= htmlspecialchars($groupName) ?></h6>
+                        <?php foreach ($items as $item): ?>
+                            <a class="<?= $jmAdminActive($item['match']) ? 'is-active' : '' ?>" href="<?= htmlspecialchars($item['href']) ?>">
+                                <i class="fas <?= htmlspecialchars($item['icon']) ?>"></i>
+                                <span><?= htmlspecialchars($item['label']) ?></span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
                 <?php endforeach; ?>
             </nav>
-            <div class="jm-admin-actions">
-                <a class="jm-admin-visit" href="/jobmington/"><i class="fas fa-up-right-from-square"></i> View site</a>
-                <a class="jm-admin-logout" href="/jobmington/auth/logout.php"><i class="fas fa-right-from-bracket"></i> Log out</a>
+            <div class="jm-admin-sidebar-foot">
+                <a href="/jobmington/"><i class="fas fa-up-right-from-square"></i> View site</a>
+                <a class="logout" href="/jobmington/auth/logout.php"><i class="fas fa-right-from-bracket"></i> Log out</a>
             </div>
-        </header>
-        <main class="jm-admin-content">
+        </aside>
+
+        <div class="jm-admin-main">
+            <header class="jm-admin-topbar">
+                <button class="jm-admin-burger" type="button" id="jmAdminBurger" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+                <a class="jm-admin-topbar-brand" href="/jobmington/admin/">
+                    <img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""> Admin
+                </a>
+            </header>
+            <main class="jm-admin-content">
     <?php
     return;
 }

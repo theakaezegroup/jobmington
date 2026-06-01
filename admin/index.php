@@ -259,758 +259,226 @@ $managementLinks = [
 ];
 
 $pageTitle = 'Admin Command Center - ' . SITE_NAME;
+
+if (class_exists('HeaderConfig')) {
+    HeaderConfig::getInstance()->setTitle($pageTitle);
+}
+
+$pillTone = static function (?string $status): string {
+    $s = strtolower((string) $status);
+    if (in_array($s, ['completed', 'active', 'published', 'hired', 'verified', 'sent'], true)) return 'good';
+    if (in_array($s, ['pending', 'reviewed', 'shortlisted', 'interview', 'draft'], true)) return 'warning';
+    if (in_array($s, ['failed', 'abandoned', 'rejected', 'inactive', 'expired', 'locked'], true)) return 'danger';
+    return 'neutral';
+};
+
+require_once __DIR__ . '/../includes/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
-    <style>
-        :root {
-            --admin-bg: #f5f8fc;
-            --admin-ink: #061426;
-            --admin-muted: #53667f;
-            --admin-line: #d8e4f4;
-            --admin-soft: #ffffff;
-            --admin-blue: #0640a3;
-            --admin-green: #0f766e;
-            --admin-amber: #b66b00;
-            --admin-red: #b42318;
-        }
 
-        body.jm-admin {
-            margin: 0;
-            background: var(--admin-bg);
-            color: var(--admin-ink);
-            font-family: 'Futura Cyrillic Demi';
-            font-size: 15px;
-            line-height: 1.55;
-        }
-
-        .admin-shell {
-            width: min(100%, 1360px);
-            margin: 0 auto;
-            padding: 22px;
-        }
-
-        .admin-topbar,
-        .admin-hero,
-        .admin-panel,
-        .admin-card,
-        .admin-list,
-        .admin-table-wrap {
-            border: 1px solid var(--admin-line);
-            border-radius: 8px;
-            background: var(--admin-soft);
-        }
-
-        .admin-topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 18px;
-            padding: 14px 16px;
-            margin-bottom: 18px;
-        }
-
-        .admin-brand {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--admin-ink);
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .admin-brand img {
-            width: 34px;
-            height: 34px;
-            object-fit: contain;
-        }
-
-        .admin-nav {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .admin-nav a,
-        .admin-action {
-            display: inline-flex;
-            align-items: center;
-            min-height: 38px;
-            padding: 0 12px;
-            border: 1px solid var(--admin-line);
-            border-radius: 6px;
-            color: var(--admin-ink);
-            background: #ffffff;
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .admin-nav a.primary,
-        .admin-action.primary {
-            border-color: var(--admin-blue);
-            color: #ffffff;
-            background: var(--admin-blue);
-        }
-
-        .admin-hero {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 20px;
-            align-items: end;
-            padding: 28px;
-            margin-bottom: 18px;
-            background: linear-gradient(135deg, #ffffff 0%, #eef7f3 100%);
-        }
-
-        .admin-kicker {
-            margin: 0 0 8px;
-            color: var(--admin-green);
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-        }
-
-        .admin-hero h1,
-        .admin-panel h2 {
-            margin: 0;
-            color: var(--admin-ink);
-            line-height: 1.12;
-        }
-
-        .admin-hero h1 {
-            font-size: clamp(32px, 4vw, 48px);
-        }
-
-        .admin-hero p,
-        .admin-panel-head p,
-        .admin-card p,
-        .admin-list p,
-        .admin-meta {
-            color: var(--admin-muted);
-        }
-
-        .admin-hero p {
-            max-width: 720px;
-            margin: 10px 0 0;
-            font-size: 16px;
-        }
-
-        .admin-status {
-            min-width: 220px;
-            padding: 16px;
-            border: 1px solid #c7ded4;
-            border-radius: 8px;
-            background: #ffffff;
-        }
-
-        .admin-status strong {
-            display: block;
-            font-size: 28px;
-            line-height: 1;
-        }
-
-        .admin-grid {
-            display: grid;
-            gap: 14px;
-        }
-
-        .admin-kpi-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            margin-bottom: 18px;
-        }
-
-        .admin-card {
-            display: block;
-            padding: 18px;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .admin-card:hover,
-        .admin-list a:hover,
-        .admin-management a:hover {
-            border-color: var(--admin-blue);
-        }
-
-        .admin-card-top {
-            display: flex;
-            align-items: start;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .admin-card b {
-            display: block;
-            color: var(--admin-ink);
-            font-size: 30px;
-            line-height: 1;
-            margin-top: 8px;
-        }
-
-        .admin-card span.label,
-        .admin-table th {
-            color: var(--admin-muted);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .admin-mark {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            color: var(--admin-blue);
-            background: #edf4ff;
-            font-weight: 800;
-        }
-
-        .admin-main-grid {
-            grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.7fr);
-            align-items: start;
-            margin-bottom: 18px;
-        }
-
-        .admin-panel {
-            padding: 20px;
-        }
-
-        .admin-panel-head {
-            display: flex;
-            align-items: start;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .admin-panel-head h2 {
-            font-size: 22px;
-        }
-
-        .admin-panel-head p {
-            margin: 4px 0 0;
-        }
-
-        .admin-attention-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .admin-attention {
-            display: block;
-            padding: 14px;
-            border: 1px solid var(--admin-line);
-            border-radius: 8px;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .admin-attention-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            color: var(--admin-ink);
-            font-weight: 800;
-        }
-
-        .admin-attention-count {
-            font-size: 24px;
-            line-height: 1;
-        }
-
-        .admin-health {
-            display: grid;
-            gap: 14px;
-        }
-
-        .admin-health-row {
-            display: grid;
-            gap: 7px;
-        }
-
-        .admin-health-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .admin-bar {
-            height: 7px;
-            overflow: hidden;
-            border-radius: 999px;
-            background: #eaf0f8;
-        }
-
-        .admin-bar span {
-            display: block;
-            height: 100%;
-            border-radius: inherit;
-            background: var(--admin-blue);
-        }
-
-        .tone-good { color: var(--admin-green); }
-        .tone-warning { color: var(--admin-amber); }
-        .tone-danger { color: var(--admin-red); }
-        .tone-blue { color: var(--admin-blue); }
-
-        .admin-pill {
-            display: inline-flex;
-            align-items: center;
-            min-height: 26px;
-            padding: 0 9px;
-            border: 1px solid var(--admin-line);
-            border-radius: 999px;
-            color: var(--admin-muted);
-            background: #ffffff;
-            font-size: 12px;
-            font-weight: 800;
-            white-space: nowrap;
-        }
-
-        .admin-pill.completed,
-        .admin-pill.active,
-        .admin-pill.published,
-        .admin-pill.hired,
-        .admin-pill.verified {
-            border-color: #acd8ce;
-            color: var(--admin-green);
-            background: #effaf6;
-        }
-
-        .admin-pill.pending,
-        .admin-pill.reviewed,
-        .admin-pill.shortlisted,
-        .admin-pill.interview {
-            border-color: #f0d49d;
-            color: var(--admin-amber);
-            background: #fff8ec;
-        }
-
-        .admin-pill.failed,
-        .admin-pill.abandoned,
-        .admin-pill.rejected,
-        .admin-pill.inactive,
-        .admin-pill.expired,
-        .admin-pill.locked {
-            border-color: #f4b8b2;
-            color: var(--admin-red);
-            background: #fff4f2;
-        }
-
-        .admin-management {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-
-        .admin-management a {
-            display: grid;
-            gap: 4px;
-            min-height: 86px;
-            padding: 14px;
-            border: 1px solid var(--admin-line);
-            border-radius: 8px;
-            color: inherit;
-            background: #ffffff;
-            text-decoration: none;
-        }
-
-        .admin-management strong,
-        .admin-list strong {
-            color: var(--admin-ink);
-        }
-
-        .admin-two-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            margin-top: 18px;
-        }
-
-        .admin-three-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            margin-top: 18px;
-        }
-
-        .admin-list {
-            overflow: hidden;
-        }
-
-        .admin-list-head {
-            padding: 18px 18px 14px;
-            border-bottom: 1px solid var(--admin-line);
-        }
-
-        .admin-list-head h2 {
-            margin: 0;
-            font-size: 21px;
-        }
-
-        .admin-list-head p {
-            margin: 4px 0 0;
-        }
-
-        .admin-list-row,
-        .admin-list a {
-            display: block;
-            padding: 15px 18px;
-            border-bottom: 1px solid var(--admin-line);
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .admin-list-row:last-child,
-        .admin-list a:last-child {
-            border-bottom: 0;
-        }
-
-        .admin-row-top {
-            display: flex;
-            align-items: start;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .admin-empty {
-            padding: 18px;
-            color: var(--admin-muted);
-        }
-
-        .admin-table-wrap {
-            overflow-x: auto;
-            margin-top: 18px;
-        }
-
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .admin-table th,
-        .admin-table td {
-            padding: 13px 16px;
-            border-bottom: 1px solid var(--admin-line);
-            text-align: left;
-            vertical-align: top;
-        }
-
-        .admin-table td {
-            color: var(--admin-muted);
-        }
-
-        .admin-table strong {
-            color: var(--admin-ink);
-        }
-
-        @media (max-width: 1000px) {
-            .admin-kpi-grid,
-            .admin-main-grid,
-            .admin-management,
-            .admin-two-grid,
-            .admin-three-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .admin-hero {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .admin-shell {
-                padding: 14px;
-            }
-
-            .admin-topbar,
-            .admin-panel-head,
-            .admin-row-top {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .admin-nav {
-                width: 100%;
-            }
-
-            .admin-nav a {
-                flex: 1 1 auto;
-                justify-content: center;
-            }
-
-            .admin-hero,
-            .admin-panel {
-                padding: 18px;
-            }
-
-            .admin-attention-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body class="jm-admin">
-    <div class="admin-shell">
-        <header class="admin-topbar">
-            <a class="admin-brand" href="/jobmington/admin/">
-                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
-                <span>Jobmington Admin</span>
-            </a>
-            <nav class="admin-nav" aria-label="Admin navigation">
-                <a class="primary" href="/jobmington/admin/">Dashboard</a>
-                <a href="/jobmington/admin/operations.php">Operations</a>
-                <a href="/jobmington/admin/jobs.php">Jobs</a>
-                <a href="/jobmington/admin/users.php">Users</a>
-                <a href="/jobmington/">View site</a>
-                <a href="/jobmington/auth/logout.php">Sign out</a>
-            </nav>
-        </header>
-
-        <section class="admin-hero">
-            <div>
-                <p class="admin-kicker">Platform control</p>
-                <h1>Admin Command Center</h1>
-                <p>Monitor operations, spot issues, and jump into the tools that keep Jobmington running.</p>
+<div class="ja-pagehead">
+    <div>
+        <h1>Command Center</h1>
+        <p>Live overview of users, jobs, revenue, and platform health.</p>
+    </div>
+    <span class="ja-statuschip">
+        <span class="ja-dot <?= $dbOnline ? '' : 'down' ?>"></span>
+        <?= $dbOnline ? 'Database online · ' . (int) $dbLatencyMs . ' ms' : 'Database unreachable' ?>
+    </span>
+</div>
+
+<!-- KPIs -->
+<div class="ja-kpis">
+    <?php foreach ($kpis as $kpi): ?>
+        <a class="ja-kpi tone-<?= e($kpi['tone']) ?>" href="<?= e($kpi['href']) ?>">
+            <div class="ja-kpi-top">
+                <span class="ja-kpi-val"><?= e($kpi['value']) ?></span>
+                <span class="ja-kpi-ico"><i class="fas <?= e($kpi['icon']) ?>"></i></span>
             </div>
-            <div class="admin-status">
-                <span class="admin-meta">Database</span>
-                <strong class="<?= $dbOnline ? 'tone-good' : 'tone-danger' ?>"><?= $dbOnline ? 'Online' : 'Down' ?></strong>
-                <span class="admin-meta"><?= $dbOnline ? e((string) $dbLatencyMs) . ' ms response' : 'Connection failed' ?></span>
-            </div>
-        </section>
+            <div class="ja-kpi-lab"><?= e($kpi['label']) ?></div>
+            <div class="ja-kpi-det"><?= e($kpi['detail']) ?></div>
+        </a>
+    <?php endforeach; ?>
+</div>
 
-        <div class="admin-grid admin-kpi-grid">
-            <?php foreach ($kpis as $index => $kpi): ?>
-                <a class="admin-card" href="<?= e($kpi['href']) ?>">
-                    <div class="admin-card-top">
-                        <div>
-                            <span class="label"><?= e($kpi['label']) ?></span>
-                            <b><?= e($kpi['value']) ?></b>
-                        </div>
-                        <span class="admin-mark"><?= $index + 1 ?></span>
-                    </div>
-                    <p><?= e($kpi['detail']) ?></p>
-                </a>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="admin-grid admin-main-grid">
-            <section class="admin-panel">
-                <div class="admin-panel-head">
-                    <div>
-                        <h2>Needs Attention</h2>
-                        <p>Queues that deserve a quick look before they become noise.</p>
-                    </div>
-                    <span class="admin-pill active">Live checks</span>
-                </div>
-                <div class="admin-grid admin-attention-grid">
-                    <?php foreach ($attentionItems as $item): ?>
-                        <a class="admin-attention" href="<?= e($item['href']) ?>">
-                            <div class="admin-attention-top">
-                                <span><?= e($item['label']) ?></span>
-                                <span class="admin-attention-count tone-<?= e($item['tone']) ?>"><?= number_format((int) $item['count']) ?></span>
-                            </div>
-                            <p class="admin-meta"><?= e($item['detail']) ?></p>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-
-            <section class="admin-panel">
-                <div class="admin-panel-head">
-                    <div>
-                        <h2>Operations Health</h2>
-                        <p>Server, payments, and safety checks.</p>
-                    </div>
-                </div>
-                <div class="admin-health">
-                    <?php foreach ($healthItems as $item): ?>
-                        <div class="admin-health-row">
-                            <div class="admin-health-top">
-                                <strong><?= e($item['label']) ?></strong>
-                                <span class="admin-pill <?= e(strtolower((string) $item['value'])) ?>"><?= e($item['value']) ?></span>
-                            </div>
-                            <div class="admin-bar"><span style="width: <?= (int) $item['percent'] ?>%"></span></div>
-                            <span class="admin-meta"><?= e($item['detail']) ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-        </div>
-
-        <section class="admin-panel">
-            <div class="admin-panel-head">
-                <div>
-                    <h2>Manage Platform</h2>
-                    <p>Fast routes into the parts you will touch most often.</p>
-                </div>
-            </div>
-            <div class="admin-grid admin-management">
-                <?php foreach ($managementLinks as $link): ?>
-                    <a href="<?= e($link['href']) ?>">
-                        <strong><?= e($link['label']) ?></strong>
-                        <span class="admin-meta"><?= e($link['detail']) ?></span>
+<!-- Attention + Health -->
+<div class="ja-grid-2">
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Needs attention</h2></div>
+        <div class="ja-card-body">
+            <div class="ja-attention">
+                <?php foreach ($attentionItems as $item): ?>
+                    <a class="ja-att tone-<?= e($item['tone']) ?>" href="<?= e($item['href']) ?>">
+                        <span class="ja-att-count"><?= number_format((int) $item['count']) ?></span>
+                        <span>
+                            <span class="ja-att-lab"><?= e($item['label']) ?></span>
+                            <span class="ja-att-det"><?= e($item['detail']) ?></span>
+                        </span>
                     </a>
                 <?php endforeach; ?>
             </div>
-        </section>
-
-        <div class="admin-grid admin-two-grid">
-            <section class="admin-list">
-                <div class="admin-list-head">
-                    <h2>Recent Jobs</h2>
-                    <p>Newest listings and current publishing state.</p>
-                </div>
-                <?php if (empty($recentJobs)): ?>
-                    <p class="admin-empty">No jobs found.</p>
-                <?php else: ?>
-                    <?php foreach ($recentJobs as $job): ?>
-                        <?php
-                            $jobStatus = ((int) $job['is_active'] === 1) ? 'active' : 'inactive';
-                            if (!empty($job['expires_at']) && strtotime($job['expires_at']) < strtotime(date('Y-m-d'))) {
-                                $jobStatus = 'expired';
-                            }
-                        ?>
-                        <a href="/jobmington/jobs/view.php?id=<?= (int) $job['job_id'] ?>">
-                            <div class="admin-row-top">
-                                <div>
-                                    <strong><?= e($job['title']) ?></strong>
-                                    <p class="admin-meta"><?= e($job['company_name'] ?: 'Unknown company') ?> / <?= e(admin_when($job['posted_at'])) ?></p>
-                                </div>
-                                <span class="admin-pill <?= e($jobStatus) ?>"><?= e(ucfirst($jobStatus)) ?></span>
-                            </div>
-                            <span class="admin-meta"><?= number_format((int) $job['views']) ?> views / <?= number_format((int) $job['applications_count']) ?> recorded applications</span>
-                        </a>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </section>
-
-            <section class="admin-list">
-                <div class="admin-list-head">
-                    <h2>Recent Applications</h2>
-                    <p>Latest candidate movement across roles.</p>
-                </div>
-                <?php if (empty($recentApplications)): ?>
-                    <p class="admin-empty">No applications yet.</p>
-                <?php else: ?>
-                    <?php foreach ($recentApplications as $application): ?>
-                        <div class="admin-list-row">
-                            <div class="admin-row-top">
-                                <div>
-                                    <strong><?= e($application['full_name'] ?: $application['email']) ?></strong>
-                                    <p class="admin-meta"><?= e($application['title']) ?> / <?= e($application['company_name'] ?: 'Unknown company') ?></p>
-                                </div>
-                                <span class="admin-pill <?= e((string) $application['status']) ?>"><?= e(ucfirst((string) $application['status'])) ?></span>
-                            </div>
-                            <span class="admin-meta"><?= e(admin_when($application['applied_at'])) ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </section>
         </div>
-
-        <div class="admin-grid admin-three-grid">
-            <section class="admin-list">
-                <div class="admin-list-head">
-                    <h2>New Users</h2>
-                    <p><?= number_format($activeUsers) ?> active accounts.</p>
-                </div>
-                <?php if (empty($recentUsers)): ?>
-                    <p class="admin-empty">No users yet.</p>
-                <?php else: ?>
-                    <?php foreach ($recentUsers as $user): ?>
-                        <div class="admin-list-row">
-                            <div class="admin-row-top">
-                                <div>
-                                    <strong><?= e($user['full_name'] ?: $user['email']) ?></strong>
-                                    <p class="admin-meta"><?= e($user['email']) ?></p>
-                                </div>
-                                <span class="admin-pill <?= ((int) $user['is_active'] === 1) ? 'active' : 'inactive' ?>"><?= e(ucfirst((string) $user['user_type'])) ?></span>
-                            </div>
-                            <span class="admin-meta"><?= e(admin_when($user['created_at'])) ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </section>
-
-            <section class="admin-list">
-                <div class="admin-list-head">
-                    <h2>Payments</h2>
-                    <p><?= number_format($pendingPayments) ?> pending payments.</p>
-                </div>
-                <?php if (empty($recentPayments)): ?>
-                    <p class="admin-empty">No payments yet.</p>
-                <?php else: ?>
-                    <?php foreach ($recentPayments as $payment): ?>
-                        <div class="admin-list-row">
-                            <div class="admin-row-top">
-                                <div>
-                                    <strong><?= e(admin_money($payment['amount'])) ?></strong>
-                                    <p class="admin-meta"><?= e($payment['plan']) ?> / <?= e($payment['full_name'] ?: $payment['email'] ?: 'Unknown user') ?></p>
-                                </div>
-                                <span class="admin-pill <?= e((string) $payment['status']) ?>"><?= e(ucfirst((string) $payment['status'])) ?></span>
-                            </div>
-                            <span class="admin-meta"><?= e(admin_when($payment['created_at'])) ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </section>
-
-            <section class="admin-list">
-                <div class="admin-list-head">
-                    <h2>Activity Log</h2>
-                    <p>Latest tracked system actions.</p>
-                </div>
-                <?php if (empty($recentActivity)): ?>
-                    <p class="admin-empty">No activity recorded yet.</p>
-                <?php else: ?>
-                    <?php foreach ($recentActivity as $activity): ?>
-                        <div class="admin-list-row">
-                            <strong><?= e($activity['action']) ?></strong>
-                            <p class="admin-meta"><?= e(admin_snippet($activity['details'])) ?></p>
-                            <span class="admin-meta"><?= e($activity['full_name'] ?: $activity['email'] ?: 'System') ?> / <?= e(admin_when($activity['created_at'])) ?></span>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </section>
-        </div>
-
-        <?php if (!empty($latestWebhooks)): ?>
-            <section class="admin-table-wrap">
-                <div class="admin-list-head">
-                    <h2>Recent Webhooks</h2>
-                    <p>Payment callbacks and processing notes.</p>
-                </div>
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Provider</th>
-                            <th>Event</th>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($latestWebhooks as $webhook): ?>
-                            <?php $webhookStatus = ((int) $webhook['processed'] === 1 && empty($webhook['error_message'])) ? 'completed' : 'failed'; ?>
-                            <tr>
-                                <td><?= e($webhook['provider'] ?: 'unknown') ?></td>
-                                <td><strong><?= e($webhook['event_type'] ?: 'unknown') ?></strong></td>
-                                <td><?= e($webhook['reference'] ?: 'none') ?></td>
-                                <td><span class="admin-pill <?= e($webhookStatus) ?>"><?= e($webhookStatus === 'completed' ? 'Processed' : 'Needs review') ?></span></td>
-                                <td><?= e(admin_when($webhook['created_at'])) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </section>
-        <?php endif; ?>
     </div>
-</body>
-</html>
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Operations health</h2></div>
+        <div class="ja-card-body">
+            <?php foreach ($healthItems as $h): ?>
+                <div class="ja-health-row">
+                    <div class="ja-health-top">
+                        <span class="ja-health-lab"><?= e($h['label']) ?></span>
+                        <span class="ja-health-val ja-tone-<?= e($h['tone']) ?>"><?= e($h['value']) ?></span>
+                    </div>
+                    <div class="ja-bar"><span class="tone-<?= e($h['tone']) ?>" style="width: <?= (int) $h['percent'] ?>%"></span></div>
+                    <div class="ja-health-det"><?= e($h['detail']) ?></div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Quick links -->
+<div class="ja-quick">
+    <?php foreach ($managementLinks as $link): ?>
+        <a class="ja-tile" href="<?= e($link['href']) ?>">
+            <i class="fas <?= e($link['icon']) ?>"></i>
+            <span><b><?= e($link['label']) ?></b><span><?= e($link['detail']) ?></span></span>
+        </a>
+    <?php endforeach; ?>
+</div>
+
+<!-- Recent activity feeds -->
+<div class="ja-grid-2">
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>New users</h2><a href="/jobmington/admin/users.php">Manage</a></div>
+        <div class="ja-card-body">
+            <table class="ja-feed">
+                <?php if (empty($recentUsers)): ?>
+                    <tr><td class="ja-feed-empty">No users yet.</td></tr>
+                <?php else: foreach ($recentUsers as $u): ?>
+                    <tr>
+                        <td>
+                            <div><?= e($u['full_name'] ?: 'Unnamed') ?></div>
+                            <div class="sub"><?= e($u['email']) ?></div>
+                        </td>
+                        <td style="text-align:right;">
+                            <span class="ja-pill <?= $u['is_active'] ? 'good' : 'danger' ?>"><?= e($u['user_type']) ?></span>
+                            <div class="sub"><?= e(admin_when($u['created_at'])) ?></div>
+                        </td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </table>
+        </div>
+    </div>
+
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Recent jobs</h2><a href="/jobmington/admin/jobs.php">Manage</a></div>
+        <div class="ja-card-body">
+            <table class="ja-feed">
+                <?php if (empty($recentJobs)): ?>
+                    <tr><td class="ja-feed-empty">No jobs yet.</td></tr>
+                <?php else: foreach ($recentJobs as $j): ?>
+                    <tr>
+                        <td>
+                            <div><?= e($j['title']) ?></div>
+                            <div class="sub"><?= e($j['company_name'] ?: 'Unknown company') ?> · <?= (int) $j['views'] ?> views · <?= (int) $j['applications_count'] ?> apps</div>
+                        </td>
+                        <td style="text-align:right;">
+                            <span class="ja-pill <?= $j['is_active'] ? 'good' : 'neutral' ?>"><?= $j['is_active'] ? 'Live' : 'Off' ?></span>
+                            <div class="sub"><?= e(admin_when($j['posted_at'])) ?></div>
+                        </td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </table>
+        </div>
+    </div>
+
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Recent applications</h2><a href="/jobmington/employer/applications.php">Review</a></div>
+        <div class="ja-card-body">
+            <table class="ja-feed">
+                <?php if (empty($recentApplications)): ?>
+                    <tr><td class="ja-feed-empty">No applications yet.</td></tr>
+                <?php else: foreach ($recentApplications as $a): ?>
+                    <tr>
+                        <td>
+                            <div><?= e($a['full_name'] ?: $a['email']) ?></div>
+                            <div class="sub"><?= e($a['title']) ?><?= $a['company_name'] ? ' · ' . e($a['company_name']) : '' ?></div>
+                        </td>
+                        <td style="text-align:right;">
+                            <span class="ja-pill <?= $pillTone($a['status']) ?>"><?= e($a['status']) ?></span>
+                            <div class="sub"><?= e(admin_when($a['applied_at'])) ?></div>
+                        </td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </table>
+        </div>
+    </div>
+
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Recent payments</h2><a href="/jobmington/payments/">View</a></div>
+        <div class="ja-card-body">
+            <table class="ja-feed">
+                <?php if (empty($recentPayments)): ?>
+                    <tr><td class="ja-feed-empty">No transactions yet.</td></tr>
+                <?php else: foreach ($recentPayments as $p): ?>
+                    <tr>
+                        <td>
+                            <div><?= e($p['full_name'] ?: ($p['email'] ?: 'Unknown')) ?></div>
+                            <div class="sub"><?= e($p['plan'] ?: 'Payment') ?></div>
+                        </td>
+                        <td style="text-align:right;">
+                            <div><strong><?= e(admin_money($p['amount'])) ?></strong></div>
+                            <span class="ja-pill <?= $pillTone($p['status']) ?>"><?= e($p['status']) ?></span>
+                        </td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Activity + webhooks -->
+<div class="ja-grid-2">
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Activity log</h2></div>
+        <div class="ja-card-body">
+            <table class="ja-feed">
+                <?php if (empty($recentActivity)): ?>
+                    <tr><td class="ja-feed-empty">No activity recorded.</td></tr>
+                <?php else: foreach ($recentActivity as $act): ?>
+                    <tr>
+                        <td>
+                            <div><?= e($act['action']) ?></div>
+                            <div class="sub"><?= e($act['full_name'] ?: ($act['email'] ?: 'System')) ?> · <?= e(admin_snippet($act['details'], 60)) ?></div>
+                        </td>
+                        <td style="text-align:right;white-space:nowrap;"><span class="sub"><?= e(admin_when($act['created_at'])) ?></span></td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </table>
+        </div>
+    </div>
+
+    <div class="ja-card">
+        <div class="ja-card-head"><h2>Recent webhooks</h2><a href="/jobmington/admin/settings.php">Settings</a></div>
+        <div class="ja-card-body">
+            <table class="ja-feed">
+                <?php if (empty($latestWebhooks)): ?>
+                    <tr><td class="ja-feed-empty">No webhook activity.</td></tr>
+                <?php else: foreach ($latestWebhooks as $w): ?>
+                    <tr>
+                        <td>
+                            <div><?= e($w['provider'] ?: 'webhook') ?> · <?= e($w['event_type'] ?: '—') ?></div>
+                            <div class="sub"><?= e($w['reference'] ?: '') ?></div>
+                        </td>
+                        <td style="text-align:right;">
+                            <?php $whBad = empty($w['processed']) || !empty($w['error_message']); ?>
+                            <span class="ja-pill <?= $whBad ? 'danger' : 'good' ?>"><?= $whBad ? 'Issue' : 'OK' ?></span>
+                            <div class="sub"><?= e(admin_when($w['created_at'])) ?></div>
+                        </td>
+                    </tr>
+                <?php endforeach; endif; ?>
+            </table>
+        </div>
+    </div>
+</div>
+
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
