@@ -172,6 +172,19 @@ HTML;
     
     // --- PREDEFINED MESSAGES ---
     
+    public static function sendVerificationEmail(string $email, string $name, string $token): bool {
+        $firstName = explode(' ', trim($name))[0];
+        $url = SITE_URL . '/auth/verify-email.php?token=' . rawurlencode($token);
+        $content = "
+            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;'>Verify your email, {$firstName}.</h2>
+            <p style='color:#64748b;margin:0 0 28px;line-height:1.7;'>You're one step away. Click the button below to confirm your email address and unlock full access to Jobmington — job listings, AI tools, and more.</p>
+            <a href='{$url}' style='display:inline-block;background:#0640a3;color:#ffffff;padding:14px 32px;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;margin:0 0 28px;'>Verify my email</a>
+            <p style='color:#94a3b8;font-size:13px;margin:0 0 6px;'>If you didn't create a Jobmington account, you can safely ignore this email.</p>
+            <p style='color:#94a3b8;font-size:12px;margin:0;'>Or paste this link in your browser:<br><a href='{$url}' style='color:#0640a3;word-break:break-all;'>{$url}</a></p>
+        ";
+        return (new self())->send($email, 'Verify your Jobmington email', $content);
+    }
+
     public static function sendWelcome(string $email, string $name): bool {
         $url = SITE_URL . '/seeker/dashboard.php';
         $content = "<h2>Identity Verified. Welcome, {$name}.</h2>

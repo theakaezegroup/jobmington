@@ -9,6 +9,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/_job_helpers.php';
 
 Session::start();
+Session::requireVerified();
 $pdo = db();
 
 $q = trim(Security::clean(get('q', '')));

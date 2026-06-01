@@ -602,6 +602,42 @@ class Session {
 
     }
 
+
+
+    /**
+
+     * Check if the logged-in user has verified their email
+
+     */
+
+    public static function isVerified(): bool {
+
+        return !empty($_SESSION['is_verified']);
+
+    }
+
+
+
+    /**
+
+     * Require verified email — redirect to verify page if not
+
+     */
+
+    public static function requireVerified(): void {
+
+        self::requireLogin();
+
+        if (!self::isVerified() && self::userType() !== USER_TYPE_ADMIN) {
+
+            header('Location: /jobmington/auth/verify-email.php');
+
+            exit;
+
+        }
+
+    }
+
 }
 
 ?>

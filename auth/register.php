@@ -86,6 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $userId = (int) $pdo->lastInsertId();
+
+            require_once __DIR__ . '/../includes/mailer.php';
+            Mailer::sendVerificationEmail($form['email'], $form['full_name'], $activationToken);
+
             $_SESSION['user_id'] = $userId;
             $_SESSION['user_type'] = $form['user_type'];
             $_SESSION['full_name'] = $form['full_name'];
