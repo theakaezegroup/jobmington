@@ -211,19 +211,19 @@ class Mailer {
   <!-- Card — sharp corners, no border-radius -->
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:0;">
 
-    <!-- Blue header -->
+    <!-- White header -->
     <tr>
-      <td style="background:#0640a3;padding:28px 40px;">
+      <td style="background:#ffffff;padding:28px 40px;">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <!-- Badge directly on blue header -->
+            <!-- Badge on white background — full contrast -->
             <td style="padding-right:14px;vertical-align:middle;">
               <img src="{$logo}" alt="JM" width="40" height="40" style="display:block;">
             </td>
             <!-- Brand name once -->
             <td style="vertical-align:middle;">
-              <span style="{$ffd}font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span><br>
-              <span style="{$ff}font-size:12px;color:rgba(255,255,255,0.6);letter-spacing:0.04em;text-transform:uppercase;">Africa's career platform</span>
+              <span style="{$ffd}font-size:22px;font-weight:700;color:#06142a;letter-spacing:-0.02em;">Jobmington</span><br>
+              <span style="{$ff}font-size:12px;color:#64748b;letter-spacing:0.04em;text-transform:uppercase;">Africa's career platform</span>
             </td>
           </tr>
         </table>
