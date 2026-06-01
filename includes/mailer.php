@@ -218,7 +218,7 @@ class Mailer {
           <tr>
             <!-- Badge in white container for contrast -->
             <td style="padding-right:14px;vertical-align:middle;">
-              <div style="background:#ffffff;border-radius:8px;padding:6px;display:inline-block;line-height:0;">
+              <div style="background:#ffffff;padding:6px;display:inline-block;line-height:0;">
                 <img src="{$logo}" alt="JM" width="36" height="36" style="display:block;">
               </div>
             </td>
