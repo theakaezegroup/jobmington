@@ -201,11 +201,11 @@ class Mailer {
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#e8edf4;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background:#f4f4f4;-webkit-font-smoothing:antialiased;">
 
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#e8edf4;">Jobmington &mdash; Africa's career platform&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#f4f4f4;">Jobmington &mdash; Africa's career platform&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#e8edf4;padding:48px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;padding:48px 16px;">
 <tr><td align="center">
 
   <!-- Card — sharp corners, no border-radius -->
