@@ -26,6 +26,7 @@ try {
             preview_text  VARCHAR(255)  NOT NULL DEFAULT '',
             body_html     TEXT          NOT NULL,
             poster_url    VARCHAR(500)  DEFAULT NULL,
+            custom_emails TEXT          DEFAULT NULL,
             segment       VARCHAR(50)   NOT NULL DEFAULT 'all',
             recipient_count INT UNSIGNED NOT NULL DEFAULT 0,
             sent_count    INT UNSIGNED  NOT NULL DEFAULT 0,
@@ -40,14 +41,17 @@ try {
     error_log('email_campaigns table error: ' . $e->getMessage());
 }
 
-/* Migrate: add poster_url column to existing tables */
+/* Migrate: add columns to existing tables */
 try {
-    $hasPoster = (int) $pdo->query("
-        SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'email_campaigns' AND COLUMN_NAME = 'poster_url'
-    ")->fetchColumn();
-    if (!$hasPoster) {
+    $cols = $pdo->query("
+        SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'email_campaigns'
+    ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+    if (!in_array('poster_url', $cols)) {
         $pdo->exec("ALTER TABLE email_campaigns ADD COLUMN poster_url VARCHAR(500) DEFAULT NULL AFTER body_html");
+    }
+    if (!in_array('custom_emails', $cols)) {
+        $pdo->exec("ALTER TABLE email_campaigns ADD COLUMN custom_emails TEXT DEFAULT NULL AFTER poster_url");
     }
 } catch (Throwable $e) {
     error_log('email_campaigns migration error: ' . $e->getMessage());
@@ -121,12 +125,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* Save draft */
     if (in_array($postAction, ['save_draft', 'send'], true)) {
-        $subject     = trim($_POST['subject']      ?? '');
-        $previewText = trim($_POST['preview_text'] ?? '');
-        $bodyHtml    = trim($_POST['body_html']    ?? '');
-        $segment     = Security::clean($_POST['segment'] ?? 'all');
-        $editId      = (int) ($_POST['edit_id'] ?? 0);
-        $keepPoster  = Security::clean($_POST['keep_poster'] ?? '');
+        $subject      = trim($_POST['subject']       ?? '');
+        $previewText  = trim($_POST['preview_text']  ?? '');
+        $bodyHtml     = trim($_POST['body_html']     ?? '');
+        $segment      = Security::clean($_POST['segment'] ?? 'all');
+        $editId       = (int) ($_POST['edit_id'] ?? 0);
+        $keepPoster   = Security::clean($_POST['keep_poster'] ?? '');
+        $rawCustom    = trim($_POST['custom_emails'] ?? '');
+
+        /* Parse & validate custom emails */
+        $customEmails = [];
+        if ($rawCustom !== '') {
+            $tokens = preg_split('/[\r\n,;]+/', $rawCustom);
+            foreach ($tokens as $tok) {
+                $tok = strtolower(trim($tok));
+                if ($tok !== '' && filter_var($tok, FILTER_VALIDATE_EMAIL)) {
+                    $customEmails[] = $tok;
+                }
+            }
+            $customEmails = array_unique($customEmails);
+        }
+        $customEmailsStored = implode("\n", $customEmails);
 
         if ($subject === '' || $bodyHtml === '') {
             Session::flash('error', 'Subject and body are required.');
@@ -151,20 +170,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $recipients    = ec_segment_query($pdo, $segment);
-        $recipientCount = count($recipients);
+        /* Merge segment + custom, deduplicate by email */
+        $segmentRecipients = ec_segment_query($pdo, $segment);
+        $segmentEmails     = array_column($segmentRecipients, 'email', 'email');
+        $allRecipients     = $segmentRecipients;
+        foreach ($customEmails as $ce) {
+            if (!isset($segmentEmails[$ce])) {
+                $allRecipients[] = ['email' => $ce, 'full_name' => ''];
+            }
+        }
+        $recipientCount = count($allRecipients);
 
         if ($editId > 0) {
             $pdo->prepare("
-                UPDATE email_campaigns SET subject=?, preview_text=?, body_html=?, poster_url=?, segment=?, recipient_count=?, status='draft'
+                UPDATE email_campaigns
+                SET subject=?, preview_text=?, body_html=?, poster_url=?, custom_emails=?, segment=?, recipient_count=?, status='draft'
                 WHERE id=? AND status='draft'
-            ")->execute([$subject, $previewText, $bodyHtml, $posterUrl, $segment, $recipientCount, $editId]);
+            ")->execute([$subject, $previewText, $bodyHtml, $posterUrl, $customEmailsStored, $segment, $recipientCount, $editId]);
             $campaignId = $editId;
         } else {
             $pdo->prepare("
-                INSERT INTO email_campaigns (subject, preview_text, body_html, poster_url, segment, recipient_count, status, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, 'draft', ?)
-            ")->execute([$subject, $previewText, $bodyHtml, $posterUrl, $segment, $recipientCount, (int) Session::userId()]);
+                INSERT INTO email_campaigns (subject, preview_text, body_html, poster_url, custom_emails, segment, recipient_count, status, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?)
+            ")->execute([$subject, $previewText, $bodyHtml, $posterUrl, $customEmailsStored, $segment, $recipientCount, (int) Session::userId()]);
             $campaignId = (int) $pdo->lastInsertId();
         }
 
@@ -175,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         /* Send now */
         if ($recipientCount === 0) {
-            Session::flash('error', 'No recipients match this segment.');
+            Session::flash('error', 'No recipients match the selected segment or custom list.');
             redirect('/jobmington/admin/email-campaigns.php?view=compose&id=' . $campaignId);
         }
 
@@ -190,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $failedCount = 0;
         $mailer      = new Mailer();
 
-        foreach ($recipients as $user) {
+        foreach ($allRecipients as $user) {
             $to   = trim($user['email']);
             $name = trim($user['full_name'] ?: 'there');
             $personalised = str_replace(
@@ -404,7 +432,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <div class="ec-field">
-                    <label class="ec-label" for="ec-segment">Recipient segment <span style="color:var(--admin-red)">*</span></label>
+                    <label class="ec-label" for="ec-segment">Recipient segment</label>
                     <div class="ec-segment-row">
                         <select class="ec-select" id="ec-segment" name="segment" style="flex:1;" onchange="updateCount(this.value)">
                             <?php foreach ($segments as $seg): ?>
@@ -416,6 +444,22 @@ require_once __DIR__ . '/../includes/header.php';
                         <span class="ec-segment-count" id="ec-count">
                             <?= number_format(ec_count($pdo, $editCampaign['segment'] ?? 'all')) ?> recipients
                         </span>
+                    </div>
+                    <p class="ec-help">Choose a group of registered users, or leave on "All verified users".</p>
+                </div>
+
+                <div class="ec-field">
+                    <label class="ec-label" for="ec-custom-emails">
+                        Additional recipients
+                        <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--admin-muted);font-size:11px;"> — emails not in the system</span>
+                    </label>
+                    <textarea class="ec-textarea" id="ec-custom-emails" name="custom_emails"
+                              style="min-height:100px;font-family:inherit;font-size:13px;"
+                              placeholder="Paste one email per line, or separate by commas:&#10;alice@example.com&#10;bob@company.org, carol@brand.io"
+                              oninput="countCustomEmails()"><?= e($editCampaign['custom_emails'] ?? '') ?></textarea>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:5px;">
+                        <p class="ec-help" style="margin:0;">Valid addresses are merged with the segment above. Duplicates are skipped.</p>
+                        <span id="ec-custom-count" style="font-size:12px;font-weight:700;color:var(--admin-blue);white-space:nowrap;"></span>
                     </div>
                 </div>
             </div>
@@ -599,6 +643,17 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <script>
+/* ── Custom email counter ────────────────────────────────────── */
+function countCustomEmails() {
+    const ta  = document.getElementById('ec-custom-emails');
+    const out = document.getElementById('ec-custom-count');
+    if (!ta || !out) return;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const tokens  = ta.value.split(/[\r\n,;]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
+    const valid   = [...new Set(tokens)].filter(t => emailRe.test(t));
+    out.textContent = valid.length ? valid.length + ' valid address' + (valid.length > 1 ? 'es' : '') : '';
+}
+
 /* ── Recipient count AJAX ────────────────────────────────────── */
 function updateCount(seg) {
     fetch('/jobmington/admin/email-campaigns.php?ajax=count&segment=' + encodeURIComponent(seg))
@@ -732,9 +787,10 @@ function insertJobsList() {
     insert(`<p style="font-weight:700;color:#06142a;margin:0 0 10px;">Featured roles this week:</p>\n<ul style="margin:0 0 20px;padding-left:18px;color:#475569;">\n  <li>Product Designer &mdash; Lagos, Remote</li>\n  <li>Backend Engineer &mdash; Nairobi, Remote</li>\n  <li>Marketing Lead &mdash; Accra</li>\n</ul>\n`);
 }
 
-/* init preview if editing a draft */
+/* init preview and custom count if editing a draft */
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('ec-body') && document.getElementById('ec-body').value) livePreview();
+    if (document.getElementById('ec-body')?.value) livePreview();
+    countCustomEmails();
 });
 </script>
 
