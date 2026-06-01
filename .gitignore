@@ -11,3 +11,14 @@ uploads/*
 *.log
 .DS_Store
 Thumbs.db
+
+# Never commit PHP session files or local debug/setup artefacts
+sess_*
+session_test.php
+debug_*.php
+setup.php
+upgrade_db.php
+/import.php
+jobs.json
+*.bak
+.claude/

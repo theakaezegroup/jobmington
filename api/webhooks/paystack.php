@@ -166,7 +166,7 @@ function handleChargeSuccess($pdo, $data) {
                 if (preg_match('/job:(\d+)/', $plan, $m)) {
                     $jobId = (int) $m[1];
                     $pdo->prepare("
-                        UPDATE jobs SET is_active = 1, status = 'active' WHERE job_id = ?
+                        UPDATE jobs SET is_active = 1 WHERE job_id = ?
                     ")->execute([$jobId]);
                     error_log("Webhook: Job {$jobId} activated for user {$userId}");
                 }
