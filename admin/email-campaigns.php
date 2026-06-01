@@ -11,6 +11,7 @@ require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/mailer.php';
+require_once __DIR__ . '/../includes/email_queue.php';
 
 Session::start();
 Session::requireAdmin();
@@ -22,18 +23,9 @@ $pdo = db();
  * runner — see database/migrate.php. Run `php database/migrate.php` on deploy.
  */
 
-/* Recover stuck campaigns: a synchronous send that died (PHP timeout, etc.)
-   leaves status='sending'. Anything sending for >15 min is marked failed. */
-try {
-    $pdo->exec("
-        UPDATE email_campaigns
-        SET status = 'failed'
-        WHERE status = 'sending'
-          AND (started_at IS NULL OR started_at < (NOW() - INTERVAL 15 MINUTE))
-    ");
-} catch (Throwable $e) {
-    error_log('email_campaigns stuck-recovery error: ' . $e->getMessage());
-}
+/* Reconcile: finalise any campaign whose queue has drained (covers a worker
+   that finished between cron ticks, or a send that never enqueued). */
+jm_reconcile_sending_campaigns($pdo);
 
 /* Ensure upload directory exists and is writable by the web server */
 $posterUploadDir = rtrim(UPLOADS_PATH, '/') . '/campaign-posters';
@@ -216,8 +208,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('/jobmington/admin/email-campaigns.php?view=compose&id=' . $campaignId);
         }
 
-        $pdo->prepare("UPDATE email_campaigns SET status='sending', started_at=NOW() WHERE id=?")->execute([$campaignId]);
-
         /* Prepend poster to body if present — table markup required for email clients */
         $posterHtml = '';
         if ($posterUrl) {
@@ -229,15 +219,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         . "</td></tr></table>\n";
         }
 
-        $sentCount    = 0;
-        $failedCount  = 0;
+        /* Enqueue one fully-rendered email per recipient. Actual delivery is
+           handled asynchronously by cron/process_email_queue.php so this
+           request returns immediately even for large lists. */
+        $queuedCount  = 0;
         $skippedCount = 0;
-        $mailer       = new Mailer();
 
         foreach ($allRecipients as $user) {
             $to = trim($user['email']);
 
-            // Honour the suppression list — never email an unsubscribed address.
+            // Honour the suppression list — never queue an unsubscribed address.
             if (Mailer::isSuppressed($to)) {
                 $skippedCount++;
                 continue;
@@ -261,20 +252,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Strip any unsupported/unreplaced {{tokens}} so raw tokens never ship.
             $personalised = preg_replace('/\{\{\s*[a-zA-Z0-9_]+\s*\}\}/', '', $personalised);
 
-            $ok = $mailer->send($to, $subject, $personalised);
-            $ok ? $sentCount++ : $failedCount++;
+            if (jm_enqueue_email($pdo, $to, $name, $subject, $personalised, 'campaign', $campaignId)) {
+                $queuedCount++;
+            }
         }
 
-        $finalStatus = $sentCount > 0 ? 'sent' : ($failedCount > 0 ? 'failed' : 'sent');
+        if ($queuedCount === 0) {
+            // Everyone was suppressed (or nothing enqueued) — nothing to send.
+            $pdo->prepare("UPDATE email_campaigns SET status='sent', skipped_count=?, sent_at=NOW() WHERE id=?")
+                ->execute([$skippedCount, $campaignId]);
+            Session::flash('error', 'No emails queued — all recipients are unsubscribed.');
+            redirect('/jobmington/admin/email-campaigns.php');
+        }
+
         $pdo->prepare("
             UPDATE email_campaigns
-            SET status=?, sent_count=?, failed_count=?, skipped_count=?, sent_at=NOW()
+            SET status='sending', started_at=NOW(), recipient_count=?, skipped_count=?, sent_count=0, failed_count=0
             WHERE id=?
-        ")->execute([$finalStatus, $sentCount, $failedCount, $skippedCount, $campaignId]);
+        ")->execute([$queuedCount, $skippedCount, $campaignId]);
 
-        $msg = "Campaign sent — {$sentCount} delivered";
-        if ($failedCount)  { $msg .= ", {$failedCount} failed"; }
-        if ($skippedCount) { $msg .= ", {$skippedCount} skipped (unsubscribed)"; }
+        $msg = "Campaign queued — {$queuedCount} email" . ($queuedCount === 1 ? '' : 's') . " will be delivered shortly";
+        if ($skippedCount) { $msg .= " ({$skippedCount} skipped — unsubscribed)"; }
         Session::flash('success', $msg . '.');
         redirect('/jobmington/admin/email-campaigns.php');
     }

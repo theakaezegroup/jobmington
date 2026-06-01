@@ -373,13 +373,22 @@ HTML;
     }
 
     /* ── 3. Job match alert — seeker ───────────────────────────── */
-    public static function sendJobMatchAlert(string $email, string $name, int $matchCount, array $jobs = []): bool {
-        $firstName = explode(' ', trim($name))[0];
+
+    /**
+     * Build the subject + inner content for a job-match alert without sending.
+     * Used by both sendJobMatchAlert() and the async queue (cron/send_job_match_alerts.php).
+     *
+     * @return array{subject:string,content:string}
+     */
+    public static function composeJobMatchAlert(string $name, int $matchCount, array $jobs = []): array {
+        $firstName = explode(' ', trim($name))[0] ?: 'there';
         $url       = 'https://jobmington.com/jobs';
         $plural    = $matchCount === 1 ? 'role matches' : 'roles match';
         $jobsList  = '';
         foreach (array_slice($jobs, 0, 3) as $job) {
-            $jobsList .= "<p style='margin:0 0 6px;color:#06142a;font-size:14px;'>&rsaquo; <strong>{$job['title']}</strong> &mdash; {$job['company']}</p>";
+            $title   = htmlspecialchars((string) ($job['title'] ?? 'Role'), ENT_QUOTES);
+            $company = htmlspecialchars((string) ($job['company'] ?? ''), ENT_QUOTES);
+            $jobsList .= "<p style='margin:0 0 6px;color:#06142a;font-size:14px;'>&rsaquo; <strong>{$title}</strong> &mdash; {$company}</p>";
         }
         $content = "
             <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>{$matchCount} new {$plural} your profile, {$firstName}.</h2>
@@ -391,7 +400,12 @@ HTML;
               </td></tr>
             </table>
         ";
-        return (new self())->send($email, "{$matchCount} new job {$plural} your profile", $content);
+        return ['subject' => "{$matchCount} new job {$plural} your profile", 'content' => $content];
+    }
+
+    public static function sendJobMatchAlert(string $email, string $name, int $matchCount, array $jobs = []): bool {
+        $c = self::composeJobMatchAlert($name, $matchCount, $jobs);
+        return (new self())->send($email, $c['subject'], $c['content']);
     }
 
     /* ── 4. Payment receipt — seeker ───────────────────────────── */

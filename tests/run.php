@@ -1,0 +1,97 @@
+<?php
+/**
+ * Jobmington - lightweight smoke + unit test runner (no dependencies).
+ *
+ *   php tests/run.php                              # unit checks only
+ *   php tests/run.php --base=https://jobmington.com  # + HTTP smoke checks
+ *
+ * Exit code 0 = all passed, 1 = one or more failed (CI-friendly).
+ */
+
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('CLI only');
+}
+
+define('JOBMINGTON', true);
+require_once __DIR__ . '/../config/env.php';
+require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../includes/security.php';
+require_once __DIR__ . '/../includes/paystack.php';
+require_once __DIR__ . '/../includes/mailer.php';
+
+$opts = getopt('', ['base::', 'no-http']);
+$base = isset($opts['base']) ? rtrim((string) $opts['base'], '/') : null;
+
+$passed = 0;
+$failed = 0;
+
+function check(string $name, bool $cond): void {
+    global $passed, $failed;
+    if ($cond) { $passed++; echo "  PASS  {$name}\n"; }
+    else       { $failed++; echo "  FAIL  {$name}\n"; }
+}
+
+echo "== Unit checks ==\n";
+
+/* Paystack money conversion */
+check('Paystack::toKobo(100) == 10000', Paystack::toKobo(100.0) === 10000);
+check('Paystack::toNaira(10000) == 100.0', Paystack::toNaira(10000) === 100.0);
+check('Paystack reference has prefix', str_starts_with(Paystack::generateReference('JMT'), 'JMT-'));
+
+/* Password hashing + strength */
+$hash = Security::hashPassword('Sup3rSecret!');
+check('password hash verifies', Security::verifyPassword('Sup3rSecret!', $hash));
+check('password verify rejects wrong', !Security::verifyPassword('nope', $hash));
+check('weak password rejected', count(Security::validatePasswordStrength('abc')) > 0);
+check('strong password accepted', count(Security::validatePasswordStrength('Abcdef12')) === 0);
+
+/* Output escaping */
+check('escape neutralises <script>', !str_contains(Security::escape('<script>'), '<script>'));
+
+/* Email validation */
+check('valid email accepted', Security::validateEmail('a@b.com'));
+check('invalid email rejected', !Security::validateEmail('not-an-email'));
+
+/* Unsubscribe token (HMAC) */
+$tok = Mailer::unsubscribeToken('user@example.com');
+check('unsubscribe token verifies', Mailer::verifyUnsubscribeToken('user@example.com', $tok));
+check('unsubscribe token is case-normalised', Mailer::verifyUnsubscribeToken('USER@example.com', $tok));
+check('tampered unsubscribe token rejected', !Mailer::verifyUnsubscribeToken('user@example.com', $tok . 'x'));
+check('token for other email rejected', !Mailer::verifyUnsubscribeToken('other@example.com', $tok));
+
+/* Job-match composer (no DB) */
+$compose = Mailer::composeJobMatchAlert('Ada Obi', 3, [['title' => 'Engineer', 'company' => 'Flutterwave']]);
+check('match alert composes subject', str_contains($compose['subject'], '3 new job'));
+check('match alert content has first name', str_contains($compose['content'], 'Ada'));
+
+/* HTTP smoke checks (opt-in) */
+if ($base && !isset($opts['no-http'])) {
+    echo "== HTTP smoke checks ({$base}) ==\n";
+
+    $status = function (string $path) use ($base): int {
+        $ch = curl_init($base . $path);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15, CURLOPT_NOBODY => true, CURLOPT_FOLLOWLOCATION => false]);
+        curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return $code;
+    };
+    $body = function (string $path) use ($base): string {
+        $ch = curl_init($base . $path);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15]);
+        $out = (string) curl_exec($ch);
+        curl_close($ch);
+        return $out;
+    };
+
+    check('GET / -> 200',            $status('/') === 200);
+    check('GET /jobs -> 200',        in_array($status('/jobs'), [200, 301, 302], true));
+    check('GET /auth/login -> 200',  $status('/auth/login') === 200);
+    check('GET /pricing -> 200',     $status('/pricing') === 200);
+    check('uploads PHP blocked (403)', $status('/uploads/__smoketest.php') === 403);
+    check('bad unsubscribe token shows invalid', str_contains($body('/unsubscribe?e=a@b.com&t=bad'), 'invalid'));
+}
+
+echo "\n== Result: {$passed} passed, {$failed} failed ==\n";
+exit($failed === 0 ? 0 : 1);

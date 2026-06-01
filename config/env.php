@@ -86,3 +86,7 @@ jm_env_default('GROQ_API_KEY', '');
 
 jm_env_default('JOB_SCRAPER_LIMIT', '80');
 jm_env_default('JOB_SCRAPER_USER_AGENT', 'JobmingtonBot/1.0 (+https://jobmington.com/contact)');
+
+// Job-match alert emails (cron/send_job_match_alerts.php). Off by default so
+// scheduling the cron never blasts real users until you explicitly opt in.
+jm_env_default('JOB_MATCH_ALERTS_ENABLED', 'false');
