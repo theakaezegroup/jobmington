@@ -263,9 +263,9 @@ class Mailer {
               <p style="margin:0 0 8px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:12px;color:#9ca3af;">
                 <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;font-weight:600;">jobmington.com</a>
                 &nbsp;&bull;&nbsp;
-                <a href="{$siteUrl}/privacy-policy.php" style="color:#9ca3af;text-decoration:none;">Privacy</a>
+                <a href="{$siteUrl}/privacy-policy" style="color:#9ca3af;text-decoration:none;">Privacy</a>
                 &nbsp;&bull;&nbsp;
-                <a href="{$siteUrl}/terms-of-service.php" style="color:#9ca3af;text-decoration:none;">Terms</a>
+                <a href="{$siteUrl}/terms-of-service" style="color:#9ca3af;text-decoration:none;">Terms</a>
               </p>
               <p style="margin:0;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:11px;color:#d1d5db;">
                 &copy; {$year} Jobmington &mdash; Simple hiring for African talent.
@@ -292,7 +292,7 @@ HTML;
 
     public static function sendVerificationEmail(string $email, string $name, string $token): bool {
         $firstName = explode(' ', trim($name))[0];
-        $url = SITE_URL . '/auth/verify-email.php?token=' . rawurlencode($token);
+        $url = SITE_URL . '/auth/verify-email?token=' . rawurlencode($token);
         $content = "
             <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Verify your email, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 28px;line-height:1.75;'>You are one step away. Click the button below to confirm your email address and unlock full access to Jobmington &mdash; job listings, AI tools, and more.</p>
@@ -309,7 +309,7 @@ HTML;
 
     public static function sendWelcome(string $email, string $name): bool {
         $firstName = explode(' ', trim($name))[0];
-        $url = SITE_URL . '/jobs/';
+        $url = SITE_URL . '/jobs';
         $content = "
             <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Welcome to Jobmington, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>Your account is verified. Start browsing open roles, use AI tools to sharpen your CV, and apply to jobs that match your skills.</p>
