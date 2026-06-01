@@ -185,6 +185,20 @@ class Mailer {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>{$subject}</title>
+  <style>
+    @font-face {
+      font-family: 'Futura Cyrillic Demi';
+      src: url('https://jobmington.com/assets/fonts/FuturaCyrillicDemi.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: 'Futura Cyrillic Book';
+      src: url('https://jobmington.com/assets/fonts/FuturaCyrillicBook.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+  </style>
 </head>
 <body style="margin:0;padding:0;background:#eef2f7;-webkit-font-smoothing:antialiased;">
 
@@ -205,7 +219,7 @@ class Mailer {
               <img src="{$logo}" alt="" width="28" height="28" style="display:block;border-radius:6px;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#0640a3;letter-spacing:-0.01em;">Jobmington</span>
+              <span style="font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#0640a3;letter-spacing:-0.01em;">Jobmington</span>
             </td>
           </tr>
         </table>
@@ -220,8 +234,8 @@ class Mailer {
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td style="background:linear-gradient(135deg,#0533a0 0%,#0a5fcc 100%);padding:36px 44px 32px;border-radius:16px 16px 0 0;">
-              <p style="margin:0 0 4px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);">Jobmington</p>
-              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:rgba(255,255,255,.7);">Africa's career platform</p>
+              <p style="margin:0 0 4px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);">Jobmington</p>
+              <p style="margin:0;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:13px;color:rgba(255,255,255,.7);">Africa's career platform</p>
             </td>
           </tr>
           <!-- Orange accent bar -->
@@ -231,7 +245,7 @@ class Mailer {
         <!-- Body content -->
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="padding:40px 44px 36px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;color:#374151;">
+            <td style="padding:40px 44px 36px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;color:#374151;">
               {$content}
             </td>
           </tr>
@@ -246,14 +260,14 @@ class Mailer {
         <table width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td style="padding:24px 44px;text-align:center;">
-              <p style="margin:0 0 8px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;color:#9ca3af;">
+              <p style="margin:0 0 8px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:12px;color:#9ca3af;">
                 <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;font-weight:600;">jobmington.com</a>
                 &nbsp;&bull;&nbsp;
                 <a href="{$siteUrl}/privacy-policy.php" style="color:#9ca3af;text-decoration:none;">Privacy</a>
                 &nbsp;&bull;&nbsp;
                 <a href="{$siteUrl}/terms-of-service.php" style="color:#9ca3af;text-decoration:none;">Terms</a>
               </p>
-              <p style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:11px;color:#d1d5db;">
+              <p style="margin:0;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:11px;color:#d1d5db;">
                 &copy; {$year} Jobmington &mdash; Simple hiring for African talent.
               </p>
             </td>
@@ -280,8 +294,8 @@ HTML;
         $firstName = explode(' ', trim($name))[0];
         $url = SITE_URL . '/auth/verify-email.php?token=' . rawurlencode($token);
         $content = "
-            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;line-height:1.2;'>Verify your email, {$firstName}.</h2>
-            <p style='color:#475569;margin:0 0 28px;line-height:1.7;'>You're one step away. Click the button below to confirm your email address and unlock full access to Jobmington &mdash; job listings, AI tools, and more.</p>
+            <h2 style='font-family:"Futura Cyrillic Demi","Century Gothic","Trebuchet MS",Helvetica,Arial,sans-serif;color:#06142a;margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.2;'>Verify your email, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 28px;line-height:1.75;'>You're one step away. Click the button below to confirm your email address and unlock full access to Jobmington &mdash; job listings, AI tools, and more.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 28px;'>
               <tr><td style='border-radius:8px;background:#0640a3;'>
                 <a href='{$url}' style='display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;'>Verify my email</a>
@@ -297,7 +311,7 @@ HTML;
         $firstName = explode(' ', trim($name))[0];
         $url = SITE_URL . '/jobs/';
         $content = "
-            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;'>Welcome to Jobmington, {$firstName}.</h2>
+            <h2 style='font-family:"Futura Cyrillic Demi","Century Gothic","Trebuchet MS",Helvetica,Arial,sans-serif;color:#06142a;margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.2;'>Welcome to Jobmington, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>Your account is verified. Start browsing open roles, use AI tools to sharpen your CV, and apply to jobs that match your skills.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
               <tr><td style='border-radius:8px;background:#0640a3;'>
@@ -311,7 +325,7 @@ HTML;
     public static function sendPasswordReset(string $email, string $name, string $link): bool {
         $firstName = explode(' ', trim($name))[0];
         $content = "
-            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;'>Reset your password, {$firstName}.</h2>
+            <h2 style='font-family:"Futura Cyrillic Demi","Century Gothic","Trebuchet MS",Helvetica,Arial,sans-serif;color:#06142a;margin:0 0 12px;font-size:22px;font-weight:700;line-height:1.2;'>Reset your password, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>We received a request to reset your Jobmington password. Click below to choose a new one. This link expires in 60 minutes.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
               <tr><td style='border-radius:8px;background:#0640a3;'>
