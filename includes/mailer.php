@@ -177,6 +177,9 @@ class Mailer {
         $year    = date('Y');
         $siteUrl = 'https://jobmington.com';
 
+        $ff = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+        $ffd = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+
         return <<<HTML
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
@@ -189,96 +192,79 @@ class Mailer {
     @font-face {
       font-family: 'Futura Cyrillic Demi';
       src: url('https://jobmington.com/assets/fonts/FuturaCyrillicDemi.ttf') format('truetype');
-      font-weight: 700;
-      font-style: normal;
+      font-weight: 700; font-style: normal;
     }
     @font-face {
       font-family: 'Futura Cyrillic Book';
       src: url('https://jobmington.com/assets/fonts/FuturaCyrillicBook.ttf') format('truetype');
-      font-weight: 400;
-      font-style: normal;
+      font-weight: 400; font-style: normal;
     }
   </style>
 </head>
-<body style="margin:0;padding:0;background:#eef2f7;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background:#e8edf4;-webkit-font-smoothing:antialiased;">
 
-<!-- Pre-header preview text -->
-<div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#eef2f7;">Jobmington &mdash; Africa's career platform&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
+<div style="display:none;max-height:0;overflow:hidden;font-size:1px;color:#e8edf4;">Jobmington &mdash; Africa's career platform&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eef2f7;padding:40px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#e8edf4;padding:48px 16px;">
 <tr><td align="center">
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+  <!-- Card — sharp corners, no border-radius -->
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:0;border:1px solid #d0d7e2;">
 
-    <!-- Brand strip above card -->
+    <!-- Blue header -->
     <tr>
-      <td align="center" style="padding-bottom:20px;">
+      <td style="background:#0640a3;padding:28px 40px;">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="padding-right:10px;vertical-align:middle;">
-              <img src="{$logo}" alt="" width="28" height="28" style="display:block;border-radius:6px;">
+            <!-- Badge in white container for contrast -->
+            <td style="padding-right:14px;vertical-align:middle;">
+              <div style="background:#ffffff;border-radius:8px;padding:6px;display:inline-block;line-height:0;">
+                <img src="{$logo}" alt="JM" width="36" height="36" style="display:block;">
+              </div>
             </td>
+            <!-- Brand name once -->
             <td style="vertical-align:middle;">
-              <span style="font-family:Futura,Century Gothic,Trebuchet MS,Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#0640a3;letter-spacing:-0.01em;">Jobmington</span>
+              <span style="{$ffd}font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span><br>
+              <span style="{$ff}font-size:12px;color:rgba(255,255,255,0.6);letter-spacing:0.04em;text-transform:uppercase;">Africa's career platform</span>
             </td>
           </tr>
         </table>
       </td>
     </tr>
 
-    <!-- Main card -->
+    <!-- Orange accent line -->
+    <tr><td style="height:4px;background:#f59f22;font-size:0;line-height:0;">&zwnj;</td></tr>
+
+    <!-- Body -->
     <tr>
-      <td style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(6,20,38,.07),0 0 0 1px rgba(6,20,38,.05);">
-
-        <!-- Hero banner -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="background:linear-gradient(135deg,#0533a0 0%,#0a5fcc 100%);padding:36px 44px 32px;border-radius:16px 16px 0 0;">
-              <p style="margin:0 0 4px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.55);">Jobmington</p>
-              <p style="margin:0;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:13px;color:rgba(255,255,255,.7);">Africa's career platform</p>
-            </td>
-          </tr>
-          <!-- Orange accent bar -->
-          <tr><td style="height:3px;background:linear-gradient(90deg,#f59f22,#f7b944);font-size:0;">&zwnj;</td></tr>
-        </table>
-
-        <!-- Body content -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="padding:40px 44px 36px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.75;color:#374151;">
-              {$content}
-            </td>
-          </tr>
-        </table>
-
-        <!-- Divider -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr><td style="padding:0 44px;"><div style="height:1px;background:#e5e7eb;font-size:0;">&zwnj;</div></td></tr>
-        </table>
-
-        <!-- Footer inside card -->
-        <table width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr>
-            <td style="padding:24px 44px;text-align:center;">
-              <p style="margin:0 0 8px;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:12px;color:#9ca3af;">
-                <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;font-weight:600;">jobmington.com</a>
-                &nbsp;&bull;&nbsp;
-                <a href="{$siteUrl}/privacy-policy" style="color:#9ca3af;text-decoration:none;">Privacy</a>
-                &nbsp;&bull;&nbsp;
-                <a href="{$siteUrl}/terms-of-service" style="color:#9ca3af;text-decoration:none;">Terms</a>
-              </p>
-              <p style="margin:0;font-family:'Futura Cyrillic Book','Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;font-size:11px;color:#d1d5db;">
-                &copy; {$year} Jobmington &mdash; Simple hiring for African talent.
-              </p>
-            </td>
-          </tr>
-        </table>
-
+      <td style="padding:44px 40px 36px;{$ff}font-size:15px;line-height:1.8;color:#374151;">
+        {$content}
       </td>
     </tr>
-    <!-- /card -->
+
+    <!-- Divider -->
+    <tr>
+      <td style="padding:0 40px;">
+        <div style="height:1px;background:#e5e7eb;font-size:0;">&zwnj;</div>
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td style="padding:22px 40px;text-align:center;background:#f7f9fc;">
+        <p style="margin:0 0 6px;{$ff}font-size:12px;color:#9ca3af;">
+          <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;font-weight:600;">jobmington.com</a>
+          &nbsp;&middot;&nbsp;
+          <a href="{$siteUrl}/privacy-policy" style="color:#9ca3af;text-decoration:none;">Privacy</a>
+          &nbsp;&middot;&nbsp;
+          <a href="{$siteUrl}/terms-of-service" style="color:#9ca3af;text-decoration:none;">Terms</a>
+        </p>
+        <p style="margin:0;{$ff}font-size:11px;color:#c9d0da;">&copy; {$year} Jobmington. Simple hiring for African talent.</p>
+      </td>
+    </tr>
 
   </table>
+  <!-- /card -->
 
 </td></tr>
 </table>
