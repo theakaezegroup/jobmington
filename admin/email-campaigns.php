@@ -17,44 +17,22 @@ Session::requireAdmin();
 
 $pdo = db();
 
-/* ── Ensure campaigns table ─────────────────────────────────────── */
+/*
+ * Schema (email_campaigns, email_unsubscribes) is managed by the migration
+ * runner — see database/migrate.php. Run `php database/migrate.php` on deploy.
+ */
+
+/* Recover stuck campaigns: a synchronous send that died (PHP timeout, etc.)
+   leaves status='sending'. Anything sending for >15 min is marked failed. */
 try {
     $pdo->exec("
-        CREATE TABLE IF NOT EXISTS email_campaigns (
-            id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            subject       VARCHAR(255)  NOT NULL,
-            preview_text  VARCHAR(255)  NOT NULL DEFAULT '',
-            body_html     TEXT          NOT NULL,
-            poster_url    VARCHAR(500)  DEFAULT NULL,
-            custom_emails TEXT          DEFAULT NULL,
-            segment       VARCHAR(50)   NOT NULL DEFAULT 'all',
-            recipient_count INT UNSIGNED NOT NULL DEFAULT 0,
-            sent_count    INT UNSIGNED  NOT NULL DEFAULT 0,
-            failed_count  INT UNSIGNED  NOT NULL DEFAULT 0,
-            status        ENUM('draft','sending','sent','failed') NOT NULL DEFAULT 'draft',
-            sent_at       DATETIME      DEFAULT NULL,
-            created_at    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            created_by    INT UNSIGNED  DEFAULT NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        UPDATE email_campaigns
+        SET status = 'failed'
+        WHERE status = 'sending'
+          AND (started_at IS NULL OR started_at < (NOW() - INTERVAL 15 MINUTE))
     ");
 } catch (Throwable $e) {
-    error_log('email_campaigns table error: ' . $e->getMessage());
-}
-
-/* Migrate: add columns to existing tables */
-try {
-    $cols = $pdo->query("
-        SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'email_campaigns'
-    ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
-    if (!in_array('poster_url', $cols)) {
-        $pdo->exec("ALTER TABLE email_campaigns ADD COLUMN poster_url VARCHAR(500) DEFAULT NULL AFTER body_html");
-    }
-    if (!in_array('custom_emails', $cols)) {
-        $pdo->exec("ALTER TABLE email_campaigns ADD COLUMN custom_emails TEXT DEFAULT NULL AFTER poster_url");
-    }
-} catch (Throwable $e) {
-    error_log('email_campaigns migration error: ' . $e->getMessage());
+    error_log('email_campaigns stuck-recovery error: ' . $e->getMessage());
 }
 
 /* Ensure upload directory exists and is writable by the web server */
@@ -238,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('/jobmington/admin/email-campaigns.php?view=compose&id=' . $campaignId);
         }
 
-        $pdo->prepare("UPDATE email_campaigns SET status='sending' WHERE id=?")->execute([$campaignId]);
+        $pdo->prepare("UPDATE email_campaigns SET status='sending', started_at=NOW() WHERE id=?")->execute([$campaignId]);
 
         /* Prepend poster to body if present — table markup required for email clients */
         $posterHtml = '';
@@ -251,30 +229,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         . "</td></tr></table>\n";
         }
 
-        $sentCount   = 0;
-        $failedCount = 0;
-        $mailer      = new Mailer();
+        $sentCount    = 0;
+        $failedCount  = 0;
+        $skippedCount = 0;
+        $mailer       = new Mailer();
 
         foreach ($allRecipients as $user) {
-            $to   = trim($user['email']);
+            $to = trim($user['email']);
+
+            // Honour the suppression list — never email an unsubscribed address.
+            if (Mailer::isSuppressed($to)) {
+                $skippedCount++;
+                continue;
+            }
+
             $name = trim($user['full_name'] ?: 'there');
+
+            // Per-recipient unsubscribe footer (CAN-SPAM / deliverability).
+            $unsubUrl = Mailer::unsubscribeUrl($to);
+            $footer   = "<p style='color:#94a3b8;font-size:12px;line-height:1.6;margin:28px 0 0;text-align:center;'>"
+                      . "You're receiving this because you have a Jobmington account.<br>"
+                      . "<a href='" . htmlspecialchars($unsubUrl, ENT_QUOTES | ENT_HTML5) . "' style='color:#94a3b8;text-decoration:underline;'>Unsubscribe from marketing emails</a>."
+                      . "</p>";
+
             $personalised = str_replace(
                 ['{{name}}', '{{first_name}}', '{{email}}'],
                 [e($name), e(explode(' ', $name)[0]), e($to)],
-                $posterHtml . $bodyHtml
+                $posterHtml . $bodyHtml . $footer
             );
+
+            // Strip any unsupported/unreplaced {{tokens}} so raw tokens never ship.
+            $personalised = preg_replace('/\{\{\s*[a-zA-Z0-9_]+\s*\}\}/', '', $personalised);
+
             $ok = $mailer->send($to, $subject, $personalised);
             $ok ? $sentCount++ : $failedCount++;
         }
 
-        $finalStatus = $failedCount === $recipientCount ? 'failed' : 'sent';
+        $finalStatus = $sentCount > 0 ? 'sent' : ($failedCount > 0 ? 'failed' : 'sent');
         $pdo->prepare("
             UPDATE email_campaigns
-            SET status=?, sent_count=?, failed_count=?, sent_at=NOW()
+            SET status=?, sent_count=?, failed_count=?, skipped_count=?, sent_at=NOW()
             WHERE id=?
-        ")->execute([$finalStatus, $sentCount, $failedCount, $campaignId]);
+        ")->execute([$finalStatus, $sentCount, $failedCount, $skippedCount, $campaignId]);
 
-        Session::flash('success', "Campaign sent — {$sentCount} delivered" . ($failedCount ? ", {$failedCount} failed" : '') . '.');
+        $msg = "Campaign sent — {$sentCount} delivered";
+        if ($failedCount)  { $msg .= ", {$failedCount} failed"; }
+        if ($skippedCount) { $msg .= ", {$skippedCount} skipped (unsubscribed)"; }
+        Session::flash('success', $msg . '.');
         redirect('/jobmington/admin/email-campaigns.php');
     }
 

@@ -487,6 +487,39 @@ HTML;
         ";
         return (new self())->send($email, 'Reset your Jobmington password', $content);
     }
+
+    /* ── Unsubscribe / suppression (marketing campaigns only) ───── */
+
+    /** Signing secret for unsubscribe tokens. */
+    private static function unsubscribeSecret(): string {
+        return getenv('APP_KEY') ?: 'jm-default-app-key-change-me';
+    }
+
+    /** Deterministic token tying an unsubscribe link to one email address. */
+    public static function unsubscribeToken(string $email): string {
+        return hash_hmac('sha256', strtolower(trim($email)), self::unsubscribeSecret());
+    }
+
+    public static function verifyUnsubscribeToken(string $email, string $token): bool {
+        return hash_equals(self::unsubscribeToken($email), $token);
+    }
+
+    /** Full, tokenised unsubscribe URL for an email address. */
+    public static function unsubscribeUrl(string $email): string {
+        return SITE_URL . '/unsubscribe?e=' . urlencode($email) . '&t=' . self::unsubscribeToken($email);
+    }
+
+    /** True if the address is on the suppression list. */
+    public static function isSuppressed(string $email): bool {
+        try {
+            $stmt = db()->prepare("SELECT 1 FROM email_unsubscribes WHERE email = ? LIMIT 1");
+            $stmt->execute([strtolower(trim($email))]);
+            return (bool) $stmt->fetchColumn();
+        } catch (Throwable $e) {
+            error_log('isSuppressed error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
 
 // Global Helper

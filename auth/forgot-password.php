@@ -10,25 +10,6 @@ require_once __DIR__ . '/../includes/mailer.php';
 
 Session::start();
 
-function jm_ensure_password_reset_columns(PDO $pdo): void {
-    static $ready = false;
-    if ($ready) return;
-
-    $exists = static function (string $col) use ($pdo): bool {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = ?
-        ");
-        $stmt->execute([$col]);
-        return (int) $stmt->fetchColumn() > 0;
-    };
-
-    if (!$exists('reset_token'))   $pdo->exec("ALTER TABLE users ADD COLUMN reset_token VARCHAR(64) NULL");
-    if (!$exists('reset_expires')) $pdo->exec("ALTER TABLE users ADD COLUMN reset_expires DATETIME NULL");
-
-    $ready = true;
-}
-
 $message = '';
 $error   = '';
 $email   = '';
@@ -42,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Enter a valid email address.';
         } else {
             $pdo = db();
-            jm_ensure_password_reset_columns($pdo);
 
             $stmt = $pdo->prepare("SELECT user_id, full_name FROM users WHERE email = ? AND is_active = 1 LIMIT 1");
             $stmt->execute([$email]);

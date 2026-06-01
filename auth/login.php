@@ -26,40 +26,6 @@ function jm_login_dashboard_for(string $userType): string {
     return '/jobmington/seeker/dashboard.php';
 }
 
-function jm_login_ensure_lockout_columns(PDO $pdo): void {
-    static $ready = false;
-
-    if ($ready) {
-        return;
-    }
-
-    $columnExists = static function (string $column) use ($pdo): bool {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE()
-              AND TABLE_NAME = 'users'
-              AND COLUMN_NAME = ?
-        ");
-        $stmt->execute([$column]);
-        return (int) $stmt->fetchColumn() > 0;
-    };
-
-    $columns = [
-        'failed_login_attempts' => "ALTER TABLE users ADD COLUMN failed_login_attempts INT NOT NULL DEFAULT 0",
-        'locked_until' => "ALTER TABLE users ADD COLUMN locked_until DATETIME DEFAULT NULL",
-        'last_login' => "ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT NULL",
-    ];
-
-    foreach ($columns as $column => $sql) {
-        if (!$columnExists($column)) {
-            $pdo->exec($sql);
-        }
-    }
-
-    $ready = true;
-}
-
 if (Session::isLoggedIn()) {
     if ($hasSafeRedirect) {
         redirect($redirectTo);
@@ -68,7 +34,6 @@ if (Session::isLoggedIn()) {
 }
 
 $pdo = db();
-jm_login_ensure_lockout_columns($pdo);
 $error = '';
 $emailValue = '';
 

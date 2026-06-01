@@ -65,6 +65,10 @@ jm_env_default('APP_ENV', 'development');
 jm_env_default('APP_DEBUG', 'true');
 jm_env_default('APP_TIMEZONE', 'Africa/Lagos');
 
+// Secret used to sign unsubscribe tokens (and other low-value HMACs).
+// Set a unique value in production .env; the default keeps links stable in dev.
+jm_env_default('APP_KEY', 'jm-default-app-key-change-me');
+
 jm_env_default('PAYSTACK_PUBLIC_KEY', '');
 jm_env_default('PAYSTACK_SECRET_KEY', '');
 jm_env_default('PAYSTACK_BASE_URL', 'https://api.paystack.co');

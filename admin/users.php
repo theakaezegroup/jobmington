@@ -17,40 +17,6 @@ Session::requireAdmin();
 $pdo = db();
 $currentAdminId = (int) (Session::userId() ?? 0);
 
-function jm_admin_users_ensure_columns(PDO $pdo): void {
-    static $ready = false;
-
-    if ($ready) {
-        return;
-    }
-
-    $columnExists = static function (string $column) use ($pdo): bool {
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*)
-            FROM INFORMATION_SCHEMA.COLUMNS
-            WHERE TABLE_SCHEMA = DATABASE()
-              AND TABLE_NAME = 'users'
-              AND COLUMN_NAME = ?
-        ");
-        $stmt->execute([$column]);
-        return (int) $stmt->fetchColumn() > 0;
-    };
-
-    $columns = [
-        'failed_login_attempts' => "ALTER TABLE users ADD COLUMN failed_login_attempts INT NOT NULL DEFAULT 0",
-        'locked_until' => "ALTER TABLE users ADD COLUMN locked_until DATETIME DEFAULT NULL",
-        'last_login' => "ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT NULL",
-    ];
-
-    foreach ($columns as $column => $sql) {
-        if (!$columnExists($column)) {
-            $pdo->exec($sql);
-        }
-    }
-
-    $ready = true;
-}
-
 function jm_admin_user_scalar(PDO $pdo, string $sql, array $params = [], $fallback = 0) {
     try {
         $stmt = $pdo->prepare($sql);
@@ -93,8 +59,6 @@ function jm_admin_user_name(array $user): string {
 function jm_admin_temp_password(): string {
     return 'Jobmington-' . random_int(100000, 999999) . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
 }
-
-jm_admin_users_ensure_columns($pdo);
 
 $allowedRoles = [USER_TYPE_ADMIN, USER_TYPE_EMPLOYER, USER_TYPE_SEEKER];
 
