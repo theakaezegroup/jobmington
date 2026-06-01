@@ -209,7 +209,7 @@ class Mailer {
 <tr><td align="center">
 
   <!-- Card — sharp corners, no border-radius -->
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:0;border:1px solid #d0d7e2;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:0;">
 
     <!-- Blue header -->
     <tr>
