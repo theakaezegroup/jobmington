@@ -216,11 +216,9 @@ class Mailer {
       <td style="background:#0640a3;padding:28px 40px;">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <!-- Badge in white container for contrast -->
+            <!-- Badge directly on blue header -->
             <td style="padding-right:14px;vertical-align:middle;">
-              <div style="background:#ffffff;padding:6px;display:inline-block;line-height:0;">
-                <img src="{$logo}" alt="JM" width="36" height="36" style="display:block;">
-              </div>
+              <img src="{$logo}" alt="JM" width="40" height="40" style="display:block;">
             </td>
             <!-- Brand name once -->
             <td style="vertical-align:middle;">
