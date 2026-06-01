@@ -170,73 +170,129 @@ class Mailer {
     }
     
     /**
-     * Construct Holographic Template
+     * Build branded email template
      */
     private function buildTemplate(string $subject, string $content): string {
-        $logo = SITE_URL . '/assets/images/badge.png?v=logo-7';
-        
+        $logo    = SITE_URL . '/assets/images/badge.png?v=logo-7';
+        $year    = date('Y');
+        $siteUrl = SITE_URL;
+
         return <<<HTML
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body { background: #0f172a; color: #e2e8f0; font-family: 'Futura Cyrillic Demi'; margin: 0; padding: 0; }
-                .wrapper { max-width: 600px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; }
-                .header { background: #0f172a; padding: 20px; text-align: center; border-bottom: 2px solid #a855f7; }
-                .logo { height: 40px; }
-                .body { padding: 30px; line-height: 1.6; }
-                .btn { display: inline-block; background: #a855f7; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
-                .footer { background: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; }
-                a { color: #a855f7; }
-                strong { color: #fff; }
-            </style>
-        </head>
-        <body>
-            <div class="wrapper">
-                <div class="header">
-                    <img src="{$logo}" alt="Jobmington" class="logo">
-                </div>
-                <div class="body">
-                    {$content}
-                </div>
-                <div class="footer">
-                    &copy; date('Y') Jobmington Network. All rights reserved.
-                </div>
-            </div>
-        </body>
-        </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{$subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 16px;">
+<tr><td align="center">
+
+  <!-- Card -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(6,20,38,.08);">
+
+    <!-- Header -->
+    <tr>
+      <td style="background:#0640a3;padding:28px 40px;text-align:left;">
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding-right:12px;vertical-align:middle;">
+              <img src="{$logo}" alt="Jobmington" height="36" style="display:block;">
+            </td>
+            <td style="vertical-align:middle;">
+              <span style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Orange accent line -->
+    <tr><td style="height:4px;background:#f59f22;font-size:0;">&nbsp;</td></tr>
+
+    <!-- Body -->
+    <tr>
+      <td style="padding:40px 40px 32px;color:#06142a;font-size:15px;line-height:1.7;">
+        {$content}
+      </td>
+    </tr>
+
+    <!-- Footer -->
+    <tr>
+      <td style="padding:24px 40px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;">
+        <p style="margin:0 0 6px;font-size:13px;color:#64748b;">
+          &copy; {$year} Jobmington &mdash; Simple hiring for African talent.
+        </p>
+        <p style="margin:0;font-size:12px;color:#94a3b8;">
+          <a href="{$siteUrl}" style="color:#0640a3;text-decoration:none;">jobmington.com</a>
+          &nbsp;&middot;&nbsp;
+          <a href="{$siteUrl}/privacy-policy.php" style="color:#94a3b8;text-decoration:none;">Privacy</a>
+          &nbsp;&middot;&nbsp;
+          <a href="{$siteUrl}/unsubscribe.php" style="color:#94a3b8;text-decoration:none;">Unsubscribe</a>
+        </p>
+      </td>
+    </tr>
+
+  </table>
+  <!-- /Card -->
+
+</td></tr>
+</table>
+
+</body>
+</html>
 HTML;
     }
-    
+
     // --- PREDEFINED MESSAGES ---
-    
+
     public static function sendVerificationEmail(string $email, string $name, string $token): bool {
         $firstName = explode(' ', trim($name))[0];
         $url = SITE_URL . '/auth/verify-email.php?token=' . rawurlencode($token);
         $content = "
-            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;'>Verify your email, {$firstName}.</h2>
-            <p style='color:#64748b;margin:0 0 28px;line-height:1.7;'>You're one step away. Click the button below to confirm your email address and unlock full access to Jobmington — job listings, AI tools, and more.</p>
-            <a href='{$url}' style='display:inline-block;background:#0640a3;color:#ffffff;padding:14px 32px;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;margin:0 0 28px;'>Verify my email</a>
+            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;line-height:1.2;'>Verify your email, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 28px;line-height:1.7;'>You're one step away. Click the button below to confirm your email address and unlock full access to Jobmington &mdash; job listings, AI tools, and more.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 28px;'>
+              <tr><td style='border-radius:8px;background:#0640a3;'>
+                <a href='{$url}' style='display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;'>Verify my email</a>
+              </td></tr>
+            </table>
             <p style='color:#94a3b8;font-size:13px;margin:0 0 6px;'>If you didn't create a Jobmington account, you can safely ignore this email.</p>
-            <p style='color:#94a3b8;font-size:12px;margin:0;'>Or paste this link in your browser:<br><a href='{$url}' style='color:#0640a3;word-break:break-all;'>{$url}</a></p>
+            <p style='color:#94a3b8;font-size:12px;margin:0;'>Or copy this link into your browser:<br><a href='{$url}' style='color:#0640a3;word-break:break-all;'>{$url}</a></p>
         ";
         return (new self())->send($email, 'Verify your Jobmington email', $content);
     }
 
     public static function sendWelcome(string $email, string $name): bool {
-        $url = SITE_URL . '/seeker/dashboard.php';
-        $content = "<h2>Identity Verified. Welcome, {$name}.</h2>
-        <p>Your access to the Jobmington Network has been granted. Prepare to upgrade your career trajectory.</p>
-        <p><a href='{$url}' class='btn'>Enter Command Center</a></p>";
-        return (new self())->send($email, 'Access Granted', $content);
+        $firstName = explode(' ', trim($name))[0];
+        $url = SITE_URL . '/jobs/';
+        $content = "
+            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;'>Welcome to Jobmington, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>Your account is verified. Start browsing open roles, use AI tools to sharpen your CV, and apply to jobs that match your skills.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+              <tr><td style='border-radius:8px;background:#0640a3;'>
+                <a href='{$url}' style='display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;'>Browse open jobs</a>
+              </td></tr>
+            </table>
+        ";
+        return (new self())->send($email, 'Welcome to Jobmington', $content);
     }
-    
+
     public static function sendPasswordReset(string $email, string $name, string $link): bool {
-        $content = "<h2>Security Alert</h2>
-        <p>A request to reset your credentials was intercepted. If this was you, authorize below:</p>
-        <p><a href='{$link}' class='btn'>Reset Credentials</a></p>
-        <p>Link expires in 60 minutes.</p>";
-        return (new self())->send($email, 'Credential Reset Protocol', $content);
+        $firstName = explode(' ', trim($name))[0];
+        $content = "
+            <h2 style='color:#06142a;margin:0 0 12px;font-size:22px;font-weight:800;'>Reset your password, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 24px;line-height:1.7;'>We received a request to reset your Jobmington password. Click below to choose a new one. This link expires in 60 minutes.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+              <tr><td style='border-radius:8px;background:#0640a3;'>
+                <a href='{$link}' style='display:inline-block;padding:14px 32px;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px;'>Reset password</a>
+              </td></tr>
+            </table>
+            <p style='color:#94a3b8;font-size:13px;margin:0;'>If you didn't request this, you can safely ignore this email. Your password won't change.</p>
+        ";
+        return (new self())->send($email, 'Reset your Jobmington password', $content);
     }
 }
 
