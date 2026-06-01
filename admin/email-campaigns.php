@@ -123,6 +123,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('/jobmington/admin/email-campaigns.php');
     }
 
+    /* Duplicate campaign → new draft */
+    if ($postAction === 'duplicate') {
+        $id   = (int) ($_POST['id'] ?? 0);
+        $orig = $pdo->prepare("SELECT * FROM email_campaigns WHERE id = ? LIMIT 1");
+        $orig->execute([$id]);
+        $orig = $orig->fetch(PDO::FETCH_ASSOC);
+        if ($orig) {
+            $pdo->prepare("
+                INSERT INTO email_campaigns
+                    (subject, preview_text, body_html, poster_url, custom_emails, segment, recipient_count, status, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?)
+            ")->execute([
+                'Copy of ' . $orig['subject'],
+                $orig['preview_text'],
+                $orig['body_html'],
+                $orig['poster_url'],
+                $orig['custom_emails'],
+                $orig['segment'],
+                $orig['recipient_count'],
+                (int) Session::userId(),
+            ]);
+            $newId = (int) $pdo->lastInsertId();
+            Session::flash('success', 'Campaign duplicated as a new draft.');
+            redirect('/jobmington/admin/email-campaigns.php?view=compose&id=' . $newId);
+        }
+        redirect('/jobmington/admin/email-campaigns.php');
+    }
+
     /* Save draft */
     if (in_array($postAction, ['save_draft', 'send'], true)) {
         $subject      = trim($_POST['subject']       ?? '');
@@ -162,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $filename = 'poster_' . uniqid() . '.' . $ext;
                 $dest     = $posterUploadDir . '/' . $filename;
                 if (move_uploaded_file($_FILES['poster']['tmp_name'], $dest)) {
-                    $posterUrl = SITE_URL . '/uploads/campaign-posters/' . $filename;
+                    $posterUrl = UPLOADS_URL . '/campaign-posters/' . $filename;
                 }
             } else {
                 Session::flash('error', 'Poster must be JPG, PNG, GIF or WebP and under 8 MB.');
@@ -209,10 +237,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->prepare("UPDATE email_campaigns SET status='sending' WHERE id=?")->execute([$campaignId]);
 
-        /* Prepend poster to body if present */
-        $posterHtml = $posterUrl
-            ? "<div style='margin:0 0 24px;'><img src='" . htmlspecialchars($posterUrl, ENT_QUOTES) . "' alt='Campaign image' style='width:100%;max-width:600px;display:block;border-radius:4px;'></div>\n"
-            : '';
+        /* Prepend poster to body if present — table markup required for email clients */
+        $posterHtml = '';
+        if ($posterUrl) {
+            $safeUrl    = htmlspecialchars($posterUrl, ENT_QUOTES | ENT_HTML5);
+            $posterHtml = "<table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin:0 0 28px;'>"
+                        . "<tr><td align='center'>"
+                        . "<img src='{$safeUrl}' alt='Campaign image' width='520'"
+                        . " style='display:block;width:100%;max-width:520px;height:auto;border:0;' />"
+                        . "</td></tr></table>\n";
+        }
 
         $sentCount   = 0;
         $failedCount = 0;
@@ -616,13 +650,21 @@ require_once __DIR__ . '/../includes/header.php';
                                 ? date('M d, Y', strtotime($campaign['sent_at']))
                                 : date('M d, Y', strtotime($campaign['created_at'])) ?>
                         </td>
-                        <td style="white-space:nowrap;">
+                        <td style="white-space:nowrap;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                             <?php if ($campaign['status'] === 'draft'): ?>
                                 <a class="ec-btn-secondary" style="padding:6px 12px;font-size:12px;"
                                    href="/jobmington/admin/email-campaigns.php?view=compose&id=<?= (int)$campaign['id'] ?>">
                                     <i class="fas fa-pencil"></i> Edit
                                 </a>
                             <?php endif; ?>
+                            <form method="POST" style="display:inline;">
+                                <?= Security::csrfField() ?>
+                                <input type="hidden" name="action" value="duplicate">
+                                <input type="hidden" name="id" value="<?= (int)$campaign['id'] ?>">
+                                <button class="ec-btn-secondary" type="submit" style="padding:6px 12px;font-size:12px;" title="Duplicate as new draft">
+                                    <i class="fas fa-copy"></i> Reuse
+                                </button>
+                            </form>
                             <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this campaign?')">
                                 <?= Security::csrfField() ?>
                                 <input type="hidden" name="action" value="delete">
