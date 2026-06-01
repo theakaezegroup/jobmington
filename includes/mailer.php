@@ -223,7 +223,7 @@ class Mailer {
             <!-- Brand name once -->
             <td style="vertical-align:middle;">
               <span style="{$ffd}font-size:22px;font-weight:700;color:#06142a;letter-spacing:-0.02em;">Jobmington</span><br>
-              <span style="{$ff}font-size:12px;color:#64748b;letter-spacing:0.04em;text-transform:uppercase;">Simple hiring for African talent</span>
+              <span style="{$ff}font-size:10px;color:#94a3b8;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
             </td>
           </tr>
         </table>
