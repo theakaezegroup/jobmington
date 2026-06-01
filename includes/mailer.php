@@ -306,6 +306,173 @@ HTML;
         return (new self())->send($email, 'Welcome to Jobmington', $content);
     }
 
+    /* ── Status label helper ───────────────────────────────────── */
+    private static function statusLabel(string $status): string {
+        return [
+            'pending'     => 'Received',
+            'reviewed'    => 'Under Review',
+            'shortlisted' => 'Shortlisted',
+            'interview'   => 'Interview Invited',
+            'rejected'    => 'Unsuccessful',
+            'hired'       => 'Hired',
+        ][$status] ?? ucfirst($status);
+    }
+
+    /* ── 1. Application confirmation — seeker ──────────────────── */
+    public static function sendApplicationConfirmation(string $email, string $name, string $jobTitle, string $company, string $jobUrl): bool {
+        $firstName = explode(' ', trim($name))[0];
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Application received, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your application for <strong style='color:#06142a;'>{$jobTitle}</strong> at <strong style='color:#06142a;'>{$company}</strong> has been submitted. We'll let you know if there are any updates.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='{$jobUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View job</a>
+              </td></tr>
+            </table>
+            <p style='color:#94a3b8;font-size:13px;margin:0;'>Track all your applications from your <a href='https://jobmington.com/seeker/applications' style='color:#0640a3;'>applications dashboard</a>.</p>
+        ";
+        return (new self())->send($email, "Application submitted — {$jobTitle}", $content);
+    }
+
+    /* ── 2. Application status update — seeker ─────────────────── */
+    public static function sendApplicationStatusUpdate(string $email, string $name, string $jobTitle, string $company, string $status): bool {
+        $firstName   = explode(' ', trim($name))[0];
+        $label       = self::statusLabel($status);
+        $isPositive  = in_array($status, ['shortlisted', 'interview', 'hired']);
+        $isRejected  = $status === 'rejected';
+        $accentColor = $isPositive ? '#059669' : ($isRejected ? '#6b7280' : '#0640a3');
+        $url         = 'https://jobmington.com/seeker/applications';
+
+        $statusNote = match($status) {
+            'shortlisted' => 'Great news — the employer has shortlisted your profile. Stay ready.',
+            'interview'   => 'The employer wants to interview you. Check your dashboard for next steps.',
+            'hired'       => 'Congratulations! You have been hired. Best of luck in your new role.',
+            'rejected'    => 'The employer has moved forward with other candidates. Keep applying — the right role is out there.',
+            'reviewed'    => 'The employer is reviewing your application. We will update you as things progress.',
+            default       => 'Your application status has been updated.',
+        };
+
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Application update, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your application for <strong style='color:#06142a;'>{$jobTitle}</strong> at <strong style='color:#06142a;'>{$company}</strong> has been updated.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 20px;'>
+              <tr>
+                <td style='background:{$accentColor};padding:12px 20px;'>
+                  <span style='color:#ffffff;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;'>{$label}</span>
+                </td>
+              </tr>
+            </table>
+            <p style='color:#475569;margin:0 0 24px;line-height:1.75;'>{$statusNote}</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View applications</a>
+              </td></tr>
+            </table>
+        ";
+        return (new self())->send($email, "Application update — {$jobTitle}", $content);
+    }
+
+    /* ── 3. Job match alert — seeker ───────────────────────────── */
+    public static function sendJobMatchAlert(string $email, string $name, int $matchCount, array $jobs = []): bool {
+        $firstName = explode(' ', trim($name))[0];
+        $url       = 'https://jobmington.com/jobs';
+        $plural    = $matchCount === 1 ? 'role matches' : 'roles match';
+        $jobsList  = '';
+        foreach (array_slice($jobs, 0, 3) as $job) {
+            $jobsList .= "<p style='margin:0 0 6px;color:#06142a;font-size:14px;'>&rsaquo; <strong>{$job['title']}</strong> &mdash; {$job['company']}</p>";
+        }
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>{$matchCount} new {$plural} your profile, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Jobmington found roles that align with your skills, experience, and location. Here are a few to get you started:</p>
+            <div style='border-left:3px solid #f59f22;padding-left:16px;margin:0 0 24px;'>{$jobsList}</div>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Browse all matches</a>
+              </td></tr>
+            </table>
+        ";
+        return (new self())->send($email, "{$matchCount} new job {$plural} your profile", $content);
+    }
+
+    /* ── 4. Payment receipt — seeker ───────────────────────────── */
+    public static function sendPaymentReceipt(string $email, string $name, string $planName, string $amount): bool {
+        $firstName = explode(' ', trim($name))[0];
+        $url       = 'https://jobmington.com/seeker/dashboard';
+        $date      = date('d M Y');
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Payment confirmed, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your purchase was successful. Here's your receipt:</p>
+            <table width='100%' cellpadding='0' cellspacing='0' style='border:1px solid #e5e7eb;margin:0 0 24px;'>
+              <tr style='background:#f8fafc;'>
+                <td style='padding:12px 16px;font-size:13px;color:#64748b;'>Plan</td>
+                <td style='padding:12px 16px;font-size:13px;color:#06142a;font-weight:700;text-align:right;'>{$planName}</td>
+              </tr>
+              <tr>
+                <td style='padding:12px 16px;font-size:13px;color:#64748b;border-top:1px solid #e5e7eb;'>Amount</td>
+                <td style='padding:12px 16px;font-size:13px;color:#06142a;font-weight:700;text-align:right;border-top:1px solid #e5e7eb;'>{$amount}</td>
+              </tr>
+              <tr style='background:#f8fafc;'>
+                <td style='padding:12px 16px;font-size:13px;color:#64748b;border-top:1px solid #e5e7eb;'>Date</td>
+                <td style='padding:12px 16px;font-size:13px;color:#06142a;font-weight:700;text-align:right;border-top:1px solid #e5e7eb;'>{$date}</td>
+              </tr>
+            </table>
+            <p style='color:#475569;margin:0 0 24px;line-height:1.75;'>All AI tools and Premium features are now unlocked on your account.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Go to dashboard</a>
+              </td></tr>
+            </table>
+        ";
+        return (new self())->send($email, "Payment confirmed — {$planName}", $content);
+    }
+
+    /* ── 5. New application alert — employer ───────────────────── */
+    public static function sendNewApplicationAlert(string $email, string $companyName, string $jobTitle, string $applicantName, string $applicationsUrl): bool {
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>New application received.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'><strong style='color:#06142a;'>{$applicantName}</strong> has applied for the <strong style='color:#06142a;'>{$jobTitle}</strong> role at {$companyName}.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='{$applicationsUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Review application</a>
+              </td></tr>
+            </table>
+            <p style='color:#94a3b8;font-size:13px;margin:0;'>Manage all applications from your <a href='https://jobmington.com/employer/applications' style='color:#0640a3;'>employer dashboard</a>.</p>
+        ";
+        return (new self())->send($email, "New application — {$jobTitle}", $content);
+    }
+
+    /* ── 6. Job posting confirmed — employer ───────────────────── */
+    public static function sendJobPostingConfirmed(string $email, string $companyName, string $jobTitle, string $jobUrl): bool {
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Your role is live.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>The <strong style='color:#06142a;'>{$jobTitle}</strong> listing for <strong style='color:#06142a;'>{$companyName}</strong> is now live on Jobmington and visible to job seekers.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='{$jobUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View listing</a>
+              </td></tr>
+            </table>
+            <p style='color:#94a3b8;font-size:13px;margin:0;'>Track applications from your <a href='https://jobmington.com/employer/applications' style='color:#0640a3;'>applications dashboard</a>.</p>
+        ";
+        return (new self())->send($email, "Your job is live — {$jobTitle}", $content);
+    }
+
+    /* ── 7. Password changed — account security ─────────────────── */
+    public static function sendPasswordChanged(string $email, string $name): bool {
+        $firstName = explode(' ', trim($name))[0];
+        $time      = date('d M Y, H:i') . ' (UTC)';
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Password changed, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your Jobmington password was successfully changed on <strong style='color:#06142a;'>{$time}</strong>.</p>
+            <p style='color:#475569;margin:0 0 24px;line-height:1.75;'>If you made this change, no action is needed. If you did not change your password, please <a href='https://jobmington.com/auth/forgot-password' style='color:#0640a3;font-weight:700;'>reset it immediately</a> and contact us.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
+              <tr><td style='background:#0640a3;'>
+                <a href='https://jobmington.com/auth/login' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Sign in to your account</a>
+              </td></tr>
+            </table>
+        ";
+        return (new self())->send($email, 'Your password was changed', $content);
+    }
+
     public static function sendPasswordReset(string $email, string $name, string $link): bool {
         $firstName = explode(' ', trim($name))[0];
         $content = "

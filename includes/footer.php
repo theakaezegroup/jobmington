@@ -54,115 +54,54 @@ if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
     </div>
 </div>
 
-<footer class="relative border-t mt-auto overflow-hidden" style="background: #ffffff; border-top: 1px solid #e8edf5;">
-    <!-- Removed dark background orbs for Neo-Brutalist clean aesthetic -->
-
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 z-10">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
-            
-            <div class="lg:col-span-4 space-y-6">
-                <a href="/jobmington/" class="flex items-center gap-3 group w-fit">
-                    <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="<?= SITE_NAME ?>" class="w-10 h-10 object-contain group-hover:scale-105 transition duration-300">
-                    <span class="text-2xl font-heading font-extrabold tracking-tight" style="color: var(--color-ink);"><?= SITE_NAME ?></span>
+<footer class="jm-footer" aria-label="Site footer">
+    <div style="max-width:1172px;margin:0 auto;padding:0 24px;">
+        <div class="jm-footer-inner">
+            <div class="jm-footer-brand">
+                <a class="jm-logo" href="/jobmington/">
+                    <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                    <span>Jobmington</span>
                 </a>
-                
-                <p class="text-sm leading-relaxed max-w-sm" style="color: var(--color-ink); opacity: 0.7;">
-                    <?= SITE_TAGLINE ?>. Find jobs, apply quickly, and help employers reach qualified African talent.
-                </p>
-
-                <div class="flex items-center gap-3">
-                    <?php 
-                    $socials = [
-                        ['icon' => 'fab fa-facebook-f', 'url' => '#'],
-                        ['icon' => 'fab fa-twitter', 'url' => '#'], // Or fa-x-twitter
-                        ['icon' => 'fab fa-linkedin-in', 'url' => '#'],
-                        ['icon' => 'fab fa-instagram', 'url' => '#']
-                    ];
-                    foreach($socials as $social): ?>
-                        <a href="<?= $social['url'] ?>" class="w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-300" style="background: #ffffff; border: 1px solid #e8edf5; color: #101828;" onmouseover="this.style.background='#effaf6'; this.style.color='#073b2f';" onmouseout="this.style.background='#ffffff'; this.style.color='#101828';">
-                            <i class="<?= $social['icon'] ?>"></i>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
+                <p>Simple hiring for African talent. Find jobs, apply quickly, and manage hiring without the noise.</p>
             </div>
-            
-            <div class="lg:col-span-5 grid grid-cols-2 gap-8">
-                <div>
-                    <h3 class="font-heading font-bold text-lg mb-5 flex items-center gap-2" style="color: var(--color-ink);">
-                        Seekers <span class="w-1.5 h-1.5 rounded-full" style="background: var(--color-accent);"></span>
-                    </h3>
-                    <ul class="space-y-3">
-                        <?php 
-                        $seekerLinks = [
-                            ['label' => 'Browse Jobs', 'url' => '/jobmington/jobs'],
-                            ['label' => 'Search Jobs', 'url' => '/jobmington/jobs/search.php'],
-                            ['label' => 'Saved Jobs', 'url' => '/jobmington/jobs/saved.php'],
-                            ['label' => 'My Profile', 'url' => '/jobmington/seeker/profile.php'],
-                        ];
-                        foreach($seekerLinks as $link): ?>
-                        <li>
-                            <a href="<?= $link['url'] ?>" class="text-sm transition-all duration-200 flex items-center gap-2 group" style="color: var(--color-ink); opacity: 0.7;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7';">
-                                <i class="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all"></i>
-                                <?= $link['label'] ?>
-                            </a>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
 
-                <div>
-                    <h3 class="font-heading font-bold text-lg mb-5 flex items-center gap-2" style="color: var(--color-ink);">
-                        Employers <span class="w-1.5 h-1.5 rounded-full" style="background: var(--color-primary);"></span>
-                    </h3>
-                    <ul class="space-y-3">
-                        <li><a href="/jobmington/employer/post-job.php" class="text-sm transition-all duration-200 group flex items-center gap-2" style="color: var(--color-ink); opacity: 0.7;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7';"><i class="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all"></i> Post a Job</a></li>
-                        <li><a href="/jobmington/employer/dashboard.php" class="text-sm transition-all duration-200 group flex items-center gap-2" style="color: var(--color-ink); opacity: 0.7;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7';"><i class="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all"></i> Dashboard</a></li>
-                        <li><a href="/jobmington/employer/manage-jobs.php" class="text-sm transition-all duration-200 group flex items-center gap-2" style="color: var(--color-ink); opacity: 0.7;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7';"><i class="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all"></i> Manage Jobs</a></li>
-                        <li><a href="/jobmington/employer/applications.php" class="text-sm transition-all duration-200 group flex items-center gap-2" style="color: var(--color-ink); opacity: 0.7;" onmouseover="this.style.opacity='1';" onmouseout="this.style.opacity='0.7';"><i class="fas fa-chevron-right text-[8px] opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0 transition-all"></i> Applications</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="lg:col-span-3">
-                <div class="bg-white rounded-2xl p-6 transition duration-300" style="border: 1px solid #e8edf5; box-shadow: none;">
-                    <h3 class="font-heading font-bold text-lg mb-2 flex items-center gap-2" style="color: var(--color-ink);">Stay Updated <span class="w-1.5 h-1.5 rounded-full" style="background: var(--color-accent);"></span></h3>
-                    <p class="text-xs mb-4" style="color: var(--color-ink); opacity: 0.7;">Get the latest jobs and career tips delivered to your inbox.</p>
-                    
-                    <form action="/jobmington/subscribe.php" method="POST" class="relative">
-                        <input type="email" name="email" placeholder="email@address.com" required
-                               class="w-full text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 transition" style="background: #f6f8fb; border: 1px solid #e8edf5; color: #101828;" onfocus="this.style.borderColor='#073b2f'; this.style.boxShadow='0 0 0 2px rgba(7, 59, 47, 0.08)';" onblur="this.style.borderColor='#e8edf5'; this.style.boxShadow='none';">
-                        <button type="submit" class="absolute right-1 top-1 bottom-1 px-3 rounded-lg text-sm font-medium transition-all hover:scale-105 active:scale-95" style="background: #073b2f; color: #ffffff; border: 0;">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
+            <nav class="jm-footer-links" aria-label="Job seeker links">
+                <h2>Job Seekers</h2>
+                <a href="/jobmington/jobs/">Find jobs</a>
+                <a href="/jobmington/cv-builder/">CV Builder</a>
+                <a href="/jobmington/jobs/search.php">Search jobs</a>
+                <a href="/jobmington/jobs/?type=Remote">Remote jobs</a>
+                <a href="/jobmington/auth/register.php">Create account</a>
+            </nav>
 
-                    <div class="mt-6 pt-6 space-y-3" style="border-top: 1px solid rgba(12, 42, 76, 0.2);">
-                         <div class="flex items-center gap-3 text-sm" style="color: var(--color-ink);">
-                            <i class="fas fa-envelope" style="color: var(--color-accent);"></i>
-                            <a href="mailto:<?= SITE_EMAIL ?>" class="hover:opacity-80 transition" style="color: var(--color-ink);"><?= SITE_EMAIL ?></a>
-                        </div>
-                         <div class="flex items-center gap-3 text-sm" style="color: var(--color-ink);">
-                            <i class="fas fa-map-marker-alt" style="color: var(--color-ink); opacity: 0.6;"></i>
-                            <span>Lagos, Nigeria</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <nav class="jm-footer-links" aria-label="Employer links">
+                <h2>Employers</h2>
+                <a href="/jobmington/employer/">Hire talent</a>
+                <a href="/jobmington/employer/post-job.php">Post a job</a>
+                <a href="/jobmington/employer/dashboard.php">Employer dashboard</a>
+                <a href="/jobmington/pricing.php">Pricing</a>
+            </nav>
+
+            <nav class="jm-footer-links" aria-label="Company links">
+                <h2>Company</h2>
+                <a href="/jobmington/contact.php">Contact</a>
+                <a href="/jobmington/faq.php">FAQ</a>
+                <a href="/jobmington/privacy-policy.php">Privacy policy</a>
+                <a href="/jobmington/terms-of-service.php">Terms of service</a>
+            </nav>
+
+            <nav class="jm-footer-links" aria-label="Popular job searches">
+                <h2>Popular Searches</h2>
+                <a href="/jobmington/jobs/search.php?q=developer">Developer jobs</a>
+                <a href="/jobmington/jobs/search.php?q=marketing">Marketing jobs</a>
+                <a href="/jobmington/jobs/search.php?q=designer">Design jobs</a>
+                <a href="/jobmington/jobs/search.php?q=operations">Operations jobs</a>
+            </nav>
         </div>
-    </div>
-    
-    <div class="relative z-10" style="border-top: 1px solid #e8edf5; background: #f6f8fb;">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-xs text-center md:text-left" style="color: var(--color-ink); opacity: 0.7;">
-                    &copy; <?= date('Y') ?> <?= SITE_NAME ?>. Crafted with <i class="fas fa-heart mx-0.5" style="color: var(--color-accent);"></i> by <a href="https://truthsprout.cc" target="blank" class="hover:opacity-100 transition" style="color: var(--color-ink);">Truthsprout</a>.
-                </p>
-                <div class="flex flex-wrap justify-center gap-6 text-xs font-medium" style="color: var(--color-ink); opacity: 0.7;">
-                    <a href="/jobmington/privacy-policy.php" class="hover:opacity-100 transition">Privacy</a>
-                    <a href="/jobmington/terms-of-service.php" class="hover:opacity-100 transition">Terms</a>
-                    <a href="/jobmington/faq.php" class="hover:opacity-100 transition">FAQ</a>
-                </div>
-            </div>
+
+        <div class="jm-footer-bottom">
+            <span>&copy; <?= date('Y') ?> Jobmington</span>
+            <span>Lagos, Nigeria</span>
         </div>
     </div>
 </footer>

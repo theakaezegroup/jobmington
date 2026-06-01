@@ -9,6 +9,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/paystack.php';
 require_once __DIR__ . '/../includes/monetization.php';
 require_once __DIR__ . '/../includes/seeker_premium.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 Session::start();
 Session::requireLogin();
@@ -57,6 +58,16 @@ try {
             );
 
             $pdo->commit();
+
+            $userRow = $pdo->prepare("SELECT email, full_name FROM users WHERE user_id = ? LIMIT 1");
+            $userRow->execute([$userId]);
+            $userRow = $userRow->fetch();
+            if ($userRow) {
+                $planLabel  = $plan === 'annual' ? 'Premium Annual' : 'Premium Monthly';
+                $amountStr  = '₦' . number_format($amountNgn, 0);
+                Mailer::sendPaymentReceipt($userRow['email'], $userRow['full_name'], $planLabel, $amountStr);
+            }
+
             Session::flash('success', 'Welcome to Premium! All AI tools are now unlocked.');
             redirect(SITE_URL . '/seeker/dashboard.php?upgraded=1');
         } catch (Throwable $e) {

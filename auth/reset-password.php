@@ -2,30 +2,61 @@
 define('JOBMINGTON', true);
 require_once __DIR__ . '/../config/env.php';
 require_once __DIR__ . '/../config/constants.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 Session::start();
-$message = '';
-$errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$token   = trim((string) ($_GET['token'] ?? ''));
+$message = '';
+$errors  = [];
+$invalid = false;
+$user    = null;
+
+if ($token === '') {
+    redirect('/jobmington/auth/forgot-password.php');
+}
+
+$pdo  = db();
+$stmt = $pdo->prepare("
+    SELECT user_id, email, full_name
+    FROM users
+    WHERE reset_token = ? AND reset_expires > NOW() AND is_active = 1
+    LIMIT 1
+");
+$stmt->execute([$token]);
+$user = $stmt->fetch();
+
+if (!$user) {
+    $invalid = true;
+}
+
+if (!$invalid && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Security::verifyCSRF()) {
         $errors[] = 'Please refresh the page and try again.';
-    }
+    } else {
+        $password = $_POST['password'] ?? '';
+        $confirm  = $_POST['confirm_password'] ?? '';
+        $errors   = array_merge($errors, Security::validatePasswordStrength($password));
 
-    $password = $_POST['password'] ?? '';
-    $confirm = $_POST['confirm_password'] ?? '';
-    $errors = array_merge($errors, Security::validatePasswordStrength($password));
+        if ($password !== $confirm) {
+            $errors[] = 'Passwords do not match.';
+        }
 
-    if ($password !== $confirm) {
-        $errors[] = 'Passwords do not match.';
-    }
+        if (empty($errors)) {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $pdo->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_expires = NULL WHERE user_id = ?")
+                ->execute([$hash, (int) $user['user_id']]);
 
-    if (empty($errors)) {
-        Security::regenerateCSRF();
-        $message = 'Your password has been reset. You can sign in now.';
+            Mailer::sendPasswordChanged($user['email'], $user['full_name']);
+
+            Security::regenerateCSRF();
+            $message = 'Your password has been reset. You can sign in now.';
+            $user    = null;
+        }
     }
 }
 
@@ -63,19 +94,27 @@ $pageTitle = 'Reset Password | ' . SITE_NAME;
                 </div>
 
                 <div class="jm-panel">
-                    <?php if ($message): ?>
+                    <?php if ($invalid): ?>
+                        <div class="jm-alert">This reset link has expired or already been used.</div>
+                        <div class="jm-form-actions" style="margin-top:16px;">
+                            <a class="jm-button" href="/jobmington/auth/forgot-password.php">Request a new link</a>
+                            <a class="jm-button secondary" href="/jobmington/auth/login.php">Sign in</a>
+                        </div>
+
+                    <?php elseif ($message): ?>
                         <div class="jm-success"><?= e($message) ?></div>
-                        <a class="jm-button" href="/jobmington/auth/login.php">Sign in</a>
+                        <a class="jm-button" href="/jobmington/auth/login.php" style="margin-top:16px;">Sign in</a>
+
                     <?php else: ?>
                         <?php if (!empty($errors)): ?>
                             <div class="jm-alert">
-                                <?php foreach ($errors as $error): ?>
-                                    <div><?= e($error) ?></div>
+                                <?php foreach ($errors as $err): ?>
+                                    <div><?= e($err) ?></div>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
 
-                        <form method="post" action="/jobmington/auth/reset-password.php">
+                        <form method="post" action="/jobmington/auth/reset-password.php?token=<?= rawurlencode($token) ?>">
                             <?= Security::csrfField() ?>
                             <div class="jm-stack">
                                 <div class="jm-field">

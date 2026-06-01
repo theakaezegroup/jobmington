@@ -7,6 +7,7 @@ require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/_job_helpers.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 Session::start();
 Session::requireVerified();
@@ -112,6 +113,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$existingApplication) {
                     'A candidate applied for ' . $job['title'] . '.',
                     '/jobmington/employer/applications.php?job=' . $jobId
                 );
+            }
+
+            /* ── Emails ─────────────────────────────────────────── */
+            $jobUrl = SITE_URL . '/jobs/view?id=' . $jobId;
+
+            Mailer::sendApplicationConfirmation(
+                Session::get('email'),
+                Session::get('full_name'),
+                $job['title'],
+                $job['company_name'],
+                $jobUrl
+            );
+
+            if (!empty($job['employer_user_id'])) {
+                $empStmt = $pdo->prepare("SELECT email FROM users WHERE user_id = ? LIMIT 1");
+                $empStmt->execute([(int) $job['employer_user_id']]);
+                $empRow = $empStmt->fetch();
+                if ($empRow) {
+                    Mailer::sendNewApplicationAlert(
+                        $empRow['email'],
+                        $job['company_name'],
+                        $job['title'],
+                        Session::get('full_name'),
+                        SITE_URL . '/employer/applications?job=' . $jobId
+                    );
+                }
             }
 
             Security::regenerateCSRF();

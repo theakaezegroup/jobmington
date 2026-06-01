@@ -578,8 +578,9 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     .jm-hero2-h1-accent::after {
         content: '';
         position: absolute;
-        inset: -4px -14px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 32' preserveAspectRatio='none'%3E%3Cellipse cx='110' cy='16' rx='104' ry='14' fill='none' stroke='%23f59f22' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center;
+        left: 0; right: 0; bottom: -6px;
+        height: 8px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 8' preserveAspectRatio='none'%3E%3Cpath d='M2 6 Q110 1 218 6' fill='none' stroke='%23f59f22' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center;
         background-size: 100% 100%;
         pointer-events: none;
     }

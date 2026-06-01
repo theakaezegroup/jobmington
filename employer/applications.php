@@ -7,6 +7,7 @@ require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/_employer_helpers.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 Session::start();
 Session::requireRole(USER_TYPE_EMPLOYER);
@@ -27,9 +28,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($applicationId > 0 && in_array($status, APPLICATION_STATUSES, true)) {
         $stmt = $pdo->prepare("
-            SELECT ja.application_id, ja.user_id, j.title
+            SELECT ja.application_id, ja.user_id, j.title,
+                   u.email AS seeker_email, u.full_name AS seeker_name,
+                   c.name AS company_name
             FROM job_applications ja
             JOIN jobs j ON ja.job_id = j.job_id
+            LEFT JOIN users u ON ja.user_id = u.user_id
+            LEFT JOIN companies c ON j.company_id = c.company_id
             WHERE ja.application_id = ? AND j.company_id = ?
             LIMIT 1
         ");
@@ -47,6 +52,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'Application status updated',
                     'Your application for "' . $application['title'] . '" is now ' . jm_employer_status_text($status) . '.',
                     '/seeker/applications.php'
+                );
+            }
+
+            if (!empty($application['seeker_email'])) {
+                Mailer::sendApplicationStatusUpdate(
+                    $application['seeker_email'],
+                    $application['seeker_name'] ?? '',
+                    $application['title'],
+                    $application['company_name'] ?? '',
+                    $status
                 );
             }
 
