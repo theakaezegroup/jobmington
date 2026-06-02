@@ -382,6 +382,645 @@ function jm_scraper_remoteok_jobs(int $limit): array {
     return $jobs;
 }
 
+function jm_scraper_remotive_jobs(int $limit): array {
+    $body = jm_scraper_fetch('https://remotive.com/api/remote-jobs?limit=' . $limit, ['Accept: application/json']);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['jobs'])) {
+        throw new RuntimeException('Could not parse Remotive JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['jobs'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['url'] ?? '');
+        if (empty($row['title']) || empty($row['company_name']) || $applyLink === '') {
+            continue;
+        }
+
+        $salaryMin = null;
+        $salaryMax = null;
+        if (!empty($row['salary']) && preg_match_all('/(\d[\d,]{2,})/', (string) $row['salary'], $m)) {
+            $values = array_map(static fn($v) => (float) str_replace(',', '', $v), $m[1]);
+            if ($values) {
+                $salaryMin = min($values);
+                $salaryMax = max($values);
+            }
+        }
+
+        $jobs[] = [
+            'source' => 'Remotive',
+            'guid' => 'remotive:' . ($row['id'] ?? sha1($applyLink)),
+            'company' => (string) $row['company_name'],
+            'title' => (string) $row['title'],
+            'description' => (string) ($row['description'] ?? ''),
+            'location' => (string) ($row['candidate_required_location'] ?? 'Remote'),
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['publication_date'] ?? 'now'),
+            'salary_min' => $salaryMin,
+            'salary_max' => $salaryMax,
+            'salary_currency' => 'USD',
+            'tags' => is_array($row['tags'] ?? null) ? $row['tags'] : [],
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_jobicy_jobs(int $limit): array {
+    $count = max(1, min(50, $limit));
+    $body = jm_scraper_fetch('https://jobicy.com/api/v2/remote-jobs?count=' . $count, ['Accept: application/json']);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['jobs'])) {
+        throw new RuntimeException('Could not parse Jobicy JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['jobs'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['url'] ?? '');
+        if (empty($row['jobTitle']) || empty($row['companyName']) || $applyLink === '') {
+            continue;
+        }
+
+        $jobs[] = [
+            'source' => 'Jobicy',
+            'guid' => 'jobicy:' . ($row['id'] ?? sha1($applyLink)),
+            'company' => (string) $row['companyName'],
+            'title' => (string) $row['jobTitle'],
+            'description' => (string) ($row['jobDescription'] ?? $row['jobExcerpt'] ?? ''),
+            'location' => (string) ($row['jobGeo'] ?? 'Remote'),
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['pubDate'] ?? 'now'),
+            'salary_min' => isset($row['annualSalaryMin']) && $row['annualSalaryMin'] !== '' ? (float) $row['annualSalaryMin'] : null,
+            'salary_max' => isset($row['annualSalaryMax']) && $row['annualSalaryMax'] !== '' ? (float) $row['annualSalaryMax'] : null,
+            'salary_currency' => (string) ($row['salaryCurrency'] ?? 'USD'),
+            'tags' => array_filter([(string) ($row['jobIndustry'][0] ?? ''), (string) ($row['jobType'][0] ?? '')]),
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_arbeitnow_jobs(int $limit): array {
+    $body = jm_scraper_fetch('https://www.arbeitnow.com/api/job-board-api', ['Accept: application/json']);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['data'])) {
+        throw new RuntimeException('Could not parse Arbeitnow JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['data'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['url'] ?? '');
+        if (empty($row['title']) || empty($row['company_name']) || $applyLink === '') {
+            continue;
+        }
+
+        $location = (string) ($row['location'] ?? 'Remote');
+        if (!empty($row['remote'])) {
+            $location = $location !== '' ? $location . ' (Remote)' : 'Remote';
+        }
+
+        $jobs[] = [
+            'source' => 'Arbeitnow',
+            'guid' => 'arbeitnow:' . ($row['slug'] ?? sha1($applyLink)),
+            'company' => (string) $row['company_name'],
+            'title' => (string) $row['title'],
+            'description' => (string) ($row['description'] ?? ''),
+            'location' => $location,
+            'apply_link' => $applyLink,
+            'posted_at' => !empty($row['created_at']) ? date('c', (int) $row['created_at']) : 'now',
+            'salary_min' => null,
+            'salary_max' => null,
+            'salary_currency' => 'EUR',
+            'tags' => array_merge(
+                is_array($row['tags'] ?? null) ? $row['tags'] : [],
+                is_array($row['job_types'] ?? null) ? $row['job_types'] : []
+            ),
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_himalayas_jobs(int $limit): array {
+    $body = jm_scraper_fetch('https://himalayas.app/jobs/api?limit=' . $limit, ['Accept: application/json']);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['jobs'])) {
+        throw new RuntimeException('Could not parse Himalayas JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['jobs'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['applicationLink'] ?? $row['guid'] ?? '');
+        if (empty($row['title']) || empty($row['companyName']) || $applyLink === '') {
+            continue;
+        }
+
+        $location = 'Remote';
+        if (!empty($row['locationRestrictions']) && is_array($row['locationRestrictions'])) {
+            $location = implode(', ', array_slice($row['locationRestrictions'], 0, 3));
+        }
+        $seniorityRaw = (!empty($row['seniority']) && is_array($row['seniority'])) ? strtolower((string) $row['seniority'][0]) : '';
+        $seniority = 'Mid';
+        if (preg_match('/intern|junior|entry|graduate/', $seniorityRaw)) {
+            $seniority = 'Entry';
+        } elseif (preg_match('/senior|lead|staff|principal/', $seniorityRaw)) {
+            $seniority = 'Senior';
+        } elseif (preg_match('/manager|director|head|chief|vp|executive|president/', $seniorityRaw)) {
+            $seniority = 'Executive';
+        }
+
+        $jobs[] = [
+            'source' => 'Himalayas',
+            'guid' => 'himalayas:' . ($row['guid'] ?? sha1($applyLink)),
+            'company' => (string) $row['companyName'],
+            'title' => (string) $row['title'],
+            'description' => (string) ($row['description'] ?? $row['excerpt'] ?? ''),
+            'location' => $location !== '' ? $location : 'Remote',
+            'apply_link' => $applyLink,
+            'posted_at' => !empty($row['pubDate']) ? date('c', (int) $row['pubDate']) : 'now',
+            'experience_level' => $seniority,
+            'salary_min' => isset($row['minSalary']) && $row['minSalary'] !== '' ? (float) $row['minSalary'] : null,
+            'salary_max' => isset($row['maxSalary']) && $row['maxSalary'] !== '' ? (float) $row['maxSalary'] : null,
+            'salary_currency' => (string) ($row['salaryCurrency'] ?? 'USD'),
+            'tags' => is_array($row['categories'] ?? null) ? $row['categories'] : [],
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_adzuna_jobs(int $limit): array {
+    $appId = trim((string) getenv('ADZUNA_APP_ID'));
+    $appKey = trim((string) getenv('ADZUNA_APP_KEY'));
+    if ($appId === '' || $appKey === '') {
+        throw new RuntimeException('Adzuna credentials missing (set ADZUNA_APP_ID and ADZUNA_APP_KEY).');
+    }
+
+    $countries = array_filter(array_map('trim', explode(',', (string) getenv('ADZUNA_COUNTRIES') ?: 'za,gb')));
+    if (empty($countries)) {
+        $countries = ['za'];
+    }
+    $perCountry = max(1, (int) ceil($limit / count($countries)));
+
+    $jobs = [];
+    foreach ($countries as $country) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $country = strtolower(preg_replace('/[^a-z]/i', '', $country));
+        if ($country === '') {
+            continue;
+        }
+
+        $query = http_build_query([
+            'app_id' => $appId,
+            'app_key' => $appKey,
+            'results_per_page' => min(50, $perCountry),
+            'what' => 'remote',
+            'content-type' => 'application/json',
+        ]);
+        $url = 'https://api.adzuna.com/v1/api/jobs/' . $country . '/search/1?' . $query;
+
+        try {
+            $body = jm_scraper_fetch($url, ['Accept: application/json']);
+        } catch (Throwable $e) {
+            jm_scraper_log('adzuna: ' . $country . ' fetch failed - ' . $e->getMessage());
+            continue;
+        }
+
+        $data = json_decode($body, true);
+        if (!is_array($data) || empty($data['results'])) {
+            continue;
+        }
+
+        foreach ($data['results'] as $row) {
+            if (count($jobs) >= $limit) {
+                break;
+            }
+            $applyLink = (string) ($row['redirect_url'] ?? '');
+            if (empty($row['title']) || $applyLink === '') {
+                continue;
+            }
+
+            $jobs[] = [
+                'source' => 'Adzuna',
+                'guid' => 'adzuna:' . ($row['id'] ?? sha1($applyLink)),
+                'company' => (string) ($row['company']['display_name'] ?? 'Hiring Company'),
+                'title' => (string) $row['title'],
+                'description' => (string) ($row['description'] ?? ''),
+                'location' => (string) ($row['location']['display_name'] ?? strtoupper($country)),
+                'apply_link' => $applyLink,
+                'posted_at' => (string) ($row['created'] ?? 'now'),
+                'salary_min' => isset($row['salary_min']) ? (float) $row['salary_min'] : null,
+                'salary_max' => isset($row['salary_max']) ? (float) $row['salary_max'] : null,
+                'salary_currency' => $country === 'za' ? 'ZAR' : ($country === 'gb' ? 'GBP' : 'USD'),
+                'tags' => array_filter([(string) ($row['category']['label'] ?? '')]),
+            ];
+        }
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_post_json(string $url, array $payload, array $headers = []): string {
+    if (!function_exists('curl_init')) {
+        throw new RuntimeException('PHP curl extension is required for job scraping.');
+    }
+
+    $userAgent = getenv('JOB_SCRAPER_USER_AGENT') ?: 'JobmingtonBot/1.0 (+https://jobmington.com/contact)';
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_USERAGENT => $userAgent,
+        CURLOPT_HTTPHEADER => array_merge(['Content-Type: application/json', 'Accept: application/json'], $headers),
+        CURLOPT_CONNECTTIMEOUT => 12,
+        CURLOPT_TIMEOUT => 40,
+        CURLOPT_SSL_VERIFYPEER => true,
+    ]);
+
+    $body = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+
+    if ($body === false || $httpCode < 200 || $httpCode >= 300) {
+        throw new RuntimeException('POST failed for ' . $url . ($error ? ': ' . $error : ' HTTP ' . $httpCode));
+    }
+
+    return (string) $body;
+}
+
+function jm_scraper_themuse_jobs(int $limit): array {
+    $apiKey = trim((string) getenv('THEMUSE_API_KEY'));
+    $jobs = [];
+    for ($page = 1; $page <= 5 && count($jobs) < $limit; $page++) {
+        $params = ['page' => $page];
+        if ($apiKey !== '') {
+            $params['api_key'] = $apiKey;
+        }
+        $body = jm_scraper_fetch('https://www.themuse.com/api/public/jobs?' . http_build_query($params), ['Accept: application/json']);
+        $data = json_decode($body, true);
+        if (!is_array($data) || empty($data['results'])) {
+            break;
+        }
+
+        foreach ($data['results'] as $row) {
+            if (count($jobs) >= $limit) {
+                break;
+            }
+            $applyLink = (string) ($row['refs']['landing_page'] ?? '');
+            if (empty($row['name']) || $applyLink === '') {
+                continue;
+            }
+            $location = !empty($row['locations']) ? (string) ($row['locations'][0]['name'] ?? 'Flexible') : 'Flexible';
+            $level = !empty($row['levels']) ? strtolower((string) ($row['levels'][0]['name'] ?? '')) : '';
+            $experience = 'Mid';
+            if (preg_match('/intern|entry|junior/', $level)) {
+                $experience = 'Entry';
+            } elseif (preg_match('/senior|lead/', $level)) {
+                $experience = 'Senior';
+            } elseif (preg_match('/manager|director|executive/', $level)) {
+                $experience = 'Executive';
+            }
+
+            $jobs[] = [
+                'source' => 'TheMuse',
+                'guid' => 'themuse:' . ($row['id'] ?? sha1($applyLink)),
+                'company' => (string) ($row['company']['name'] ?? 'Hiring Company'),
+                'title' => (string) $row['name'],
+                'description' => (string) ($row['contents'] ?? ''),
+                'location' => $location,
+                'apply_link' => $applyLink,
+                'posted_at' => (string) ($row['publication_date'] ?? 'now'),
+                'experience_level' => $experience,
+                'salary_min' => null,
+                'salary_max' => null,
+                'salary_currency' => 'USD',
+                'tags' => array_map(static fn($c) => (string) ($c['name'] ?? ''), is_array($row['categories'] ?? null) ? $row['categories'] : []),
+            ];
+        }
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_devitjobs_jobs(int $limit): array {
+    // DevITjobs UK exposes a public JSON feed (no auth) as a flat array.
+    $body = jm_scraper_fetch('https://devitjobs.uk/api/jobsLight', ['Accept: application/json']);
+    $rows = json_decode($body, true);
+    if (!is_array($rows)) {
+        throw new RuntimeException('Could not parse DevITjobs JSON.');
+    }
+
+    $jobs = [];
+    foreach ($rows as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        if (!is_array($row)) {
+            continue;
+        }
+        $slug = (string) ($row['jobUrl'] ?? '');
+        $applyLink = (string) ($row['redirectJobUrl'] ?? '');
+        if ($applyLink === '' && $slug !== '') {
+            $applyLink = 'https://devitjobs.uk/jobs/' . $slug;
+        }
+        $title = (string) ($row['name'] ?? '');
+        $company = (string) ($row['company'] ?? '');
+        if ($title === '' || $company === '' || $applyLink === '') {
+            continue;
+        }
+
+        $location = (string) ($row['actualCity'] ?? $row['cityCategory'] ?? 'United Kingdom');
+        if (!empty($row['workplace']) && stripos((string) $row['workplace'], 'remote') !== false) {
+            $location = $location !== '' ? $location . ' (Remote)' : 'Remote';
+        }
+        $expLevelRaw = strtolower((string) ($row['expLevel'] ?? ''));
+        $experience = 'Mid';
+        if (preg_match('/intern|junior|entry|graduate/', $expLevelRaw)) {
+            $experience = 'Entry';
+        } elseif (preg_match('/senior|lead|principal/', $expLevelRaw)) {
+            $experience = 'Senior';
+        } elseif (preg_match('/manager|director|head|executive|cto/', $expLevelRaw)) {
+            $experience = 'Executive';
+        }
+
+        $jobs[] = [
+            'source' => 'DevITjobs',
+            'guid' => 'devitjobs:' . ($row['_id'] ?? sha1($applyLink)),
+            'company' => $company,
+            'title' => $title,
+            'description' => (string) ($row['name'] ?? '') . ' at ' . $company . '. See listing for full details.',
+            'location' => $location !== '' ? $location : 'United Kingdom',
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['activeFrom'] ?? 'now'),
+            'experience_level' => $experience,
+            'salary_min' => isset($row['annualSalaryFrom']) && $row['annualSalaryFrom'] !== '' ? (float) $row['annualSalaryFrom'] : null,
+            'salary_max' => isset($row['annualSalaryTo']) && $row['annualSalaryTo'] !== '' ? (float) $row['annualSalaryTo'] : null,
+            'salary_currency' => 'GBP',
+            'tags' => is_array($row['technologies'] ?? ($row['filterTags'] ?? null)) ? ($row['technologies'] ?? $row['filterTags']) : [],
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_jooble_jobs(int $limit): array {
+    $apiKey = trim((string) getenv('JOOBLE_API_KEY'));
+    if ($apiKey === '') {
+        throw new RuntimeException('Jooble API key missing (set JOOBLE_API_KEY).');
+    }
+
+    $payload = array_filter([
+        'keywords' => (string) (getenv('JOOBLE_KEYWORDS') ?: 'remote'),
+        'location' => (string) getenv('JOOBLE_LOCATION'),
+        'page' => '1',
+    ], static fn($v) => $v !== '' && $v !== null);
+
+    $body = jm_scraper_post_json('https://jooble.org/api/' . rawurlencode($apiKey), $payload);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['jobs'])) {
+        throw new RuntimeException('Could not parse Jooble JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['jobs'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['link'] ?? '');
+        if (empty($row['title']) || $applyLink === '') {
+            continue;
+        }
+
+        $salaryMin = null;
+        $salaryMax = null;
+        if (!empty($row['salary']) && preg_match_all('/(\d[\d,]{2,})/', (string) $row['salary'], $m)) {
+            $values = array_map(static fn($v) => (float) str_replace(',', '', $v), $m[1]);
+            if ($values) {
+                $salaryMin = min($values);
+                $salaryMax = max($values);
+            }
+        }
+
+        $jobs[] = [
+            'source' => 'Jooble',
+            'guid' => 'jooble:' . ($row['id'] ?? sha1($applyLink)),
+            'company' => (string) ($row['company'] ?? 'Hiring Company'),
+            'title' => (string) $row['title'],
+            'description' => (string) ($row['snippet'] ?? ''),
+            'location' => (string) ($row['location'] ?? 'Remote'),
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['updated'] ?? 'now'),
+            'salary_min' => $salaryMin,
+            'salary_max' => $salaryMax,
+            'salary_currency' => 'USD',
+            'tags' => array_filter([(string) ($row['type'] ?? '')]),
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_theirstack_jobs(int $limit): array {
+    $apiKey = trim((string) getenv('THEIRSTACK_API_KEY'));
+    if ($apiKey === '') {
+        throw new RuntimeException('TheirStack API key missing (set THEIRSTACK_API_KEY).');
+    }
+
+    $maxAge = max(1, (int) (getenv('THEIRSTACK_MAX_AGE_DAYS') ?: 7));
+    $payload = [
+        'page' => 0,
+        'limit' => min(50, $limit),
+        'posted_at_max_age_days' => $maxAge,
+        'order_by' => [['field' => 'date_posted', 'desc' => true]],
+        'remote' => true,
+    ];
+
+    $body = jm_scraper_post_json('https://api.theirstack.com/v1/jobs/search', $payload, [
+        'Authorization: Bearer ' . $apiKey,
+    ]);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['data'])) {
+        throw new RuntimeException('Could not parse TheirStack JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['data'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['final_url'] ?? $row['url'] ?? '');
+        $company = (string) ($row['company'] ?? ($row['company_object']['name'] ?? ''));
+        if (empty($row['job_title']) || $applyLink === '' || $company === '') {
+            continue;
+        }
+
+        $seniorityRaw = strtolower((string) ($row['seniority'] ?? ''));
+        $experience = 'Mid';
+        if (preg_match('/intern|entry|junior/', $seniorityRaw)) {
+            $experience = 'Entry';
+        } elseif (preg_match('/senior|lead|staff|principal/', $seniorityRaw)) {
+            $experience = 'Senior';
+        } elseif (preg_match('/manager|director|head|executive|vp|chief/', $seniorityRaw)) {
+            $experience = 'Executive';
+        }
+
+        $jobs[] = [
+            'source' => 'TheirStack',
+            'guid' => 'theirstack:' . ($row['id'] ?? sha1($applyLink)),
+            'company' => $company,
+            'title' => (string) $row['job_title'],
+            'description' => (string) ($row['description'] ?? ''),
+            'location' => (string) ($row['location'] ?? ($row['short_location'] ?? 'Remote')),
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['date_posted'] ?? 'now'),
+            'experience_level' => $experience,
+            'salary_min' => isset($row['min_annual_salary']) ? (float) $row['min_annual_salary'] : null,
+            'salary_max' => isset($row['max_annual_salary']) ? (float) $row['max_annual_salary'] : null,
+            'salary_currency' => (string) ($row['salary_currency'] ?? 'USD'),
+            'tags' => is_array($row['technology_slugs'] ?? null) ? $row['technology_slugs'] : [],
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_fantasticjobs_jobs(int $limit): array {
+    $apiKey = trim((string) getenv('FANTASTICJOBS_RAPIDAPI_KEY'));
+    $host = trim((string) getenv('FANTASTICJOBS_RAPIDAPI_HOST')) ?: 'active-jobs-db.p.rapidapi.com';
+    if ($apiKey === '') {
+        throw new RuntimeException('Fantastic.jobs RapidAPI key missing (set FANTASTICJOBS_RAPIDAPI_KEY).');
+    }
+
+    $query = http_build_query([
+        'limit' => min(100, $limit),
+        'offset' => 0,
+        'description_type' => 'text',
+    ]);
+    $body = jm_scraper_fetch('https://' . $host . '/active-ats-7d?' . $query, [
+        'Accept: application/json',
+        'X-RapidAPI-Key: ' . $apiKey,
+        'X-RapidAPI-Host: ' . $host,
+    ]);
+    $rows = json_decode($body, true);
+    if (isset($rows['data']) && is_array($rows['data'])) {
+        $rows = $rows['data'];
+    }
+    if (!is_array($rows)) {
+        throw new RuntimeException('Could not parse Fantastic.jobs JSON.');
+    }
+
+    $jobs = [];
+    foreach ($rows as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        if (!is_array($row)) {
+            continue;
+        }
+        $applyLink = (string) ($row['url'] ?? ($row['apply_url'] ?? ''));
+        $title = (string) ($row['title'] ?? '');
+        $company = (string) ($row['organization'] ?? ($row['company'] ?? ''));
+        if ($title === '' || $company === '' || $applyLink === '') {
+            continue;
+        }
+
+        $location = 'Remote';
+        if (!empty($row['locations_derived']) && is_array($row['locations_derived'])) {
+            $location = (string) $row['locations_derived'][0];
+        } elseif (!empty($row['location'])) {
+            $location = (string) $row['location'];
+        }
+
+        $jobs[] = [
+            'source' => 'FantasticJobs',
+            'guid' => 'fantasticjobs:' . ($row['id'] ?? sha1($applyLink)),
+            'company' => $company,
+            'title' => $title,
+            'description' => (string) ($row['description'] ?? ($row['description_text'] ?? '')),
+            'location' => $location,
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['date_posted'] ?? ($row['date_created'] ?? 'now')),
+            'salary_min' => null,
+            'salary_max' => null,
+            'salary_currency' => 'USD',
+            'tags' => is_array($row['employment_type'] ?? null) ? $row['employment_type'] : [],
+        ];
+    }
+
+    return $jobs;
+}
+
+function jm_scraper_careerjet_jobs(int $limit): array {
+    $affid = trim((string) getenv('CAREERJET_AFFID'));
+    if ($affid === '') {
+        throw new RuntimeException('Careerjet affiliate id missing (set CAREERJET_AFFID).');
+    }
+
+    $query = http_build_query(array_filter([
+        'affid' => $affid,
+        'keywords' => (string) (getenv('JOOBLE_KEYWORDS') ?: 'remote'),
+        'location' => (string) getenv('CAREERJET_LOCATION'),
+        'pagesize' => min(99, $limit),
+        'page' => 1,
+        'sort' => 'date',
+        'user_ip' => '127.0.0.1',
+        'user_agent' => getenv('JOB_SCRAPER_USER_AGENT') ?: 'JobmingtonBot/1.0',
+        'url' => 'https://jobmington.com',
+    ], static fn($v) => $v !== '' && $v !== null));
+
+    $body = jm_scraper_fetch('http://public.api.careerjet.net/search?' . $query, ['Accept: application/json']);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data['jobs'])) {
+        throw new RuntimeException('Could not parse Careerjet JSON.');
+    }
+
+    $jobs = [];
+    foreach ($data['jobs'] as $row) {
+        if (count($jobs) >= $limit) {
+            break;
+        }
+        $applyLink = (string) ($row['url'] ?? '');
+        if (empty($row['title']) || $applyLink === '') {
+            continue;
+        }
+
+        $salaryMin = isset($row['salary_min']) && $row['salary_min'] !== '' ? (float) $row['salary_min'] : null;
+        $salaryMax = isset($row['salary_max']) && $row['salary_max'] !== '' ? (float) $row['salary_max'] : null;
+
+        $jobs[] = [
+            'source' => 'Careerjet',
+            'guid' => 'careerjet:' . sha1($applyLink),
+            'company' => (string) ($row['company'] ?? 'Hiring Company'),
+            'title' => (string) $row['title'],
+            'description' => (string) ($row['description'] ?? ''),
+            'location' => (string) ($row['locations'] ?? 'Remote'),
+            'apply_link' => $applyLink,
+            'posted_at' => (string) ($row['date'] ?? 'now'),
+            'salary_min' => $salaryMin,
+            'salary_max' => $salaryMax,
+            'salary_currency' => (string) ($row['salary_currency_code'] ?? 'USD'),
+            'tags' => [],
+        ];
+    }
+
+    return $jobs;
+}
+
 $lockPath = sys_get_temp_dir() . '/jobmington-job-scraper.lock';
 $lockHandle = fopen($lockPath, 'c');
 if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
@@ -392,7 +1031,40 @@ if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
 $sources = [
     'wwr' => 'jm_scraper_wwr_jobs',
     'remoteok' => 'jm_scraper_remoteok_jobs',
+    'remotive' => 'jm_scraper_remotive_jobs',
+    'jobicy' => 'jm_scraper_jobicy_jobs',
+    'arbeitnow' => 'jm_scraper_arbeitnow_jobs',
+    'himalayas' => 'jm_scraper_himalayas_jobs',
+    'themuse' => 'jm_scraper_themuse_jobs',
+    'devitjobs' => 'jm_scraper_devitjobs_jobs',
 ];
+
+// Keyed sources: only register when credentials exist, so default `--source=all`
+// runs never log a guaranteed failure. Selecting one explicitly without its key
+// gives a clear message instead of a generic failure.
+$keyedSources = [
+    'adzuna' => ['fn' => 'jm_scraper_adzuna_jobs', 'env' => ['ADZUNA_APP_ID', 'ADZUNA_APP_KEY']],
+    'jooble' => ['fn' => 'jm_scraper_jooble_jobs', 'env' => ['JOOBLE_API_KEY']],
+    'theirstack' => ['fn' => 'jm_scraper_theirstack_jobs', 'env' => ['THEIRSTACK_API_KEY']],
+    'fantasticjobs' => ['fn' => 'jm_scraper_fantasticjobs_jobs', 'env' => ['FANTASTICJOBS_RAPIDAPI_KEY']],
+    'careerjet' => ['fn' => 'jm_scraper_careerjet_jobs', 'env' => ['CAREERJET_AFFID']],
+];
+
+foreach ($keyedSources as $name => $cfg) {
+    $hasAll = true;
+    foreach ($cfg['env'] as $envKey) {
+        if (trim((string) getenv($envKey)) === '') {
+            $hasAll = false;
+            break;
+        }
+    }
+    if ($hasAll) {
+        $sources[$name] = $cfg['fn'];
+    } elseif ($selectedSource === $name) {
+        jm_scraper_log($name . ' selected but ' . implode('/', $cfg['env']) . ' not set. Add to .env first.');
+        exit(1);
+    }
+}
 
 if ($selectedSource !== 'all') {
     $sources = array_filter($sources, static fn($key) => $key === $selectedSource, ARRAY_FILTER_USE_KEY);
