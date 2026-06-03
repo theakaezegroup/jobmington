@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
 $pdo = db();
@@ -53,175 +54,56 @@ if (isPost()) {
     }
 }
 
-$pageTitle = 'The Room | Share Your Insights';
-require_once __DIR__ . '/../includes/header.php';
+$pageTitle = 'New topic - ' . SITE_NAME;
+$activeAIPage = 'learn';
+require_once __DIR__ . '/../includes/ai-header.php';
 ?>
-
 <style>
-    /* --- SYSTEM CORE --- */
-    html, body { 
-        background: #030303; 
-        background-image: linear-gradient(180deg, #030303 0%, #0a0a0a 50%, #0f0f0f 100%);
-        background-attachment: fixed;
-        color: #ffffff; 
-    }
-
-    /* Aurora Glows - subtle white/gray */
-    .post-bg {
-        position: fixed;
-        inset: 0; z-index: -1;
-        background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
-    }
-
-    /* --- GLASS TERMINAL --- */
-    .glass-terminal {
-        background: rgba(10, 10, 10, 0.8);
-        backdrop-filter: blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        border-radius: 2.5rem;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    }
-
-    /* --- CONSOLE INPUTS --- */
-    .console-input {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 1rem;
-        color: white;
-        padding: 1rem 1.5rem;
-        transition: all 0.3s ease;
-    }
-    .console-input:focus {
-        border-color: rgba(255, 255, 255, 0.15);
-        background: rgba(255, 255, 255, 0.04);
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
-        outline: none;
-    }
-
-    .label-mini {
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        color: #64748b;
-        margin-bottom: 0.75rem;
-        display: block;
-    }
-
-    /* --- ACTION BUTTON --- */
-    .btn-post {
-        background: #f4f4f5;
-        color: #050608; 
-        border-radius: 1.25rem; 
-        font-weight: 900;
-        padding: 1.25rem; 
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        text-transform: uppercase; 
-        letter-spacing: 0.1em;
-    }
-    .btn-post:hover {
-        transform: scale(1.02);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-    }
-
-    /* Status HUD */
-    .hud-card {
-        background: rgba(255, 255, 255, 0.015);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-        border-radius: 1.5rem;
-        padding: 1.5rem;
-    }
+.jm-nt { max-width:680px; margin:0 auto; padding:36px 20px 72px; }
+.jm-nt h1 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-.02em; color:#061426; margin:0 0 8px; }
+.jm-nt p.sub { font-size:15px; color:#53667f; margin:0 0 24px; }
+.jm-nt-card { background:#fff; border:1px solid #e4eaf3; border-radius:14px; padding:24px; }
+.jm-nt-field { margin-bottom:16px; }
+.jm-nt-field label { display:block; font-size:13px; font-weight:700; color:#5b6b82; margin-bottom:6px; }
+.jm-nt-field input, .jm-nt-field select, .jm-nt-field textarea { width:100%; box-sizing:border-box; border:1px solid #d8e4f4; border-radius:10px; padding:11px 14px; font:inherit; font-size:14px; background:#fbfdff; }
+.jm-nt-field textarea { min-height:160px; resize:vertical; line-height:1.6; }
+.jm-nt-field input:focus, .jm-nt-field select:focus, .jm-nt-field textarea:focus { outline:none; border-color:#0640a3; box-shadow:0 0 0 3px rgba(6,64,163,.08); }
+.jm-nt-btn { background:#0640a3; color:#fff; border:0; border-radius:10px; padding:13px 24px; font-weight:800; font-size:14px; cursor:pointer; }
+.jm-nt-login { background:#fff; border:1px solid #e4eaf3; border-radius:14px; padding:40px 24px; text-align:center; color:#53667f; }
+.jm-nt-login a { color:#0640a3; font-weight:700; text-decoration:none; }
 </style>
 
-<div class="post-bg"></div>
+<div class="jm-nt">
+    <?= jm_breadcrumbs([['label' => 'Community', 'url' => '/jobmington/community/'], ['label' => 'New topic']]) ?>
+    <h1>Start a discussion.</h1>
+    <p class="sub">Ask a question or share something with the community.</p>
 
-<main class="max-w-5xl mx-auto px-4 pt-20 pb-12">
-    <div class="grid lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-8">
-            <div class="glass-terminal p-6 md:p-8 relative overflow-hidden">
-                
-                <header class="mb-6">
-                    <h1 class="text-3xl font-heading font-black text-white tracking-tighter mb-1">POST TO <span class="text-zinc-400">THE ROOM</span></h1>
-                    <p class="text-sm text-slate-400 font-light italic">Share career updates, questions, and insights with professionals in The Room.</p>
-                </header>
-
-                <?php if (Session::hasFlash()): ?>
-                    <div class="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold uppercase tracking-widest">
-                        <?php foreach (Session::getFlash('error') as $m): ?> <?= e($m) ?> <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-
-                <form method="POST" action="" class="space-y-4">
-                    <?= Security::csrfField() ?>
-                    
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="space-y-1.5">
-                            <label class="label-mini">Category</label>
-                            <select name="category_id" class="console-input w-full appearance-none text-sm">
-                                <option value="">General Discussion</option>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= e($cat['id']) ?>"><?= e($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="space-y-1.5">
-                            <label class="label-mini">Post Title</label>
-                            <input type="text" name="title" placeholder="Clear, professional subject..." required class="console-input w-full text-sm" />
-                        </div>
-                    </div>
-
-                    <div class="space-y-1.5">
-                        <label class="label-mini">Post Content</label>
-                        <textarea name="content" rows="7" placeholder="Share your career insight, ask a question, or start a professional discussion..." required class="console-input w-full resize-none chat-scroll text-sm"></textarea>
-                    </div>
-
-                    <div class="pt-2">
-                        <button class="btn-post w-full flex items-center justify-center gap-2 py-3 text-sm" type="submit">
-                            <i class="fas fa-paper-plane"></i> Share in The Room
-                        </button>
-                    </div>
-                </form>
+    <?php if (!Session::isLoggedIn()): ?>
+        <div class="jm-nt-login"><a href="/jobmington/auth/login.php?redirect=<?= urlencode('/jobmington/community/new-topic.php') ?>">Sign in</a> to post a topic.</div>
+    <?php else: ?>
+        <form class="jm-nt-card" method="post">
+            <?= Security::csrfField() ?>
+            <div class="jm-nt-field">
+                <label>Category</label>
+                <select name="category_id">
+                    <option value="">General</option>
+                    <?php foreach ($categories as $c): ?>
+                        <option value="<?= (int)$c['id'] ?>"><?= e($c['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-        </div>
-
-        <aside class="lg:col-span-4 space-y-4">
-            <div class="hud-card">
-                <span class="label-mini mb-3 text-xs">Rewards</span>
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500 text-sm">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-bold text-xs">Earn Seeds</h4>
-                        <p class="text-[9px] text-slate-500 uppercase font-black">For Valuable Posts</p>
-                    </div>
-                </div>
-                <p class="text-xs text-slate-400 leading-relaxed italic">
-                    Helpful posts can earn you <strong>Seeds</strong> (reward points) in your Jobmington wallet. Share value and support other professionals.
-                </p>
+            <div class="jm-nt-field">
+                <label>Title</label>
+                <input type="text" name="title" placeholder="A clear, specific title" required>
             </div>
-
-            <div class="hud-card">
-                <span class="label-mini mb-3 text-xs">Community Guidelines</span>
-                <ul class="space-y-2">
-                    <li class="flex items-start gap-2">
-                        <div class="w-4 h-4 rounded bg-white/5 flex items-center justify-center text-white/60 text-[8px] font-bold flex-shrink-0 mt-0.5">1</div>
-                        <p class="text-xs text-slate-300">Keep it professional. No spam.</p>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <div class="w-4 h-4 rounded bg-white/5 flex items-center justify-center text-white/60 text-[8px] font-bold flex-shrink-0 mt-0.5">2</div>
-                        <p class="text-xs text-slate-300">Use descriptive titles.</p>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <div class="w-4 h-4 rounded bg-white/5 flex items-center justify-center text-white/60 text-[8px] font-bold flex-shrink-0 mt-0.5">3</div>
-                        <p class="text-xs text-slate-300">Link to relevant resources if helpful.</p>
-                    </li>
-                </ul>
+            <div class="jm-nt-field">
+                <label>Your message</label>
+                <textarea name="content" placeholder="Share the details…" required></textarea>
             </div>
-        </aside>
+            <button class="jm-nt-btn" type="submit">Post topic</button>
+        </form>
+    <?php endif; ?>
+</div>
 
-    </div>
-</main>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>

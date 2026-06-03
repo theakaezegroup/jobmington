@@ -1,117 +1,103 @@
 <?php
+/**
+ * JOBMINGTON - Blog post (public)
+ */
 define('JOBMINGTON', true);
 require_once __DIR__ . '/../config/env.php';
-require_once __DIR__ . '/../config/constants.php'; // <--- THIS WAS MISSING
+require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
 $pdo = db();
 
 $slug = Security::clean(get('slug', ''));
-if (empty($slug)) redirect('/jobmington/blog');
+if (empty($slug)) redirect('/jobmington/blog/');
 
-$stmt = $pdo->prepare("SELECT bp.*, u.full_name, bc.name as cat_name, bc.slug as cat_slug FROM blog_posts bp LEFT JOIN users u ON bp.author_id = u.user_id LEFT JOIN blog_categories bc ON bp.category_id = bc.id WHERE bp.slug = ?");
+$stmt = $pdo->prepare("SELECT bp.*, u.full_name, bc.name AS cat_name, bc.slug AS cat_slug
+    FROM blog_posts bp
+    LEFT JOIN users u ON bp.author_id = u.user_id
+    LEFT JOIN blog_categories bc ON bp.category_id = bc.id
+    WHERE bp.slug = ? AND bp.is_published = 1 LIMIT 1");
 $stmt->execute([$slug]);
 $post = $stmt->fetch();
 
-if (!$post) { header("HTTP/1.0 404 Not Found"); exit('Data corrupted or missing.'); }
-
-$pdo->prepare("UPDATE blog_posts SET views = views + 1 WHERE post_id = ?")->execute([$post['post_id']]);
-
-// SIDEBAR DATA (With Safety Shield)
-$jobs = [];
-try {
-    $jobs = $pdo->query("SELECT id as job_id, title as job_title, company_name FROM jobs WHERE status = 'active' ORDER BY created_at DESC LIMIT 3")->fetchAll();
-} catch (Exception $e) {
-    try {
-        $jobs = $pdo->query("SELECT job_id, job_title, company_name FROM jobs WHERE status = 'active' ORDER BY created_at DESC LIMIT 3")->fetchAll();
-    } catch (Exception $x) {
-        $jobs = []; 
-    }
+if (!$post) {
+    http_response_code(404);
+    $pageTitle = 'Post not found - ' . SITE_NAME;
+    $activeAIPage = 'learn';
+    require_once __DIR__ . '/../includes/ai-header.php';
+    echo '<div style="max-width:680px;margin:80px auto;text-align:center;padding:0 20px;"><h1 style="color:#061426;">Post not found</h1><p style="color:#53667f;"><a href="/jobmington/blog/" style="color:#0640a3;">Back to blog</a></p></div>';
+    require_once __DIR__ . '/../includes/ai-footer.php';
+    exit;
 }
 
-require_once __DIR__ . '/../includes/header.php';
-?>
+try { $pdo->prepare("UPDATE blog_posts SET views = views + 1 WHERE post_id = ?")->execute([$post['post_id']]); } catch (Throwable $e) {}
 
+// More posts
+$more = [];
+try {
+    $m = $pdo->prepare("SELECT title, slug FROM blog_posts WHERE is_published = 1 AND post_id <> ? ORDER BY COALESCE(published_at, created_at) DESC LIMIT 4");
+    $m->execute([$post['post_id']]);
+    $more = $m->fetchAll();
+} catch (Throwable $e) {}
+
+$pageTitle = $post['title'] . ' - ' . SITE_NAME;
+$activeAIPage = 'learn';
+require_once __DIR__ . '/../includes/ai-header.php';
+?>
 <style>
-    body { background-color: #020617; color: #cbd5e1; font-family: 'Futura Cyrillic Demi'; }
-    .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; overflow: hidden; }
-    .prose-cyber { color: #cbd5e1; line-height: 1.8; font-size: 1.125rem; }
-    .prose-cyber h2 { color: white; font-weight: 800; font-size: 1.8rem; margin: 2rem 0 1rem; border-left: 4px solid #a855f7; padding-left: 1rem; }
-    .prose-cyber p { margin-bottom: 1.5rem; }
-    .prose-cyber a { color: #3b82f6; text-decoration: underline; text-underline-offset: 4px; }
-    
-    .cta-break {
-        background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(168, 85, 247, 0.1));
-        border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 0.5rem; margin: 2rem 0;
-        display: flex; align-items: center; justify-content: space-between;
-    }
+.jm-post { max-width:760px; margin:0 auto; padding:36px 20px 72px; }
+.jm-post-tag { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:#0640a3; }
+.jm-post h1 { font-size:clamp(28px,4.5vw,42px); font-weight:800; letter-spacing:-.02em; color:#061426; line-height:1.15; margin:10px 0 14px; }
+.jm-post-byline { font-size:13px; color:#94a3b8; margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid #e4eaf3; }
+.jm-post-hero { aspect-ratio:16/8; border-radius:16px; overflow:hidden; margin-bottom:28px; background:linear-gradient(135deg,#eef5ff,#f7faff); }
+.jm-post-hero img { width:100%; height:100%; object-fit:cover; }
+.jm-post-body { font-size:17px; line-height:1.8; color:#1f2d3d; }
+.jm-post-body p { margin:0 0 1.4em; }
+.jm-post-body h2 { font-size:24px; font-weight:800; color:#061426; margin:1.6em 0 .6em; }
+.jm-post-body h3 { font-size:19px; font-weight:800; color:#061426; margin:1.4em 0 .5em; }
+.jm-post-body a { color:#0640a3; text-decoration:underline; text-underline-offset:3px; }
+.jm-post-body img { max-width:100%; border-radius:12px; }
+.jm-post-body ul, .jm-post-body ol { margin:0 0 1.4em; padding-left:1.4em; }
+.jm-post-body li { margin-bottom:.5em; }
+.jm-post-more { margin-top:40px; padding-top:28px; border-top:1px solid #e4eaf3; }
+.jm-post-more h3 { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:#5b6b82; margin:0 0 14px; }
+.jm-post-more a { display:block; padding:12px 0; border-bottom:1px solid #f0f4f9; color:#061426; font-weight:600; text-decoration:none; font-size:15px; }
+.jm-post-more a:hover { color:#0640a3; }
 </style>
 
-<div class="min-h-screen py-10">
-    <div class="max-w-[1400px] mx-auto px-4">
-        <div class="text-xs text-slate-500 mb-6 font-mono uppercase tracking-widest">
-            <a href="/jobmington/blog" class="hover:text-white">HUB</a> // <?= e($post['cat_name']) ?> // ID: <?= $post['post_id'] ?>
-        </div>
+<div class="jm-post">
+    <?= jm_breadcrumbs([['label' => 'Blog', 'url' => '/jobmington/blog/'], ['label' => $post['title']]]) ?>
 
-        <div class="flex flex-col lg:flex-row gap-10">
-            <div class="lg:w-3/4">
-                <article class="glass-panel">
-                    <?php if ($post['featured_image']): ?>
-                        <div class="h-[400px] w-full overflow-hidden border-b border-white/5 relative">
-                            <img src="<?= upload('blog-images/' . $post['featured_image']) ?>" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] to-transparent"></div>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="p-8 md:p-12">
-                        <h1 class="text-4xl md:text-5xl font-black text-white mb-6 leading-tight"><?= e($post['title']) ?></h1>
-                        <div class="flex items-center gap-4 text-sm text-slate-400 font-mono mb-10 border-b border-white/5 pb-6">
-                            <span><i class="fas fa-user text-slate-400"></i> <?= e($post['full_name']) ?></span>
-                            <span><i class="fas fa-clock text-blue-500"></i> <?= formatDate($post['published_at']) ?></span>
-                            <span><i class="fas fa-eye text-green-500"></i> <?= $post['views'] ?> Reads</span>
-                        </div>
-                        <div class="prose-cyber">
-                            <?= $post['content'] ?>
-                            <div class="cta-break">
-                                <div>
-                                    <h4 class="text-white font-bold">Need a better CV?</h4>
-                                    <p class="text-sm text-slate-400 m-0">Use our Obsidian CV Architect to build an ATS-proof resume.</p>
-                                </div>
-                                <a href="/jobmington/cv-builder" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded uppercase tracking-wide transition">Build Now</a>
-                            </div>
-                        </div>
-                    </div>
-                </article>
-            </div>
-
-            <aside class="lg:w-1/4 space-y-6">
-                <div class="p-6 rounded-2xl bg-gradient-to-br from-amber-900/20 to-slate-900/20 border border-amber-500/30 text-center">
-                    <div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-400"><i class="fas fa-robot text-2xl"></i></div>
-                    <h4 class="font-bold text-white">Andika AI – Career Assistant</h4>
-                    <p class="text-xs text-slate-400 mb-4">"I can help you summarize this article or find related jobs."</p>
-                    <a href="/jobmington/ai/andika.php" class="w-full block border border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-black text-xs font-bold py-2 rounded uppercase transition text-center">Chat Now</a>
-                </div>
-                
-                <div class="glass-panel p-5">
-                    <h4 class="text-xs font-bold text-white uppercase tracking-widest mb-4 border-b border-white/10 pb-2">Related Targets</h4>
-                    <div class="space-y-4">
-                        <?php if(!empty($jobs)): foreach($jobs as $job): ?>
-                        <a href="/jobmington/jobs/view.php?id=<?= $job['job_id'] ?? 0 ?>" class="block group">
-                            <div class="text-sm font-bold text-white group-hover:text-blue-400 transition truncate"><?= e($job['job_title']) ?></div>
-                            <div class="text-xs text-slate-500"><?= e($job['company_name']) ?></div>
-                        </a>
-                        <?php endforeach; else: ?>
-                            <div class="text-xs text-slate-500">Scanning...</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            </aside>
-        </div>
+    <span class="jm-post-tag"><?= e($post['cat_name'] ?: 'Article') ?></span>
+    <h1><?= e($post['title']) ?></h1>
+    <div class="jm-post-byline">
+        By <strong><?= e($post['full_name'] ?: 'Jobmington') ?></strong>
+        &middot; <?= e(formatDate($post['published_at'] ?: $post['created_at'])) ?>
+        &middot; <?= (int)$post['views'] ?> views
     </div>
+
+    <?php if (!empty($post['featured_image'])): ?>
+        <div class="jm-post-hero"><img src="<?= e($post['featured_image']) ?>" alt="<?= e($post['title']) ?>"></div>
+    <?php endif; ?>
+
+    <div class="jm-post-body"><?php
+        $content = preg_replace('#<(script|style|iframe)\b[^>]*>.*?</\1>#is', '', (string) $post['content']);
+        echo (strip_tags($content) === $content) ? nl2br(e($content)) : $content;
+    ?></div>
+
+    <?php if (!empty($more)): ?>
+        <div class="jm-post-more">
+            <h3>More from the blog</h3>
+            <?php foreach ($more as $m): ?>
+                <a href="/jobmington/blog/post.php?slug=<?= e($m['slug']) ?>"><?= e($m['title']) ?></a>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>

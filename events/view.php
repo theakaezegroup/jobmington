@@ -21,9 +21,9 @@ $event = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$event) {
     http_response_code(404);
     $pageTitle = 'Event not found - ' . SITE_NAME;
-    require_once __DIR__ . '/../includes/header.php';
+    $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
     echo '<div style="max-width:680px;margin:80px auto;text-align:center;padding:0 20px;"><h1 style="color:#061426;">Event not found</h1><p style="color:#53667f;"><a href="/jobmington/events/" style="color:#0640a3;">Back to events</a></p></div>';
-    require_once __DIR__ . '/../includes/footer.php';
+    require_once __DIR__ . '/../includes/ai-footer.php';
     exit;
 }
 
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'regis
 }
 
 $pageTitle = $event['title'] . ' - ' . SITE_NAME;
-require_once __DIR__ . '/../includes/header.php';
+$activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 <style>
 .jm-evv { max-width:900px; margin:0 auto; padding:40px 20px 72px; }
@@ -154,4 +154,4 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>

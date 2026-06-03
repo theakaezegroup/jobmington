@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
 
@@ -153,185 +154,96 @@ if (Session::isLoggedIn()) {
     $userLikedReplies = $likedStmt->fetchAll(PDO::FETCH_COLUMN);
 }
 
-$pageTitle = e($topic['title']) . ' - ' . SITE_NAME;
-require_once __DIR__ . '/../includes/header.php';
-?>
+$pageTitle = $topic['title'] . ' - ' . SITE_NAME;
+$activeAIPage = 'learn';
+require_once __DIR__ . '/../includes/ai-header.php';
 
+function jm_forum_avatar(array $u): string {
+    $img = !empty($u['profile_image']) ? (function_exists('profileImage') ? profileImage($u['profile_image']) : $u['profile_image']) : '';
+    if ($img) {
+        return '<img class="jm-tpc-av" src="' . e($img) . '" alt="">';
+    }
+    return '<span class="jm-tpc-av">' . e(strtoupper(substr($u['full_name'] ?: 'J', 0, 1))) . '</span>';
+}
+?>
 <style>
-    html, body { 
-        background: #030303; 
-        background-image: linear-gradient(180deg, #030303 0%, #0a0a0a 50%, #0f0f0f 100%);
-        background-attachment: fixed;
-    }
-    .topic-card {
-        background: rgba(10, 10, 10, 0.8);
-        backdrop-filter: blur(24px);
-        border: 1px solid rgba(255, 255, 255, 0.04);
-    }
+.jm-tpc { max-width:760px; margin:0 auto; padding:36px 20px 72px; }
+.jm-tpc-av { width:42px; height:42px; border-radius:50%; flex-shrink:0; object-fit:cover; background:#eef5ff; display:grid; place-items:center; color:#0640a3; font-weight:800; font-size:16px; }
+.jm-tpc-cat { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:#0640a3; }
+.jm-tpc h1 { font-size:clamp(24px,4vw,34px); font-weight:800; letter-spacing:-.02em; color:#061426; line-height:1.2; margin:8px 0 14px; }
+.jm-tpc-card { background:#fff; border:1px solid #e4eaf3; border-radius:14px; padding:22px; margin-bottom:24px; }
+.jm-tpc-author { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.jm-tpc-author .nm { font-size:14px; font-weight:700; color:#061426; }
+.jm-tpc-author .mt { font-size:12px; color:#94a3b8; }
+.jm-tpc-content { font-size:16px; line-height:1.7; color:#1f2d3d; white-space:pre-wrap; }
+.jm-tpc-stats { display:flex; gap:16px; font-size:12px; color:#94a3b8; margin-top:16px; padding-top:14px; border-top:1px solid #f0f4f9; }
+.jm-tpc-replies-h { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:#5b6b82; margin:0 0 14px; }
+.jm-tpc-reply { display:flex; gap:12px; padding:16px 0; border-bottom:1px solid #f0f4f9; }
+.jm-tpc-reply:last-child { border-bottom:none; }
+.jm-tpc-reply-main { flex:1; min-width:0; }
+.jm-tpc-reply-head { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+.jm-tpc-reply-head .nm { font-size:13.5px; font-weight:700; color:#061426; }
+.jm-tpc-reply-head .ag { font-size:12px; color:#94a3b8; }
+.jm-tpc-reply-body { font-size:14.5px; line-height:1.6; color:#1f2d3d; white-space:pre-wrap; }
+.jm-tpc-form { background:#fff; border:1px solid #e4eaf3; border-radius:14px; padding:20px; margin-top:24px; }
+.jm-tpc-form textarea { width:100%; box-sizing:border-box; border:1px solid #d8e4f4; border-radius:10px; padding:12px 14px; font:inherit; font-size:14px; min-height:100px; resize:vertical; background:#fbfdff; }
+.jm-tpc-form textarea:focus { outline:none; border-color:#0640a3; box-shadow:0 0 0 3px rgba(6,64,163,.08); }
+.jm-tpc-form button { margin-top:12px; background:#0640a3; color:#fff; border:0; border-radius:10px; padding:12px 22px; font-weight:800; font-size:14px; cursor:pointer; }
+.jm-tpc-login { background:#fff; border:1px solid #e4eaf3; border-radius:14px; padding:20px; margin-top:24px; text-align:center; color:#53667f; }
+.jm-tpc-login a { color:#0640a3; font-weight:700; text-decoration:none; }
 </style>
 
-<div class="min-h-screen py-8">
-    <div class="max-w-5xl mx-auto px-4">
-        
-        <!-- Breadcrumb -->
-        <div class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
-            <a href="/jobmington/community" class="hover:text-white transition">Community</a>
-            <i class="fas fa-chevron-right text-xs"></i>
-            <span class="text-zinc-400"><?= e($topic['category_name']) ?></span>
-        </div>
-        
-        <!-- Main Topic -->
-        <div class="topic-card rounded-2xl overflow-hidden mb-6">
-            <div class="p-6 md:p-8">
-                <h1 class="text-2xl font-bold text-white mb-4"><?= e($topic['title']) ?></h1>
-                
-                <div class="flex items-center gap-3 mb-6 pb-6 border-b border-white/5">
-                    <img src="<?= profileImage($topic['profile_image']) ?>" class="w-10 h-10 rounded-full object-cover">
-                    <div>
-                        <p class="font-medium text-white text-sm">
-                            <?= e($topic['full_name']) ?>
-                            <?php if ($topic['user_type'] == 'admin'): ?>
-                                <span class="bg-white/10 text-white/70 text-[10px] px-2 py-0.5 rounded ml-1">ADMIN</span>
-                            <?php endif; ?>
-                        </p>
-                        <p class="text-xs text-zinc-500"><?= formatDate($topic['created_at']) ?></p>
-                    </div>
-                </div>
-                
-                <div class="prose max-w-none text-zinc-300 leading-relaxed">
-                    <?= nl2br(e($topic['content'])) ?>
-                </div>
-                
-                <!-- Topic Actions -->
-                <div class="flex items-center gap-4 mt-6 pt-6 border-t border-white/5">
-                    <button onclick="toggleLike('topic', <?= $topic['topic_id'] ?>, this)" 
-                            class="like-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition
-                                   <?= $userLikedTopic ? 'bg-red-500/20 text-red-400' : 'bg-white/5 text-zinc-400 hover:bg-white/10' ?>">
-                        <i class="<?= $userLikedTopic ? 'fas' : 'far' ?> fa-heart"></i>
-                        <span class="like-count"><?= $topic['likes'] ?? 0 ?></span>
-                    </button>
-                    <span class="text-zinc-500 text-sm flex items-center gap-2">
-                        <i class="far fa-eye"></i> <?= $topic['views'] ?? 0 ?> views
-                    </span>
-                    <span class="text-zinc-500 text-sm flex items-center gap-2">
-                        <i class="far fa-comment"></i> <?= count($replies) ?> replies
-                    </span>
-                </div>
+<div class="jm-tpc">
+    <?= jm_breadcrumbs([['label' => 'Community', 'url' => '/jobmington/community/'], ['label' => $topic['title']]]) ?>
+
+    <div class="jm-tpc-card">
+        <?php if ($topic['category_name']): ?><span class="jm-tpc-cat"><?= e($topic['category_name']) ?></span><?php endif; ?>
+        <h1><?= e($topic['title']) ?></h1>
+        <div class="jm-tpc-author">
+            <?= jm_forum_avatar($topic) ?>
+            <div>
+                <div class="nm"><?= e($topic['full_name'] ?: 'Member') ?></div>
+                <div class="mt"><?= e(timeAgo($topic['created_at'])) ?></div>
             </div>
         </div>
-        
-        <!-- Replies -->
-        <div class="space-y-6">
-            <h3 class="font-bold text-zinc-400 text-sm uppercase tracking-wider ml-2"><?= count($replies) ?> Replies</h3>
-            
-            <?php foreach ($replies as $reply): ?>
-            <div class="topic-card rounded-2xl p-6" id="reply-<?= $reply['reply_id'] ?>">
-                <div class="flex items-start gap-4">
-                    <img src="<?= profileImage($reply['profile_image']) ?>" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
-                    <div class="flex-1">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <span class="font-bold text-white text-sm">
-                                    <?= e($reply['full_name']) ?>
-                                    <?php if ($reply['user_type'] == 'admin'): ?>
-                                        <span class="bg-white/10 text-white/70 text-[10px] px-2 py-0.5 rounded ml-1">ADMIN</span>
-                                    <?php endif; ?>
-                                </span>
-                                <span class="text-xs text-zinc-500 ml-2"><?= timeAgo($reply['created_at']) ?></span>
-                            </div>
+        <div class="jm-tpc-content"><?= e($topic['content']) ?></div>
+        <div class="jm-tpc-stats">
+            <span><?= (int)$topic['likes'] ?> likes</span>
+            <span><?= count($replies) ?> repl<?= count($replies) === 1 ? 'y' : 'ies' ?></span>
+            <span><?= (int)$topic['views'] ?> views</span>
+        </div>
+    </div>
+
+    <div class="jm-tpc-replies-h"><?= count($replies) ?> repl<?= count($replies) === 1 ? 'y' : 'ies' ?></div>
+
+    <?php if (!empty($replies)): ?>
+        <div class="jm-tpc-card" style="padding:6px 22px;">
+            <?php foreach ($replies as $r): ?>
+                <div class="jm-tpc-reply">
+                    <?= jm_forum_avatar($r) ?>
+                    <div class="jm-tpc-reply-main">
+                        <div class="jm-tpc-reply-head">
+                            <span class="nm"><?= e($r['full_name'] ?: 'Member') ?></span>
+                            <span class="ag"><?= e(timeAgo($r['created_at'])) ?></span>
                         </div>
-                        
-                        <div class="mt-2 text-zinc-400 text-sm leading-relaxed">
-                            <?= nl2br(e($reply['content'])) ?>
-                        </div>
-                        
-                        <!-- Reply Actions -->
-                        <div class="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
-                            <?php $isLiked = in_array($reply['reply_id'], $userLikedReplies); ?>
-                            <button onclick="toggleLike('reply', <?= $reply['reply_id'] ?>, this)" 
-                                    class="like-btn flex items-center gap-1.5 text-xs font-medium transition
-                                           <?= $isLiked ? 'text-red-400' : 'text-zinc-500 hover:text-red-400' ?>">
-                                <i class="<?= $isLiked ? 'fas' : 'far' ?> fa-heart"></i>
-                                <span class="like-count"><?= $reply['likes'] ?? 0 ?></span>
-                            </button>
-                        </div>
+                        <div class="jm-tpc-reply-body"><?= e($r['content']) ?></div>
                     </div>
                 </div>
-            </div>
             <?php endforeach; ?>
         </div>
-        
-        <!-- Reply Form -->
-        <div class="mt-8 topic-card rounded-2xl p-6">
-            <?php if (Session::isLoggedIn()): ?>
-                <h3 class="font-bold text-white mb-4">Post a Reply</h3>
-                <form method="POST">
-                    <?= csrf_field() ?>
-                    <div class="mb-4">
-                        <textarea name="content" rows="5" class="w-full p-4 bg-white/3 border border-white/8 rounded-xl text-white placeholder-zinc-500 focus:border-white/15 focus:outline-none transition" placeholder="Share your thoughts..." required></textarea>
-                    </div>
-                    <div class="flex justify-end">
-                        <button type="submit" class="bg-white text-black font-bold px-6 py-2.5 rounded-xl hover:bg-zinc-200 transition">
-                            Post Reply
-                        </button>
-                    </div>
-                </form>
-            <?php else: ?>
-                <div class="text-center py-6">
-                    <p class="text-zinc-400 mb-4">You must be logged in to reply.</p>
-                    <a href="/jobmington/auth/login.php?redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>" class="inline-block bg-white text-black font-bold px-6 py-2.5 rounded-xl hover:bg-zinc-200 transition">
-                        Log In to Reply
-                    </a>
-                </div>
-            <?php endif; ?>
-        </div>
-        
-    </div>
+    <?php endif; ?>
+
+    <?php if (Session::isLoggedIn()): ?>
+        <form class="jm-tpc-form" method="post">
+            <?= Security::csrfField() ?>
+            <textarea name="content" placeholder="Write a reply…" required></textarea>
+            <button type="submit">Post reply</button>
+        </form>
+    <?php else: ?>
+        <div class="jm-tpc-login"><a href="/jobmington/auth/login.php?redirect=<?= urlencode('/jobmington/community/topic.php?id=' . $topicId) ?>">Sign in</a> to join the discussion.</div>
+    <?php endif; ?>
 </div>
 
-<script>
-function toggleLike(type, targetId, btn) {
-    fetch(window.location.href, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `action=like&type=${type}&target_id=${targetId}&csrf_token=<?= Security::csrfToken() ?>`
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            const icon = btn.querySelector('i');
-            const count = btn.querySelector('.like-count');
-            count.textContent = data.count;
-            
-            if (data.liked) {
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                if (type === 'topic') {
-                    btn.classList.remove('bg-white/5', 'text-zinc-400');
-                    btn.classList.add('bg-red-500/20', 'text-red-400');
-                } else {
-                    btn.classList.remove('text-zinc-500');
-                    btn.classList.add('text-red-400');
-                }
-            } else {
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                if (type === 'topic') {
-                    btn.classList.add('bg-white/5', 'text-zinc-400');
-                    btn.classList.remove('bg-red-500/20', 'text-red-400');
-                } else {
-                    btn.classList.add('text-zinc-500');
-                    btn.classList.remove('text-red-400');
-                }
-            }
-        } else {
-            alert(data.message || 'Please log in to like');
-        }
-    })
-    .catch(err => console.error('Like error:', err));
-}
-</script>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+

@@ -24,14 +24,14 @@ if ($slug !== '') {
 if (!$ebook) {
     http_response_code(404);
     $pageTitle = 'Ebook not found - ' . SITE_NAME;
-    require_once __DIR__ . '/../includes/header.php';
+    $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
     echo '<div style="max-width:680px;margin:80px auto;text-align:center;padding:0 20px;"><h1 style="color:#061426;">Ebook not found</h1><p style="color:#53667f;">It may have been unpublished. <a href="/jobmington/ebooks/" style="color:#0640a3;">Back to library</a></p></div>';
-    require_once __DIR__ . '/../includes/footer.php';
+    require_once __DIR__ . '/../includes/ai-footer.php';
     exit;
 }
 
 $pageTitle = $ebook['title'] . ' - ' . SITE_NAME;
-require_once __DIR__ . '/../includes/header.php';
+$activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 <style>
 .jm-ebv { max-width:980px; margin:0 auto; padding:40px 20px 72px; }
@@ -84,4 +84,4 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>

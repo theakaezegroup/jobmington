@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
 $pdo = db();
@@ -19,7 +20,8 @@ try {
 } catch (Throwable $e) { $ebooks = []; }
 
 $pageTitle = 'Ebooks & Guides - ' . SITE_NAME;
-require_once __DIR__ . '/../includes/header.php';
+$activeAIPage = 'learn';
+require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 <style>
 .jm-eb-page { max-width:1100px; margin:0 auto; padding:48px 20px 72px; }
@@ -44,6 +46,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="jm-eb-page">
     <?= jm_breadcrumbs([['label' => 'Ebooks']]) ?>
+    <?= jm_learn_nav('ebooks') ?>
     <div class="jm-eb-head">
         <h1>Ebooks &amp; guides.</h1>
         <p>Practical, downloadable resources to grow your career — free and premium.</p>
@@ -77,4 +80,4 @@ require_once __DIR__ . '/../includes/header.php';
     <?php endif; ?>
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
 $pdo = db();
@@ -20,7 +21,8 @@ try {
 } catch (Throwable $e) { $upcoming = $past = []; }
 
 $pageTitle = 'Events & Webinars - ' . SITE_NAME;
-require_once __DIR__ . '/../includes/header.php';
+$activeAIPage = 'learn';
+require_once __DIR__ . '/../includes/ai-header.php';
 
 function jm_event_card(array $ev, bool $isPast = false): string {
     $date = date('D, M d, Y', strtotime($ev['starts_at']));
@@ -74,6 +76,7 @@ function jm_event_card(array $ev, bool $isPast = false): string {
 
 <div class="jm-ev-page">
     <?= jm_breadcrumbs([['label' => 'Events']]) ?>
+    <?= jm_learn_nav('events') ?>
     <div class="jm-ev-head">
         <h1>Events &amp; webinars.</h1>
         <p>Live sessions, workshops, and webinars to level up your career — most are free.</p>
@@ -92,4 +95,4 @@ function jm_event_card(array $ev, bool $isPast = false): string {
     <?php endif; ?>
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>
