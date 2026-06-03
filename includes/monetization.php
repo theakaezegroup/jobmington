@@ -206,6 +206,15 @@ function jm_ai_tools(): array {
             'description'  => 'AI-written cover letter tailored to the job description.',
             'is_free'      => false,
         ],
+        'cold_pitch' => [
+            'id'           => 'cold_pitch',
+            'name'         => 'Cold Pitch AI',
+            'credit_cost'  => TOOL_COST_COLD_PITCH,
+            'ngn_price'    => PRICE_CREDITS_SINGLE * TOOL_COST_COLD_PITCH,
+            'free_preview' => false,
+            'description'  => 'Human, specific cold pitches that earn the micro-yes — email, DM, or LinkedIn.',
+            'is_free'      => false,
+        ],
         'interview_prep' => [
             'id'           => 'interview_prep',
             'name'         => 'Interview Prep',

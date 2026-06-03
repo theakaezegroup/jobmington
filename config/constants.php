@@ -96,6 +96,7 @@ define('PRICE_CREDITS_PACK_10',           (int)(getenv('PRICE_CREDITS_PACK_10') 
 // ── Monetization: Per-Tool (credits) ─────────────────────────────────────────
 define('TOOL_COST_CV_OPTIMIZER',          (int)(getenv('TOOL_COST_CV_OPTIMIZER')          ?: 1));
 define('TOOL_COST_COVER_LETTER',          (int)(getenv('TOOL_COST_COVER_LETTER')          ?: 1));
+define('TOOL_COST_COLD_PITCH',            (int)(getenv('TOOL_COST_COLD_PITCH')            ?: 1));
 define('TOOL_COST_INTERVIEW_PREP',        (int)(getenv('TOOL_COST_INTERVIEW_PREP')        ?: 2));  // ₦800 equiv
 define('TOOL_COST_SKILLS_GAP_REPORT',     (int)(getenv('TOOL_COST_SKILLS_GAP_REPORT')     ?: 1));  // ₦300 equiv
 

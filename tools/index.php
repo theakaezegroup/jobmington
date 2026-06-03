@@ -35,12 +35,22 @@ $tools = [
         'stats' => 'Data from 100K+ jobs'
     ],
     [
-        'name' => 'Cover Letter Builder',
+        'name' => 'Cover Letter AI',
         'icon' => 'pen-fancy',
         'description' => 'Create professional cover letters tailored to each job. AI suggestions help you stand out.',
-        'url' => '#',
+        'url' => '/jobmington/ai/cover-letter.php',
         'color' => 'purple',
+        'badge' => 'New',
         'stats' => 'AI-powered'
+    ],
+    [
+        'name' => 'Cold Pitch AI',
+        'icon' => 'paper-plane',
+        'description' => 'Write human, specific cold pitches that earn the micro-yes — for email, DM, or LinkedIn.',
+        'url' => '/jobmington/ai/cold-pitch.php',
+        'color' => 'blue',
+        'badge' => 'New',
+        'stats' => 'Email · DM · LinkedIn'
     ],
     [
         'name' => 'Interview Prep',
