@@ -598,6 +598,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
 
 <div class="jm-roast-wrap">
 
+    <?= jm_breadcrumbs([['label' => 'Tools', 'url' => '/jobmington/tools/'], ['label' => 'Resume Optimizer']]) ?>
+
     <!-- Hero -->
     <div class="jm-roast-hero">
         <p class="jm-kicker" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;margin-bottom:10px;">AI-Powered</p>

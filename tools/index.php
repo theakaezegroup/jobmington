@@ -14,6 +14,7 @@ require_once $root . '/includes/functions.php';
 
 Session::start();
 $pageTitle = 'Career Tools - ' . SITE_NAME;
+$activeAIPage = 'tools';
 
 $tools = [
     [
@@ -74,7 +75,7 @@ $tools = [
     ],
 ];
 
-require_once $root . '/includes/header.php';
+require_once $root . '/includes/ai-header.php';
 ?>
 <style>
 .jm-tools-page { max-width: 1100px; margin: 0 auto; padding: 48px 20px 72px; }
@@ -99,6 +100,7 @@ require_once $root . '/includes/header.php';
 </style>
 
 <div class="jm-tools-page">
+    <?= jm_breadcrumbs([['label' => 'Tools']]) ?>
     <div class="jm-tools-head">
         <h1>Career tools.</h1>
         <p>Everything you need to build, sharpen, and pitch yourself — powered by AI, tuned for African and remote talent.</p>
@@ -124,4 +126,4 @@ require_once $root . '/includes/header.php';
     </div>
 </div>
 
-<?php require_once $root . '/includes/footer.php'; ?>
+<?php require_once $root . '/includes/ai-footer.php'; ?>

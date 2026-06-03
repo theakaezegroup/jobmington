@@ -95,6 +95,7 @@ jm_jobs_header($pageTitle, 'jobs');
 ?>
 
 <section class="jm-section" style="padding-top:0;">
+    <?= jm_breadcrumbs([['label' => 'Jobs']]) ?>
     <div class="jm-section-head">
         <div>
             <p class="jm-kicker">Find jobs</p>

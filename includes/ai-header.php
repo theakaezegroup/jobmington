@@ -48,6 +48,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
             <nav class="jm-nav" id="jm-ai-nav" aria-label="Main navigation">
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/cv-builder/">CV Builder</a>
+                <a class="<?= $activeAIPage === 'tools' ? 'active' : '' ?>" href="/jobmington/tools/">Tools</a>
                 <a class="<?= $activeAIPage === 'andika' ? 'active' : '' ?>" href="/jobmington/ai/andika.php">Andika AI</a>
                 <a href="/jobmington/employer/">Employers</a>
                 <a href="/jobmington/pricing.php">Pricing</a>

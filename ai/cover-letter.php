@@ -25,6 +25,7 @@ require_once __DIR__ . '/_tool_styles.php';
 ?>
 
 <div class="jm-tool-wrap">
+    <?= jm_breadcrumbs([['label' => 'Tools', 'url' => '/jobmington/tools/'], ['label' => 'Cover Letter AI']]) ?>
     <div class="jm-tool-hero">
         <p class="jm-kicker" style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;margin-bottom:10px;">AI-Powered</p>
         <h1>Cover Letter AI.</h1>

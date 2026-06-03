@@ -89,6 +89,7 @@ jm_jobs_header($pageTitle, 'jobs');
 ?>
 
 <section class="jm-section jm-job-detail" style="padding-top:0;">
+    <?= jm_breadcrumbs([['label' => 'Jobs', 'url' => '/jobmington/jobs/'], ['label' => $job['title']]]) ?>
     <?php
     $companyLogo = jm_company_logo_url($job);
     $salaryText = trim((string) jm_job_salary($job));

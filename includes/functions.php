@@ -123,6 +123,61 @@ function upload(string $path): string {
     return $root . '/' . ltrim($path, '/');
 }
 
+/**
+ * Render an accessible breadcrumb trail. Self-contained: it inlines its own CSS
+ * once per request, so it renders correctly on any page regardless of which
+ * header/stylesheet version is cached.
+ *
+ * @param array $crumbs  Ordered list of ['label' => ..., 'url' => ...]. The last
+ *                       item is the current page (rendered as plain text even if
+ *                       it has a url). 'Home' is prepended automatically.
+ */
+function jm_breadcrumbs(array $crumbs, bool $withHome = true): string {
+    if (empty($crumbs)) {
+        return '';
+    }
+    if ($withHome) {
+        array_unshift($crumbs, ['label' => 'Home', 'url' => '/jobmington/']);
+    }
+
+    static $stylePrinted = false;
+    $style = '';
+    if (!$stylePrinted) {
+        $stylePrinted = true;
+        $style = '<style>'
+            . '.jm-breadcrumb{margin:0 0 22px;}'
+            . '.jm-breadcrumb ol{display:flex;flex-wrap:wrap;align-items:center;gap:7px;list-style:none;margin:0;padding:0;font-size:13px;line-height:1.4;}'
+            . '.jm-breadcrumb li{display:inline-flex;align-items:center;gap:7px;}'
+            . '.jm-breadcrumb li+li::before{content:"";width:6px;height:6px;border-top:1.6px solid #94a3b8;border-right:1.6px solid #94a3b8;transform:rotate(45deg);display:inline-block;}'
+            . '.jm-breadcrumb a{color:#53667f;text-decoration:none;transition:color .15s;font-weight:600;}'
+            . '.jm-breadcrumb a:hover{color:#0640a3;}'
+            . '.jm-breadcrumb .current{color:#061426;font-weight:700;max-width:46ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}'
+            . '</style>';
+    }
+
+    $count = count($crumbs);
+    $items = '';
+    foreach (array_values($crumbs) as $i => $crumb) {
+        $label  = e((string) ($crumb['label'] ?? ''));
+        $url    = (string) ($crumb['url'] ?? '');
+        $isLast = ($i === $count - 1);
+        $pos    = $i + 1;
+
+        $inner = (!$isLast && $url !== '')
+            ? '<a itemprop="item" href="' . e($url) . '"><span itemprop="name">' . $label . '</span></a>'
+            : '<span class="current" itemprop="name" aria-current="page">' . $label . '</span>';
+
+        $items .= '<li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">'
+            . $inner
+            . '<meta itemprop="position" content="' . $pos . '"></li>';
+    }
+
+    return $style
+        . '<nav class="jm-breadcrumb" aria-label="Breadcrumb">'
+        . '<ol itemscope itemtype="https://schema.org/BreadcrumbList">' . $items . '</ol>'
+        . '</nav>';
+}
+
 /* ==========================================================================
    3. FORMATTING & DISPLAY
    ========================================================================== */

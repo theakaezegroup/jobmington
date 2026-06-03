@@ -92,6 +92,7 @@ $pageTitle = 'Saved Jobs | ' . SITE_NAME;
         </header>
 
         <section class="jm-section" style="padding-top:0;">
+            <?= jm_breadcrumbs([['label' => 'Jobs', 'url' => '/jobmington/jobs/'], ['label' => 'Saved jobs']]) ?>
             <div class="jm-section-head">
                 <div>
                     <p class="jm-kicker">Saved jobs</p>

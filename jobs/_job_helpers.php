@@ -696,6 +696,7 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
                 <nav class="jm-nav" aria-label="Main navigation">
                     <a class="<?= $active === 'jobs' ? 'active' : '' ?>" href="/jobmington/jobs/">Find jobs</a>
                     <a href="/jobmington/cv-builder/">CV Builder</a>
+                    <a class="<?= $active === 'tools' ? 'active' : '' ?>" href="/jobmington/tools/">Tools</a>
                     <a href="/jobmington/ai/andika.php">Andika AI</a>
                     <a href="/jobmington/employer/">Employers</a>
                     <a href="/jobmington/pricing.php">Pricing</a>
