@@ -170,6 +170,8 @@ if ($isAdminArea) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0640a3">
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
+    <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
@@ -527,6 +529,8 @@ ob_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#030303">
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
+    <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
     

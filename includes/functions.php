@@ -556,6 +556,14 @@ if (!function_exists('jm_minimal_footer')) {
                 document.head.appendChild(icon);
             }
 
+            if (!document.querySelector('link[rel="icon"]')) {
+                const favicon = document.createElement('link');
+                favicon.rel = 'icon';
+                favicon.type = 'image/png';
+                favicon.href = `${pathBase}/assets/images/favicon.png?v=fav-1`;
+                document.head.appendChild(favicon);
+            }
+
             let nav = null;
             let toggle = null;
 

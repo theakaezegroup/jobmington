@@ -180,6 +180,8 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     <meta name="description" content="Jobmington — Africa's career platform. Find remote jobs, unlock AI tools, and build a career that pays in dollars.">
     <link rel="canonical" href="/">
     <link rel="manifest" href="/jobmington/manifest.json?v=clean-urls">
+    <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
+    <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <meta name="theme-color" content="#0640a3">
     <title><?= e($pageTitle) ?></title>
