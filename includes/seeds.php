@@ -97,6 +97,8 @@ function ensureSeedsSchema(): void {
         }
     };
 
+    // tool_credits is the paid Credits balance (shared wallets row with Seeds = balance).
+    $ensureColumn('wallets', 'tool_credits', "ALTER TABLE wallets ADD COLUMN tool_credits INT NOT NULL DEFAULT 0 AFTER balance");
     $ensureColumn('wallets', 'lifetime_spent', "ALTER TABLE wallets ADD COLUMN lifetime_spent DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER lifetime_earned");
     $ensureColumn('wallets', 'is_locked', "ALTER TABLE wallets ADD COLUMN is_locked TINYINT(1) DEFAULT 0 AFTER lifetime_spent");
     $ensureColumn('wallets', 'created_at', "ALTER TABLE wallets ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER is_locked");
@@ -123,18 +125,16 @@ function ensureSeedsSchema(): void {
         ['daily_login', 5, 'earn', 'Daily login bonus'],
         ['referral_signup', 200, 'earn', 'Refer a friend who signs up'],
         ['interview_scheduled', 50, 'earn', 'Get an interview scheduled'],
-        ['ai_chat_basic', 5, 'spend', 'Basic AI chat message'],
-        ['ai_chat_premium', 15, 'spend', 'Premium AI analysis'],
-        ['cv_roast', 50, 'spend', 'AI CV roast/review'],
-        ['cv_optimize', 100, 'spend', 'AI CV optimization'],
-        ['cover_letter', 75, 'spend', 'AI cover letter generation'],
+        // ── SPEND (Seeds): Andika chat + light engagement perks only. ──────────
+        // Premium AI tools (CV optimizer, cover letter, cold pitch, interview prep)
+        // are paid for in Credits, NOT Seeds — see includes/monetization.php.
+        ['ai_chat_basic', 5, 'spend', 'Andika AI chat message'],
+        ['ai_chat_premium', 15, 'spend', 'Andika AI deep analysis'],
+        ['redeem_credit', 100, 'spend', 'Redeem Seeds for 1 Credit'],
         ['job_boost', 200, 'spend', 'Boost job application visibility'],
         ['profile_boost', 150, 'spend', 'Feature profile for 7 days'],
         ['unlock_premium_course', 500, 'spend', 'Unlock a premium course'],
-        ['skill_assessment', 100, 'spend', 'Take a skill assessment'],
-        ['interview_practice', 100, 'spend', 'AI interview practice session'],
         ['salary_guide', 0, 'spend', 'Salary insights (free)'],
-        ['career_roadmap', 75, 'spend', 'AI career roadmap planning'],
     ];
 
     $rateExists = $pdo->prepare("SELECT rate_id FROM seed_rates WHERE action = ? LIMIT 1");
@@ -156,6 +156,12 @@ function ensureSeedsSchema(): void {
             $rateInsert->execute($rate);
         }
     }
+
+    // Drop any legacy rates no longer in the canonical list (e.g. cv_roast,
+    // cv_optimize, cover_letter — those moved to the Credits economy).
+    $canonical = array_map(static fn($r) => $r[0], $rates);
+    $ph = implode(',', array_fill(0, count($canonical), '?'));
+    $pdo->prepare("DELETE FROM seed_rates WHERE action NOT IN ($ph)")->execute($canonical);
 
     $packages = [
         ['Starter Pack', 500, 1000, 0, 0],
@@ -681,8 +687,78 @@ function getSeedLeaderboard(int $limit = 10): array {
 }
 
 /**
+ * Bridge: redeem earned Seeds into paid Credits (used for premium AI tools).
+ * Atomic — deducts Seeds and adds Credits in one transaction. Rate: SEEDS_PER_CREDIT.
+ *
+ * @return array ['success'=>bool,'message'=>string,'seeds_balance'=>float,'credit_balance'=>int,...]
+ */
+function jm_redeem_seeds_for_credits(int $userId, int $credits): array {
+    ensureSeedsSchema();
+    $pdo = db();
+
+    $credits     = max(1, $credits);
+    $rate        = defined('SEEDS_PER_CREDIT') ? (int) SEEDS_PER_CREDIT : 100;
+    $seedsNeeded = $credits * $rate;
+
+    $balanceStmt = $pdo->prepare("SELECT balance, tool_credits FROM wallets WHERE user_id = ? LIMIT 1");
+
+    try {
+        $balanceStmt->execute([$userId]);
+        $row = $balanceStmt->fetch(PDO::FETCH_ASSOC) ?: ['balance' => 0, 'tool_credits' => 0];
+        $seedBalance = (float) $row['balance'];
+
+        if ($seedBalance < $seedsNeeded) {
+            return [
+                'success'        => false,
+                'message'        => "You need {$seedsNeeded} Seeds to redeem {$credits} Credit" . ($credits > 1 ? 's' : '') . ", but have " . formatSeeds($seedBalance) . ".",
+                'seeds_balance'  => $seedBalance,
+                'credit_balance' => (int) $row['tool_credits'],
+            ];
+        }
+
+        $pdo->beginTransaction();
+
+        $upd = $pdo->prepare("
+            UPDATE wallets
+            SET balance = balance - ?, lifetime_spent = lifetime_spent + ?, tool_credits = tool_credits + ?
+            WHERE user_id = ? AND balance >= ?
+        ");
+        $upd->execute([$seedsNeeded, $seedsNeeded, $credits, $userId, $seedsNeeded]);
+        if ($upd->rowCount() === 0) {
+            $pdo->rollBack();
+            return ['success' => false, 'message' => 'Insufficient Seeds.', 'seeds_balance' => $seedBalance, 'credit_balance' => (int) $row['tool_credits']];
+        }
+
+        $balanceStmt->execute([$userId]);
+        $after = $balanceStmt->fetch(PDO::FETCH_ASSOC) ?: ['balance' => 0, 'tool_credits' => 0];
+
+        $pdo->prepare("
+            INSERT INTO seed_transactions (user_id, type, amount, balance_after, source, description)
+            VALUES (?, 'spend', ?, ?, 'redeem_credit', ?)
+        ")->execute([$userId, $seedsNeeded, (float) $after['balance'], "Redeemed {$seedsNeeded} Seeds for {$credits} Credit" . ($credits > 1 ? 's' : '')]);
+
+        $pdo->commit();
+
+        return [
+            'success'        => true,
+            'message'        => "Redeemed {$credits} Credit" . ($credits > 1 ? 's' : '') . " for {$seedsNeeded} Seeds.",
+            'credits_added'  => $credits,
+            'seeds_spent'    => $seedsNeeded,
+            'seeds_balance'  => (float) $after['balance'],
+            'credit_balance' => (int) $after['tool_credits'],
+        ];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log('jm_redeem_seeds_for_credits error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Redemption failed. Please try again.'];
+    }
+}
+
+/**
  * Format seeds amount for display
- * 
+ *
  * @param float $amount
  * @return string
  */

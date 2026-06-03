@@ -102,8 +102,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$existingApplication) {
                 VALUES (?, ?, ?, ?, 'pending', NOW())
             ");
             $stmt->execute([$jobId, $userId, $coverLetter ?: null, $cvPath]);
+            $applicationId = (int) $pdo->lastInsertId();
 
             $pdo->prepare("UPDATE jobs SET applications_count = COALESCE(applications_count, 0) + 1 WHERE job_id = ?")->execute([$jobId]);
+
+            // Reward the application with Seeds.
+            try {
+                require_once __DIR__ . '/../includes/seeds.php';
+                awardSeeds($userId, 'job_apply', $applicationId);
+            } catch (Throwable $e) {
+                error_log('Job-apply seed award failed: ' . $e->getMessage());
+            }
 
             if (!empty($job['employer_user_id'])) {
                 sendNotification(

@@ -162,7 +162,7 @@ function jm_paywall_banner(string $toolId, int $creditBalance): string {
     ob_start(); ?>
     <div class="jm-paywall-banner" role="alert">
         <div class="jm-paywall-inner">
-            <div class="jm-paywall-icon">🔒</div>
+            <div class="jm-paywall-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
             <div class="jm-paywall-body">
                 <h3>Unlock <?= htmlspecialchars($toolName) ?></h3>
                 <p>You need <?= $creditCost ?> credit<?= $creditCost > 1 ? 's' : '' ?> to use this tool.

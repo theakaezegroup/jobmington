@@ -87,6 +87,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $userId = (int) $pdo->lastInsertId();
 
+            // Welcome Seeds (free engagement currency).
+            try {
+                require_once __DIR__ . '/../includes/seeds.php';
+                awardSignupBonus($userId);
+            } catch (Throwable $e) {
+                error_log('Signup seed bonus failed: ' . $e->getMessage());
+            }
+
             require_once __DIR__ . '/../includes/mailer.php';
             Mailer::sendVerificationEmail($form['email'], $form['full_name'], $activationToken);
 

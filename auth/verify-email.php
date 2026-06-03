@@ -34,6 +34,15 @@ if ($token !== '') {
             $_SESSION['is_verified'] = true;
         }
 
+        // Reward email verification with Seeds (once — awardEmailVerificationBonus
+        // is safe to call, but guard against repeat verifies via the token reset).
+        try {
+            require_once __DIR__ . '/../includes/seeds.php';
+            awardEmailVerificationBonus((int) $user['user_id']);
+        } catch (Throwable $e) {
+            error_log('Email-verify seed bonus failed: ' . $e->getMessage());
+        }
+
         $verified = true;
     } else {
         $invalid = true;

@@ -93,6 +93,11 @@ define('PRICE_CREDITS_SINGLE',            (int)(getenv('PRICE_CREDITS_SINGLE')  
 define('PRICE_CREDITS_PACK_5',            (int)(getenv('PRICE_CREDITS_PACK_5')            ?: 2000));   // ₦2,000 × 5
 define('PRICE_CREDITS_PACK_10',           (int)(getenv('PRICE_CREDITS_PACK_10')           ?: 3000));   // ₦3,000 × 10
 
+// ── Economy: Seeds <-> Credits bridge ─────────────────────────────────────────
+// Seeds are the free, earned engagement currency. Credits are the paid currency
+// for premium AI tools. Users can redeem earned Seeds into Credits at this rate.
+define('SEEDS_PER_CREDIT',                (int)(getenv('SEEDS_PER_CREDIT')                ?: 100));   // 100 Seeds = 1 Credit
+
 // ── Monetization: Per-Tool (credits) ─────────────────────────────────────────
 define('TOOL_COST_CV_OPTIMIZER',          (int)(getenv('TOOL_COST_CV_OPTIMIZER')          ?: 1));
 define('TOOL_COST_COVER_LETTER',          (int)(getenv('TOOL_COST_COVER_LETTER')          ?: 1));

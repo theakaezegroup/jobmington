@@ -17,6 +17,14 @@ if (Session::isEmployer() && !Session::isAdmin()) {
 $pdo = db();
 $userId = Session::userId();
 
+// Daily login Seeds (idempotent — awards at most once per calendar day).
+try {
+    require_once __DIR__ . '/../includes/seeds.php';
+    awardDailyLoginBonus((int) $userId);
+} catch (Throwable $e) {
+    error_log('Daily login seed bonus failed: ' . $e->getMessage());
+}
+
 if (!function_exists('jm_dashboard_scalar')) {
     function jm_dashboard_scalar(PDO $pdo, string $sql, array $params = []): int {
         try {
@@ -59,6 +67,15 @@ if ($displayName === '') {
     $displayName = 'there';
 }
 $firstName = explode(' ', $displayName)[0];
+
+// Wallet balances (Seeds = free/earned, Credits = paid/premium tools).
+require_once __DIR__ . '/../includes/monetization.php';
+require_once __DIR__ . '/../includes/seeker_premium.php';
+$seedBalance   = (int) round(getSeedBalance((int) $userId));
+$creditBalance = jm_seeker_credit_balance($pdo, (int) $userId);
+$isPremiumUser = jm_seeker_is_premium($pdo, (int) $userId);
+$seedsPerCredit = defined('SEEDS_PER_CREDIT') ? (int) SEEDS_PER_CREDIT : 100;
+$redeemableCredits = (int) floor($seedBalance / max(1, $seedsPerCredit));
 
 $stats = [
     'Applications' => jm_dashboard_scalar($pdo, "SELECT COUNT(*) FROM job_applications WHERE user_id = ?", [$userId]),
@@ -217,6 +234,60 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
         </section>
 
         <section class="jm-section">
+            <style>
+            .jm-wallet { display:grid; grid-template-columns:1fr 1fr auto; gap:16px; align-items:stretch; border:1px solid var(--jm-line); border-radius:14px; background:#fff; padding:6px; }
+            @media (max-width:760px){ .jm-wallet { grid-template-columns:1fr 1fr; } .jm-wallet-action { grid-column:1 / -1; } }
+            @media (max-width:440px){ .jm-wallet { grid-template-columns:1fr; } }
+            .jm-wallet-cell { padding:16px 18px; border-radius:10px; }
+            .jm-wallet-cell.seeds { background:#f0fdf9; }
+            .jm-wallet-cell.credits { background:#eef5ff; }
+            .jm-wallet-cell .lbl { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--jm-muted); margin-bottom:8px; }
+            .jm-wallet-cell .lbl svg { width:14px; height:14px; }
+            .jm-wallet-cell.seeds .lbl svg { color:var(--jm-green); }
+            .jm-wallet-cell.credits .lbl svg { color:var(--jm-blue); }
+            .jm-wallet-cell .val { font-size:30px; font-weight:800; letter-spacing:-.03em; color:var(--jm-ink); line-height:1; }
+            .jm-wallet-cell .sub { font-size:12px; color:var(--jm-muted); margin-top:6px; }
+            .jm-wallet-action { display:flex; flex-direction:column; justify-content:center; gap:8px; padding:16px 18px; }
+            .jm-wallet-action .jm-button { justify-content:center; white-space:nowrap; }
+            </style>
+            <div class="jm-section-head">
+                <div>
+                    <h2>Your wallet</h2>
+                    <p style="margin:4px 0 0;color:var(--jm-muted);">Seeds are earned free; Credits power the premium AI tools. <?= $seedsPerCredit ?> Seeds = 1 Credit.</p>
+                </div>
+                <a class="jm-muted-link" href="/jobmington/wallet/">History</a>
+            </div>
+            <div class="jm-wallet">
+                <div class="jm-wallet-cell seeds">
+                    <span class="lbl">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C7 7 7 12 12 22 17 12 17 7 12 2z"/></svg>
+                        Seeds
+                    </span>
+                    <div class="val"><?= number_format($seedBalance) ?></div>
+                    <div class="sub">Earn by applying, verifying, daily logins &amp; more.</div>
+                </div>
+                <div class="jm-wallet-cell credits">
+                    <span class="lbl">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Credits
+                    </span>
+                    <div class="val"><?= $isPremiumUser ? '&infin;' : number_format($creditBalance) ?></div>
+                    <div class="sub"><?= $isPremiumUser ? 'Premium — unlimited tools' : 'Spend on Optimizer, Cover Letter, Cold Pitch.' ?></div>
+                </div>
+                <div class="jm-wallet-action">
+                    <?php if (!$isPremiumUser): ?>
+                        <button class="jm-button" id="jm-redeem-btn" onclick="JMWallet.redeem()" <?= $redeemableCredits < 1 ? 'disabled' : '' ?>>
+                            Redeem <?= $seedsPerCredit ?> Seeds → 1 Credit
+                        </button>
+                        <a class="jm-button secondary" href="/jobmington/payments/credits.php">Buy Credits</a>
+                    <?php else: ?>
+                        <a class="jm-button secondary" href="/jobmington/wallet/">Open wallet</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </section>
+
+        <section class="jm-section">
             <div class="jm-section-head">
                 <div>
                     <h2>Career tools</h2>
@@ -347,5 +418,33 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
 
         <?php jm_minimal_footer(); ?>
     </div>
+    <script>
+    const JMWallet = {
+        redeem: async function () {
+            const btn = document.getElementById('jm-redeem-btn');
+            if (!btn || btn.disabled) return;
+            const orig = btn.textContent;
+            btn.disabled = true; btn.textContent = 'Redeeming…';
+            try {
+                const res = await fetch('/jobmington/api/redeem-seeds.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credits: 1 })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (window.JM && JM.toast) JM.toast(data.message, 'success');
+                    location.reload();
+                } else {
+                    (window.JM && JM.toast) ? JM.toast(data.message || 'Could not redeem.', 'error') : alert(data.message || 'Could not redeem.');
+                    btn.disabled = false; btn.textContent = orig;
+                }
+            } catch (e) {
+                (window.JM && JM.toast) ? JM.toast('Connection error.', 'error') : alert('Connection error.');
+                btn.disabled = false; btn.textContent = orig;
+            }
+        }
+    };
+    </script>
 </body>
 </html>
