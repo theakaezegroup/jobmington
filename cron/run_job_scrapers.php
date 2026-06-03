@@ -224,6 +224,14 @@ function jm_scraper_duplicate_exists(PDO $pdo, array $job, int $companyId): bool
     return (bool) $stmt->fetchColumn();
 }
 
+function jm_scraper_jobs_columns(PDO $pdo): array {
+    static $cols = null;
+    if ($cols === null) {
+        $cols = $pdo->query('SHOW COLUMNS FROM jobs')->fetchAll(PDO::FETCH_COLUMN);
+    }
+    return $cols;
+}
+
 function jm_scraper_insert_job(PDO $pdo, array $job, int $ownerUserId): string {
     if (!jm_scraper_allowed_job($job)) {
         return 'skipped_geo';
@@ -244,22 +252,15 @@ function jm_scraper_insert_job(PDO $pdo, array $job, int $ownerUserId): string {
     $salaryMin = isset($job['salary_min']) && $job['salary_min'] !== '' ? (float) $job['salary_min'] : null;
     $salaryMax = isset($job['salary_max']) && $job['salary_max'] !== '' ? (float) $job['salary_max'] : null;
 
-    $stmt = $pdo->prepare('
-        INSERT INTO jobs (
-            guid, source, company_id, category_id, title, slug, description, apply_link,
-            original_location, city, country_id, job_type, experience_level,
-            salary_min, salary_max, salary_currency, show_salary, posted_at, expires_at, is_active
-        ) VALUES (
-            :guid, :source, :company_id, :category_id, :title, :slug, :description, :apply_link,
-            :original_location, :city, :country_id, :job_type, :experience_level,
-            :salary_min, :salary_max, :salary_currency, :show_salary, :posted_at, :expires_at, 1
-        )
-    ');
-
-    $stmt->execute([
+    // Build the row from every field the scraper knows about, then keep only the
+    // columns that actually exist on this database. Production (VPS, the source of
+    // truth) lacks some columns the local dev DB has (slug, experience_level,
+    // salary_currency, show_salary), so a fixed column list would break there.
+    $candidate = [
         'guid' => $job['guid'],
         'source' => $job['source'],
         'company_id' => $companyId,
+        'user_id' => $ownerUserId,
         'category_id' => $categoryId,
         'title' => $title,
         'slug' => $slug,
@@ -276,7 +277,16 @@ function jm_scraper_insert_job(PDO $pdo, array $job, int $ownerUserId): string {
         'show_salary' => ($salaryMin || $salaryMax) ? 1 : 0,
         'posted_at' => $postedAt,
         'expires_at' => $expiresAt,
-    ]);
+        'is_active' => 1,
+    ];
+
+    $available = jm_scraper_jobs_columns($pdo);
+    $row = array_filter($candidate, static fn($col) => in_array($col, $available, true), ARRAY_FILTER_USE_KEY);
+
+    $columns = array_keys($row);
+    $placeholders = array_map(static fn($col) => ':' . $col, $columns);
+    $sql = 'INSERT INTO jobs (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $placeholders) . ')';
+    $pdo->prepare($sql)->execute($row);
 
     return 'inserted';
 }
