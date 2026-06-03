@@ -180,6 +180,7 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
             <nav class="jm-nav" aria-label="Main navigation">
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/cv-builder/">CV Builder</a>
+                <a href="/jobmington/tools/">Tools</a>
                 <a href="/jobmington/seeker/dashboard.php">Dashboard</a>
                 <a href="/jobmington/seeker/applications.php">Applications</a>
                 <a href="/jobmington/jobs/saved.php">Saved jobs</a>
@@ -211,6 +212,44 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
                         <strong><?= number_format((int) $value) ?></strong>
                         <span><?= e($label) ?></span>
                     </div>
+                <?php endforeach; ?>
+            </div>
+        </section>
+
+        <section class="jm-section">
+            <div class="jm-section-head">
+                <div>
+                    <h2>Career tools</h2>
+                    <p style="margin:4px 0 0;color:var(--jm-muted);">AI-powered tools to build, sharpen, and pitch yourself.</p>
+                </div>
+                <a class="jm-muted-link" href="/jobmington/tools/">See all</a>
+            </div>
+            <style>
+            .jm-dash-tools { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+            @media (max-width:900px){ .jm-dash-tools { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+            @media (max-width:520px){ .jm-dash-tools { grid-template-columns:1fr; } }
+            .jm-dash-tool { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--jm-line); border-radius:12px; background:#fff; text-decoration:none; transition:box-shadow .15s, transform .15s, border-color .15s; }
+            .jm-dash-tool:hover { box-shadow:0 8px 22px rgba(6,20,38,.08); transform:translateY(-2px); border-color:#c8d8ef; }
+            .jm-dash-tool-ico { width:40px; height:40px; border-radius:10px; display:grid; place-items:center; background:#eef5ff; color:var(--jm-blue); }
+            .jm-dash-tool b { font-size:14px; font-weight:800; color:var(--jm-ink); }
+            .jm-dash-tool span { font-size:12.5px; color:var(--jm-muted); line-height:1.5; }
+            </style>
+            <div class="jm-dash-tools">
+                <?php
+                $dashTools = [
+                    ['name' => 'Resume Builder', 'desc' => 'Build an ATS-friendly CV from polished templates.', 'url' => '/jobmington/cv-builder/', 'icon' => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/>'],
+                    ['name' => 'Resume Optimizer', 'desc' => 'Score your CV against ATS criteria and fix it.', 'url' => '/jobmington/ai/roast.php', 'icon' => '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>'],
+                    ['name' => 'Cover Letter AI', 'desc' => 'Tailored cover letter from any job description.', 'url' => '/jobmington/ai/cover-letter.php', 'icon' => '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 5L2 7"/>'],
+                    ['name' => 'Cold Pitch AI', 'desc' => 'Human cold pitches for email, DM, or LinkedIn.', 'url' => '/jobmington/ai/cold-pitch.php', 'icon' => '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>'],
+                ];
+                foreach ($dashTools as $t): ?>
+                    <a class="jm-dash-tool" href="<?= e($t['url']) ?>">
+                        <span class="jm-dash-tool-ico">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><?= $t['icon'] ?></svg>
+                        </span>
+                        <b><?= e($t['name']) ?></b>
+                        <span><?= e($t['desc']) ?></span>
+                    </a>
                 <?php endforeach; ?>
             </div>
         </section>
