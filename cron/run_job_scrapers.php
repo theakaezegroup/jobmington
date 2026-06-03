@@ -174,7 +174,7 @@ function jm_scraper_company_id(PDO $pdo, string $companyName, int $ownerUserId):
         $slug = $baseSlug . '-' . $i;
     }
 
-    $stmt = $pdo->prepare('INSERT INTO companies (user_id, name, slug, is_verified, created_at, updated_at) VALUES (?, ?, ?, 0, NOW(), NOW())');
+    $stmt = $pdo->prepare('INSERT INTO companies (user_id, name, slug, is_verified, created_at) VALUES (?, ?, ?, 0, NOW())');
     $stmt->execute([$ownerUserId, $companyName, $slug]);
     return (int) $pdo->lastInsertId();
 }
