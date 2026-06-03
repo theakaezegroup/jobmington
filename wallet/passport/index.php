@@ -43,16 +43,41 @@ if ($passportNumber) {
 } elseif (Session::isLoggedIn()) {
     // Viewing own passport
     $userId = Session::get('user_id');
-    $stmt = $pdo->prepare("
+    $ownStmt = "
         SELECT tp.*, u.user_id, u.full_name, u.profile_image, u.email, u.created_at as member_since,
                cv.headline, cv.summary, cv.city
         FROM talent_passports tp
         JOIN users u ON tp.user_id = u.user_id
         LEFT JOIN cv_profiles cv ON u.user_id = cv.user_id
         WHERE tp.user_id = ?
-    ");
+    ";
+    $stmt = $pdo->prepare($ownStmt);
     $stmt->execute([$userId]);
     $passport = $stmt->fetch();
+
+    // First visit: create (claim) the passport for this user.
+    if (!$passport) {
+        try {
+            for ($try = 0; $try < 5; $try++) {
+                $passportNumber = 'JM' . str_pad((string) $userId, 6, '0', STR_PAD_LEFT) . strtoupper(bin2hex(random_bytes(2)));
+                $chk = $pdo->prepare("SELECT 1 FROM talent_passports WHERE passport_number = ? LIMIT 1");
+                $chk->execute([$passportNumber]);
+                if (!$chk->fetchColumn()) {
+                    break;
+                }
+            }
+            $pdo->prepare("
+                INSERT INTO talent_passports (user_id, passport_number, first_featured_at, last_featured_at)
+                VALUES (?, ?, NOW(), NOW())
+            ")->execute([$userId, $passportNumber]);
+
+            $stmt = $pdo->prepare($ownStmt);
+            $stmt->execute([$userId]);
+            $passport = $stmt->fetch();
+        } catch (Throwable $e) {
+            error_log('Passport creation failed: ' . $e->getMessage());
+        }
+    }
     $isOwner = true;
 }
 

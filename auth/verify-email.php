@@ -43,6 +43,14 @@ if ($token !== '') {
             error_log('Email-verify seed bonus failed: ' . $e->getMessage());
         }
 
+        // Award the Verified badge.
+        try {
+            require_once __DIR__ . '/../includes/badges.php';
+            awardBadge((int) $user['user_id'], 'verified');
+        } catch (Throwable $e) {
+            error_log('Email-verify badge failed: ' . $e->getMessage());
+        }
+
         $verified = true;
     } else {
         $invalid = true;
