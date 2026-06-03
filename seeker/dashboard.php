@@ -419,6 +419,7 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
         <?php jm_minimal_footer(); ?>
     </div>
     <script>
+    const JM_SITE = <?= json_encode(SITE_URL) ?>;
     const JMWallet = {
         redeem: async function () {
             const btn = document.getElementById('jm-redeem-btn');
@@ -426,7 +427,7 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
             const orig = btn.textContent;
             btn.disabled = true; btn.textContent = 'Redeeming…';
             try {
-                const res = await fetch('/jobmington/api/redeem-seeds.php', {
+                const res = await fetch(`${JM_SITE}/api/redeem-seeds.php`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ credits: 1 })
