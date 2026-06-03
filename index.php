@@ -969,6 +969,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/cv-builder/">CV Builder</a>
                 <a href="/jobmington/tools/">Tools</a>
+                <a href="/jobmington/learn/">Learn</a>
                 <a href="/jobmington/ai/andika.php">Andika AI</a>
                 <a href="/jobmington/employer/">Employers</a>
                 <a href="/jobmington/pricing.php">Pricing</a>

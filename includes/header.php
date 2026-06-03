@@ -63,6 +63,7 @@ final class Navigation {
             ['url' => '/jobmington/jobs', 'label' => 'Find Jobs', 'icon' => 'briefcase'],
             ['url' => '/jobmington/cv-builder/', 'label' => 'CV Builder', 'icon' => 'document'],
             ['url' => '/jobmington/tools/', 'label' => 'Tools', 'icon' => 'tools'],
+            ['url' => '/jobmington/learn/', 'label' => 'Learn', 'icon' => 'graduation'],
             ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles'],
             ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus'],
             ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users'],
@@ -143,6 +144,8 @@ if ($isAdminArea) {
             ['href' => '/jobmington/admin/modules.php', 'label' => 'Modules', 'icon' => 'fa-book-open', 'match' => '/admin/modules'],
             ['href' => '/jobmington/admin/quizzes.php', 'label' => 'Quizzes', 'icon' => 'fa-tasks', 'match' => '/admin/quizzes'],
             ['href' => '/jobmington/admin/certificates.php', 'label' => 'Certificates', 'icon' => 'fa-certificate', 'match' => '/admin/certificates'],
+            ['href' => '/jobmington/admin/ebooks.php', 'label' => 'Ebooks', 'icon' => 'fa-book', 'match' => '/admin/ebooks'],
+            ['href' => '/jobmington/admin/events.php', 'label' => 'Events', 'icon' => 'fa-calendar-day', 'match' => '/admin/events'],
         ],
         'Engagement' => [
             ['href' => '/jobmington/admin/badges.php', 'label' => 'Badges & Seeds', 'icon' => 'fa-medal', 'match' => '/admin/badges'],
