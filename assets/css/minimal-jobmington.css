@@ -1208,10 +1208,10 @@ body.jm-nav-open {
 }
 
 .jm-job-detail-hero {
-    border: 1px solid var(--jm-line);
-    border-radius: 12px;
-    background: var(--jm-white);
-    padding: 30px 32px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 8px 0 4px;
 }
 
 .jm-job-detail-company {
