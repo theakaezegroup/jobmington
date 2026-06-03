@@ -24,7 +24,7 @@ $userId = Session::userId();
 $stmt = $pdo->prepare("
     SELECT ce.*, c.title, c.thumbnail, c.description, c.is_external, c.external_url,
            (SELECT COUNT(*) FROM course_modules WHERE course_id = c.course_id) as module_count,
-           (SELECT verification_code FROM certificates WHERE user_id = ce.user_id AND course_id = c.course_id LIMIT 1) as cert_code
+           (SELECT cert_code FROM certificates WHERE user_id = ce.user_id AND course_id = c.course_id LIMIT 1) as cert_code
     FROM course_enrollments ce
     JOIN courses c ON ce.course_id = c.course_id
     WHERE ce.user_id = ?
