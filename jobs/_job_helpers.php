@@ -631,6 +631,47 @@ function jm_job_find(PDO $pdo, int $jobId, bool $activeOnly = true): ?array {
     return $job ?: null;
 }
 
+/**
+ * Extract a clean company domain from the company website. Returns null when no
+ * usable domain exists. We deliberately ignore apply_link, since for scraped
+ * jobs that points at the job board (LinkedIn, Jooble, ...), not the employer.
+ */
+function jm_company_domain(array $job): ?string {
+    $website = trim((string) ($job['company_website'] ?? ''));
+    if ($website === '') {
+        return null;
+    }
+    if (!preg_match('#^https?://#i', $website)) {
+        $website = 'https://' . $website;
+    }
+    $host = parse_url($website, PHP_URL_HOST) ?: '';
+    $host = preg_replace('#^www\.#i', '', strtolower($host));
+    return $host !== '' && str_contains($host, '.') ? $host : null;
+}
+
+/**
+ * A logo URL for a known company domain (Google's favicon service, which returns
+ * a clean PNG and follows redirects in the browser).
+ */
+function jm_company_logo_from_domain(string $domain, int $size = 128): string {
+    return 'https://www.google.com/s2/favicons?domain=' . rawurlencode($domain) . '&sz=' . $size;
+}
+
+/**
+ * Best available logo URL for a company: an uploaded logo if present, otherwise
+ * a fetched logo from the company website domain. Returns '' when neither is
+ * available — the view then resolves it from the company name client-side, and
+ * renders nothing if that fails too (no initials placeholder).
+ */
+function jm_company_logo_url(array $job): string {
+    $uploaded = trim((string) ($job['company_logo'] ?? ''));
+    if ($uploaded !== '') {
+        return $uploaded;
+    }
+    $domain = jm_company_domain($job);
+    return $domain !== null ? jm_company_logo_from_domain($domain) : '';
+}
+
 function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
     $isLoggedIn = Session::isLoggedIn();
     $dashboardUrl = Session::isAdmin()
@@ -643,7 +684,7 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= e($pageTitle) ?></title>
-        <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+        <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-13">
     </head>
     <body class="jm-minimal">
         <div class="jm-shell">

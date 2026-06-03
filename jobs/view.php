@@ -89,22 +89,42 @@ jm_jobs_header($pageTitle, 'jobs');
 ?>
 
 <section class="jm-section jm-job-detail" style="padding-top:0;">
+    <?php
+    $companyLogo = jm_company_logo_url($job);
+    $salaryText = trim((string) jm_job_salary($job));
+    ?>
     <div class="jm-job-detail-hero">
         <div class="jm-job-detail-company">
-            <div class="jm-company-mark">
-                <?php if (!empty($job['company_logo'])): ?>
-                    <img src="<?= e($job['company_logo']) ?>" alt="">
-                <?php else: ?>
-                    <span><?= e(strtoupper(substr($job['company_name'], 0, 1))) ?></span>
+            <div class="jm-company-mark" data-company="<?= e($job['company_name']) ?>">
+                <?php if ($companyLogo !== ''): ?>
+                    <img src="<?= e($companyLogo) ?>" alt="<?= e($job['company_name']) ?> logo">
                 <?php endif; ?>
             </div>
             <div>
                 <p class="jm-kicker"><?= e($job['company_name']) ?></p>
                 <h1><?= e($job['title']) ?></h1>
-                <p class="jm-job-detail-meta">
-                    <?= e(jm_job_location($job)) ?> / <?= e($job['job_type']) ?> / <?= e($job['experience_level'] ?? 'Entry') ?>
-                </p>
             </div>
+        </div>
+
+        <div class="jm-job-facts">
+            <span class="jm-job-fact">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <?= e(jm_job_location($job)) ?>
+            </span>
+            <span class="jm-job-fact">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                <?= e($job['job_type']) ?>
+            </span>
+            <span class="jm-job-fact">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="10"/></svg>
+                <?= e($job['experience_level'] ?? 'Entry') ?>
+            </span>
+            <?php if ($salaryText !== ''): ?>
+                <span class="jm-job-fact is-salary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <?= e($salaryText) ?>
+                </span>
+            <?php endif; ?>
         </div>
 
         <?php if (!empty($jobTags)): ?>
@@ -318,6 +338,35 @@ jm_jobs_header($pageTitle, 'jobs');
 <?php jm_jobs_footer('/jobmington/jobs/', 'Browse jobs'); ?>
 <script>
 (function () {
+    // Resolve a company logo from its name: Clearbit's public autocomplete
+    // (CORS-enabled, no key) maps name -> domain, then Google's favicon service
+    // gives the logo. Runs only for marks without a server-provided logo.
+    function resolveByName(mark, name) {
+        if (!name) { mark.remove(); return; }
+        fetch('https://autocomplete.clearbit.com/v1/companies/suggest?query=' + encodeURIComponent(name))
+            .then(function (r) { return r.ok ? r.json() : []; })
+            .then(function (list) {
+                var hit = (Array.isArray(list) && list.length) ? list[0] : null;
+                if (!hit || !hit.domain) { mark.remove(); return; }
+                var img = new Image();
+                img.alt = name + ' logo';
+                img.onload = function () { mark.innerHTML = ''; mark.appendChild(img); };
+                img.onerror = function () { mark.remove(); };
+                img.src = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(hit.domain) + '&sz=128';
+            })
+            .catch(function () { mark.remove(); });
+    }
+
+    document.querySelectorAll('.jm-company-mark[data-company]').forEach(function (mark) {
+        var name = mark.getAttribute('data-company') || '';
+        var img = mark.querySelector('img');
+        if (img) {
+            img.addEventListener('error', function () { resolveByName(mark, name); });
+        } else {
+            resolveByName(mark, name);
+        }
+    });
+
     document.querySelectorAll('.jm-bookmark-btn-lg[data-bookmark], .jm-bookmark-btn[data-bookmark]').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             e.preventDefault(); e.stopPropagation();
