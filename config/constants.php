@@ -101,9 +101,12 @@ define('SEEDS_PER_CREDIT',                (int)(getenv('SEEDS_PER_CREDIT')      
 define('SEEDS_PER_CREDIT_REVERSE',        (int)(getenv('SEEDS_PER_CREDIT_REVERSE')        ?: 80));    // 1 Credit = 80 Seeds
 
 // ── Monetization: premium content (Seeds / Credits) ───────────────────────────
-// Premium "verified" certificate upgrade (issued cert stays free).
-define('PRICE_PREMIUM_CERT_CREDITS',      (int)(getenv('PRICE_PREMIUM_CERT_CREDITS')      ?: 2));     // 2 Credits
-define('PRICE_PREMIUM_CERT_SEEDS',        (int)(getenv('PRICE_PREMIUM_CERT_SEEDS')        ?: 200));   // or 200 Seeds
+// Certificate issuance for FREE courses (paid courses include the certificate).
+define('PRICE_CERT_CREDITS',              (int)(getenv('PRICE_CERT_CREDITS')              ?: 2));     // 2 Credits
+define('PRICE_CERT_SEEDS',                (int)(getenv('PRICE_CERT_SEEDS')                ?: 150));   // or 150 Seeds
+// (legacy aliases kept for any older references)
+define('PRICE_PREMIUM_CERT_CREDITS',      (int)(getenv('PRICE_PREMIUM_CERT_CREDITS')      ?: 2));
+define('PRICE_PREMIUM_CERT_SEEDS',        (int)(getenv('PRICE_PREMIUM_CERT_SEEDS')        ?: 200));
 // Talent Passport visibility boost (7 days)
 define('PRICE_PASSPORT_BOOST_SEEDS',      (int)(getenv('PRICE_PASSPORT_BOOST_SEEDS')      ?: 200));   // 200 Seeds / week
 

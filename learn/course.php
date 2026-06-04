@@ -13,6 +13,7 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/learn_nav.php';
 require_once __DIR__ . '/../includes/seeds.php';
+require_once __DIR__ . '/../includes/certificates.php';
 
 Session::start();
 $pdo = db();
@@ -91,15 +92,25 @@ if (isPost() && isset($_POST['enroll'])) {
     }
 }
 
-// Issue certificate for module-only courses (no quiz) once everything is done.
-if ($isEnrolled && $hasAccess && $course['has_certificate'] && !$quiz && $allDone && !$certificate && $userId) {
-    $code = 'JMT-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(4)));
-    try {
-        $pdo->prepare("INSERT INTO certificates (cert_code, user_id, course_id) VALUES (?,?,?)")->execute([$code, $userId, $courseId]);
-        $pdo->prepare("UPDATE course_enrollments SET progress = 100, completed_at = NOW() WHERE enrollment_id = ?")->execute([$enrollment['enrollment_id']]);
-        try { awardSeeds($userId, 'course_complete', $courseId); } catch (Throwable $e) {}
-        redirect('/jobmington/certificates/view.php?code=' . $code);
-    } catch (Throwable $e) {}
+// Completion for module-only courses (no quiz) once everything is done.
+$certPayable = false;
+if ($isEnrolled && $hasAccess && $course['has_certificate'] && !$quiz && $allDone && $userId) {
+    // Mark completion + award seeds once.
+    if (empty($enrollment['completed_at'])) {
+        try {
+            $pdo->prepare("UPDATE course_enrollments SET progress = 100, completed_at = NOW() WHERE enrollment_id = ?")->execute([$enrollment['enrollment_id']]);
+            try { awardSeeds($userId, 'course_complete', $courseId); } catch (Throwable $e) {}
+        } catch (Throwable $e) {}
+    }
+    if (!$certificate) {
+        if (jm_cert_included($course)) {
+            // Paid course -> certificate is free; issue and go.
+            $code = jm_issue_certificate($pdo, $userId, $courseId, false);
+            redirect('/jobmington/certificates/view.php?code=' . $code);
+        }
+        // Free course -> certificate must be claimed (paid).
+        $certPayable = true;
+    }
 }
 
 $pageTitle = $course['title'] . ' - ' . SITE_NAME;
@@ -202,6 +213,10 @@ require_once __DIR__ . '/../includes/ai-header.php';
             <?php if ($certificate): ?>
                 <div class="jm-cd-progress"><div class="jm-cd-bar"><span style="width:100%"></span></div><div class="jm-cd-progress-label">Completed</div></div>
                 <a class="jm-cd-btn green" href="/jobmington/certificates/view.php?code=<?= e($certificate['cert_code']) ?>">View certificate</a>
+            <?php elseif (!empty($certPayable)): $cp = jm_cert_price($course); ?>
+                <div class="jm-cd-progress"><div class="jm-cd-bar"><span style="width:100%"></span></div><div class="jm-cd-progress-label">Course complete</div></div>
+                <a class="jm-cd-btn green" href="/jobmington/certificates/claim.php?course=<?= (int)$courseId ?>">Claim certificate &middot; <?= number_format($cp['seeds']) ?> Seeds</a>
+                <p style="font-size:12px;color:#94a3b8;text-align:center;margin-top:8px;">Free course — issue your certificate with Seeds or Credits.</p>
             <?php elseif ($isEnrolled && $hasAccess): ?>
                 <div class="jm-cd-progress"><div class="jm-cd-bar"><span style="width:<?= $totalMods ? round($doneMods/$totalMods*100) : 0 ?>%"></span></div><div class="jm-cd-progress-label"><?= $doneMods ?>/<?= max(1,$totalMods) ?> modules done</div></div>
                 <?php if ($course['is_external'] && $course['external_url']): ?>

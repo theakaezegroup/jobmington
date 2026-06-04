@@ -13,6 +13,7 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/learn_nav.php';
 require_once __DIR__ . '/../includes/seeds.php';
+require_once __DIR__ . '/../includes/certificates.php';
 
 Session::start();
 Session::requireLogin();
@@ -22,7 +23,7 @@ $quizId = (int) get('id', 0);
 $userId = (int) Session::userId();
 if ($quizId <= 0) redirect('/jobmington/learn/');
 
-$stmt = $pdo->prepare("SELECT q.*, c.course_id, c.title AS course_title, c.has_certificate FROM quizzes q JOIN courses c ON q.course_id = c.course_id WHERE q.quiz_id = ? AND c.is_published = 1");
+$stmt = $pdo->prepare("SELECT q.*, c.course_id, c.title AS course_title, c.has_certificate, c.is_free FROM quizzes q JOIN courses c ON q.course_id = c.course_id WHERE q.quiz_id = ? AND c.is_published = 1");
 $stmt->execute([$quizId]);
 $quiz = $stmt->fetch();
 if (!$quiz) redirect('/jobmington/learn/');
@@ -39,7 +40,7 @@ $questions = $pdo->prepare("SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER
 $questions->execute([$quizId]);
 $questions = $questions->fetchAll();
 
-$showResults = false; $score = 0; $passed = false; $userAnswers = []; $certCode = null;
+$showResults = false; $score = 0; $passed = false; $userAnswers = []; $certCode = null; $certPayable = false;
 
 if (isPost() && Security::verifyCSRF() && $questions) {
     $showResults = true;
@@ -53,18 +54,24 @@ if (isPost() && Security::verifyCSRF() && $questions) {
     $passed = $score >= (int) $quiz['passing_score'];
 
     if ($passed) {
+        // Mark completion + award seeds (once).
+        if (empty($enrollment['completed_at'])) {
+            try { awardSeeds($userId, 'course_complete', (int)$quiz['course_id']); } catch (Throwable $e) {}
+        }
+        $pdo->prepare("UPDATE course_enrollments SET progress = 100, completed_at = NOW() WHERE enrollment_id = ?")->execute([$enrollment['enrollment_id']]);
+
         $s = $pdo->prepare("SELECT cert_code FROM certificates WHERE user_id = ? AND course_id = ? LIMIT 1");
         $s->execute([$userId, $quiz['course_id']]);
         $certCode = $s->fetchColumn();
         if (!$certCode) {
-            $certCode = 'JMT-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(4)));
-            try {
-                $pdo->prepare("INSERT INTO certificates (cert_code, user_id, course_id) VALUES (?,?,?)")->execute([$certCode, $userId, $quiz['course_id']]);
-                $pdo->prepare("UPDATE courses SET completion_count = completion_count + 1 WHERE course_id = ?")->execute([$quiz['course_id']]);
-                try { awardSeeds($userId, 'course_complete', (int)$quiz['course_id']); } catch (Throwable $e) {}
-            } catch (Throwable $e) {}
+            if (jm_cert_included($quiz)) {
+                // Paid course -> certificate included; issue free.
+                $certCode = jm_issue_certificate($pdo, $userId, (int)$quiz['course_id'], false);
+            } else {
+                // Free course -> certificate must be claimed (paid).
+                $certPayable = true;
+            }
         }
-        $pdo->prepare("UPDATE course_enrollments SET progress = 100, completed_at = NOW() WHERE enrollment_id = ?")->execute([$enrollment['enrollment_id']]);
     }
 }
 
@@ -102,12 +109,15 @@ require_once __DIR__ . '/../includes/ai-header.php';
             <div class="jm-qz-score <?= $passed ? 'pass' : 'fail' ?>"><?= $score ?>%</div>
             <h2><?= $passed ? 'Congratulations — you passed!' : 'Not quite there' ?></h2>
             <p>
-                <?php if ($passed): ?>You scored <?= $score ?>% (pass mark <?= (int)$quiz['passing_score'] ?>%). Your certificate is ready.
+                <?php if ($passed && $certPayable): ?>You scored <?= $score ?>% (pass mark <?= (int)$quiz['passing_score'] ?>%). Claim your certificate to finish.
+                <?php elseif ($passed): ?>You scored <?= $score ?>% (pass mark <?= (int)$quiz['passing_score'] ?>%). Your certificate is ready.
                 <?php else: ?>You scored <?= $score ?>%. You need <?= (int)$quiz['passing_score'] ?>% to pass — review the modules and try again.<?php endif; ?>
             </p>
             <div class="jm-qz-cta">
                 <?php if ($passed && $certCode): ?>
                     <a class="jm-qz-btn" href="/jobmington/certificates/view.php?code=<?= e($certCode) ?>">View certificate</a>
+                <?php elseif ($passed && $certPayable): $cp = jm_cert_price($quiz); ?>
+                    <a class="jm-qz-btn" href="/jobmington/certificates/claim.php?course=<?= (int)$quiz['course_id'] ?>">Claim certificate &middot; <?= number_format($cp['seeds']) ?> Seeds</a>
                 <?php else: ?>
                     <a class="jm-qz-btn" href="/jobmington/learn/quiz.php?id=<?= $quizId ?>">Try again</a>
                 <?php endif; ?>
