@@ -569,6 +569,16 @@ if (!function_exists('jm_minimal_footer')) {
                     <a href="/jobmington/pricing.php">Pricing</a>
                 </nav>
 
+                <nav class="jm-footer-links" aria-label="Learn links">
+                    <h2>Learn</h2>
+                    <a href="/jobmington/learn/">Online courses</a>
+                    <a href="/jobmington/ebooks/">Free ebooks &amp; guides</a>
+                    <a href="/jobmington/events/">Events &amp; webinars</a>
+                    <a href="/jobmington/blog/">Career blog</a>
+                    <a href="/jobmington/community/">Community forum</a>
+                    <a href="/jobmington/tools/">Career tools</a>
+                </nav>
+
                 <nav class="jm-footer-links" aria-label="Company links">
                     <h2>Company</h2>
                     <a href="/jobmington/contact.php">Contact</a>

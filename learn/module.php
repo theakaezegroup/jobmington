@@ -1,11 +1,8 @@
 <?php
-require_once __DIR__ . '/_disabled.php';
-
 /**
- * JOBMINGTON - Course Module
- * Aesthetic: Deep Space Cockpit
- * Features: Cinematic Player, Holographic Sidebar, Focus Mode
+ * JOBMINGTON - Course module (lesson) viewer
  */
+require_once __DIR__ . '/_disabled.php';
 
 define('JOBMINGTON', true);
 require_once __DIR__ . '/../config/env.php';
@@ -14,256 +11,119 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
-Session::requireLogin();
-
 $pdo = db();
 $moduleId = (int) get('id', 0);
-$userId = Session::userId();
+if ($moduleId <= 0) redirect('/jobmington/learn/');
 
-if ($moduleId <= 0) redirect('/jobmington/learn');
-
-// Fetch Module & Course
-$stmt = $pdo->prepare("SELECT m.*, c.course_id, c.title as course_title, c.slug as course_slug FROM course_modules m JOIN courses c ON m.course_id = c.course_id WHERE m.module_id = ? AND c.is_published = 1");
+$stmt = $pdo->prepare("SELECT m.*, c.course_id, c.title AS course_title, c.is_free, c.has_certificate
+    FROM course_modules m JOIN courses c ON m.course_id = c.course_id
+    WHERE m.module_id = ? AND c.is_published = 1");
 $stmt->execute([$moduleId]);
 $module = $stmt->fetch();
+if (!$module) redirect('/jobmington/learn/');
 
-if (!$module) { Session::flash('error', 'Data fragment missing.'); redirect('/jobmington/learn'); }
+$courseId = (int) $module['course_id'];
+$userId = Session::userId();
 
-// Check Enrollment
-$stmt = $pdo->prepare("SELECT * FROM course_enrollments WHERE user_id = ? AND course_id = ?");
-$stmt->execute([$userId, $module['course_id']]);
-$enrollment = $stmt->fetch();
-
-if (!$enrollment) { Session::flash('info', 'Access Denied. Enrollment Required.'); redirect('/jobmington/learn/course.php?id=' . $module['course_id']); }
-
-// Get Syllabus
-$stmt = $pdo->prepare("SELECT * FROM course_modules WHERE course_id = ? ORDER BY order_index ASC");
-$stmt->execute([$module['course_id']]);
-$allModules = $stmt->fetchAll();
-
-// Navigation Logic
-$currentIndex = null;
-foreach ($allModules as $index => $m) {
-    if ($m['module_id'] == $moduleId) { $currentIndex = $index; break; }
+$enrollment = null;
+if ($userId) {
+    $s = $pdo->prepare("SELECT * FROM course_enrollments WHERE user_id = ? AND course_id = ?");
+    $s->execute([$userId, $courseId]);
+    $enrollment = $s->fetch();
 }
-$prevModule = $currentIndex > 0 ? $allModules[$currentIndex - 1] : null;
-$nextModule = $currentIndex < count($allModules) - 1 ? $allModules[$currentIndex + 1] : null;
+$isPreview = (bool) $module['is_free_preview'];
+if (!$enrollment && !$isPreview) {
+    Session::flash('info', 'Enroll to access this module.');
+    redirect('/jobmington/learn/course.php?id=' . $courseId);
+}
 
-// Check for Quiz
-$stmt = $pdo->prepare("SELECT * FROM quizzes WHERE course_id = ? LIMIT 1");
-$stmt->execute([$module['course_id']]);
-$quiz = $stmt->fetch();
+$all = $pdo->prepare("SELECT * FROM course_modules WHERE course_id = ? ORDER BY sort_order ASC, module_id ASC");
+$all->execute([$courseId]);
+$all = $all->fetchAll();
+$idx = 0;
+foreach ($all as $i => $m) { if ((int)$m['module_id'] === $moduleId) { $idx = $i; break; } }
+$prev = $idx > 0 ? $all[$idx - 1] : null;
+$next = $idx < count($all) - 1 ? $all[$idx + 1] : null;
 
-// Update Progress
-$progress = min(100, round((($currentIndex + 1) / count($allModules)) * 100));
-$pdo->prepare("UPDATE course_enrollments SET progress = ? WHERE enrollment_id = ?")->execute([$progress, $enrollment['enrollment_id']]);
+$quiz = $pdo->prepare("SELECT * FROM quizzes WHERE course_id = ? LIMIT 1");
+$quiz->execute([$courseId]);
+$quiz = $quiz->fetch();
 
-// Video Parser
-$videoId = '';
-if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $module['video_url'], $matches)) $videoId = $matches[1];
-elseif (preg_match('/youtu\.be\/([^\&\?\/]+)/', $module['video_url'], $matches)) $videoId = $matches[1];
-elseif (preg_match('/youtube\.com\/embed\/([^\&\?\/]+)/', $module['video_url'], $matches)) $videoId = $matches[1];
+if (isPost() && isset($_POST['complete']) && $enrollment && Security::verifyCSRF()) {
+    $pdo->prepare("INSERT INTO module_progress (user_id, module_id, is_completed, completed_at) VALUES (?,?,1,NOW())
+                   ON DUPLICATE KEY UPDATE is_completed = 1, completed_at = NOW()")->execute([$userId, $moduleId]);
 
-$pageTitle = e($module['title']) . ' | Jobmington Learn';
-require_once __DIR__ . '/../includes/header.php';
+    $ph = implode(',', array_fill(0, count($all), '?'));
+    $cs = $pdo->prepare("SELECT COUNT(*) FROM module_progress WHERE user_id = ? AND is_completed = 1 AND module_id IN ($ph)");
+    $cs->execute(array_merge([$userId], array_column($all, 'module_id')));
+    $done = (int) $cs->fetchColumn();
+    $progress = count($all) ? (int) round($done / count($all) * 100) : 100;
+    $pdo->prepare("UPDATE course_enrollments SET progress = ?, last_accessed = NOW() WHERE enrollment_id = ?")->execute([$progress, $enrollment['enrollment_id']]);
+
+    redirect($next ? '/jobmington/learn/module.php?id=' . (int)$next['module_id'] : '/jobmington/learn/course.php?id=' . $courseId);
+}
+
+function jm_embed_url(string $url): string {
+    if (preg_match('~(?:youtube\.com/watch\?v=|youtu\.be/)([\w-]+)~', $url, $m)) return 'https://www.youtube.com/embed/' . $m[1];
+    if (preg_match('~vimeo\.com/(\d+)~', $url, $m)) return 'https://player.vimeo.com/video/' . $m[1];
+    return $url;
+}
+
+$pageTitle = $module['title'] . ' - ' . SITE_NAME;
+$activeAIPage = 'learn';
+require_once __DIR__ . '/../includes/ai-header.php';
 ?>
-
 <style>
-    /* --- COCKPIT THEME --- */
-    body {
-        background-color: #050505;
-        color: #e2e8f0;
-        background-image: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #000000 70%);
-        min-height: 100vh;
-    }
-
-    /* --- CINEMATIC PLAYER --- */
-    .viewport-container {
-        position: relative;
-        border-radius: 1rem;
-        overflow: hidden;
-        box-shadow: 
-            0 0 50px -10px rgba(59, 130, 246, 0.2), /* Blue Ambient Glow */
-            0 20px 40px -5px rgba(0,0,0,0.8);
-        border: 1px solid rgba(255,255,255,0.1);
-        background: black;
-    }
-    
-    .viewport-frame {
-        position: relative; padding-bottom: 56.25%; height: 0;
-    }
-    .viewport-frame iframe, .viewport-frame video {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    }
-
-    /* --- SIDEBAR HUD --- */
-    .hud-panel {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 1rem;
-        max-height: calc(100vh - 100px);
-        overflow-y: auto;
-    }
-
-    .module-item {
-        display: flex; items-center; gap: 1rem;
-        padding: 1rem;
-        border-bottom: 1px solid rgba(255,255,255,0.03);
-        transition: 0.2s;
-        cursor: pointer;
-    }
-    .module-item:hover { background: rgba(255,255,255,0.05); }
-    
-    /* Active Lesson */
-    .module-item.active {
-        background: rgba(59, 130, 246, 0.1);
-        border-left: 3px solid #3b82f6;
-    }
-    .module-item.active .module-title { color: #fff; font-weight: bold; }
-    .module-item.active .status-indicator { color: #3b82f6; animation: pulse 2s infinite; }
-
-    /* Completed Lesson */
-    .module-item.completed .status-indicator { color: #10b981; }
-
-    /* --- CONTROLS --- */
-    .control-btn {
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.75rem;
-        font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase;
-        transition: 0.3s;
-    }
-    .btn-prev { background: rgba(255,255,255,0.05); color: #94a3b8; }
-    .btn-prev:hover { background: rgba(255,255,255,0.1); color: white; }
-    
-    .btn-next {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-    }
-    .btn-next:hover { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); transform: translateY(-2px); }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-
+.jm-md { max-width:820px; margin:0 auto; padding:28px 20px 72px; }
+.jm-md-back { font-size:13px; color:#53667f; text-decoration:none; font-weight:600; }
+.jm-md-back:hover { color:#0640a3; }
+.jm-md-bar { height:6px; border-radius:99px; background:#eef2f7; overflow:hidden; margin:14px 0 6px; }
+.jm-md-bar span { display:block; height:100%; background:#0f766e; }
+.jm-md-bar-label { font-size:12px; color:#94a3b8; font-weight:600; margin-bottom:22px; }
+.jm-md h1 { font-size:clamp(24px,3.5vw,32px); font-weight:800; color:#061426; line-height:1.2; margin:6px 0 18px; }
+.jm-md-video { aspect-ratio:16/9; border-radius:14px; overflow:hidden; margin-bottom:24px; background:#000; }
+.jm-md-video iframe { width:100%; height:100%; border:0; }
+.jm-md-body { font-size:16px; line-height:1.8; color:#1f2d3d; white-space:pre-wrap; }
+.jm-md-nav { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:32px; padding-top:22px; border-top:1px solid #e4eaf3; }
+.jm-md-btn { display:inline-flex; align-items:center; gap:8px; border-radius:10px; padding:12px 20px; font-weight:800; font-size:14px; text-decoration:none; cursor:pointer; border:0; }
+.jm-md-btn.primary { background:#0640a3; color:#fff; } .jm-md-btn.primary:hover { background:#052f78; }
+.jm-md-btn.ghost { background:#fff; color:#0640a3; border:1px solid #d8e4f4; }
 </style>
 
-<div class="border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-50">
-    <div class="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <a href="/jobmington/learn/course.php?id=<?= $module['course_id'] ?>" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition text-slate-400">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-            <div>
-                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold"><?= e($module['course_title']) ?></div>
-                <h1 class="text-white font-bold text-sm"><?= e($module['title']) ?></h1>
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <div class="text-right hidden sm:block">
-                <div class="text-[10px] text-slate-500 uppercase font-bold">Upload Status</div>
-                    <div class="text-xs font-mono text-blue-400"><?= $progress ?>% COMPLETE</div>
-                </div>
-            <div class="w-12 h-12 relative flex items-center justify-center">
-                <svg class="w-full h-full transform -rotate-90">
-                    <circle cx="24" cy="24" r="18" stroke="rgba(255,255,255,0.1)" stroke-width="3" fill="none"></circle>
-                    <circle cx="24" cy="24" r="18" stroke="#3b82f6" stroke-width="3" fill="none" stroke-dasharray="113" stroke-dashoffset="<?= 113 - (113 * $progress / 100) ?>"></circle>
-                </svg>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="jm-md">
+    <a class="jm-md-back" href="/jobmington/learn/course.php?id=<?= $courseId ?>">&larr; <?= e($module['course_title']) ?></a>
+    <?php $progPct = count($all) ? round(($idx+1)/count($all)*100) : 100; ?>
+    <div class="jm-md-bar"><span style="width:<?= $progPct ?>%"></span></div>
+    <div class="jm-md-bar-label">Module <?= $idx+1 ?> of <?= count($all) ?></div>
 
-<div class="max-w-[1600px] mx-auto px-4 md:px-6 py-8">
-    <div class="grid lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-8 xl:col-span-9">
-            
-            <?php if ($module['video_url']): ?>
-            <div class="viewport-container mb-8">
-                <div class="viewport-frame">
-                    <?php if ($videoId): ?>
-                        <iframe src="https://www.youtube.com/embed/<?= e($videoId) ?>?rel=0&modestbranding=1" allowfullscreen></iframe>
-                    <?php else: ?>
-                        <video controls><source src="<?= e($module['video_url']) ?>" type="video/mp4"></video>
-                    <?php endif; ?>
-                </div>
-            </div>
+    <h1><?= e($module['title']) ?></h1>
+
+    <?php if (!empty($module['video_url'])): ?>
+        <div class="jm-md-video"><iframe src="<?= e(jm_embed_url($module['video_url'])) ?>" allowfullscreen loading="lazy"></iframe></div>
+    <?php endif; ?>
+
+    <div class="jm-md-body"><?= e($module['content'] ?: $module['description'] ?: 'Lesson content coming soon.') ?></div>
+
+    <div class="jm-md-nav">
+        <div>
+            <?php if ($prev): ?><a class="jm-md-btn ghost" href="/jobmington/learn/module.php?id=<?= (int)$prev['module_id'] ?>">&larr; Previous</a><?php endif; ?>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <?php if ($enrollment): ?>
+                <form method="post" style="margin:0;">
+                    <?= Security::csrfField() ?>
+                    <button class="jm-md-btn primary" type="submit" name="complete" value="1">
+                        <?= $next ? 'Complete &amp; next &rarr;' : ($quiz ? 'Complete &rarr; quiz' : 'Complete course') ?>
+                    </button>
+                </form>
+            <?php elseif ($isPreview): ?>
+                <a class="jm-md-btn primary" href="/jobmington/learn/course.php?id=<?= $courseId ?>">Enroll to continue</a>
             <?php endif; ?>
-
-            <div class="flex flex-col md:flex-row justify-between gap-8">
-                <div class="flex-1">
-                    <h2 class="text-2xl font-bold text-white mb-4">Lesson Directive</h2>
-                    <div class="prose prose-invert prose-sm text-slate-400 leading-relaxed max-w-none">
-                        <?= nl2br(e($module['content'])) ?>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 self-start flex-shrink-0">
-                    <?php if ($prevModule): ?>
-                    <a href="?id=<?= $prevModule['module_id'] ?>" class="control-btn btn-prev">
-                        <i class="fas fa-arrow-left"></i> Prev
-                    </a>
-                    <?php endif; ?>
-
-                    <?php if ($nextModule): ?>
-                    <a href="?id=<?= $nextModule['module_id'] ?>" class="control-btn btn-next">
-                        Next Phase <i class="fas fa-arrow-right"></i>
-                    </a>
-                    <?php elseif ($quiz): ?>
-                    <a href="/jobmington/learn/quiz.php?id=<?= $quiz['quiz_id'] ?>" class="control-btn btn-next bg-gradient-to-r from-yellow-500 to-orange-500 shadow-orange-500/20">
-                        Initiate Quiz <i class="fas fa-crosshairs"></i>
-                    </a>
-                    <?php else: ?>
-                    <a href="/jobmington/learn/course.php?id=<?= $module['course_id'] ?>" class="control-btn btn-next bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-500/20">
-                        Complete <i class="fas fa-check"></i>
-                    </a>
-                    <?php endif; ?>
-                </div>
-            </div>
-
         </div>
-
-        <div class="lg:col-span-4 xl:col-span-3">
-            <div class="hud-panel sticky top-24">
-                <div class="p-4 border-b border-white/5 bg-white/[0.02]">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Data Stream</h3>
-                </div>
-                
-                <div>
-                    <?php foreach ($allModules as $idx => $m): 
-                        $isCurrent = ($m['module_id'] == $moduleId);
-                        $isCompleted = ($idx < $currentIndex);
-                    ?>
-                    <a href="?id=<?= $m['module_id'] ?>" class="module-item <?= $isCurrent ? 'active' : '' ?> <?= $isCompleted ? 'completed' : '' ?>">
-                        <div class="status-indicator w-6 flex justify-center text-sm">
-                            <?php if ($isCurrent): ?><i class="fas fa-play text-[10px]"></i>
-                            <?php elseif ($isCompleted): ?><i class="fas fa-check-circle"></i>
-                            <?php else: ?><span class="text-slate-600 font-mono text-xs"><?= $idx + 1 ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="flex-1">
-                            <div class="module-title text-sm text-slate-400 transition"><?= e($m['title']) ?></div>
-                            <div class="text-[10px] text-slate-600 font-mono mt-0.5">Packet #00<?= $idx + 1 ?></div>
-                        </div>
-                    </a>
-                    <?php endforeach; ?>
-
-                    <?php if ($quiz): ?>
-                    <a href="/jobmington/learn/quiz.php?id=<?= $quiz['quiz_id'] ?>" class="module-item border-t border-white/10 hover:bg-yellow-500/5">
-                        <div class="status-indicator text-yellow-500 w-6 flex justify-center"><i class="fas fa-trophy"></i></div>
-                        <div class="text-sm font-bold text-yellow-500">Final Assessment</div>
-                    </a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>
