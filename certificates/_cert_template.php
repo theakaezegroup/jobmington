@@ -26,6 +26,8 @@ $certSig1Tt = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_
 $certSig2Nm = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig2_name', '') : '';
 $certSig2Tt = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig2_title', '') : '';
 $certSubttl = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_subtitle', '') : '';
+$certBrand  = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_brand_name', '') : '';
+if ($certBrand === '')  $certBrand  = 'Jobmington';
 if ($certSig1Nm === '') $certSig1Nm = 'Jobmington';
 if ($certSig1Tt === '') $certSig1Tt = 'Director, Jobmington';
 if ($certSig2Nm === '') $certSig2Nm = 'Career Learning';
@@ -99,7 +101,9 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
     display:flex; flex-direction:column; align-items:center; text-align:center;
 }
 
-.jm-cert-logo { width:5cqw; height:5cqw; object-fit:contain; display:block; }
+.jm-cert-brandrow { display:flex; align-items:center; justify-content:center; gap:1.4cqw; line-height:1; }
+.jm-cert-logo { width:4.6cqw; height:4.6cqw; object-fit:contain; display:block; flex:0 0 auto; }
+.jm-cert-brandname { font-family:"Futura Cyrillic Demi",Arial,sans-serif; font-size:3cqw; font-weight:800; letter-spacing:.012em; color:var(--navy); line-height:1; display:flex; align-items:center; }
 
 .jm-cert-title {
     font-family:"Cormorant Garamond",Georgia,serif; font-weight:600;
@@ -172,7 +176,10 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
     </svg>
 
     <div class="jm-cert-inner">
-        <img class="jm-cert-logo" src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+        <div class="jm-cert-brandrow">
+            <img class="jm-cert-logo" src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+            <span class="jm-cert-brandname"><?= e($certBrand) ?></span>
+        </div>
         <h2 class="jm-cert-title">Certificate</h2>
         <div class="jm-cert-sub"><?= e($certSubttl) ?></div>
 

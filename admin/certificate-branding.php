@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         jm_setting_set('cert_sig2_name', trim((string) post('sig2_name', '')));
         jm_setting_set('cert_sig2_title', trim((string) post('sig2_title', '')));
         jm_setting_set('cert_subtitle', trim((string) post('subtitle', '')));
+        jm_setting_set('cert_brand_name', trim((string) post('brand_name', '')));
 
         // images: upload replaces; "remove" checkbox clears
         foreach ([
@@ -76,6 +77,7 @@ $sig1Ttl  = jm_setting_get('cert_sig1_title', '');
 $sig2Name = jm_setting_get('cert_sig2_name', '');
 $sig2Ttl  = jm_setting_get('cert_sig2_title', '');
 $subtitle = jm_setting_get('cert_subtitle', '');
+$brandName = jm_setting_get('cert_brand_name', '');
 
 // most recent issued cert (for live preview)
 $previewCode = $pdo->query("SELECT cert_code FROM certificates ORDER BY issued_at DESC LIMIT 1")->fetchColumn();
@@ -173,9 +175,18 @@ $imgTag = function (string $path): string {
             <!-- Wording -->
             <div class="bg-white rounded-xl shadow p-6">
                 <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2"><i class="fas fa-font text-blue-600"></i> Wording</h3>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Subtitle under "Certificate"</label>
-                <input type="text" name="subtitle" value="<?= htmlspecialchars($subtitle) ?>" placeholder="of Completion" class="w-full md:w-1/2 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                <p class="text-xs text-slate-500 mt-2">Defaults to "of Completion" if left empty.</p>
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Brand name (beside the logo)</label>
+                        <input type="text" name="brand_name" value="<?= htmlspecialchars($brandName) ?>" placeholder="Jobmington" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-slate-500 mt-2">Defaults to "Jobmington" if left empty.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Subtitle under "Certificate"</label>
+                        <input type="text" name="subtitle" value="<?= htmlspecialchars($subtitle) ?>" placeholder="of Completion" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-slate-500 mt-2">Defaults to "of Completion" if left empty.</p>
+                    </div>
+                </div>
             </div>
 
             <div class="bg-white rounded-xl shadow p-6">
