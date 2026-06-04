@@ -252,6 +252,62 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
+            <!-- Seeds <-> Credits converter -->
+            <div class="hud-panel p-4" id="jmConverter">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h3 class="text-white font-bold text-xs">Convert</h3>
+                        <p class="text-[9px] text-slate-500">Seeds &harr; Credits</p>
+                    </div>
+                    <div class="text-right font-mono text-[10px] text-slate-400">
+                        <span id="jmcSeeds" class="text-emerald-400 font-bold"><?= number_format((float)($wallet['balance'] ?? 0), 0) ?></span> Seeds
+                        &middot; <span id="jmcCredits" class="text-sky-400 font-bold"><?= (int)($wallet['tool_credits'] ?? 0) ?></span> Credits
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input id="jmcAmount" type="number" min="1" max="100" value="1"
+                           class="w-16 bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-white text-sm text-center font-mono focus:outline-none focus:border-yellow-500/40">
+                    <span class="text-slate-400 text-xs">credits</span>
+                    <button type="button" data-dir="to_credits"
+                            class="jmc-btn flex-1 bg-sky-500/15 border border-sky-500/30 text-sky-300 rounded-lg py-2 text-xs font-bold hover:bg-sky-500/25 transition">
+                        Buy with Seeds <span class="opacity-60">(100/cr)</span>
+                    </button>
+                    <button type="button" data-dir="to_seeds"
+                            class="jmc-btn flex-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 rounded-lg py-2 text-xs font-bold hover:bg-emerald-500/25 transition">
+                        Cash to Seeds <span class="opacity-60">(80/cr)</span>
+                    </button>
+                </div>
+                <p id="jmcMsg" class="text-[10px] mt-2 font-mono text-slate-500"></p>
+            </div>
+            <script>
+            (function(){
+                var amt = document.getElementById('jmcAmount'),
+                    msg = document.getElementById('jmcMsg'),
+                    sEl = document.getElementById('jmcSeeds'),
+                    cEl = document.getElementById('jmcCredits');
+                function nf(n){ return Number(n).toLocaleString(); }
+                document.querySelectorAll('.jmc-btn').forEach(function(b){
+                    b.addEventListener('click', function(){
+                        var dir = b.getAttribute('data-dir');
+                        var credits = Math.max(1, Math.min(100, parseInt(amt.value||'1',10)));
+                        b.disabled = true; msg.className='text-[10px] mt-2 font-mono text-slate-400'; msg.textContent='Processing…';
+                        fetch('/jobmington/api/redeem-seeds.php', {
+                            method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+                            body: JSON.stringify({ direction: dir, credits: credits })
+                        }).then(function(r){ return r.json(); }).then(function(d){
+                            b.disabled = false;
+                            if (d && d.success) {
+                                if (d.data){ sEl.textContent = nf(Math.round(d.data.seeds_balance)); cEl.textContent = nf(d.data.credit_balance); }
+                                msg.className='text-[10px] mt-2 font-mono text-emerald-400'; msg.textContent = d.message || 'Done.';
+                            } else {
+                                msg.className='text-[10px] mt-2 font-mono text-red-400'; msg.textContent = (d && d.message) || 'Conversion failed.';
+                            }
+                        }).catch(function(){ b.disabled=false; msg.className='text-[10px] mt-2 font-mono text-red-400'; msg.textContent='Network error.'; });
+                    });
+                });
+            })();
+            </script>
+
             <div class="hud-panel p-4">
                 <div class="flex justify-between items-center mb-3">
                     <div>

@@ -201,6 +201,7 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
                 <a href="/jobmington/seeker/dashboard.php">Dashboard</a>
                 <a href="/jobmington/seeker/applications.php">Applications</a>
                 <a href="/jobmington/jobs/saved.php">Saved jobs</a>
+                <a href="/jobmington/wallet/passport/">Passport</a>
                 <a href="/jobmington/seeker/profile.php">Profile</a>
                 <?php require_once __DIR__ . '/../includes/notification_bell.php'; jm_notification_bell(); ?>
                 <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>

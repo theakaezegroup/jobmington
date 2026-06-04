@@ -13,6 +13,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/seeds.php';
 
 Session::start();
 $pdo = db();
@@ -57,6 +58,40 @@ if ($stmt->fetch()) {
 $seedBalance = getSeeds((int) $userId);
 
 $hasEnoughSeeds = $seedBalance >= ($course['seed_price'] ?? 0);
+
+// Credit price (explicit, or derived from seed price at the bridge rate)
+$creditPrice = (int) ($course['credit_price'] ?? 0);
+if ($creditPrice <= 0 && (int) ($course['seed_price'] ?? 0) > 0) {
+    $creditPrice = (int) ceil((int) $course['seed_price'] / SEEDS_PER_CREDIT);
+}
+$wallet         = jm_wallet_summary((int) $userId);
+$creditBalance  = (int) $wallet['credits'];
+$hasEnoughCredits = $creditPrice > 0 && $creditBalance >= $creditPrice;
+
+// Handle Credits payment
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_with_credits'])) {
+    if (!Security::verifyCSRF()) {
+        $_SESSION['error'] = 'Invalid request. Please try again.';
+        redirect('/jobmington/learn/checkout.php?course=' . $courseId . '&method=credits');
+    }
+    if ($creditPrice <= 0 || !$hasEnoughCredits) {
+        $_SESSION['error'] = 'Insufficient credits for this course.';
+        redirect('/jobmington/learn/checkout.php?course=' . $courseId . '&method=credits');
+    }
+    $pay = jm_pay_with_credits((int) $userId, $creditPrice, 'course_unlock', 'Course: ' . $course['title'], $courseId);
+    if (!$pay['success']) {
+        $_SESSION['error'] = $pay['message'];
+        redirect('/jobmington/learn/checkout.php?course=' . $courseId . '&method=credits');
+    }
+    try {
+        $pdo->prepare("INSERT INTO course_purchases (user_id, course_id, amount, payment_method, transaction_ref) VALUES (?, ?, ?, 'credits', ?)")
+            ->execute([$userId, $courseId, $creditPrice, 'CREDITS-' . time() . '-' . $userId]);
+        $pdo->prepare("INSERT IGNORE INTO course_enrollments (user_id, course_id, started_at) VALUES (?, ?, NOW())")->execute([$userId, $courseId]);
+        $pdo->prepare("UPDATE courses SET enrollment_count = enrollment_count + 1 WHERE course_id = ?")->execute([$courseId]);
+    } catch (Throwable $e) { /* purchase recorded via wallet; enrollment best-effort */ }
+    $_SESSION['success'] = 'Course unlocked! You spent ' . $creditPrice . ' credit' . ($creditPrice > 1 ? 's' : '') . '.';
+    redirect('/jobmington/learn/course.php?id=' . $courseId);
+}
 
 // Handle Seeds payment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pay_with_seeds'])) {
@@ -327,8 +362,50 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
                 <?php endif; ?>
                 
+                <!-- Credits Payment -->
+                <?php if ($creditPrice > 0): ?>
+                <div class="bg-white rounded-2xl p-6 shadow-sm payment-option <?= $method === 'credits' ? 'ring-2 ring-blue-500' : '' ?>">
+                    <div class="flex items-start gap-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-coins text-white text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-slate-900">Pay with Credits</h3>
+                            <p class="text-slate-500 text-sm mb-4">Use your Jobmington tool credits</p>
+                            <div class="bg-slate-50 rounded-xl p-4 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-slate-600">Your credits</span>
+                                    <span class="font-bold text-slate-900"><?= number_format($creditBalance) ?> <i class="fas fa-coins text-blue-500"></i></span>
+                                </div>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-slate-600">Course cost</span>
+                                    <span class="font-bold text-slate-900">−<?= number_format($creditPrice) ?> <i class="fas fa-coins text-blue-500"></i></span>
+                                </div>
+                            </div>
+                            <?php if ($hasEnoughCredits): ?>
+                            <form method="POST">
+                                <?= csrf_field() ?>
+                                <button type="submit" name="pay_with_credits"
+                                        class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    Pay <?= number_format($creditPrice) ?> Credit<?= $creditPrice > 1 ? 's' : '' ?>
+                                </button>
+                            </form>
+                            <?php else: ?>
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                                <p class="text-blue-700 font-medium">Need <?= number_format($creditPrice - $creditBalance) ?> more credits</p>
+                                <a href="/jobmington/wallet/?topup=1" class="inline-block mt-2 text-sm text-primary hover:underline font-medium">
+                                    <i class="fas fa-plus-circle mr-1"></i> Get or convert credits
+                                </a>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <!-- Divider -->
-                <?php if ($course['seed_price'] > 0): ?>
+                <?php if ($course['seed_price'] > 0 || $creditPrice > 0): ?>
                 <div class="flex items-center gap-4">
                     <div class="flex-1 h-px bg-slate-300"></div>
                     <span class="text-slate-400 text-sm font-medium">OR</span>

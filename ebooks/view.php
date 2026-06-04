@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/seeds.php';
 
 Session::start();
 $pdo = db();
@@ -21,6 +22,35 @@ if ($slug !== '') {
     $ebook = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
+// ── Premium unlock (Seeds / Credits) ──────────────────────────────────────────
+$ebMsg = '';
+if ($ebook && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['unlock_ebook'])) {
+    if (!Session::isLoggedIn()) {
+        redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/ebooks/view.php?slug=' . $ebook['slug']));
+    }
+    if (!Security::verifyCSRF()) {
+        $ebMsg = 'Session expired. Please try again.';
+    } else {
+        $uid = (int) Session::userId();
+        $p   = jm_content_prices((float) $ebook['price'], (int) ($ebook['seed_price'] ?? 0), (int) ($ebook['credit_price'] ?? 0));
+        $method = (string) post('method', 'seeds');
+        if (jm_ebook_has_access($pdo, $uid, $ebook)) {
+            redirect('/jobmington/ebooks/download.php?slug=' . $ebook['slug']);
+        }
+        $pay = $method === 'credits'
+            ? jm_pay_with_credits($uid, (int) $p['credits'], 'ebook_unlock', 'Ebook: ' . $ebook['title'], (int) $ebook['ebook_id'])
+            : jm_pay_with_seeds($uid, (float) $p['seeds'], 'ebook_unlock', 'Ebook: ' . $ebook['title'], (int) $ebook['ebook_id']);
+        if (!empty($pay['success'])) {
+            try {
+                $pdo->prepare("INSERT IGNORE INTO ebook_purchases (user_id, ebook_id, method, amount) VALUES (?, ?, ?, ?)")
+                    ->execute([$uid, (int) $ebook['ebook_id'], $method, $method === 'credits' ? (int) $p['credits'] : (int) $p['seeds']]);
+            } catch (Throwable $e) {}
+            redirect('/jobmington/ebooks/download.php?slug=' . $ebook['slug']);
+        }
+        $ebMsg = $pay['message'] ?? 'Payment failed.';
+    }
+}
+
 if (!$ebook) {
     http_response_code(404);
     $pageTitle = 'Ebook not found - ' . SITE_NAME;
@@ -29,6 +59,10 @@ if (!$ebook) {
     require_once __DIR__ . '/../includes/ai-footer.php';
     exit;
 }
+
+$ebPrices    = jm_content_prices((float) $ebook['price'], (int) ($ebook['seed_price'] ?? 0), (int) ($ebook['credit_price'] ?? 0));
+$ebHasAccess = jm_ebook_has_access($pdo, (int) Session::userId(), $ebook);
+$ebWallet    = Session::isLoggedIn() ? jm_wallet_summary((int) Session::userId()) : ['seeds' => 0, 'credits' => 0];
 
 $pageTitle = $ebook['title'] . ' - ' . SITE_NAME;
 $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
@@ -69,22 +103,41 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
                 <?= (int)$ebook['download_count'] ?> downloads
             </div>
             <div class="jm-ebv-desc"><?= e($ebook['description'] ?: 'No description provided.') ?></div>
+            <?php if ($ebMsg): ?><div style="background:#fef2f2;border:1px solid #fecaca;color:#b42318;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;"><?= e($ebMsg) ?></div><?php endif; ?>
             <div class="jm-ebv-cta">
                 <?php if (empty($ebook['file_path'])): ?>
                     <span style="color:#94a3b8;font-size:14px;">Download coming soon.</span>
-                <?php elseif (Session::isLoggedIn()): ?>
-                    <a class="jm-ebv-btn" href="/jobmington/ebooks/download.php?slug=<?= e($ebook['slug']) ?>">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        <?= $ebook['is_free'] ? 'Download free' : 'Download' ?>
-                    </a>
-                <?php else: ?>
+                <?php elseif (!Session::isLoggedIn()): ?>
                     <a class="jm-ebv-btn" href="/jobmington/auth/login.php?redirect=<?= urlencode('/jobmington/ebooks/view.php?slug=' . $ebook['slug']) ?>">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         Sign in to download
                     </a>
+                    <span class="jm-ebv-price"><?= $ebook['is_free'] ? 'Free' : '₦' . number_format((float)$ebook['price']) ?></span>
+                <?php elseif ($ebHasAccess): ?>
+                    <a class="jm-ebv-btn" href="/jobmington/ebooks/download.php?slug=<?= e($ebook['slug']) ?>">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <?= $ebook['is_free'] ? 'Download free' : 'Download' ?>
+                    </a>
+                    <?php if (!$ebook['is_free']): ?><span class="jm-ebv-price" style="color:#0a6454;">Unlocked</span><?php endif; ?>
+                <?php else: /* premium, logged in, not yet purchased */ ?>
+                    <form method="post" style="display:inline;">
+                        <?= csrf_field() ?><input type="hidden" name="method" value="seeds">
+                        <button type="submit" name="unlock_ebook" class="jm-ebv-btn" <?= $ebWallet['seeds'] < $ebPrices['seeds'] ? 'disabled style="opacity:.55;cursor:not-allowed;"' : '' ?>>
+                            Unlock with <?= number_format($ebPrices['seeds']) ?> Seeds
+                        </button>
+                    </form>
+                    <form method="post" style="display:inline;">
+                        <?= csrf_field() ?><input type="hidden" name="method" value="credits">
+                        <button type="submit" name="unlock_ebook" class="jm-ebv-btn" style="background:#0a6454;" <?= $ebWallet['credits'] < $ebPrices['credits'] ? 'disabled style="background:#0a6454;opacity:.55;cursor:not-allowed;"' : '' ?>>
+                            or <?= number_format($ebPrices['credits']) ?> Credit<?= $ebPrices['credits'] > 1 ? 's' : '' ?>
+                        </button>
+                    </form>
+                    <span class="jm-ebv-price">₦<?= number_format((float)$ebook['price']) ?></span>
                 <?php endif; ?>
-                <span class="jm-ebv-price"><?= $ebook['is_free'] ? 'Free' : '₦' . number_format((float)$ebook['price']) ?></span>
             </div>
+            <?php if (Session::isLoggedIn() && !$ebHasAccess && !$ebook['is_free']): ?>
+            <p style="font-size:12.5px;color:#7c8aa0;margin-top:10px;">Your balance: <?= number_format($ebWallet['seeds']) ?> Seeds &middot; <?= number_format($ebWallet['credits']) ?> Credits &middot; <a href="/jobmington/wallet/" style="color:#0640a3;">Top up or convert</a></p>
+            <?php endif; ?>
         </div>
     </div>
 </div>

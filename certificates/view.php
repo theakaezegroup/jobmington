@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/seeds.php';
 
 Session::start();
 $pdo = db();
@@ -34,6 +35,32 @@ if (!$cert) {
     require_once __DIR__ . '/../includes/ai-footer.php';
     exit;
 }
+
+$isOwner    = Session::isLoggedIn() && (int) Session::userId() === (int) $cert['user_id'];
+$isPremium  = !empty($cert['is_premium']);
+$upgradeMsg = '';
+
+// Premium certificate upgrade (Seeds / Credits). Owner only.
+if ($isOwner && !$isPremium && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upgrade_premium'])) {
+    if (!Security::verifyCSRF()) {
+        $upgradeMsg = 'Session expired. Please try again.';
+    } else {
+        $uid    = (int) Session::userId();
+        $method = (string) post('method', 'seeds');
+        $pay = $method === 'credits'
+            ? jm_pay_with_credits($uid, (int) PRICE_PREMIUM_CERT_CREDITS, 'premium_certificate', 'Premium certificate: ' . $cert['course_title'], (int) $cert['certificate_id'])
+            : jm_pay_with_seeds($uid, (float) PRICE_PREMIUM_CERT_SEEDS, 'premium_certificate', 'Premium certificate: ' . $cert['course_title'], (int) $cert['certificate_id']);
+        if (!empty($pay['success'])) {
+            try {
+                $pdo->prepare("UPDATE certificates SET is_premium = 1 WHERE cert_code = ?")->execute([$cert['cert_code']]);
+            } catch (Throwable $e) {}
+            redirect('/jobmington/certificates/view.php?code=' . urlencode($cert['cert_code']) . '&upgraded=1');
+        }
+        $upgradeMsg = $pay['message'] ?? 'Payment failed.';
+    }
+}
+if (isset($_GET['upgraded'])) { $isPremium = true; }
+$premWallet = Session::isLoggedIn() ? jm_wallet_summary((int) Session::userId()) : ['seeds' => 0, 'credits' => 0];
 
 $verifyUrl = SITE_URL . '/verify?code=' . urlencode($cert['cert_code']);
 $pageTitle = 'Certificate — ' . $cert['course_title'] . ' - ' . SITE_NAME;
@@ -61,8 +88,41 @@ require_once __DIR__ . '/../includes/ai-header.php';
         <div><span class="jm-certpage-verified">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
             Authentic &amp; verified
-        </span></div>
+        </span>
+        <?php if ($isPremium): ?>
+        <span class="jm-certpage-verified" style="background:#eef3ff;color:#0640a3;margin-left:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg>
+            Premium
+        </span>
+        <?php endif; ?>
+        </div>
     </div>
+
+    <?php if ($upgradeMsg): ?>
+    <div style="max-width:620px;margin:0 auto 18px;background:#fef2f2;border:1px solid #fecaca;color:#b42318;padding:11px 15px;border-radius:10px;font-size:13.5px;text-align:center;"><?= e($upgradeMsg) ?></div>
+    <?php endif; ?>
+
+    <?php if ($isOwner && !$isPremium): ?>
+    <div style="max-width:620px;margin:0 auto 22px;background:#f7faff;border:1px solid #e1ebfa;border-radius:14px;padding:18px 20px;text-align:center;">
+        <div style="font-weight:800;color:#061426;font-size:15px;margin-bottom:4px;">Upgrade to a Premium verified certificate</div>
+        <p style="font-size:13px;color:#53667f;margin:0 0 14px;">Adds a Premium mark and priority verification. Pay with Seeds or Credits.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <form method="post" style="display:inline;">
+                <?= csrf_field() ?><input type="hidden" name="method" value="seeds">
+                <button type="submit" name="upgrade_premium" class="jm-cp-btn primary" <?= $premWallet['seeds'] < PRICE_PREMIUM_CERT_SEEDS ? 'disabled style="opacity:.55;cursor:not-allowed;"' : '' ?>>
+                    Upgrade for <?= number_format(PRICE_PREMIUM_CERT_SEEDS) ?> Seeds
+                </button>
+            </form>
+            <form method="post" style="display:inline;">
+                <?= csrf_field() ?><input type="hidden" name="method" value="credits">
+                <button type="submit" name="upgrade_premium" class="jm-cp-btn ghost" <?= $premWallet['credits'] < PRICE_PREMIUM_CERT_CREDITS ? 'disabled style="opacity:.55;cursor:not-allowed;"' : '' ?>>
+                    or <?= (int) PRICE_PREMIUM_CERT_CREDITS ?> Credits
+                </button>
+            </form>
+        </div>
+        <p style="font-size:12px;color:#7c8aa0;margin:12px 0 0;">Balance: <?= number_format($premWallet['seeds']) ?> Seeds &middot; <?= number_format($premWallet['credits']) ?> Credits &middot; <a href="/jobmington/wallet/" style="color:#0640a3;">Top up / convert</a></p>
+    </div>
+    <?php endif; ?>
 
     <?php require __DIR__ . '/_cert_template.php'; ?>
 

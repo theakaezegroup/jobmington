@@ -96,7 +96,16 @@ define('PRICE_CREDITS_PACK_10',           (int)(getenv('PRICE_CREDITS_PACK_10') 
 // ── Economy: Seeds <-> Credits bridge ─────────────────────────────────────────
 // Seeds are the free, earned engagement currency. Credits are the paid currency
 // for premium AI tools. Users can redeem earned Seeds into Credits at this rate.
-define('SEEDS_PER_CREDIT',                (int)(getenv('SEEDS_PER_CREDIT')                ?: 100));   // 100 Seeds = 1 Credit
+define('SEEDS_PER_CREDIT',                (int)(getenv('SEEDS_PER_CREDIT')                ?: 100));   // 100 Seeds = 1 Credit (Seeds -> Credits)
+// Reverse bridge (Credits -> Seeds) carries a spread to discourage round-trip gaming.
+define('SEEDS_PER_CREDIT_REVERSE',        (int)(getenv('SEEDS_PER_CREDIT_REVERSE')        ?: 80));    // 1 Credit = 80 Seeds
+
+// ── Monetization: premium content (Seeds / Credits) ───────────────────────────
+// Premium "verified" certificate upgrade (issued cert stays free).
+define('PRICE_PREMIUM_CERT_CREDITS',      (int)(getenv('PRICE_PREMIUM_CERT_CREDITS')      ?: 2));     // 2 Credits
+define('PRICE_PREMIUM_CERT_SEEDS',        (int)(getenv('PRICE_PREMIUM_CERT_SEEDS')        ?: 200));   // or 200 Seeds
+// Talent Passport visibility boost (7 days)
+define('PRICE_PASSPORT_BOOST_SEEDS',      (int)(getenv('PRICE_PASSPORT_BOOST_SEEDS')      ?: 200));   // 200 Seeds / week
 
 // ── Monetization: Per-Tool (credits) ─────────────────────────────────────────
 define('TOOL_COST_CV_OPTIMIZER',          (int)(getenv('TOOL_COST_CV_OPTIMIZER')          ?: 1));

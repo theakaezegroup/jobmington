@@ -757,6 +757,192 @@ function jm_redeem_seeds_for_credits(int $userId, int $credits): array {
 }
 
 /**
+ * Convert paid Credits back into Seeds (reverse bridge, with spread).
+ * 1 Credit -> SEEDS_PER_CREDIT_REVERSE Seeds.
+ */
+function jm_convert_credits_to_seeds(int $userId, int $credits): array {
+    ensureSeedsSchema();
+    $pdo = db();
+
+    $credits   = max(1, $credits);
+    $rate      = defined('SEEDS_PER_CREDIT_REVERSE') ? (int) SEEDS_PER_CREDIT_REVERSE : 80;
+    $seedsGain = $credits * $rate;
+
+    try {
+        $stmt = $pdo->prepare("SELECT balance, tool_credits FROM wallets WHERE user_id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['balance' => 0, 'tool_credits' => 0];
+
+        if ((int) $row['tool_credits'] < $credits) {
+            return [
+                'success'        => false,
+                'message'        => "You need {$credits} Credit" . ($credits > 1 ? 's' : '') . " but have " . (int) $row['tool_credits'] . ".",
+                'seeds_balance'  => (float) $row['balance'],
+                'credit_balance' => (int) $row['tool_credits'],
+            ];
+        }
+
+        $pdo->beginTransaction();
+        $upd = $pdo->prepare("
+            UPDATE wallets
+            SET tool_credits = tool_credits - ?, balance = balance + ?, lifetime_earned = lifetime_earned + ?
+            WHERE user_id = ? AND tool_credits >= ?
+        ");
+        $upd->execute([$credits, $seedsGain, $seedsGain, $userId, $credits]);
+        if ($upd->rowCount() === 0) {
+            $pdo->rollBack();
+            return ['success' => false, 'message' => 'Insufficient Credits.', 'seeds_balance' => (float) $row['balance'], 'credit_balance' => (int) $row['tool_credits']];
+        }
+
+        $stmt->execute([$userId]);
+        $after = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['balance' => 0, 'tool_credits' => 0];
+
+        $pdo->prepare("
+            INSERT INTO seed_transactions (user_id, type, amount, balance_after, source, description)
+            VALUES (?, 'earn', ?, ?, 'redeem_seed', ?)
+        ")->execute([$userId, $seedsGain, (float) $after['balance'], "Converted {$credits} Credit" . ($credits > 1 ? 's' : '') . " to {$seedsGain} Seeds"]);
+
+        $pdo->commit();
+        return [
+            'success'        => true,
+            'message'        => "Converted {$credits} Credit" . ($credits > 1 ? 's' : '') . " to {$seedsGain} Seeds.",
+            'seeds_added'    => $seedsGain,
+            'credits_spent'  => $credits,
+            'seeds_balance'  => (float) $after['balance'],
+            'credit_balance' => (int) $after['tool_credits'],
+        ];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('jm_convert_credits_to_seeds error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Conversion failed. Please try again.'];
+    }
+}
+
+/**
+ * Wallet snapshot: seeds (float) + credits (int).
+ */
+function jm_wallet_summary(int $userId): array {
+    ensureSeedsSchema();
+    try {
+        $stmt = db()->prepare("SELECT balance, tool_credits FROM wallets WHERE user_id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) { createWallet($userId); return ['seeds' => 0.0, 'credits' => 0]; }
+        return ['seeds' => (float) $row['balance'], 'credits' => (int) $row['tool_credits']];
+    } catch (Throwable $e) {
+        return ['seeds' => 0.0, 'credits' => 0];
+    }
+}
+
+/**
+ * Atomically spend Seeds for a purchase. Returns ['success'=>bool,'message'=>string].
+ */
+function jm_pay_with_seeds(int $userId, float $seeds, string $source, string $description, ?int $referenceId = null): array {
+    ensureSeedsSchema();
+    $pdo = db();
+    $seeds = round(max(0, $seeds), 2);
+    if ($seeds <= 0) return ['success' => true, 'message' => 'No charge.'];
+    try {
+        $pdo->beginTransaction();
+        $upd = $pdo->prepare("UPDATE wallets SET balance = balance - ?, lifetime_spent = lifetime_spent + ? WHERE user_id = ? AND balance >= ?");
+        $upd->execute([$seeds, $seeds, $userId, $seeds]);
+        if ($upd->rowCount() === 0) {
+            $pdo->rollBack();
+            return ['success' => false, 'message' => 'Insufficient Seeds.'];
+        }
+        $bal = $pdo->prepare("SELECT balance FROM wallets WHERE user_id = ?");
+        $bal->execute([$userId]);
+        $after = (float) $bal->fetchColumn();
+        $pdo->prepare("INSERT INTO seed_transactions (user_id, type, amount, balance_after, source, description, reference_id)
+                       VALUES (?, 'spend', ?, ?, ?, ?, ?)")
+            ->execute([$userId, $seeds, $after, $source, $description, $referenceId]);
+        $pdo->commit();
+        return ['success' => true, 'message' => 'Paid with Seeds.', 'seeds_balance' => $after];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        // reference_id column may not exist on older schemas — retry without it
+        try {
+            $pdo->beginTransaction();
+            $upd = $pdo->prepare("UPDATE wallets SET balance = balance - ?, lifetime_spent = lifetime_spent + ? WHERE user_id = ? AND balance >= ?");
+            $upd->execute([$seeds, $seeds, $userId, $seeds]);
+            if ($upd->rowCount() === 0) { $pdo->rollBack(); return ['success' => false, 'message' => 'Insufficient Seeds.']; }
+            $bal = $pdo->prepare("SELECT balance FROM wallets WHERE user_id = ?"); $bal->execute([$userId]); $after = (float) $bal->fetchColumn();
+            $pdo->prepare("INSERT INTO seed_transactions (user_id, type, amount, balance_after, source, description) VALUES (?, 'spend', ?, ?, ?, ?)")
+                ->execute([$userId, $seeds, $after, $source, $description]);
+            $pdo->commit();
+            return ['success' => true, 'message' => 'Paid with Seeds.', 'seeds_balance' => $after];
+        } catch (Throwable $e2) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            error_log('jm_pay_with_seeds error: ' . $e2->getMessage());
+            return ['success' => false, 'message' => 'Payment failed. Please try again.'];
+        }
+    }
+}
+
+/**
+ * Atomically spend Credits for a purchase. Returns ['success'=>bool,'message'=>string].
+ */
+function jm_pay_with_credits(int $userId, int $credits, string $source, string $description, ?int $referenceId = null): array {
+    ensureSeedsSchema();
+    $pdo = db();
+    $credits = max(0, $credits);
+    if ($credits <= 0) return ['success' => true, 'message' => 'No charge.'];
+    try {
+        $pdo->beginTransaction();
+        $upd = $pdo->prepare("UPDATE wallets SET tool_credits = tool_credits - ? WHERE user_id = ? AND tool_credits >= ?");
+        $upd->execute([$credits, $userId, $credits]);
+        if ($upd->rowCount() === 0) {
+            $pdo->rollBack();
+            return ['success' => false, 'message' => 'Insufficient Credits.'];
+        }
+        // best-effort usage log (table may not exist on all envs)
+        try {
+            $pdo->prepare("INSERT INTO tool_usage_log (user_id, tool, credits_used, source, created_at) VALUES (?, ?, ?, 'credit', NOW())")
+                ->execute([$userId, $source, $credits]);
+        } catch (Throwable $ignore) {}
+        $pdo->commit();
+        $bal = $pdo->prepare("SELECT tool_credits FROM wallets WHERE user_id = ?");
+        $bal->execute([$userId]);
+        return ['success' => true, 'message' => 'Paid with Credits.', 'credit_balance' => (int) $bal->fetchColumn()];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        error_log('jm_pay_with_credits error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Payment failed. Please try again.'];
+    }
+}
+
+/**
+ * Resolve Seed & Credit prices for a premium content item.
+ * Uses explicit seed/credit columns if set, else derives them consistently
+ * from the bridge rate (and the Naira price as a last resort).
+ */
+function jm_content_prices(float $naira, int $seedPrice, int $creditPrice): array {
+    $perCredit  = defined('SEEDS_PER_CREDIT') ? (int) SEEDS_PER_CREDIT : 100;
+    $perSingle  = defined('PRICE_CREDITS_SINGLE') ? (int) PRICE_CREDITS_SINGLE : 500;
+    if ($creditPrice > 0)      $credits = $creditPrice;
+    elseif ($seedPrice > 0)    $credits = (int) ceil($seedPrice / $perCredit);
+    elseif ($naira > 0)        $credits = (int) ceil($naira / $perSingle);
+    else                       $credits = 0;
+    $seeds = $seedPrice > 0 ? $seedPrice : $credits * $perCredit;
+    return ['seeds' => $seeds, 'credits' => $credits];
+}
+
+/**
+ * Does the user already have access to a premium ebook?
+ */
+function jm_ebook_has_access(PDO $pdo, int $userId, array $ebook): bool {
+    if (!empty($ebook['is_free'])) return true;
+    if ($userId <= 0) return false;
+    try {
+        $stmt = $pdo->prepare("SELECT 1 FROM ebook_purchases WHERE user_id = ? AND ebook_id = ? LIMIT 1");
+        $stmt->execute([$userId, (int) $ebook['ebook_id']]);
+        return (bool) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+/**
  * Format seeds amount for display
  *
  * @param float $amount

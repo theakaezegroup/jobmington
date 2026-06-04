@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/seeds.php';
 
 Session::start();
 $pdo = db();
@@ -26,6 +27,11 @@ if (!$ebook || empty($ebook['file_path'])) {
 // Ebook downloads are members-only (the listing + detail pages stay public for SEO).
 if (!Session::isLoggedIn()) {
     redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/ebooks/view.php?slug=' . $ebook['slug']));
+}
+
+// Premium ebooks require a purchase (Seeds / Credits / Naira) before download.
+if (!jm_ebook_has_access($pdo, (int) Session::userId(), $ebook)) {
+    redirect('/jobmington/ebooks/view.php?slug=' . $ebook['slug'] . '&unlock=1');
 }
 
 // Resolve the file path on disk (file_path is stored as a web path under /jobmington/uploads/...).
