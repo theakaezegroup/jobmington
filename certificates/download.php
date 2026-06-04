@@ -49,11 +49,16 @@ if (!$cert) { http_response_code(404); exit('Certificate not found.'); }
     .jm-dl-stage { max-width:1000px; margin:46px auto 0; }
     @media print {
         @page { size:A4 landscape; margin:0; }
-        body { background:#fff; padding:0; }
+        html, body { margin:0; padding:0; background:#fff; width:297mm; height:210mm; overflow:hidden; }
         .jm-dl-bar { display:none; }
-        .jm-dl-stage { margin:0; max-width:none; }
-        .jm-cert-stage { max-width:none !important; }
-        .jm-cert { width:100%; border:0 !important; }
+        .jm-dl-stage { margin:0; padding:0; max-width:none; }
+        .jm-cert-stage { max-width:none !important; width:297mm !important; }
+        .jm-cert {
+            width:297mm !important; height:210mm !important;
+            aspect-ratio:auto !important; border:0 !important;
+            -webkit-print-color-adjust:exact; print-color-adjust:exact;
+            break-inside:avoid; page-break-inside:avoid;
+        }
     }
 </style>
 </head>

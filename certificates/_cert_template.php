@@ -16,6 +16,13 @@ $verifyUrl  = $siteUrl . '/verify?code=' . urlencode($certCode);
 $qrUrl      = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&qzone=1&color=061426&data=' . urlencode($verifyUrl);
 ?>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&display=swap');
+@font-face {
+    font-family:"Futura Cyrillic Demi";
+    src:local("Futura Cyrillic Demi"), local("FuturaCyrillicDemi"),
+        url("/jobmington/assets/fonts/FuturaCyrillicDemi.ttf") format("truetype");
+    font-display:swap;
+}
 .jm-cert-stage { container-type:inline-size; width:100%; max-width:1000px; margin:0 auto; }
 .jm-cert {
     --navy:#061426; --blue:#0640a3; --line:#d8e4f4; --muted:#5b6b82;
@@ -38,11 +45,9 @@ $qrUrl      = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0
     display:flex; flex-direction:column; align-items:center; text-align:center;
 }
 
-.jm-cert-top { display:flex; align-items:center; gap:1.1cqw; }
-.jm-cert-top img { width:4cqw; height:4cqw; object-fit:contain; }
-.jm-cert-brand { text-align:left; line-height:1; }
-.jm-cert-brand b { display:block; font-size:2.1cqw; font-weight:800; letter-spacing:.02em; color:var(--navy); }
-.jm-cert-brand span { display:block; font-size:.86cqw; font-weight:800; letter-spacing:.46em; color:var(--blue); margin-top:.5cqw; }
+.jm-cert-top { display:flex; align-items:center; justify-content:center; gap:1.3cqw; }
+.jm-cert-top img { width:4.8cqw; height:4.8cqw; object-fit:contain; display:block; }
+.jm-cert-brand { font-family:"Futura Cyrillic Demi", Arial, sans-serif; font-size:2.7cqw; font-weight:800; letter-spacing:.015em; color:var(--navy); line-height:1; }
 
 .jm-cert-kicker { margin-top:4.4cqw; font-size:1.5cqw; font-weight:800; letter-spacing:.5em; color:var(--blue); text-transform:uppercase; }
 .jm-cert-rule { width:7cqw; height:.32cqw; background:var(--blue); margin:1.4cqw auto 0; }
@@ -72,8 +77,8 @@ $qrUrl      = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0
 .jm-cert-seal svg { width:13cqw; height:13cqw; display:block; }
 /* right: signature */
 .jm-cert-vright { flex:1 1 0; min-width:0; text-align:center; }
-.jm-cert-vright .sig { font-family:"Segoe Script","Brush Script MT",cursive; font-size:2.6cqw; color:var(--navy); }
-.jm-cert-vright .ln { height:.1cqw; background:#9fb0c6; margin:.8cqw 16% .9cqw; }
+.jm-cert-vright .sig { font-family:"Alex Brush","Segoe Script",cursive; font-size:4cqw; color:var(--navy); line-height:1; padding-bottom:.3cqw; }
+.jm-cert-vright .ln { height:.1cqw; background:#9fb0c6; margin:.6cqw 14% .9cqw; }
 .jm-cert-vright .lbl { font-size:.92cqw; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:#7c8aa0; }
 </style>
 
@@ -94,7 +99,7 @@ $qrUrl      = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0
     <div class="jm-cert-inner">
         <div class="jm-cert-top">
             <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
-            <div class="jm-cert-brand"><b>Jobmington</b><span>ACADEMY</span></div>
+            <div class="jm-cert-brand">Jobmington</div>
         </div>
 
         <div class="jm-cert-kicker">Certificate of Completion</div>
@@ -119,31 +124,30 @@ $qrUrl      = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0
 
             <div class="jm-cert-seal" aria-label="Verified seal">
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- scalloped medallion edge -->
-                    <g fill="#061426">
-                        <?php for ($i = 0; $i < 24; $i++) {
-                            $a = deg2rad($i * 15);
-                            $cx = 50 + cos($a) * 44; $cy = 50 + sin($a) * 44;
-                            echo '<circle cx="' . round($cx, 2) . '" cy="' . round($cy, 2) . '" r="4.6"/>';
-                        } ?>
-                    </g>
-                    <circle cx="50" cy="50" r="42" fill="#061426"/>
-                    <circle cx="50" cy="50" r="38" fill="none" stroke="#0640a3" stroke-width="1.4"/>
-                    <circle cx="50" cy="50" r="32" fill="none" stroke="#3f6fc0" stroke-width="0.8" stroke-dasharray="1.5 2.6"/>
-                    <!-- center check -->
-                    <circle cx="50" cy="47" r="18" fill="#0640a3"/>
-                    <path d="M42 47.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <!-- VERIFIED label -->
-                    <text x="50" y="74" text-anchor="middle" fill="#fff" font-size="6.4" font-family="Arial" font-weight="bold" letter-spacing="1.4">VERIFIED</text>
-                    <!-- top star -->
-                    <path d="M50 19l1.6 3.4 3.7.5-2.7 2.6.7 3.7L50 30.9l-3 1.8.7-3.7-2.7-2.6 3.7-.5z" fill="#0640a3"/>
+                    <?php
+                    // sleek sunburst rosette (vector, brand navy)
+                    $pts = []; $n = 28;
+                    for ($i = 0; $i < $n * 2; $i++) {
+                        $a = M_PI * $i / $n - M_PI / 2;
+                        $r = ($i % 2 === 0) ? 49 : 44.5;
+                        $pts[] = round(50 + cos($a) * $r, 2) . ',' . round(50 + sin($a) * $r, 2);
+                    }
+                    ?>
+                    <polygon points="<?= implode(' ', $pts) ?>" fill="#061426"/>
+                    <circle cx="50" cy="50" r="40.5" fill="#061426"/>
+                    <circle cx="50" cy="50" r="36.5" fill="none" stroke="#0640a3" stroke-width="1.3"/>
+                    <circle cx="50" cy="50" r="31.5" fill="none" stroke="#3f6fc0" stroke-width="0.7" stroke-dasharray="0.4 3"/>
+                    <!-- clean center -->
+                    <circle cx="50" cy="44" r="15.5" fill="#fff"/>
+                    <path d="M43 44.4l4.6 4.6 9.6-10" stroke="#0640a3" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <text x="50" y="71.5" text-anchor="middle" fill="#fff" font-size="5.4" font-family="Arial" font-weight="bold" letter-spacing="2.4">VERIFIED</text>
                 </svg>
             </div>
 
             <div class="jm-cert-vright">
                 <div class="sig">Jobmington</div>
                 <div class="ln"></div>
-                <div class="lbl">Jobmington Academy</div>
+                <div class="lbl">Authorised Signature</div>
             </div>
         </div>
     </div>
