@@ -8,13 +8,16 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 Session::start();
-Session::requireVerified();
-
 $pdo = db();
-$userId = Session::userId();
 
+// AJAX save/unsave toggle — handled before the page-level verify gate so it
+// always returns clean JSON (never an HTML redirect that the fetch can't parse).
 if (isset($_GET['action']) && $_GET['action'] === 'toggle' && Security::isAjax()) {
-    $jobId = (int) get('job_id', 0);
+    if (!Session::isLoggedIn()) {
+        jsonError('Please sign in to save jobs.', 401);
+    }
+    $userId = (int) Session::userId();
+    $jobId  = (int) get('job_id', 0);
     if ($jobId <= 0) {
         jsonError('Invalid job.');
     }
@@ -26,10 +29,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'toggle' && Security::isAjax()
         $pdo->prepare("DELETE FROM saved_jobs WHERE user_id = ? AND job_id = ?")->execute([$userId, $jobId]);
         jsonSuccess(['saved' => false], 'Job removed from saved jobs.');
     } else {
-        $pdo->prepare("INSERT INTO saved_jobs (user_id, job_id) VALUES (?, ?)")->execute([$userId, $jobId]);
+        $pdo->prepare("INSERT IGNORE INTO saved_jobs (user_id, job_id) VALUES (?, ?)")->execute([$userId, $jobId]);
         jsonSuccess(['saved' => true], 'Job saved.');
     }
 }
+
+Session::requireVerified();
+$userId = Session::userId();
 
 if (isset($_GET['remove'])) {
     $jobId = (int) get('remove');

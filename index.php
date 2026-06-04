@@ -1637,9 +1637,11 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         roast:   'CV Roast',
     };
 
-    var SHOW_MS  = 5500;
-    var GAP_MS   = 8000;
-    var FIRST_MS = 7000;
+    var SHOW_MS  = 6000;
+    var GAP_MS   = 26000;
+    var FIRST_MS = 15000;
+    var MAX_SHOWS = 3;        /* show a few, then stop — avoid distraction */
+    var shownCount = 0;
 
     var idx      = Math.floor(Math.random() * EVENTS.length);
     var timer    = null;
@@ -1669,6 +1671,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     }
 
     function showNext() {
+        shownCount++;
         var e = EVENTS[idx];
         idx = (idx + 1) % EVENTS.length;
 
@@ -1709,7 +1712,9 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         toast.classList.add('jm-fomo-leaving');
         barEl.style.transition = 'none';
         barEl.style.transform  = 'scaleX(0)';
-        timer = setTimeout(showNext, GAP_MS);
+        if (shownCount < MAX_SHOWS) {
+            timer = setTimeout(showNext, GAP_MS);
+        }
     }
 
     /* pause on hover */
@@ -1730,7 +1735,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         timer = setTimeout(hide, remaining);
     });
 
-    closeBtn.addEventListener('click', function () { hide(); });
+    closeBtn.addEventListener('click', function () { shownCount = MAX_SHOWS; hide(); });
 
     timer = setTimeout(showNext, FIRST_MS);
 })();

@@ -1282,7 +1282,19 @@ ob_start();
                 <a href="/jobmington/jobs/saved.php" class="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center transition duration-300 jm-nav-icon" style="background: #ffffff; border: 1px solid #e8edf5; color: #101828;" onmouseover="this.style.background='#f6f8fb'" onmouseout="this.style.background='#ffffff'" title="Saved Jobs">
                     <i class="fas fa-bookmark text-sm"></i>
                 </a>
-                
+
+                <!-- Notifications -->
+                <div class="jm-notif">
+                    <button id="jm-notif-btn" class="w-9 h-9 rounded-lg flex items-center justify-center transition duration-300 jm-nav-icon" style="position:relative;background:#ffffff;border:1px solid #e8edf5;color:#101828;" title="Notifications" aria-label="Notifications">
+                        <i class="fas fa-bell text-sm"></i>
+                        <span id="jm-notif-badge" class="jm-notif-badge">0</span>
+                    </button>
+                    <div id="jm-notif-panel" class="jm-notif-panel" hidden>
+                        <div class="jm-notif-head"><span>Notifications</span><button type="button" id="jm-notif-readall">Mark all read</button></div>
+                        <div id="jm-notif-list" class="jm-notif-list"><div class="jm-notif-empty">Loading&hellip;</div></div>
+                        <a class="jm-notif-foot" href="/jobmington/seeker/notifications.php">View all notifications</a>
+                    </div>
+                </div>
                 <?php endif; ?>
 
                 <?php if ($isLoggedIn): 
@@ -1501,6 +1513,124 @@ ob_start();
     </div>
 
     <main id="main-content" class="flex-1 relative z-10 pt-[80px]">
+
+    <?php if ($isLoggedIn): ?>
+    <style nonce="<?= $cspNonce ?>">
+        .jm-notif { position:relative; }
+        .jm-notif-badge { position:absolute; top:-5px; right:-5px; min-width:17px; height:17px; padding:0 4px; border-radius:99px; background:#e11d2a; color:#fff; font-size:10px; font-weight:800; line-height:17px; text-align:center; box-shadow:0 0 0 2px #fff; display:none; }
+        .jm-notif-badge.show { display:block; }
+        .jm-notif-btn-ring { animation: jmBellRing .9s ease; }
+        @keyframes jmBellRing { 0%,100%{transform:rotate(0)} 20%{transform:rotate(14deg)} 40%{transform:rotate(-12deg)} 60%{transform:rotate(8deg)} 80%{transform:rotate(-5deg)} }
+        .jm-notif-panel { position:absolute; top:46px; right:0; width:340px; max-width:88vw; background:#fff; border:1px solid #e8edf5; border-radius:14px; box-shadow:0 20px 48px -16px rgba(16,24,40,.28); z-index:120; overflow:hidden; }
+        .jm-notif-panel[hidden] { display:none; }
+        .jm-notif-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #f0f4f9; }
+        .jm-notif-head span { font-size:13px; font-weight:800; color:#101828; text-transform:uppercase; letter-spacing:.05em; }
+        .jm-notif-head button { background:none; border:0; color:#0640a3; font-size:12px; font-weight:700; cursor:pointer; }
+        .jm-notif-list { max-height:380px; overflow-y:auto; }
+        .jm-notif-item { display:flex; gap:11px; padding:13px 16px; border-bottom:1px solid #f5f8fc; text-decoration:none; transition:background .12s; cursor:pointer; }
+        .jm-notif-item:hover { background:#f8fbff; }
+        .jm-notif-item.unread { background:#f3f8ff; }
+        .jm-notif-dot { width:8px; height:8px; border-radius:50%; background:#0640a3; flex-shrink:0; margin-top:5px; opacity:0; }
+        .jm-notif-item.unread .jm-notif-dot { opacity:1; }
+        .jm-notif-itxt { flex:1; min-width:0; }
+        .jm-notif-itxt b { display:block; font-size:13.5px; font-weight:700; color:#101828; line-height:1.35; }
+        .jm-notif-itxt small { display:block; font-size:12px; color:#667085; margin-top:2px; line-height:1.45; }
+        .jm-notif-ago { font-size:11px; color:#98a2b3; margin-top:4px; display:block; }
+        .jm-notif-empty { padding:34px 16px; text-align:center; color:#98a2b3; font-size:13px; }
+        .jm-notif-foot { display:block; text-align:center; padding:12px; font-size:13px; font-weight:700; color:#0640a3; text-decoration:none; border-top:1px solid #f0f4f9; }
+        .jm-notif-foot:hover { background:#f8fbff; }
+    </style>
+    <script nonce="<?= $cspNonce ?>">
+    (function () {
+        var btn = document.getElementById('jm-notif-btn');
+        var panel = document.getElementById('jm-notif-panel');
+        var list = document.getElementById('jm-notif-list');
+        var badge = document.getElementById('jm-notif-badge');
+        var readAll = document.getElementById('jm-notif-readall');
+        if (!btn || !panel) return;
+        var base = '<?= defined('SITE_URL') ? SITE_URL : '' ?>';
+        var lastUnread = parseInt(localStorage.getItem('jm_notif_seen') || '0', 10) || 0;
+        var audioCtx = null;
+
+        function chime() {
+            try {
+                audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                var now = audioCtx.currentTime;
+                [[880, 0], [1174.66, 0.11]].forEach(function (n) {
+                    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                    o.type = 'sine'; o.frequency.value = n[0];
+                    o.connect(g); g.connect(audioCtx.destination);
+                    var t = now + n[1];
+                    g.gain.setValueAtTime(0, t);
+                    g.gain.linearRampToValueAtTime(0.14, t + 0.02);
+                    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+                    o.start(t); o.stop(t + 0.55);
+                });
+            } catch (e) {}
+        }
+
+        function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+        function setBadge(n) {
+            if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.add('show'); }
+            else { badge.classList.remove('show'); }
+        }
+
+        function render(items) {
+            if (!items.length) { list.innerHTML = '<div class="jm-notif-empty">You\'re all caught up.</div>'; return; }
+            list.innerHTML = items.map(function (n) {
+                var inner = '<span class="jm-notif-dot"></span><span class="jm-notif-itxt"><b>' + esc(n.title) + '</b>'
+                    + (n.message ? '<small>' + esc(n.message) + '</small>' : '')
+                    + '<span class="jm-notif-ago">' + esc(n.ago) + '</span></span>';
+                var cls = 'jm-notif-item' + (n.is_read ? '' : ' unread');
+                return n.link
+                    ? '<a class="' + cls + '" data-id="' + n.id + '" href="' + esc(n.link) + '">' + inner + '</a>'
+                    : '<div class="' + cls + '" data-id="' + n.id + '">' + inner + '</div>';
+            }).join('');
+            list.querySelectorAll('[data-id]').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    var id = el.getAttribute('data-id');
+                    fetch(base + '/api/notifications.php?action=read', {
+                        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id
+                    });
+                    el.classList.remove('unread');
+                });
+            });
+        }
+
+        function load(open) {
+            fetch(base + '/api/notifications.php?action=list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (d) {
+                    if (!d || !d.success) return;
+                    var unread = d.data.unread || 0;
+                    setBadge(unread);
+                    if (unread > lastUnread) { btn.classList.add('jm-notif-btn-ring'); setTimeout(function () { btn.classList.remove('jm-notif-btn-ring'); }, 1000); chime(); }
+                    lastUnread = unread; localStorage.setItem('jm_notif_seen', unread);
+                    if (open) render(d.data.items || []);
+                })
+                .catch(function () {});
+        }
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var willOpen = panel.hasAttribute('hidden');
+            if (willOpen) { panel.removeAttribute('hidden'); list.innerHTML = '<div class="jm-notif-empty">Loading&hellip;</div>'; load(true); }
+            else { panel.setAttribute('hidden', ''); }
+        });
+        document.addEventListener('click', function (e) { if (!panel.contains(e.target) && e.target !== btn) panel.setAttribute('hidden', ''); });
+        if (readAll) readAll.addEventListener('click', function () {
+            fetch(base + '/api/notifications.php?action=read_all', { method: 'POST' }).then(function () {
+                setBadge(0); lastUnread = 0; localStorage.setItem('jm_notif_seen', '0');
+                list.querySelectorAll('.jm-notif-item').forEach(function (i) { i.classList.remove('unread'); });
+            });
+        });
+
+        load(false);
+        setInterval(function () { load(false); }, 45000);
+    })();
+    </script>
+    <?php endif; ?>
 
     <script nonce="<?= $cspNonce ?>">
         // Scroll Effect
