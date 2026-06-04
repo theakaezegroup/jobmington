@@ -97,7 +97,7 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 }
 .jm-cert-bg { position:absolute; inset:0; width:100%; height:100%; display:block; }
 .jm-cert-inner {
-    position:absolute; inset:0; padding:7.2cqw 11cqw 5.6cqw;
+    position:absolute; inset:0; padding:9.4cqw 11cqw 9.4cqw;
     display:flex; flex-direction:column; align-items:center; text-align:center;
 }
 
@@ -107,20 +107,20 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 
 .jm-cert-title {
     font-family:"Cormorant Garamond",Georgia,serif; font-weight:600;
-    font-size:7.6cqw; line-height:.96; letter-spacing:.14em; color:var(--navy);
-    margin:1.8cqw 0 0; text-transform:uppercase; text-indent:.14em;
+    font-size:7.4cqw; line-height:.96; letter-spacing:.14em; color:var(--navy);
+    margin:1.4cqw 0 0; text-transform:uppercase; text-indent:.14em;
 }
 .jm-cert-sub { font-size:1.5cqw; font-weight:700; letter-spacing:.52em; color:var(--muted); text-transform:uppercase; margin-top:1cqw; text-indent:.52em; }
 
-.jm-cert-present { margin-top:3.4cqw; font-size:1.34cqw; color:var(--muted); }
-.jm-cert-namerow { display:flex; align-items:center; justify-content:center; gap:2.2cqw; width:78%; margin-top:1.5cqw; }
+.jm-cert-present { margin-top:2.6cqw; font-size:1.34cqw; color:var(--muted); }
+.jm-cert-namerow { display:flex; align-items:center; justify-content:center; gap:2.2cqw; width:78%; margin-top:1.2cqw; }
 .jm-cert-namerow .ln { flex:1; height:.08cqw; background:linear-gradient(90deg,transparent,#b9c7dd); }
 .jm-cert-namerow .ln.r { background:linear-gradient(90deg,#b9c7dd,transparent); }
 .jm-cert-name { font-family:"Futura Cyrillic Demi",Arial,sans-serif; font-size:2.7cqw; font-weight:800; letter-spacing:.13em; color:var(--blue); text-transform:uppercase; white-space:nowrap; }
 
-.jm-cert-for { margin-top:2.4cqw; font-size:1.3cqw; color:var(--muted); }
+.jm-cert-for { margin-top:1.8cqw; font-size:1.3cqw; color:var(--muted); }
 .jm-cert-course { font-family:"Cormorant Garamond",Georgia,serif; font-size:3.2cqw; font-weight:600; color:var(--navy); margin-top:.6cqw; max-width:78%; line-height:1.16; }
-.jm-cert-when { margin-top:1cqw; font-size:1.16cqw; color:var(--muted); }
+.jm-cert-when { margin-top:.8cqw; font-size:1.16cqw; color:var(--muted); }
 
 /* signatures flanking the seal */
 .jm-cert-foot { margin-top:auto; width:100%; display:flex; align-items:flex-end; justify-content:space-between; gap:3cqw; }
@@ -130,10 +130,10 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 .jm-cert-sigcol .ln { height:.08cqw; background:#b9c7dd; margin:.4cqw 10% .8cqw; }
 .jm-cert-sigcol .lbl { font-size:.9cqw; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
 .jm-cert-seal { flex:0 0 auto; }
-.jm-cert-seal svg { width:12.5cqw; height:12.5cqw; display:block; }
+.jm-cert-seal svg { width:10.2cqw; height:10.2cqw; display:block; }
 /* centered verification footer */
-.jm-cert-footline { display:flex; align-items:center; justify-content:center; gap:1.1cqw; margin-top:2.2cqw; }
-.jm-cert-footline img { width:5.4cqw; height:5.4cqw; background:#fff; display:block; }
+.jm-cert-footline { display:flex; align-items:center; justify-content:center; gap:1.1cqw; margin-top:1.5cqw; }
+.jm-cert-footline img { width:4.8cqw; height:4.8cqw; background:#fff; display:block; }
 .jm-cert-footline span { font-size:1cqw; color:var(--muted); letter-spacing:.02em; }
 .jm-cert-footline b { color:var(--navy); font-family:"Courier New",monospace; font-weight:800; letter-spacing:.03em; }
 </style>
@@ -207,7 +207,7 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 
             <div class="jm-cert-seal" aria-label="Jobmington official seal">
                 <?php if ($certSeal !== ''): ?>
-                <img src="<?= e($certPrefix . $certSeal) ?>" alt="Official seal" style="width:12.5cqw;height:12.5cqw;object-fit:contain;display:block;">
+                <img src="<?= e($certPrefix . $certSeal) ?>" alt="Official seal" style="width:10.2cqw;height:10.2cqw;object-fit:contain;display:block;">
                 <?php else: ?>
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
