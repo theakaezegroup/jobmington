@@ -47,7 +47,7 @@ $cTop = $inset + $band / 2; $cBot = $GH - $inset - $band / 2;
 $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 ?>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Sacramento&display=swap');
 @font-face {
     font-family:"Futura Cyrillic Demi";
     src:local("Futura Cyrillic Demi"), local("FuturaCyrillicDemi"),
@@ -88,24 +88,23 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 .jm-cert-namerow .ln.r { background:linear-gradient(90deg,#b9c7dd,transparent); }
 .jm-cert-name { font-family:"Futura Cyrillic Demi",Arial,sans-serif; font-size:2.7cqw; font-weight:800; letter-spacing:.13em; color:var(--blue); text-transform:uppercase; white-space:nowrap; }
 
-.jm-cert-for { margin-top:3cqw; font-size:1.3cqw; color:var(--muted); }
-.jm-cert-course { font-family:"Cormorant Garamond",Georgia,serif; font-size:3.4cqw; font-weight:600; color:var(--navy); margin-top:.7cqw; max-width:78%; line-height:1.18; }
-.jm-cert-when { margin-top:1.4cqw; font-size:1.18cqw; color:var(--muted); }
+.jm-cert-for { margin-top:2.4cqw; font-size:1.3cqw; color:var(--muted); }
+.jm-cert-course { font-family:"Cormorant Garamond",Georgia,serif; font-size:3.2cqw; font-weight:600; color:var(--navy); margin-top:.6cqw; max-width:78%; line-height:1.16; }
+.jm-cert-when { margin-top:1cqw; font-size:1.16cqw; color:var(--muted); }
 
+/* signatures flanking the seal */
 .jm-cert-foot { margin-top:auto; width:100%; display:flex; align-items:flex-end; justify-content:space-between; gap:3cqw; }
-/* left: signature */
 .jm-cert-sigcol { flex:1 1 0; min-width:0; text-align:center; }
-.jm-cert-sigcol .sig { font-family:"Futura Cyrillic Book",Arial,sans-serif; font-weight:400; font-style:italic; font-size:2.2cqw; letter-spacing:.04em; color:var(--navy); line-height:1; }
-.jm-cert-sigcol .ln { height:.08cqw; background:#b9c7dd; margin:.7cqw 12% .85cqw; }
-.jm-cert-sigcol .lbl { font-size:.92cqw; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
-/* center: vector seal */
+.jm-cert-sigcol .sig { font-family:"Sacramento",cursive; font-weight:400; font-size:3.2cqw; letter-spacing:.01em; color:#1c3a63; line-height:.9; }
+.jm-cert-sigcol .ln { height:.08cqw; background:#b9c7dd; margin:.4cqw 10% .8cqw; }
+.jm-cert-sigcol .lbl { font-size:.9cqw; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
 .jm-cert-seal { flex:0 0 auto; }
 .jm-cert-seal svg { width:12.5cqw; height:12.5cqw; display:block; }
-/* right: verify */
-.jm-cert-vcol { flex:1 1 0; min-width:0; display:flex; align-items:flex-end; justify-content:flex-end; gap:1.2cqw; text-align:left; }
-.jm-cert-vcol img { width:7.6cqw; height:7.6cqw; background:#fff; display:block; flex:0 0 auto; }
-.jm-cert-vcol .vid { font-size:.98cqw; font-weight:800; letter-spacing:.03em; color:var(--navy); font-family:"Courier New",monospace; }
-.jm-cert-vcol .vsub { font-size:.82cqw; color:var(--muted); margin-top:.45cqw; max-width:15cqw; line-height:1.4; }
+/* centered verification footer */
+.jm-cert-footline { display:flex; align-items:center; justify-content:center; gap:1.1cqw; margin-top:2.2cqw; }
+.jm-cert-footline img { width:5.4cqw; height:5.4cqw; background:#fff; display:block; }
+.jm-cert-footline span { font-size:1cqw; color:var(--muted); letter-spacing:.02em; }
+.jm-cert-footline b { color:var(--navy); font-family:"Courier New",monospace; font-weight:800; letter-spacing:.03em; }
 </style>
 
 <div class="jm-cert-stage">
@@ -164,11 +163,15 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
             <div class="jm-cert-sigcol">
                 <div class="sig">Jobmington</div>
                 <div class="ln"></div>
-                <div class="lbl">Authorised Signature</div>
+                <div class="lbl">Director, Jobmington</div>
             </div>
 
-            <div class="jm-cert-seal" aria-label="Verified seal">
+            <div class="jm-cert-seal" aria-label="Jobmington official seal">
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="jmSealTop" d="M17,50 A33,33 0 0 1 83,50"/>
+                        <path id="jmSealBot" d="M21,53 A29,29 0 0 0 79,53"/>
+                    </defs>
                     <?php
                     $pts = []; $n = 28;
                     for ($i = 0; $i < $n * 2; $i++) {
@@ -179,21 +182,26 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
                     ?>
                     <polygon points="<?= implode(' ', $pts) ?>" fill="#0640a3"/>
                     <circle cx="50" cy="50" r="40.5" fill="#0640a3"/>
-                    <circle cx="50" cy="50" r="36.5" fill="none" stroke="#fff" stroke-width="1" opacity="0.65"/>
-                    <circle cx="50" cy="50" r="31.5" fill="none" stroke="#cfe0ff" stroke-width="0.7" stroke-dasharray="0.4 3"/>
-                    <circle cx="50" cy="44" r="15.5" fill="#fff"/>
-                    <path d="M43 44.4l4.6 4.6 9.6-10" stroke="#0640a3" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    <text x="50" y="71.5" text-anchor="middle" fill="#fff" font-size="5.4" font-family="Arial" font-weight="bold" letter-spacing="2.4">VERIFIED</text>
+                    <circle cx="50" cy="50" r="37" fill="none" stroke="#fff" stroke-width="1" opacity="0.6"/>
+                    <text fill="#dce8ff" font-size="5.4" font-family="Arial" font-weight="bold" letter-spacing="1.8"><textPath href="#jmSealTop" startOffset="50%" text-anchor="middle">JOBMINGTON</textPath></text>
+                    <text fill="#dce8ff" font-size="4.4" font-family="Arial" font-weight="bold" letter-spacing="2.2"><textPath href="#jmSealBot" startOffset="50%" text-anchor="middle">OFFICIAL SEAL</textPath></text>
+                    <circle cx="36" cy="50" r="1.1" fill="#dce8ff"/>
+                    <circle cx="64" cy="50" r="1.1" fill="#dce8ff"/>
+                    <circle cx="50" cy="48" r="14.5" fill="#fff"/>
+                    <path d="M43.4 48.4l4.4 4.4 9.2-9.6" stroke="#0640a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
             </div>
 
-            <div class="jm-cert-vcol">
-                <div>
-                    <div class="vid"><?= e($certCode) ?></div>
-                    <div class="vsub">Scan to verify &middot; jobmington.com/verify</div>
-                </div>
-                <img src="<?= e($qrUrl) ?>" alt="Scan to verify" loading="lazy">
+            <div class="jm-cert-sigcol">
+                <div class="sig">Career Learning</div>
+                <div class="ln"></div>
+                <div class="lbl">Head, Career Learning</div>
             </div>
+        </div>
+
+        <div class="jm-cert-footline">
+            <img src="<?= e($qrUrl) ?>" alt="Scan to verify" loading="lazy">
+            <span>Certificate ID <b><?= e($certCode) ?></b> &middot; Verify at jobmington.com/verify</span>
         </div>
     </div>
 </div>
