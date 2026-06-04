@@ -43,6 +43,16 @@ $strip = function ($a0, $a1, $c, $amp, $lambda, $phases, $horizontal) {
     }
     return $out;
 };
+// rose curve r = a*cos(k t) — delicate petal medallion
+$rose = function ($cx, $cy, $a, $k, $petalsClosed = false) {
+    $steps = 360; $p = [];
+    for ($i = 0; $i <= $steps; $i++) {
+        $t = 2 * M_PI * $i / $steps;
+        $r = $a * cos($k * $t);
+        $p[] = round($cx + $r * cos($t), 2) . ',' . round($cy + $r * sin($t), 2);
+    }
+    return 'M' . implode(' L', $p);
+};
 $cTop = $inset + $band / 2; $cBot = $GH - $inset - $band / 2;
 $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 ?>
@@ -115,31 +125,32 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
         <rect x="<?= $inset + $band ?>" y="<?= $inset + $band ?>" width="<?= $GW - 2*($inset+$band) ?>" height="<?= $GH - 2*($inset+$band) ?>" fill="none" stroke="#0640a3" stroke-width="1"/>
         <rect x="<?= $inset + $band + 5 ?>" y="<?= $inset + $band + 5 ?>" width="<?= $GW - 2*($inset+$band+5) ?>" height="<?= $GH - 2*($inset+$band+5) ?>" fill="none" stroke="#9db4d8" stroke-width="0.5"/>
 
-        <!-- guilloché lace bands (light, interwoven) -->
-        <g stroke="#0640a3" stroke-width="0.5" fill="none" opacity="0.22">
-            <?= $strip($inset + $band, $GW - $inset - $band, $cTop, 13, 27, 16, true) ?>
-            <?= $strip($inset + $band, $GW - $inset - $band, $cBot, 13, 27, 16, true) ?>
-            <?= $strip($inset + $band, $GH - $inset - $band, $cLft, 13, 27, 16, false) ?>
-            <?= $strip($inset + $band, $GH - $inset - $band, $cRgt, 13, 27, 16, false) ?>
+        <!-- sleek guilloché rope braid (3 interwoven strands) -->
+        <g stroke="#0640a3" stroke-width="0.7" fill="none" opacity="0.5">
+            <?= $strip($inset + $band, $GW - $inset - $band, $cTop, 10, 46, 3, true) ?>
+            <?= $strip($inset + $band, $GW - $inset - $band, $cBot, 10, 46, 3, true) ?>
+            <?= $strip($inset + $band, $GH - $inset - $band, $cLft, 10, 46, 3, false) ?>
+            <?= $strip($inset + $band, $GH - $inset - $band, $cRgt, 10, 46, 3, false) ?>
         </g>
-        <!-- guilloché chain (antiphase eyes) -->
-        <g stroke="#0640a3" stroke-width="0.8" fill="none" opacity="0.5">
-            <?= $strip($inset + $band, $GW - $inset - $band, $cTop, 17, 54, 2, true) ?>
-            <?= $strip($inset + $band, $GW - $inset - $band, $cBot, 17, 54, 2, true) ?>
-            <?= $strip($inset + $band, $GH - $inset - $band, $cLft, 17, 54, 2, false) ?>
-            <?= $strip($inset + $band, $GH - $inset - $band, $cRgt, 17, 54, 2, false) ?>
+        <!-- thin guide line through the band centre -->
+        <g stroke="#9db4d8" stroke-width="0.4" fill="none" opacity="0.7">
+            <?= $strip($inset + $band, $GW - $inset - $band, $cTop, 0, 1, 1, true) ?>
+            <?= $strip($inset + $band, $GW - $inset - $band, $cBot, 0, 1, 1, true) ?>
+            <?= $strip($inset + $band, $GH - $inset - $band, $cLft, 0, 1, 1, false) ?>
+            <?= $strip($inset + $band, $GH - $inset - $band, $cRgt, 0, 1, 1, false) ?>
         </g>
 
-        <!-- corner rosettes (spirograph) -->
+        <!-- delicate rose-curve corner medallions -->
         <?php
         $corners = [[$cLft, $cTop], [$cRgt, $cTop], [$cLft, $cBot], [$cRgt, $cBot]];
         foreach ($corners as $c):
             [$cx, $cy] = $c; ?>
-            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="30" fill="#ffffff"/>
-            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="30" fill="none" stroke="#0640a3" stroke-width="0.8" opacity="0.55"/>
-            <path d="<?= $spiro($cx, $cy, 34, 9, 20, 9) ?>" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.55"/>
-            <path d="<?= $spiro($cx, $cy, 24, 7, 13, 7) ?>" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.7"/>
-            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="4.4" fill="#0640a3"/>
+            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="24" fill="#ffffff"/>
+            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="23.5" fill="none" stroke="#0640a3" stroke-width="0.6" opacity="0.4"/>
+            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="19" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.55"/>
+            <path d="<?= $rose($cx, $cy, 18.5, 6) ?>" fill="none" stroke="#0640a3" stroke-width="0.55" opacity="0.6"/>
+            <path d="<?= $rose($cx, $cy, 11, 6) ?>" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.75"/>
+            <circle cx="<?= $cx ?>" cy="<?= $cy ?>" r="3" fill="#0640a3"/>
         <?php endforeach; ?>
     </svg>
 
@@ -169,26 +180,23 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
             <div class="jm-cert-seal" aria-label="Jobmington official seal">
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <path id="jmSealTop" d="M17,50 A33,33 0 0 1 83,50"/>
-                        <path id="jmSealBot" d="M21,53 A29,29 0 0 0 79,53"/>
+                        <path id="jmSealTop" d="M14,50 A36,36 0 0 1 86,50"/>
+                        <path id="jmSealBot" d="M18,52 A32,32 0 0 0 82,52"/>
                     </defs>
-                    <?php
-                    $pts = []; $n = 28;
-                    for ($i = 0; $i < $n * 2; $i++) {
-                        $a = M_PI * $i / $n - M_PI / 2;
-                        $r = ($i % 2 === 0) ? 49 : 44.5;
-                        $pts[] = round(50 + cos($a) * $r, 2) . ',' . round(50 + sin($a) * $r, 2);
-                    }
-                    ?>
-                    <polygon points="<?= implode(' ', $pts) ?>" fill="#0640a3"/>
-                    <circle cx="50" cy="50" r="40.5" fill="#0640a3"/>
-                    <circle cx="50" cy="50" r="37" fill="none" stroke="#fff" stroke-width="1" opacity="0.6"/>
-                    <text fill="#dce8ff" font-size="5.4" font-family="Arial" font-weight="bold" letter-spacing="1.8"><textPath href="#jmSealTop" startOffset="50%" text-anchor="middle">JOBMINGTON</textPath></text>
-                    <text fill="#dce8ff" font-size="4.4" font-family="Arial" font-weight="bold" letter-spacing="2.2"><textPath href="#jmSealBot" startOffset="50%" text-anchor="middle">OFFICIAL SEAL</textPath></text>
-                    <circle cx="36" cy="50" r="1.1" fill="#dce8ff"/>
-                    <circle cx="64" cy="50" r="1.1" fill="#dce8ff"/>
-                    <circle cx="50" cy="48" r="14.5" fill="#fff"/>
-                    <path d="M43.4 48.4l4.4 4.4 9.2-9.6" stroke="#0640a3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <!-- line-art medallion: concentric rings + guilloché rosette -->
+                    <circle cx="50" cy="50" r="48" fill="#fff"/>
+                    <circle cx="50" cy="50" r="47" fill="none" stroke="#0640a3" stroke-width="1.4"/>
+                    <circle cx="50" cy="50" r="38.5" fill="none" stroke="#0640a3" stroke-width="0.9"/>
+                    <circle cx="50" cy="50" r="36.5" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.55"/>
+                    <text fill="#0640a3" font-size="6" font-family="Arial" font-weight="bold" letter-spacing="2.6"><textPath href="#jmSealTop" startOffset="50%" text-anchor="middle">JOBMINGTON</textPath></text>
+                    <text fill="#0640a3" font-size="4.6" font-family="Arial" font-weight="bold" letter-spacing="2.8"><textPath href="#jmSealBot" startOffset="50%" text-anchor="middle">OFFICIAL SEAL</textPath></text>
+                    <path d="M30 50l3 2.4-3 2.4M70 50l-3 2.4 3 2.4" stroke="#0640a3" stroke-width="0.9" opacity="0.7"/>
+                    <!-- guilloché rosette ring -->
+                    <path d="<?= $rose(50, 50, 29, 9) ?>" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.5"/>
+                    <path d="<?= $spiro(50, 50, 24, 6, 14, 6) ?>" fill="none" stroke="#0640a3" stroke-width="0.5" opacity="0.6"/>
+                    <!-- centre badge -->
+                    <circle cx="50" cy="50" r="13" fill="#0640a3"/>
+                    <path d="M43.6 50l4.2 4.2 8.8-9.2" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
             </div>
 
