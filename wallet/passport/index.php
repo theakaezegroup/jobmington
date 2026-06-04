@@ -17,8 +17,14 @@ $passportNumber = $_GET['id'] ?? null;
 $isOwner = false;
 $passport = null;
 
+// cv_profiles uses 'city' on some installs, 'location' on others — pick what exists.
+$cityCol = 'NULL';
+try {
+    if ($pdo->query("SHOW COLUMNS FROM cv_profiles LIKE 'city'")->fetch())          $cityCol = 'cv.city';
+    elseif ($pdo->query("SHOW COLUMNS FROM cv_profiles LIKE 'location'")->fetch())   $cityCol = 'cv.location';
+} catch (Throwable $e) {}
 $selectCols = "tp.*, u.user_id, u.full_name, u.profile_image, u.email, u.created_at as member_since,
-               cv.headline, cv.summary, cv.city";
+               cv.headline, cv.summary, $cityCol AS city";
 
 if ($passportNumber) {
     $stmt = $pdo->prepare("SELECT $selectCols FROM talent_passports tp
@@ -95,7 +101,8 @@ $lvl = $passport['level'] ?? 'rising';
 if (!isset($levels[$lvl])) $lvl = 'rising';
 
 $pageTitle = $passport ? e($passport['full_name']) . "'s Talent Passport" : 'Talent Passport';
-require_once __DIR__ . '/../../includes/header.php';
+$activeAIPage = '';
+require_once __DIR__ . '/../../includes/ai-header.php';
 
 $shieldSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
 ?>
@@ -264,4 +271,4 @@ function jmSharePassport(){
 </script>
 <?php endif; ?>
 
-<?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../../includes/ai-footer.php'; ?>

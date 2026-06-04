@@ -37,62 +37,64 @@ $fwd  = defined('SEEDS_PER_CREDIT') ? (int) SEEDS_PER_CREDIT : 100;
 $rev  = defined('SEEDS_PER_CREDIT_REVERSE') ? (int) SEEDS_PER_CREDIT_REVERSE : 80;
 
 $pageTitle = 'Wallet — ' . SITE_NAME;
-require_once __DIR__ . '/../includes/header.php';
+$activeAIPage = '';
+require_once __DIR__ . '/../includes/ai-header.php';
 
 $svgSeed = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C8 2 4 6 4 12c0 4 2 8 8 10 6-2 8-6 8-10 0-6-4-10-8-10zm0 4c1.2 0 2.4.8 3.2 2.4-.8-.4-2-.4-3.2.4-1.2-.8-2.4-.8-3.2-.4C9.6 6.8 10.8 6 12 6z"/></svg>';
 ?>
 <style>
-.jm-wal { max-width:1040px; margin:0 auto; padding:26px 20px 72px; }
-.jm-wal-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
-.jm-wal-head h1 { font-size:clamp(22px,3.5vw,30px); font-weight:800; color:#061426; margin:0; }
-.jm-wal-head p { font-size:13.5px; color:#53667f; margin:3px 0 0; }
-.jm-wal-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:16px; align-items:start; }
+.jm-ai-main { background:#ffffff; }
+.jm-wal { max-width:1040px; margin:0 auto; padding:28px 20px 80px; }
+.jm-wal-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:22px; }
+.jm-wal-head h1 { font-size:clamp(22px,3.5vw,30px); font-weight:800; color:#061426; margin:0; letter-spacing:-.01em; }
+.jm-wal-head p { font-size:13.5px; color:#53667f; margin:4px 0 0; }
+.jm-wal-grid { display:grid; grid-template-columns:1.5fr 1fr; gap:14px; align-items:start; }
 @media (max-width:820px){ .jm-wal-grid { grid-template-columns:1fr; } }
 
+/* white, flat, sharp */
 .jm-wal-bal { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.jm-bal { border-radius:16px; padding:20px; color:#fff; position:relative; overflow:hidden; }
-.jm-bal.seeds { background:linear-gradient(135deg,#0640a3,#052f78); }
-.jm-bal.credits { background:linear-gradient(135deg,#0a1b3a,#13294f); }
-.jm-bal .lab { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; opacity:.7; display:flex; align-items:center; gap:7px; }
-.jm-bal .num { font-size:34px; font-weight:800; letter-spacing:-.02em; margin-top:8px; line-height:1; }
-.jm-bal .sub { font-size:12px; opacity:.7; margin-top:6px; }
-.jm-bal .deco { position:absolute; right:-20px; bottom:-22px; opacity:.12; }
-.jm-bal .deco svg { width:110px; height:110px; }
+.jm-bal { background:#fff; border:1px solid #e3e9f2; border-top-width:3px; border-radius:6px; padding:20px; }
+.jm-bal.seeds { border-top-color:#0640a3; }
+.jm-bal.credits { border-top-color:#0a1b3a; }
+.jm-bal .lab { font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; display:flex; align-items:center; gap:7px; color:#7c8aa0; }
+.jm-bal.seeds .lab { color:#0640a3; } .jm-bal.credits .lab { color:#0a1b3a; }
+.jm-bal .num { font-size:36px; font-weight:800; letter-spacing:-.03em; margin-top:10px; line-height:1; color:#061426; }
+.jm-bal .sub { font-size:12px; color:#94a3b8; margin-top:7px; }
 
-.jm-card { background:#fff; border:1px solid #e8edf5; border-radius:16px; padding:18px 20px; }
+.jm-card { background:#fff; border:1px solid #e3e9f2; border-radius:6px; padding:18px 20px; }
 .jm-card h3 { font-size:13px; font-weight:800; color:#061426; text-transform:uppercase; letter-spacing:.05em; margin:0 0 4px; }
 .jm-card .hint { font-size:12px; color:#7c8aa0; margin:0 0 14px; }
 
-.jm-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
-.jm-stat { background:#f7faff; border:1px solid #eef3fb; border-radius:12px; padding:12px 14px; text-align:center; }
+.jm-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.jm-stat { background:#fff; border:1px solid #eef3fb; border-radius:6px; padding:12px 14px; text-align:center; }
 .jm-stat b { display:block; font-size:18px; font-weight:800; color:#061426; }
 .jm-stat span { font-size:11px; color:#7c8aa0; text-transform:uppercase; letter-spacing:.06em; }
 
 /* converter */
 .jm-conv-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.jm-conv-row input { width:70px; border:1px solid #d8e4f4; border-radius:9px; padding:9px; text-align:center; font-weight:800; color:#061426; font-size:15px; }
+.jm-conv-row input { width:70px; border:1px solid #d8e4f4; border-radius:6px; padding:9px; text-align:center; font-weight:800; color:#061426; font-size:15px; }
 .jm-conv-row input:focus { outline:2px solid #0640a3; border-color:#0640a3; }
-.jm-conv-btn { flex:1; min-width:130px; border:1px solid #d8e4f4; border-radius:9px; padding:10px; font-size:12.5px; font-weight:800; cursor:pointer; background:#fff; color:#0640a3; }
-.jm-conv-btn:hover { background:#eef5ff; }
-.jm-conv-btn.alt { color:#0a6454; border-color:#cdeee5; } .jm-conv-btn.alt:hover { background:#e9f7f2; }
+.jm-conv-btn { flex:1; min-width:130px; border:1px solid #d8e4f4; border-radius:6px; padding:10px; font-size:12.5px; font-weight:800; cursor:pointer; background:#fff; color:#0640a3; }
+.jm-conv-btn:hover { background:#f4f8ff; }
+.jm-conv-btn.alt { color:#0a6454; border-color:#cdeee5; } .jm-conv-btn.alt:hover { background:#f1faf7; }
 .jm-conv-msg { font-size:12px; margin-top:9px; min-height:16px; }
 
 .jm-actions { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-.jm-act { display:flex; flex-direction:column; align-items:center; gap:6px; background:#fff; border:1px solid #e8edf5; border-radius:12px; padding:14px 8px; font-size:12px; font-weight:700; color:#061426; text-decoration:none; cursor:pointer; }
-.jm-act:hover { background:#f6f8fb; }
-.jm-act .ic { width:34px; height:34px; border-radius:9px; background:#eef3ff; color:#0640a3; display:flex; align-items:center; justify-content:center; }
+.jm-act { display:flex; flex-direction:column; align-items:center; gap:6px; background:#fff; border:1px solid #e3e9f2; border-radius:6px; padding:14px 8px; font-size:12px; font-weight:700; color:#061426; text-decoration:none; cursor:pointer; }
+.jm-act:hover { border-color:#0640a3; }
+.jm-act .ic { width:34px; height:34px; border-radius:6px; background:#f4f7fc; color:#0640a3; display:flex; align-items:center; justify-content:center; }
 
-.jm-pass { background:linear-gradient(135deg,#f7faff,#eef4ff); border:1px solid #e1ebfa; border-radius:16px; padding:18px 20px; }
+.jm-pass { background:#fff; border:1px solid #e3e9f2; border-left:3px solid #0640a3; border-radius:6px; padding:18px 20px; }
 .jm-pass-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .jm-pass-top b { font-size:14px; font-weight:800; color:#061426; }
 .jm-pass-num { font-family:"Courier New",monospace; font-weight:800; color:#0640a3; font-size:14px; margin-top:6px; }
-.jm-pass-cta { display:inline-flex; align-items:center; gap:6px; background:#0640a3; color:#fff; border-radius:9px; padding:9px 16px; font-size:13px; font-weight:800; text-decoration:none; margin-top:12px; }
+.jm-pass-cta { display:inline-flex; align-items:center; gap:6px; background:#0640a3; color:#fff; border-radius:6px; padding:9px 16px; font-size:13px; font-weight:800; text-decoration:none; margin-top:12px; }
 .jm-pass-cta:hover { background:#052f78; }
 
 .jm-tx { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid #f1f5fb; }
 .jm-tx:last-child { border-bottom:0; }
-.jm-tx .ic { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.jm-tx.in .ic { background:#e6f5f1; color:#0a6454; } .jm-tx.out .ic { background:#fef2f2; color:#b42318; }
+.jm-tx .ic { width:34px; height:34px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.jm-tx.in .ic { background:#eef7f3; color:#0a6454; } .jm-tx.out .ic { background:#fdf0f0; color:#b42318; }
 .jm-tx .desc { flex:1; min-width:0; } .jm-tx .desc b { display:block; font-size:13px; color:#061426; font-weight:700; }
 .jm-tx .desc span { font-size:11.5px; color:#94a3b8; }
 .jm-tx .amt { font-weight:800; font-size:13.5px; } .jm-tx.in .amt { color:#0a6454; } .jm-tx.out .amt { color:#b42318; }
@@ -116,13 +118,11 @@ $svgSeed = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <div class="lab"><?= $svgSeed ?> Seeds</div>
             <div class="num"><?= number_format($seeds, 0) ?></div>
             <div class="sub">Earned currency</div>
-            <div class="deco"><?= $svgSeed ?></div>
         </div>
         <div class="jm-bal credits">
             <div class="lab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 0 5"/></svg> Credits</div>
             <div class="num"><?= number_format($credits) ?></div>
             <div class="sub">Paid currency</div>
-            <div class="deco"><svg width="110" height="110" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.4"><circle cx="12" cy="12" r="9"/></svg></div>
         </div>
     </div>
 
@@ -249,4 +249,4 @@ function jmSelectPackage(plan, amount, credits){
 })();
 </script>
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/ai-footer.php'; ?>
