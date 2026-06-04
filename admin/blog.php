@@ -151,6 +151,18 @@ require_once __DIR__ . '/../includes/header.php';
 .jm-ad-catrow { display:flex; gap:8px; margin-top:8px; }
 .jm-ad-catrow input { flex:1; }
 .jm-ad-catrow button { background:#eef5ff; color:#0640a3; border:1px solid #d8e4f4; border-radius:8px; padding:0 14px; font-weight:700; cursor:pointer; }
+.jm-rte-toolbar { display:flex; flex-wrap:wrap; gap:4px; padding:7px; border:1px solid #d8e4f4; border-bottom:0; border-radius:8px 8px 0 0; background:#f7faff; }
+.jm-rte-toolbar button { border:1px solid transparent; background:transparent; border-radius:6px; padding:5px 9px; font-size:12.5px; font-weight:700; color:#0b1b33; cursor:pointer; min-width:30px; }
+.jm-rte-toolbar button:hover { background:#fff; border-color:#d8e4f4; }
+.jm-rte { min-height:240px; border:1px solid #d8e4f4; border-radius:0 0 8px 8px; padding:14px 16px; background:#fff; font-size:14px; line-height:1.7; color:#1f2d3d; outline:none; overflow-y:auto; max-height:480px; }
+.jm-rte:focus { border-color:#0640a3; box-shadow:0 0 0 3px rgba(6,64,163,.08); }
+.jm-rte h2 { font-size:20px; font-weight:800; margin:.6em 0 .3em; }
+.jm-rte h3 { font-size:17px; font-weight:800; margin:.6em 0 .3em; }
+.jm-rte p { margin:0 0 .8em; }
+.jm-rte ul, .jm-rte ol { margin:0 0 .8em; padding-left:1.4em; }
+.jm-rte blockquote { border-left:3px solid #c8d8ef; margin:0 0 .8em; padding:2px 0 2px 14px; color:#53667f; }
+.jm-rte img { max-width:100%; border-radius:8px; }
+.jm-rte a { color:#0640a3; }
 </style>
 
 <div class="ja-pagehead"><div><h1>Blog</h1><p>Write and manage blog posts.</p></div>
@@ -177,7 +189,22 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
         </div>
         <div class="jm-ad-field"><label>Excerpt</label><textarea name="excerpt"><?= e($editing['excerpt'] ?? '') ?></textarea></div>
-        <div class="jm-ad-field"><label>Content * <span style="font-weight:400;color:#94a3b8;">(HTML allowed)</span></label><textarea name="content" class="body"><?= e($editing['content'] ?? '') ?></textarea></div>
+        <div class="jm-ad-field"><label>Content *</label>
+            <div class="jm-rte-toolbar" aria-label="Formatting">
+                <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+                <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+                <button type="button" data-cmd="formatBlock" data-val="h2" title="Heading">H2</button>
+                <button type="button" data-cmd="formatBlock" data-val="h3" title="Subheading">H3</button>
+                <button type="button" data-cmd="formatBlock" data-val="p" title="Paragraph">P</button>
+                <button type="button" data-cmd="insertUnorderedList" title="Bulleted list">&bull; List</button>
+                <button type="button" data-cmd="insertOrderedList" title="Numbered list">1. List</button>
+                <button type="button" data-cmd="formatBlock" data-val="blockquote" title="Quote">&ldquo; Quote</button>
+                <button type="button" data-act="link" title="Insert link">&#128279; Link</button>
+                <button type="button" data-act="image" title="Insert image by URL">&#128247; Image</button>
+            </div>
+            <div id="jm-rte" class="jm-rte" contenteditable="true"><?= $editing['content'] ?? '' ?></div>
+            <textarea name="content" id="jm-rte-input" style="display:none;"><?= e($editing['content'] ?? '') ?></textarea>
+        </div>
         <div class="jm-ad-field"><label>Cover image (jpg/png, 16:9)</label><input type="file" name="featured_image" accept="image/*">
             <?php if (!empty($editing['featured_image'])): ?><div style="margin-top:6px;"><img src="<?= e($editing['featured_image']) ?>" class="jm-ad-thumb"></div><?php endif; ?>
         </div>
@@ -217,4 +244,32 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
+<script>
+(function () {
+    var rte = document.getElementById('jm-rte');
+    var input = document.getElementById('jm-rte-input');
+    if (!rte || !input) return;
+    function sync() { input.value = rte.innerHTML; }
+    document.querySelectorAll('.jm-rte-toolbar button').forEach(function (b) {
+        b.addEventListener('click', function () {
+            rte.focus();
+            if (b.dataset.cmd) {
+                document.execCommand(b.dataset.cmd, false, b.dataset.val || null);
+            } else if (b.dataset.act === 'link') {
+                var u = prompt('Link URL:', 'https://');
+                if (u) document.execCommand('createLink', false, u);
+            } else if (b.dataset.act === 'image') {
+                var img = prompt('Image URL:', 'https://');
+                if (img) document.execCommand('insertImage', false, img);
+            }
+            sync();
+        });
+    });
+    rte.addEventListener('input', sync);
+    rte.addEventListener('blur', sync);
+    var form = rte.closest('form');
+    if (form) form.addEventListener('submit', sync);
+    sync();
+})();
+</script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
