@@ -80,6 +80,58 @@ function sc_make_ebook_cover(string $path, string $title, string $author, string
 }
 
 /**
+ * Generate a 16:9 branded banner PNG (course/event/blog cover). Returns true on success.
+ */
+function sc_make_banner(string $path, string $title, string $kicker, ?string $fontPath): bool {
+    if (!extension_loaded('gd') || !function_exists('imagecreatetruecolor')) {
+        return false;
+    }
+    if (!$fontPath || !is_file($fontPath)) {
+        foreach (['C:/Windows/Fonts/arialbd.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'] as $f) {
+            if (is_file($f)) { $fontPath = $f; break; }
+        }
+    }
+
+    $W = 1200; $H = 675;
+    $im = imagecreatetruecolor($W, $H);
+    // Diagonal-ish gradient via vertical blend.
+    [$r1,$g1,$b1] = [6,64,163];
+    [$r2,$g2,$b2] = [4,18,48];
+    for ($y = 0; $y < $H; $y++) {
+        $t = $y / $H;
+        $col = imagecolorallocate($im,
+            (int) round($r1 + ($r2 - $r1) * $t),
+            (int) round($g1 + ($g2 - $g1) * $t),
+            (int) round($b1 + ($b2 - $b1) * $t));
+        imageline($im, 0, $y, $W, $y, $col);
+    }
+    // Soft accent circle (top-right).
+    $accent = imagecolorallocatealpha($im, 245, 159, 34, 110);
+    imagefilledellipse($im, $W - 120, 110, 360, 360, $accent);
+    imagefilledrectangle($im, 80, 250, 180, 258, imagecolorallocate($im, 245, 159, 34));
+
+    $white = imagecolorallocate($im, 255, 255, 255);
+    $soft  = imagecolorallocate($im, 198, 214, 238);
+
+    if ($fontPath && is_file($fontPath)) {
+        if ($kicker !== '') {
+            imagettftext($im, 18, 0, 80, 130, $soft, $fontPath, strtoupper($kicker));
+        }
+        $y = 340;
+        foreach (sc_wrap_ttf($title, 48, $fontPath, $W - 320) as $i => $ln) {
+            if ($i > 2) break;
+            imagettftext($im, 48, 0, 80, $y, $white, $fontPath, $ln);
+            $y += 74;
+        }
+        imagettftext($im, 17, 0, 80, $H - 60, $white, $fontPath, 'JOBMINGTON');
+    }
+
+    imagepng($im, $path, 9);
+    imagedestroy($im);
+    return is_file($path);
+}
+
+/**
  * Minimal, dependency-free PDF writer (base-14 Helvetica fonts, A4).
  * Enough for a clean text ebook with a colour cover page.
  */
