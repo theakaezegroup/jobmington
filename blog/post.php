@@ -87,7 +87,18 @@ require_once __DIR__ . '/../includes/ai-header.php';
 
     <div class="jm-post-body"><?php
         $content = preg_replace('#<(script|style|iframe)\b[^>]*>.*?</\1>#is', '', (string) $post['content']);
-        echo (strip_tags($content) === $content) ? nl2br(e($content)) : $content;
+        $isPlain = strip_tags($content) === $content;
+        if (Session::isLoggedIn()) {
+            echo $isPlain ? nl2br(e($content)) : $content;
+        } else {
+            // Public, crawlable teaser + members-only wall for the rest.
+            echo $isPlain ? nl2br(e(strip_tags(jm_content_teaser($content, 2)))) : jm_content_teaser($content, 2);
+            echo jm_signin_wall(
+                'Keep reading this article',
+                'It is free — create an account or sign in to read the full post and unlock courses, ebooks, and events.',
+                '/jobmington/blog/post.php?slug=' . $post['slug']
+            );
+        }
     ?></div>
 
     <?php if (!empty($more)): ?>

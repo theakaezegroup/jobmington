@@ -178,6 +178,59 @@ function jm_breadcrumbs(array $crumbs, bool $withHome = true): string {
         . '</nav>';
 }
 
+/**
+ * Return the first N block-level chunks of HTML content as a teaser. Falls back
+ * to a word-bounded character cut for plain-text content. Used for the public,
+ * crawlable preview of gated content (e.g. blog posts).
+ */
+function jm_content_teaser(string $html, int $paragraphs = 2, int $charFallback = 360): string {
+    if (preg_match_all('#<(p|h2|h3|ul|ol|blockquote)\b[^>]*>.*?</\1>#is', $html, $m) && !empty($m[0])) {
+        return implode('', array_slice($m[0], 0, $paragraphs));
+    }
+    $text = trim(preg_replace('/\s+/', ' ', strip_tags($html)));
+    if (function_exists('mb_strlen') ? mb_strlen($text) <= $charFallback : strlen($text) <= $charFallback) {
+        return '<p>' . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . '</p>';
+    }
+    $cut  = mb_substr($text, 0, $charFallback);
+    $sp   = mb_strrpos($cut, ' ');
+    if ($sp) $cut = mb_substr($cut, 0, $sp);
+    return '<p>' . htmlspecialchars($cut, ENT_QUOTES, 'UTF-8') . '&hellip;</p>';
+}
+
+/**
+ * A members-only sign-in wall. Self-contained (prints CSS once). Use after a
+ * teaser to gate the rest of the content while keeping the page crawlable.
+ */
+function jm_signin_wall(string $heading = 'This is for members', string $sub = 'Create a free account or sign in to keep reading.', string $redirect = ''): string {
+    static $stylePrinted = false;
+    $style = '';
+    if (!$stylePrinted) {
+        $stylePrinted = true;
+        $style = '<style>'
+            . '.jm-wall{position:relative;margin-top:-90px;padding-top:90px;}'
+            . '.jm-wall-fade{position:absolute;top:0;left:0;right:0;height:90px;background:linear-gradient(to bottom,rgba(255,255,255,0),#ffffff);pointer-events:none;}'
+            . '.jm-wall-card{border:1px solid #e4eaf3;border-radius:16px;background:#fff;box-shadow:0 12px 30px rgba(6,20,38,.08);padding:30px 26px;text-align:center;max-width:520px;margin:0 auto;}'
+            . '.jm-wall-ico{width:46px;height:46px;border-radius:12px;background:#eef5ff;color:#0640a3;display:grid;place-items:center;margin:0 auto 14px;}'
+            . '.jm-wall-card h3{font-size:20px;font-weight:800;color:#061426;margin:0 0 8px;}'
+            . '.jm-wall-card p{font-size:14.5px;color:#53667f;margin:0 0 20px;line-height:1.6;}'
+            . '.jm-wall-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}'
+            . '.jm-wall-btn{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:12px 22px;font-weight:800;font-size:14px;text-decoration:none;}'
+            . '.jm-wall-btn.primary{background:#0640a3;color:#fff;}.jm-wall-btn.primary:hover{background:#052f78;}'
+            . '.jm-wall-btn.ghost{background:#fff;color:#0640a3;border:1px solid #d8e4f4;}'
+            . '</style>';
+    }
+    $r = $redirect !== '' ? '?redirect=' . urlencode($redirect) : '';
+    return $style
+        . '<div class="jm-wall"><div class="jm-wall-fade"></div><div class="jm-wall-card">'
+        . '<div class="jm-wall-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>'
+        . '<h3>' . htmlspecialchars($heading, ENT_QUOTES, 'UTF-8') . '</h3>'
+        . '<p>' . htmlspecialchars($sub, ENT_QUOTES, 'UTF-8') . '</p>'
+        . '<div class="jm-wall-actions">'
+        . '<a class="jm-wall-btn primary" href="/jobmington/auth/register.php' . $r . '">Create free account</a>'
+        . '<a class="jm-wall-btn ghost" href="/jobmington/auth/login.php' . $r . '">Sign in</a>'
+        . '</div></div></div>';
+}
+
 /* ==========================================================================
    3. FORMATTING & DISPLAY
    ========================================================================== */

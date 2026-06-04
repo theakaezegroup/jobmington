@@ -70,13 +70,18 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
             </div>
             <div class="jm-ebv-desc"><?= e($ebook['description'] ?: 'No description provided.') ?></div>
             <div class="jm-ebv-cta">
-                <?php if (!empty($ebook['file_path'])): ?>
+                <?php if (empty($ebook['file_path'])): ?>
+                    <span style="color:#94a3b8;font-size:14px;">Download coming soon.</span>
+                <?php elseif (Session::isLoggedIn()): ?>
                     <a class="jm-ebv-btn" href="/jobmington/ebooks/download.php?slug=<?= e($ebook['slug']) ?>">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <?= $ebook['is_free'] ? 'Download free' : 'Download' ?>
                     </a>
                 <?php else: ?>
-                    <span style="color:#94a3b8;font-size:14px;">Download coming soon.</span>
+                    <a class="jm-ebv-btn" href="/jobmington/auth/login.php?redirect=<?= urlencode('/jobmington/ebooks/view.php?slug=' . $ebook['slug']) ?>">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Sign in to download
+                    </a>
                 <?php endif; ?>
                 <span class="jm-ebv-price"><?= $ebook['is_free'] ? 'Free' : '₦' . number_format((float)$ebook['price']) ?></span>
             </div>

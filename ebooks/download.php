@@ -23,8 +23,8 @@ if (!$ebook || empty($ebook['file_path'])) {
     redirect('/jobmington/ebooks/');
 }
 
-// Paid ebooks require login (purchase flow can be layered on later).
-if (!$ebook['is_free'] && !Session::isLoggedIn()) {
+// Ebook downloads are members-only (the listing + detail pages stay public for SEO).
+if (!Session::isLoggedIn()) {
     redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/ebooks/view.php?slug=' . $ebook['slug']));
 }
 
