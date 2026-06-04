@@ -99,9 +99,11 @@ if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
 
             <nav class="jm-footer-links" aria-label="Learn links">
                 <h2>Learn</h2>
-                <a href="/jobmington/learn/">Courses</a>
-                <a href="/jobmington/ebooks/">Ebooks &amp; guides</a>
+                <a href="/jobmington/learn/">Online courses</a>
+                <a href="/jobmington/ebooks/">Free ebooks &amp; guides</a>
                 <a href="/jobmington/events/">Events &amp; webinars</a>
+                <a href="/jobmington/blog/">Career blog</a>
+                <a href="/jobmington/community/">Community forum</a>
                 <a href="/jobmington/tools/">Career tools</a>
             </nav>
 
