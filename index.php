@@ -975,6 +975,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
                 <a href="/jobmington/pricing.php">Pricing</a>
                 <?php if ($isLoggedIn): ?>
                     <a href="<?= e($dashboardUrl) ?>">Dashboard</a>
+                    <?php require_once __DIR__ . '/includes/notification_bell.php'; jm_notification_bell(); ?>
                     <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
                 <?php else: ?>
                     <a href="/jobmington/auth/login.php">Sign in</a>
