@@ -16,7 +16,7 @@ Session::start();
 $pdo = db();
 
 if (!Session::isLoggedIn()) {
-    header('Location: ' . SITE_URL . '/auth/login.php?redirect=' . urlencode('/jobmington/wallet/passport/boost.php'));
+    header('Location: ' . SITE_URL . '/auth/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/wallet/passport/boost.php'));
     exit;
 }
 $userId = (int) Session::userId();
