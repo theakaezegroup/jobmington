@@ -1590,9 +1590,7 @@ ob_start();
             list.querySelectorAll('[data-id]').forEach(function (el) {
                 el.addEventListener('click', function () {
                     var id = el.getAttribute('data-id');
-                    fetch(base + '/api/notifications.php?action=read', {
-                        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'id=' + id
-                    });
+                    fetch(base + '/api/notifications.php?action=read&id=' + encodeURIComponent(id), { method: 'POST' });
                     el.classList.remove('unread');
                 });
             });
