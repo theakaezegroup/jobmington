@@ -156,6 +156,7 @@ if ($isAdminArea) {
         'System' => [
             ['href' => '/jobmington/admin/categories.php', 'label' => 'Categories', 'icon' => 'fa-layer-group', 'match' => '/admin/categories'],
             ['href' => '/jobmington/admin/countries.php', 'label' => 'Countries', 'icon' => 'fa-globe-africa', 'match' => '/admin/countries'],
+            ['href' => '/jobmington/admin/certificate-branding.php', 'label' => 'Certificate', 'icon' => 'fa-award', 'match' => '/admin/certificate-branding'],
             ['href' => '/jobmington/admin/settings.php', 'label' => 'Settings', 'icon' => 'fa-sliders', 'match' => '/admin/settings'],
         ],
     ];

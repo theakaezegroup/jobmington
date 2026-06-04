@@ -380,6 +380,44 @@ if (!function_exists('get')) {
     }
 }
 
+if (!function_exists('jm_setting_get')) {
+    /**
+     * Read a value from the key/value settings table (cached per request).
+     */
+    function jm_setting_get(string $key, $default = null) {
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            try {
+                foreach (db()->query("SELECT setting_key, setting_value FROM settings") as $row) {
+                    $cache[$row['setting_key']] = $row['setting_value'];
+                }
+            } catch (Throwable $e) {
+                // settings table missing — fall back to defaults
+            }
+        }
+        $v = $cache[$key] ?? null;
+        return ($v === null || $v === '') ? $default : $v;
+    }
+}
+
+if (!function_exists('jm_setting_set')) {
+    /**
+     * Upsert a settings value. Pass null/'' to clear.
+     */
+    function jm_setting_set(string $key, $value): bool {
+        try {
+            $stmt = db()->prepare(
+                "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
+                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = CURRENT_TIMESTAMP"
+            );
+            return $stmt->execute([$key, ($value === '' ? null : $value)]);
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+}
+
 if (!function_exists('jsonResponse')) {
     function jsonResponse(array $data, int $statusCode = 200): void {
         http_response_code($statusCode);

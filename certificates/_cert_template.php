@@ -16,6 +16,22 @@ $siteUrl    = defined('SITE_URL') ? SITE_URL : 'https://jobmington.com';
 $verifyUrl  = $siteUrl . '/verify?code=' . urlencode($certCode);
 $qrUrl      = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&qzone=1&color=0640a3&data=' . urlencode($verifyUrl);
 
+/* admin-managed branding (falls back to built-in vector design) */
+$certPrefix = '/jobmington';
+$certSeal   = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_seal_image', '') : '';
+$certSig1Im = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig1_image', '') : '';
+$certSig2Im = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig2_image', '') : '';
+$certSig1Nm = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig1_name', '') : '';
+$certSig1Tt = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig1_title', '') : '';
+$certSig2Nm = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig2_name', '') : '';
+$certSig2Tt = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_sig2_title', '') : '';
+$certSubttl = function_exists('jm_setting_get') ? (string) jm_setting_get('cert_subtitle', '') : '';
+if ($certSig1Nm === '') $certSig1Nm = 'Jobmington';
+if ($certSig1Tt === '') $certSig1Tt = 'Director, Jobmington';
+if ($certSig2Nm === '') $certSig2Nm = 'Career Learning';
+if ($certSig2Tt === '') $certSig2Tt = 'Head, Career Learning';
+if ($certSubttl === '') $certSubttl = 'of Completion';
+
 /* ---------- vector guilloché border generator ---------- */
 $GW = 1000; $GH = 707; $inset = 11; $band = 54;
 
@@ -106,6 +122,7 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 .jm-cert-foot { margin-top:auto; width:100%; display:flex; align-items:flex-end; justify-content:space-between; gap:3cqw; }
 .jm-cert-sigcol { flex:1 1 0; min-width:0; text-align:center; }
 .jm-cert-sigcol .sig { font-family:"Sacramento",cursive; font-weight:400; font-size:3.2cqw; letter-spacing:.01em; color:#1c3a63; line-height:.9; }
+.jm-cert-sigcol .sig-img { max-height:5.4cqw; max-width:82%; object-fit:contain; display:block; margin:0 auto .2cqw; }
 .jm-cert-sigcol .ln { height:.08cqw; background:#b9c7dd; margin:.4cqw 10% .8cqw; }
 .jm-cert-sigcol .lbl { font-size:.9cqw; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
 .jm-cert-seal { flex:0 0 auto; }
@@ -157,7 +174,7 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
     <div class="jm-cert-inner">
         <img class="jm-cert-logo" src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
         <h2 class="jm-cert-title">Certificate</h2>
-        <div class="jm-cert-sub">of Completion</div>
+        <div class="jm-cert-sub"><?= e($certSubttl) ?></div>
 
         <div class="jm-cert-present">This certificate is proudly presented to</div>
         <div class="jm-cert-namerow">
@@ -172,12 +189,19 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 
         <div class="jm-cert-foot">
             <div class="jm-cert-sigcol">
-                <div class="sig">Jobmington</div>
+                <?php if ($certSig1Im !== ''): ?>
+                    <img class="sig-img" src="<?= e($certPrefix . $certSig1Im) ?>" alt="">
+                <?php else: ?>
+                    <div class="sig"><?= e($certSig1Nm) ?></div>
+                <?php endif; ?>
                 <div class="ln"></div>
-                <div class="lbl">Director, Jobmington</div>
+                <div class="lbl"><?= e($certSig1Tt) ?></div>
             </div>
 
             <div class="jm-cert-seal" aria-label="Jobmington official seal">
+                <?php if ($certSeal !== ''): ?>
+                <img src="<?= e($certPrefix . $certSeal) ?>" alt="Official seal" style="width:12.5cqw;height:12.5cqw;object-fit:contain;display:block;">
+                <?php else: ?>
                 <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <path id="jmSealTop" d="M14,50 A36,36 0 0 1 86,50"/>
@@ -198,12 +222,17 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
                     <circle cx="50" cy="50" r="13" fill="#0640a3"/>
                     <path d="M43.6 50l4.2 4.2 8.8-9.2" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                 </svg>
+                <?php endif; ?>
             </div>
 
             <div class="jm-cert-sigcol">
-                <div class="sig">Career Learning</div>
+                <?php if ($certSig2Im !== ''): ?>
+                    <img class="sig-img" src="<?= e($certPrefix . $certSig2Im) ?>" alt="">
+                <?php else: ?>
+                    <div class="sig"><?= e($certSig2Nm) ?></div>
+                <?php endif; ?>
                 <div class="ln"></div>
-                <div class="lbl">Head, Career Learning</div>
+                <div class="lbl"><?= e($certSig2Tt) ?></div>
             </div>
         </div>
 
