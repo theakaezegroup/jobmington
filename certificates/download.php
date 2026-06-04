@@ -43,7 +43,8 @@ if (!$cert) { http_response_code(404); exit('Certificate not found.'); }
         display:inline-flex; align-items:center; gap:8px; border-radius:9px; padding:10px 18px;
         font:inherit; font-size:13.5px; font-weight:800; text-decoration:none; cursor:pointer; border:0;
     }
-    .jm-dl-print { background:#f59f22; color:#1a1205; }
+    .jm-dl-print { background:#fff; color:#0640a3; }
+    .jm-dl-print:hover { background:#eef5ff; }
     .jm-dl-back { background:rgba(255,255,255,.12); color:#fff; }
     .jm-dl-stage { max-width:1000px; margin:46px auto 0; }
     @media print {
@@ -51,7 +52,8 @@ if (!$cert) { http_response_code(404); exit('Certificate not found.'); }
         body { background:#fff; padding:0; }
         .jm-dl-bar { display:none; }
         .jm-dl-stage { margin:0; max-width:none; }
-        .jm-cert { box-shadow:none !important; max-width:none !important; width:100%; height:100vh; border-radius:0; }
+        .jm-cert-stage { max-width:none !important; }
+        .jm-cert { width:100%; border:0 !important; }
     }
 </style>
 </head>
