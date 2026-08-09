@@ -121,8 +121,9 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
 .jm-evd-desc { font-size: 15.5px; color: #0b1b33; line-height: 1.75; white-space: pre-wrap; margin: 0; }
 
 /* Host */
-.jm-evd-host { display: flex; gap: 13px; align-items: flex-start; }
-.jm-evd-host-av { width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0; display: block; object-fit: contain; }
+.jm-evd-host { display: flex; gap: 11px; align-items: flex-start; }
+/* Deliberately smaller than the 42px header logo so it reads as a byline mark, not a second brand lockup. */
+.jm-evd-host-av { width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; display: block; object-fit: contain; margin-top: 1px; }
 .jm-evd-host-name { font-size: 15px; font-weight: 800; color: #061426; margin: 0 0 3px; }
 .jm-evd-host-bio { font-size: 14px; color: #53667f; line-height: 1.65; margin: 0; white-space: pre-wrap; }
 
