@@ -5,6 +5,31 @@
 
 $aiPageTitle = $pageTitle ?? SITE_NAME;
 $activeAIPage = $activeAIPage ?? '';
+
+/*
+ * Link previews (WhatsApp, LinkedIn, X, Slack, iMessage).
+ *
+ * Pages may set $pageDescription / $pageImage / $pageCanonical / $pageType
+ * before including this header. Anything not set falls back to the site
+ * defaults, so every page that uses this shell previews with the brand cover
+ * rather than as a bare link.
+ *
+ * $pageImage may be a site-relative path; scrapers require an absolute URL,
+ * so it is resolved here rather than at every call site.
+ */
+$jmShareDesc = trim((string) ($pageDescription
+    ?? "Jobmington — Africa's career platform. Find remote roles that pay in dollars, local jobs near you, and AI tools that get you hired."));
+
+$jmShareImage = trim((string) ($pageImage ?? ''));
+$jmShareDefault = ($jmShareImage === '');
+if ($jmShareDefault) {
+    $jmShareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
+} elseif (!preg_match('#^https?://#i', $jmShareImage)) {
+    $jmShareImage = SITE_URL . '/' . ltrim($jmShareImage, '/');
+}
+
+$jmShareUrl  = trim((string) ($pageCanonical ?? (SITE_URL . ($_SERVER['REQUEST_URI'] ?? '/'))));
+$jmShareType = (string) ($pageType ?? 'website');
 $isLoggedIn = class_exists('Session') && Session::isLoggedIn();
 $dashboardUrl = class_exists('Session') && Session::isAdmin()
     ? '/jobmington/admin/'
@@ -19,6 +44,26 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= e($aiPageTitle) ?></title>
+    <meta name="description" content="<?= e($jmShareDesc) ?>">
+    <link rel="canonical" href="<?= e($jmShareUrl) ?>">
+
+    <meta property="og:type" content="<?= e($jmShareType) ?>">
+    <meta property="og:site_name" content="<?= e(SITE_NAME) ?>">
+    <meta property="og:title" content="<?= e($aiPageTitle) ?>">
+    <meta property="og:description" content="<?= e($jmShareDesc) ?>">
+    <meta property="og:url" content="<?= e($jmShareUrl) ?>">
+    <meta property="og:image" content="<?= e($jmShareImage) ?>">
+    <?php if ($jmShareDefault): /* only the bundled cover has known dimensions */ ?>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <?php endif; ?>
+    <meta property="og:image:alt" content="<?= e($aiPageTitle) ?>">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= e($aiPageTitle) ?>">
+    <meta name="twitter:description" content="<?= e($jmShareDesc) ?>">
+    <meta name="twitter:image" content="<?= e($jmShareImage) ?>">
+
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">

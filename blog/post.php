@@ -47,6 +47,15 @@ try {
 
 $pageTitle = $post['title'] . ' - ' . SITE_NAME;
 $activeAIPage = 'learn';
+// Link preview: the post's own image, falling back to the brand cover.
+$bpPlain = trim(preg_replace('/\s+/', ' ', strip_tags((string) ($post['content'] ?? ''))));
+$bpSnip  = preg_match('/^.{0,160}/us', $bpPlain, $bm) ? rtrim($bm[0]) : '';
+if (strlen($bpPlain) > strlen($bpSnip)) { $bpSnip .= '...'; }
+$pageDescription = $post['excerpt'] ?? ($bpSnip ?: null);
+$pageImage       = (string) ($post['featured_image'] ?? '');
+$pageCanonical   = SITE_URL . '/blog/post.php?slug=' . rawurlencode((string) $post['slug']);
+$pageType        = 'article';
+
 require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 <style>

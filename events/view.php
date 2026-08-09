@@ -164,6 +164,17 @@ if ($justJoined) {
 }
 
 $pageTitle = $event['title'] . ' - ' . SITE_NAME;
+
+// Link preview: the event's own cover, falling back to the brand cover.
+$evPlain = trim(preg_replace('/\s+/', ' ', strip_tags((string) $event['description'])));
+$evSnip  = preg_match('/^.{0,140}/us', $evPlain, $em) ? rtrim($em[0]) : '';
+if (strlen($evPlain) > strlen($evSnip)) { $evSnip .= '...'; }
+$pageDescription = trim(date('l, j F Y', $start) . ' at ' . date('g:i A', $start)
+    . ($event['timezone'] ? ' ' . $event['timezone'] : '') . ' - ' . $where . '. ' . $evSnip);
+$pageImage     = (string) ($event['cover_image'] ?? '');
+$pageCanonical = SITE_URL . '/events/view.php?slug=' . rawurlencode((string) $event['slug']);
+$pageType      = 'article';
+
 $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 <style>
