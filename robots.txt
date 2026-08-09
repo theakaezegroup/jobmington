@@ -4,4 +4,4 @@ Disallow: /config/
 Disallow: /includes/
 Disallow: /learn/
 
-Sitemap: https://jobmington.com/sitemap.php
+Sitemap: https://jobmington.com/sitemap
