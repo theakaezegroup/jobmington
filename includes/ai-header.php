@@ -25,6 +25,11 @@ $jmShareDefault = ($jmShareImage === '');
 if ($jmShareDefault) {
     $jmShareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
 } elseif (!preg_match('#^https?://#i', $jmShareImage)) {
+    // Stored paths may carry a legacy /jobmington prefix. Production serves from
+    // the root, so keeping it produced jobmington.com/jobmington/... which only
+    // resolves via a redirect -- and scrapers routinely refuse to follow one for
+    // an image. Strip it before prefixing; SITE_URL re-adds it where it belongs.
+    $jmShareImage = preg_replace('#^/?jobmington/#', '', ltrim($jmShareImage, '/'));
     $jmShareImage = SITE_URL . '/' . ltrim($jmShareImage, '/');
 }
 
