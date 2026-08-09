@@ -141,9 +141,15 @@ $pageTitle = 'Create Account | ' . SITE_NAME;
 
         <section class="jm-hero">
             <div>
-                <?php $authCtx = trim((string) ($_SESSION['auth_context'] ?? '')); ?>
-                <p class="jm-kicker"><?= $authCtx ? 'Almost there' : 'Create account' ?></p>
-                <h1><?= $authCtx ? 'One more step.' : 'Join Jobmington.' ?></h1>
+                <?php
+                    $ctxFor  = (string) ($_SESSION['auth_context_for'] ?? '');
+                    $ctxHere = $hasSafeRedirect && $ctxFor !== ''
+                        && jm_norm_target($ctxFor) === jm_norm_target($redirectTo);
+                    if (!$ctxHere) { unset($_SESSION['auth_context'], $_SESSION['auth_context_for']); }
+                    $authCtx = $ctxHere ? trim((string) ($_SESSION['auth_context'] ?? '')) : '';
+                ?>
+                <p class="jm-kicker">Create account</p>
+                <h1><?= $authCtx ? 'Create your account.' : 'Join Jobmington.' ?></h1>
                 <p><?= $authCtx
                         ? e($authCtx)
                         : 'Create a seeker account to apply and save roles, or an employer account to set up a company and publish jobs.' ?></p>

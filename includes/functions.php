@@ -92,6 +92,21 @@ if (!function_exists('redirectBack')) {
 }
 
 /**
+ * Normalise a return target for comparison.
+ *
+ * The same destination can arrive spelled differently (/seeker/profile.php vs
+ * /seeker/profile, with or without a trailing slash), so an auth note bound to
+ * one spelling must still match the other.
+ */
+if (!function_exists('jm_norm_target')) {
+    function jm_norm_target(string $target): string {
+        $target = explode('#', $target)[0];
+        $target = preg_replace('#\.php(?=$|\?)#', '', $target);
+        return rtrim($target, '/');
+    }
+}
+
+/**
  * Validate a post-authentication return target.
  *
  * The previous test was str_starts_with($target, '/jobmington/'), which only

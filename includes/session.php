@@ -245,10 +245,12 @@ class Session {
      */
     public static function requireLogin(string $context = '', string $returnTo = ''): void {
         if (!self::isLoggedIn()) {
+            $target = $returnTo !== '' ? $returnTo : ($_SERVER['REQUEST_URI'] ?? '/');
             if ($context !== '') {
-                $_SESSION['auth_context'] = $context;
+                // Bound to its target so it can only ever appear for this journey.
+                $_SESSION['auth_context']     = $context;
+                $_SESSION['auth_context_for'] = $target;
             }
-            $target   = $returnTo !== '' ? $returnTo : ($_SERVER['REQUEST_URI'] ?? '/');
             $redirect = urlencode($target);
             header("Location: /jobmington/auth/login.php?redirect={$redirect}");
             exit;

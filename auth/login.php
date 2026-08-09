@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 redirect('/jobmington/auth/verify-email.php');
             }
 
-            unset($_SESSION['auth_context']);   // consumed; must not linger
+            unset($_SESSION['auth_context'], $_SESSION['auth_context_for']);   // consumed; must not linger
             if ($hasSafeRedirect) {
                 redirect($redirectTo);
             }
@@ -133,11 +133,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <section class="jm-hero">
             <div>
-                <?php $authCtx = trim((string) ($_SESSION['auth_context'] ?? '')); ?>
-                <?php /* "Welcome back" is wrong for someone arriving from an action
-                          who has never had an account, so use neutral copy there. */ ?>
-                <p class="jm-kicker"><?= $authCtx ? 'Almost there' : 'Sign in' ?></p>
-                <h1><?= $authCtx ? 'One more step.' : 'Welcome back.' ?></h1>
+                <?php
+                    /* A gate always supplies ?redirect=; a nav link never does. Only
+                       show the note when this request actually came from a gate, and
+                       drop a stale one otherwise, so someone who just clicked "Sign in"
+                       is not told they are mid-way through something they abandoned. */
+                    $ctxFor  = (string) ($_SESSION['auth_context_for'] ?? '');
+                    $ctxHere = $hasSafeRedirect && $ctxFor !== ''
+                        && jm_norm_target($ctxFor) === jm_norm_target($redirectTo);
+                    if (!$ctxHere) { unset($_SESSION['auth_context'], $_SESSION['auth_context_for']); }
+                    $authCtx = $ctxHere ? trim((string) ($_SESSION['auth_context'] ?? '')) : '';
+                ?>
+                <p class="jm-kicker">Sign in</p>
+                <h1><?= $authCtx ? 'Sign in to continue.' : 'Welcome back.' ?></h1>
                 <p><?= $authCtx
                         ? e($authCtx)
                         : 'Sign in to apply, save jobs, manage listings, or continue posting a role.' ?></p>

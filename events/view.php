@@ -58,9 +58,11 @@ if ($postedIntent && !Session::isLoggedIn()) {
     // Park the intent, then send them to sign in (that page links to sign-up).
     // auth_context tells the auth pages why the user is there, so they do not
     // land on generic "Welcome back" copy with no sign their click registered.
+    $returnTo = '/jobmington/events/view.php?slug=' . $event['slug'];
     $_SESSION[$intentKey] = $eventId;
     $_SESSION['auth_context'] = 'You\'re registering for "' . $event['title'] . '". Sign in or create a free account and we\'ll complete it automatically.';
-    redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/events/view.php?slug=' . $event['slug']));
+    $_SESSION['auth_context_for'] = $returnTo;
+    redirect('/jobmington/auth/login.php?redirect=' . urlencode($returnTo));
 }
 
 // A posted form needs CSRF; a resumed intent is already trusted (it is server-side).
@@ -77,11 +79,11 @@ if ($postedIntent) {
 
 // Already registered before the intent could resume — nothing left to do.
 if ($pendingHere && Session::isLoggedIn() && $registered) {
-    unset($_SESSION[$intentKey], $_SESSION['auth_context']);
+    unset($_SESSION[$intentKey], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
 }
 
 if ($wantsRegister && Session::isLoggedIn()) {
-    unset($_SESSION[$intentKey], $_SESSION['auth_context']);
+    unset($_SESSION[$intentKey], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
 
     if ($isPast) {
         $message = 'This event has already taken place.';
