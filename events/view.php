@@ -41,26 +41,70 @@ if (Session::isLoggedIn()) {
     $registered = (bool) $chk->fetchColumn();
 }
 
-// Handle registration.
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'register') {
-    if (!Session::isLoggedIn()) {
-        redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/events/view.php?slug=' . $event['slug']));
-    } elseif (!Security::verifyCSRF()) {
+/*
+ * Registration intent survives the auth detour.
+ *
+ * A guest who clicks Register is sent to sign in / sign up. Signup creates a
+ * session but then force-redirects to verify-email.php, dropping any ?redirect,
+ * so a URL-carried return target is not reliable. Instead the intent is parked
+ * in the session and completed the moment the user is next on this page while
+ * logged in — no second click, and it survives the verification detour.
+ */
+$intentKey    = 'pending_event_registration';
+$postedIntent = $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'register';
+$pendingHere  = (int) ($_SESSION[$intentKey] ?? 0) === $eventId;
+
+if ($postedIntent && !Session::isLoggedIn()) {
+    // Park the intent, then send them to sign in (that page links to sign-up).
+    $_SESSION[$intentKey] = $eventId;
+    redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/events/view.php?slug=' . $event['slug']));
+}
+
+// A posted form needs CSRF; a resumed intent is already trusted (it is server-side).
+$wantsRegister = false;
+if ($postedIntent) {
+    if (Security::verifyCSRF()) {
+        $wantsRegister = true;
+    } else {
         $message = 'Security check failed. Please try again.';
-    } elseif ($isPast) {
+    }
+} elseif ($pendingHere && Session::isLoggedIn() && !$registered) {
+    $wantsRegister = true;
+}
+
+// Already registered before the intent could resume — nothing left to do.
+if ($pendingHere && Session::isLoggedIn() && $registered) {
+    unset($_SESSION[$intentKey]);
+}
+
+if ($wantsRegister && Session::isLoggedIn()) {
+    unset($_SESSION[$intentKey]);
+
+    if ($isPast) {
         $message = 'This event has already taken place.';
     } elseif ($isFull) {
         $message = 'This event is fully booked.';
     } elseif (!$registered) {
         try {
+            // Insert and bump the counter together, so the count cannot drift
+            // from the number of rows if either statement fails.
+            $pdo->beginTransaction();
             $pdo->prepare("INSERT INTO event_registrations (event_id, user_id, name, email) VALUES (?, ?, ?, ?)")
                 ->execute([$eventId, (int) Session::userId(), Session::get('full_name'), Session::get('email')]);
             $pdo->prepare("UPDATE events SET registration_count = registration_count + 1 WHERE event_id = ?")->execute([$eventId]);
+            $pdo->commit();
+
             $registered = true;
             $justJoined = true;
             $event['registration_count']++;
-        } catch (Throwable $e) {
-            $registered = true; // unique key — already registered
+        } catch (PDOException $e) {
+            if ($pdo->inTransaction()) { $pdo->rollBack(); }
+            if ($e->getCode() === '23000') {
+                $registered = true;   // unique key (event_id, user_id): already registered
+            } else {
+                $message = 'We could not complete your registration. Please try again.';
+                error_log('Event registration failed for event ' . $eventId . ': ' . $e->getMessage());
+            }
         }
         Security::regenerateCSRF();
     }
@@ -92,6 +136,26 @@ try {
     ]);
 } catch (Throwable $e) {
     $gcalUrl = '';
+}
+
+// Confirmation email. Sent here so the calendar link is already built.
+// A mail failure must never break a registration that is already committed.
+if ($justJoined) {
+    $attendeeEmail = trim((string) Session::get('email'));
+    if ($attendeeEmail !== '') {
+        try {
+            require_once __DIR__ . '/../includes/mailer.php';
+            Mailer::sendEventRegistration(
+                $attendeeEmail,
+                (string) Session::get('full_name'),
+                $event,
+                SITE_URL . '/events/view.php?slug=' . rawurlencode((string) $event['slug']),
+                $gcalUrl
+            );
+        } catch (Throwable $e) {
+            error_log('Event confirmation email failed for event ' . $eventId . ': ' . $e->getMessage());
+        }
+    }
 }
 
 $pageTitle = $event['title'] . ' - ' . SITE_NAME;
@@ -261,7 +325,7 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
                         <input type="hidden" name="action" value="register">
                         <button class="jm-evd-btn" type="submit"><?= $event['is_free'] ? 'Register free' : 'Register &mdash; &#8358;' . number_format((float) $event['price']) ?></button>
                     </form>
-                    <?php if (!Session::isLoggedIn()): ?><p class="jm-evd-note">You'll be asked to sign in first.</p><?php endif; ?>
+                    <?php if (!Session::isLoggedIn()): ?><p class="jm-evd-note">Sign in or create a free account &mdash; we'll finish your registration automatically.</p><?php endif; ?>
                 <?php endif; ?>
 
                 <?php if (!$isPast && $gcalUrl): ?>

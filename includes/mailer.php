@@ -470,6 +470,53 @@ HTML;
         return (new self())->send($email, "Your job is live — {$jobTitle}", $content);
     }
 
+    /* ── 6b. Event registration confirmed — attendee ────────────── */
+    public static function sendEventRegistration(string $email, string $name, array $event, string $eventUrl, string $calendarUrl = ''): bool {
+        [$subject, $content] = self::composeEventRegistration($name, $event, $eventUrl, $calendarUrl);
+        return (new self())->send($email, $subject, $content);
+    }
+
+    /** Split out so the message can be built and inspected without sending. */
+    public static function composeEventRegistration(string $name, array $event, string $eventUrl, string $calendarUrl = ''): array {
+        $firstName = explode(' ', trim($name))[0] ?: 'there';
+        $start     = strtotime($event['starts_at']);
+        $when      = date('l, j F Y', $start) . ' at ' . date('g:i A', $start)
+                   . ($event['timezone'] ? ' ' . $event['timezone'] : '');
+        $where     = !empty($event['is_online']) ? 'Online' : ($event['location'] ?: 'In person');
+        $title     = htmlspecialchars((string) $event['title'], ENT_QUOTES, 'UTF-8');
+        $host      = !empty($event['host_name'])
+            ? "<tr><td style='padding:6px 0;color:#94a3b8;font-size:13px;'>Host</td><td style='padding:6px 0;color:#06142a;font-size:13px;font-weight:600;'>" . htmlspecialchars((string) $event['host_name'], ENT_QUOTES, 'UTF-8') . "</td></tr>"
+            : '';
+
+        // The join link is only meaningful for an online session that has one.
+        $joinRow = (!empty($event['is_online']) && !empty($event['meeting_url']))
+            ? "<p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Join here when it starts: <a href='" . htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') . "' style='color:#0640a3;'>" . htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') . "</a></p>"
+            : "<p style='color:#475569;margin:0 0 20px;line-height:1.75;'>We'll email you the joining details before it starts.</p>";
+
+        $calendarBtn = $calendarUrl
+            ? "<a href='{$calendarUrl}' style='display:inline-block;padding:13px 22px;color:#0640a3;font-size:14px;font-weight:700;text-decoration:none;border:1px solid #d8e4f4;'>Add to calendar</a>"
+            : '';
+
+        $content = "
+            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>You're registered, {$firstName}.</h2>
+            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your place at <strong style='color:#06142a;'>{$title}</strong> is confirmed.</p>
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 22px;border-collapse:collapse;'>
+              <tr><td style='padding:6px 18px 6px 0;color:#94a3b8;font-size:13px;'>When</td><td style='padding:6px 0;color:#06142a;font-size:13px;font-weight:600;'>{$when}</td></tr>
+              <tr><td style='padding:6px 18px 6px 0;color:#94a3b8;font-size:13px;'>Where</td><td style='padding:6px 0;color:#06142a;font-size:13px;font-weight:600;'>{$where}</td></tr>
+              {$host}
+            </table>
+            {$joinRow}
+            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+              <tr>
+                <td style='background:#0640a3;'><a href='{$eventUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View event</a></td>
+                <td style='padding-left:10px;'>{$calendarBtn}</td>
+              </tr>
+            </table>
+            <p style='color:#94a3b8;font-size:13px;margin:0;'>Can no longer make it? Just ignore this email — no action needed.</p>
+        ";
+        return ["You're registered — {$event['title']}", $content];
+    }
+
     /* ── 7. Password changed — account security ─────────────────── */
     public static function sendPasswordChanged(string $email, string $name): bool {
         $firstName = explode(' ', trim($name))[0];
