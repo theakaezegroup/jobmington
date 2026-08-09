@@ -73,7 +73,12 @@ $taken    = (int) $event['registration_count'];
 $seatsLeft = $capacity > 0 ? max(0, $capacity - $taken) : null;
 $fillPct  = $capacity > 0 ? min(100, (int) round($taken / $capacity * 100)) : 0;
 
+// First character of the host name, for the avatar initial.
+// preg with /u rather than mb_substr: mbstring is not installed on the server.
+$hostInitial = preg_match('/./u', (string) $event['host_name'], $hm) ? strtoupper($hm[0]) : '?';
+
 // "Add to calendar" link. Times are stored in the event's own timezone.
+$gcalDetails = preg_match('/^.{0,900}/us', (string) $event['description'], $dm) ? $dm[0] : '';
 $gcalUrl = '';
 try {
     $tz  = new DateTimeZone($event['timezone'] ?: 'Africa/Lagos');
@@ -86,7 +91,7 @@ try {
         'action'   => 'TEMPLATE',
         'text'     => $event['title'],
         'dates'    => $gs->format('Ymd\THis\Z') . '/' . $ge->format('Ymd\THis\Z'),
-        'details'  => mb_substr((string) $event['description'], 0, 900),
+        'details'  => $gcalDetails,
         'location' => $event['is_online'] ? ($event['meeting_url'] ?: 'Online') : (string) $event['location'],
     ]);
 } catch (Throwable $e) {
@@ -190,7 +195,7 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
             <div class="jm-evd-sec">
                 <h2>Host</h2>
                 <div class="jm-evd-host">
-                    <div class="jm-evd-host-av"><?= e(strtoupper(mb_substr($event['host_name'], 0, 1))) ?></div>
+                    <div class="jm-evd-host-av"><?= e($hostInitial) ?></div>
                     <div>
                         <p class="jm-evd-host-name"><?= e($event['host_name']) ?></p>
                         <?php if (!empty($event['host_bio'])): ?>
