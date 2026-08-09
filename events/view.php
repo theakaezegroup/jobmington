@@ -66,89 +66,209 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'regis
     }
 }
 
+$start    = strtotime($event['starts_at']);
+$where    = $event['is_online'] ? 'Online' : ($event['location'] ?: 'In person');
+$capacity = (int) $event['capacity'];
+$taken    = (int) $event['registration_count'];
+$seatsLeft = $capacity > 0 ? max(0, $capacity - $taken) : null;
+$fillPct  = $capacity > 0 ? min(100, (int) round($taken / $capacity * 100)) : 0;
+
+// "Add to calendar" link. Times are stored in the event's own timezone.
+$gcalUrl = '';
+try {
+    $tz  = new DateTimeZone($event['timezone'] ?: 'Africa/Lagos');
+    $gs  = new DateTime($event['starts_at'], $tz);
+    $ge  = !empty($event['ends_at']) ? new DateTime($event['ends_at'], $tz) : (clone $gs)->modify('+1 hour');
+    $utc = new DateTimeZone('UTC');
+    $gs->setTimezone($utc);
+    $ge->setTimezone($utc);
+    $gcalUrl = 'https://calendar.google.com/calendar/render?' . http_build_query([
+        'action'   => 'TEMPLATE',
+        'text'     => $event['title'],
+        'dates'    => $gs->format('Ymd\THis\Z') . '/' . $ge->format('Ymd\THis\Z'),
+        'details'  => mb_substr((string) $event['description'], 0, 900),
+        'location' => $event['is_online'] ? ($event['meeting_url'] ?: 'Online') : (string) $event['location'],
+    ]);
+} catch (Throwable $e) {
+    $gcalUrl = '';
+}
+
 $pageTitle = $event['title'] . ' - ' . SITE_NAME;
 $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
 ?>
 <style>
-.jm-evv { max-width:900px; margin:0 auto; padding:40px 20px 72px; }
-.jm-evv-cover { aspect-ratio:16/7; border-radius:16px; overflow:hidden; background:linear-gradient(135deg,#eef5ff,#f7faff); display:grid; place-items:center; border:1px solid #e4eaf3; margin-bottom:24px; }
-.jm-evv-cover img { width:100%; height:100%; object-fit:cover; }
-.jm-evv-cover svg { width:52px; height:52px; color:#9bb0c7; }
-.jm-evv-type { display:inline-block; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:#fff; background:#0640a3; padding:4px 12px; border-radius:99px; }
-.jm-evv h1 { font-size:clamp(26px,4vw,38px); font-weight:800; letter-spacing:-.02em; color:#061426; margin:12px 0 16px; line-height:1.15; }
-.jm-evv-grid { display:grid; grid-template-columns:1fr 300px; gap:32px; align-items:start; }
-@media (max-width:760px){ .jm-evv-grid { grid-template-columns:1fr; } }
-.jm-evv-desc { font-size:15px; color:#0b1b33; line-height:1.75; white-space:pre-wrap; }
-.jm-evv-side { border:1px solid #e4eaf3; border-radius:14px; padding:20px; background:#fff; position:sticky; top:20px; }
-.jm-evv-meta { display:flex; gap:10px; align-items:flex-start; margin-bottom:14px; }
-.jm-evv-meta svg { width:18px; height:18px; color:#0640a3; flex-shrink:0; margin-top:2px; }
-.jm-evv-meta .l { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:#94a3b8; }
-.jm-evv-meta .v { font-size:14px; font-weight:600; color:#0b1b33; }
-.jm-evv-btn { display:block; width:100%; box-sizing:border-box; text-align:center; background:#0640a3; color:#fff; border:0; border-radius:10px; padding:14px; font:inherit; font-weight:800; font-size:14px; cursor:pointer; text-decoration:none; }
-.jm-evv-btn:hover { background:#052f78; }
-.jm-evv-btn.disabled { background:#e4eaf3; color:#94a3b8; cursor:not-allowed; }
-.jm-evv-note { font-size:12px; color:#53667f; text-align:center; margin-top:10px; line-height:1.5; }
-.jm-evv-join { display:block; text-align:center; background:#0f766e; color:#fff; border-radius:10px; padding:14px; font-weight:800; font-size:14px; text-decoration:none; }
-.jm-evv-flash { background:#e6f5f1; color:#0a6454; border-radius:8px; padding:11px 14px; font-size:13px; font-weight:600; margin-bottom:16px; }
+.jm-evd { max-width: 940px; margin: 0 auto; padding: 36px 20px 80px; }
+
+/* Title block */
+.jm-evd-type { display: inline-block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #0640a3; background: #eaf1fd; padding: 4px 9px; border-radius: 4px; }
+.jm-evd h1 { font-size: clamp(25px,3.8vw,36px); font-weight: 800; letter-spacing: -.025em; color: #061426; margin: 12px 0 10px; line-height: 1.16; }
+.jm-evd-sub { font-size: 14.5px; color: #53667f; margin: 0 0 26px; line-height: 1.6; }
+.jm-evd-sub b { color: #061426; font-weight: 700; }
+
+/* Layout */
+.jm-evd-grid { display: grid; grid-template-columns: minmax(0,1fr) 312px; gap: 40px; align-items: start; }
+@media (max-width: 820px) { .jm-evd-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+/* Cover */
+.jm-evd-cover { aspect-ratio: 16/8; border-radius: 12px; overflow: hidden; border: 1px solid #e4eaf3; background: #f7faff; display: grid; place-items: center; margin-bottom: 30px; }
+.jm-evd-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.jm-evd-cover svg { width: 44px; height: 44px; color: #b8c8df; }
+
+/* Sections */
+.jm-evd-sec + .jm-evd-sec { margin-top: 30px; padding-top: 30px; border-top: 1px solid #eef2f8; }
+.jm-evd-sec h2 { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: #5b6b82; margin: 0 0 12px; }
+.jm-evd-desc { font-size: 15.5px; color: #0b1b33; line-height: 1.75; white-space: pre-wrap; margin: 0; }
+
+/* Host */
+.jm-evd-host { display: flex; gap: 13px; align-items: flex-start; }
+.jm-evd-host-av { width: 42px; height: 42px; border-radius: 50%; background: #eaf1fd; color: #0640a3; display: grid; place-items: center; font-size: 15px; font-weight: 800; flex-shrink: 0; }
+.jm-evd-host-name { font-size: 15px; font-weight: 800; color: #061426; margin: 0 0 3px; }
+.jm-evd-host-bio { font-size: 14px; color: #53667f; line-height: 1.65; margin: 0; white-space: pre-wrap; }
+
+/* Sidebar */
+.jm-evd-side { position: sticky; top: 20px; }
+.jm-evd-card { border: 1px solid #e4eaf3; border-radius: 12px; padding: 20px; background: #fff; }
+.jm-evd-price { font-size: 22px; font-weight: 800; color: #061426; letter-spacing: -.02em; margin: 0 0 16px; }
+.jm-evd-price.is-free { color: #0a6454; }
+.jm-evd-row { display: flex; gap: 11px; align-items: flex-start; padding: 11px 0; border-top: 1px solid #f1f5fb; }
+.jm-evd-row:first-of-type { border-top: 0; padding-top: 0; }
+.jm-evd-row svg { width: 17px; height: 17px; color: #94a3b8; flex-shrink: 0; margin-top: 2px; }
+.jm-evd-row .l { font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: #94a3b8; margin-bottom: 2px; }
+.jm-evd-row .v { font-size: 14px; font-weight: 600; color: #0b1b33; line-height: 1.5; }
+
+/* Capacity */
+.jm-evd-bar { height: 4px; border-radius: 99px; background: #eef2f8; overflow: hidden; margin-top: 8px; }
+.jm-evd-bar span { display: block; height: 100%; background: #0640a3; border-radius: 99px; }
+.jm-evd-left { font-size: 12px; font-weight: 700; color: #8a5300; margin-top: 6px; }
+
+/* Actions */
+.jm-evd-act { margin-top: 18px; }
+.jm-evd-btn { display: block; width: 100%; box-sizing: border-box; text-align: center; background: #0640a3; color: #fff; border: 0; border-radius: 8px; padding: 13px; font: inherit; font-weight: 800; font-size: 14px; cursor: pointer; text-decoration: none; transition: background .14s; }
+.jm-evd-btn:hover { background: #052f78; }
+.jm-evd-btn.disabled { background: #f1f5fb; color: #94a3b8; cursor: not-allowed; }
+.jm-evd-btn.join { background: #0a6454; }
+.jm-evd-btn.join:hover { background: #08533f; }
+.jm-evd-note { font-size: 12px; color: #53667f; text-align: center; margin: 9px 0 0; line-height: 1.5; }
+.jm-evd-cal { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 10px; padding: 11px; border: 1px solid #e4eaf3; border-radius: 8px; font-size: 13px; font-weight: 700; color: #53667f; text-decoration: none; transition: border-color .14s, color .14s; }
+.jm-evd-cal:hover { border-color: #0640a3; color: #0640a3; }
+.jm-evd-cal svg { width: 15px; height: 15px; }
+
+/* Flash */
+.jm-evd-flash { border-radius: 8px; padding: 12px 15px; font-size: 13.5px; font-weight: 600; margin-bottom: 20px; }
+.jm-evd-flash.ok { background: #e6f5f1; color: #0a6454; }
+.jm-evd-flash.err { background: #fdecea; color: #991b1b; }
 </style>
 
-<div class="jm-evv">
+<div class="jm-evd">
     <?= jm_breadcrumbs([['label' => 'Events', 'url' => '/jobmington/events/'], ['label' => $event['title']]]) ?>
 
-    <div class="jm-evv-cover">
-        <?php if (!empty($event['cover_image'])): ?>
-            <img src="<?= e($event['cover_image']) ?>" alt="<?= e($event['title']) ?>">
-        <?php else: ?>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <?php endif; ?>
-    </div>
-
-    <span class="jm-evv-type"><?= e(ucfirst($event['event_type'])) ?></span>
+    <span class="jm-evd-type"><?= e(ucfirst($event['event_type'])) ?></span>
     <h1><?= e($event['title']) ?></h1>
+    <p class="jm-evd-sub">
+        <b><?= e(date('l, j F Y', $start)) ?></b> &middot; <?= e(date('g:i A', $start)) ?><?= $event['timezone'] ? ' ' . e($event['timezone']) : '' ?> &middot; <?= e($where) ?>
+    </p>
 
-    <?php if ($justJoined): ?><div class="jm-evv-flash">You're registered! Details are below.</div><?php endif; ?>
-    <?php if ($message): ?><div class="jm-evv-flash" style="background:#fdecea;color:#991b1b;"><?= e($message) ?></div><?php endif; ?>
+    <?php if ($justJoined): ?><div class="jm-evd-flash ok">You're registered. Details are below.</div><?php endif; ?>
+    <?php if ($message): ?><div class="jm-evd-flash err"><?= e($message) ?></div><?php endif; ?>
 
-    <div class="jm-evv-grid">
-        <div class="jm-evv-desc"><?= e($event['description'] ?: 'Details coming soon.') ?></div>
-
-        <aside class="jm-evv-side">
-            <div class="jm-evv-meta">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <div><div class="l">When</div><div class="v"><?= e(date('D, M d, Y', strtotime($event['starts_at']))) ?><br><?= e(date('h:i A', strtotime($event['starts_at']))) ?> <?= e($event['timezone']) ?></div></div>
-            </div>
-            <div class="jm-evv-meta">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <div><div class="l">Where</div><div class="v"><?= $event['is_online'] ? 'Online' : e($event['location'] ?: 'In person') ?></div></div>
-            </div>
-            <div class="jm-evv-meta">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                <div><div class="l">Registered</div><div class="v"><?= (int)$event['registration_count'] ?><?= $event['capacity'] ? ' / ' . (int)$event['capacity'] : '' ?></div></div>
-            </div>
-
-            <div style="margin-top:18px;">
-            <?php if ($registered): ?>
-                <?php if (!$isPast && !empty($event['meeting_url'])): ?>
-                    <a class="jm-evv-join" href="<?= e($event['meeting_url']) ?>" target="_blank" rel="noopener">Join the session</a>
-                    <p class="jm-evv-note">You're registered. The link is also emailed nearer the time.</p>
-                <?php elseif (!$isPast): ?>
-                    <div class="jm-evv-btn disabled">You're registered</div>
-                    <p class="jm-evv-note">The join link will appear here before it starts.</p>
+    <div class="jm-evd-grid">
+        <div class="jm-evd-main">
+            <div class="jm-evd-cover">
+                <?php if (!empty($event['cover_image'])): ?>
+                    <img src="<?= e($event['cover_image']) ?>" alt="<?= e($event['title']) ?>">
                 <?php else: ?>
-                    <div class="jm-evv-btn disabled">Event ended</div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <?php endif; ?>
-            <?php elseif ($isPast): ?>
-                <div class="jm-evv-btn disabled">Event ended</div>
-            <?php elseif ($isFull): ?>
-                <div class="jm-evv-btn disabled">Fully booked</div>
-            <?php else: ?>
-                <form method="post">
-                    <?= Security::csrfField() ?>
-                    <input type="hidden" name="action" value="register">
-                    <button class="jm-evv-btn" type="submit"><?= $event['is_free'] ? 'Register free' : 'Register — ₦' . number_format((float)$event['price']) ?></button>
-                </form>
-                <?php if (!Session::isLoggedIn()): ?><p class="jm-evv-note">You'll be asked to sign in first.</p><?php endif; ?>
+            </div>
+
+            <div class="jm-evd-sec">
+                <h2>About this event</h2>
+                <p class="jm-evd-desc"><?= e($event['description'] ?: 'Details coming soon.') ?></p>
+            </div>
+
+            <?php if (!empty($event['host_name'])): ?>
+            <div class="jm-evd-sec">
+                <h2>Host</h2>
+                <div class="jm-evd-host">
+                    <div class="jm-evd-host-av"><?= e(strtoupper(mb_substr($event['host_name'], 0, 1))) ?></div>
+                    <div>
+                        <p class="jm-evd-host-name"><?= e($event['host_name']) ?></p>
+                        <?php if (!empty($event['host_bio'])): ?>
+                            <p class="jm-evd-host-bio"><?= e($event['host_bio']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
             <?php endif; ?>
+        </div>
+
+        <aside class="jm-evd-side">
+            <div class="jm-evd-card">
+                <p class="jm-evd-price<?= $event['is_free'] ? ' is-free' : '' ?>">
+                    <?= $event['is_free'] ? 'Free' : '&#8358;' . number_format((float) $event['price']) ?>
+                </p>
+
+                <div class="jm-evd-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <div>
+                        <div class="l">When</div>
+                        <div class="v"><?= e(date('D, j M Y', $start)) ?><br><?= e(date('g:i A', $start)) ?> <?= e($event['timezone']) ?></div>
+                    </div>
+                </div>
+
+                <div class="jm-evd-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <div>
+                        <div class="l">Where</div>
+                        <div class="v"><?= e($where) ?></div>
+                    </div>
+                </div>
+
+                <div class="jm-evd-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <div style="flex:1;min-width:0;">
+                        <div class="l">Registered</div>
+                        <div class="v"><?= $taken ?><?= $capacity > 0 ? ' of ' . $capacity : '' ?></div>
+                        <?php if ($capacity > 0): ?>
+                            <div class="jm-evd-bar"><span style="width:<?= $fillPct ?>%"></span></div>
+                            <?php if (!$isPast && $seatsLeft !== null && $seatsLeft <= 20): ?>
+                                <div class="jm-evd-left"><?= $seatsLeft > 0 ? $seatsLeft . ' spots left' : 'Fully booked' ?></div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="jm-evd-act">
+                <?php if ($registered): ?>
+                    <?php if (!$isPast && !empty($event['meeting_url'])): ?>
+                        <a class="jm-evd-btn join" href="<?= e($event['meeting_url']) ?>" target="_blank" rel="noopener">Join the session</a>
+                        <p class="jm-evd-note">You're registered. The link is also emailed nearer the time.</p>
+                    <?php elseif (!$isPast): ?>
+                        <div class="jm-evd-btn disabled">You're registered</div>
+                        <p class="jm-evd-note">The join link will appear here before it starts.</p>
+                    <?php else: ?>
+                        <div class="jm-evd-btn disabled">Event ended</div>
+                    <?php endif; ?>
+                <?php elseif ($isPast): ?>
+                    <div class="jm-evd-btn disabled">Event ended</div>
+                <?php elseif ($isFull): ?>
+                    <div class="jm-evd-btn disabled">Fully booked</div>
+                <?php else: ?>
+                    <form method="post">
+                        <?= Security::csrfField() ?>
+                        <input type="hidden" name="action" value="register">
+                        <button class="jm-evd-btn" type="submit"><?= $event['is_free'] ? 'Register free' : 'Register &mdash; &#8358;' . number_format((float) $event['price']) ?></button>
+                    </form>
+                    <?php if (!Session::isLoggedIn()): ?><p class="jm-evd-note">You'll be asked to sign in first.</p><?php endif; ?>
+                <?php endif; ?>
+
+                <?php if (!$isPast && $gcalUrl): ?>
+                    <a class="jm-evd-cal" href="<?= e($gcalUrl) ?>" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                        Add to calendar
+                    </a>
+                <?php endif; ?>
+                </div>
             </div>
         </aside>
     </div>
