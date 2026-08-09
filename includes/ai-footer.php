@@ -49,7 +49,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';
-                navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-15`).catch(() => {});
+                navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-16`).catch(() => {});
             });
         }
     })();
