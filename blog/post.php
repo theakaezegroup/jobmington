@@ -85,6 +85,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         <div class="jm-post-hero"><img src="<?= e($post['featured_image']) ?>" alt="<?= e($post['title']) ?>"></div>
     <?php endif; ?>
 
+    <?php require_once __DIR__ . '/../includes/header_ads.php'; ?>
     <div class="jm-post-body"><?php
         $content = preg_replace('#<(script|style|iframe)\b[^>]*>.*?</\1>#is', '', (string) $post['content']);
         $isPlain = strip_tags($content) === $content;
@@ -100,6 +101,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
             );
         }
     ?></div>
+
+    <?php jm_ad_inline(); ?>
 
     <?php if (!empty($more)): ?>
         <div class="jm-post-more">

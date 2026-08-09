@@ -84,8 +84,83 @@ $jobTags = jm_job_tags($job);
 $matchUserId = Session::isLoggedIn() && !Session::isEmployer() ? (int) Session::userId() : null;
 $matchCoach = jm_job_match_coach($pdo, $job, $matchUserId, Session::isLoggedIn());
 $interviewKit = jm_job_interview_kit($job);
-$pageTitle = $job['title'] . ' | ' . SITE_NAME;
-jm_jobs_header($pageTitle, 'jobs');
+/* ── Search, sharing and Google-for-Jobs metadata ─────────────────── */
+$jobWhere = trim(($job['city'] ?? '') . (!empty($job['city']) && !empty($job['country_name']) ? ', ' : '') . ($job['country_name'] ?? ''));
+$isRemote = ($job['job_type'] ?? '') === 'remote';
+
+// preg rather than mb_*: mbstring is not installed on the server.
+$plain = trim(preg_replace('/\s+/', ' ', strip_tags((string) $job['description'])));
+$snippet = preg_match('/^.{0,150}/us', $plain, $sm) ? rtrim($sm[0]) : '';
+if (strlen($plain) > strlen($snippet)) { $snippet .= '…'; }
+
+$jobDesc = trim($job['title'] . ' at ' . $job['company_name']
+    . ($jobWhere !== '' ? ' — ' . $jobWhere : ($isRemote ? ' — Remote' : ''))
+    . '. ' . $snippet);
+
+$jobCanonical = SITE_URL . '/jobs/view.php?id=' . (int) $job['job_id'];
+
+$employmentType = [
+    'full-time'  => 'FULL_TIME',
+    'part-time'  => 'PART_TIME',
+    'contract'   => 'CONTRACTOR',
+    'internship' => 'INTERN',
+    'remote'     => 'FULL_TIME',
+][$job['job_type'] ?? ''] ?? 'FULL_TIME';
+
+$jobLd = [
+    '@context'           => 'https://schema.org/',
+    '@type'              => 'JobPosting',
+    'title'              => (string) $job['title'],
+    'description'        => (string) ($job['description'] ?: $job['title']),
+    'datePosted'         => date('Y-m-d', strtotime((string) $job['posted_at'])),
+    'employmentType'     => $employmentType,
+    'hiringOrganization' => [
+        '@type' => 'Organization',
+        'name'  => (string) $job['company_name'],
+        'sameAs' => SITE_URL,
+    ],
+    'directApply'        => empty($job['apply_link']),
+];
+if (!empty($job['expires_at'])) {
+    $jobLd['validThrough'] = date('Y-m-d', strtotime((string) $job['expires_at']));
+}
+if ($isRemote) {
+    // Google requires TELECOMMUTE plus where the applicant may be based.
+    $jobLd['jobLocationType'] = 'TELECOMMUTE';
+    $jobLd['applicantLocationRequirements'] = [
+        '@type' => 'Country',
+        'name'  => $job['country_name'] ?: 'Africa',
+    ];
+} elseif ($jobWhere !== '') {
+    $jobLd['jobLocation'] = [
+        '@type'   => 'Place',
+        'address' => array_filter([
+            '@type'           => 'PostalAddress',
+            'addressLocality' => $job['city'] ?: null,
+            'addressCountry'  => $job['country_name'] ?: null,
+        ]),
+    ];
+}
+if (!empty($job['salary_min']) || !empty($job['salary_max'])) {
+    $jobLd['baseSalary'] = [
+        '@type'    => 'MonetaryAmount',
+        'currency' => $job['currency_symbol'] ?: 'USD',
+        'value'    => array_filter([
+            '@type'    => 'QuantitativeValue',
+            'minValue' => $job['salary_min'] ? (float) $job['salary_min'] : null,
+            'maxValue' => $job['salary_max'] ? (float) $job['salary_max'] : null,
+            'unitText' => 'MONTH',
+        ]),
+    ];
+}
+
+$pageTitle = $job['title'] . ' at ' . $job['company_name'] . ' | ' . SITE_NAME;
+jm_jobs_header($pageTitle, 'jobs', [
+    'description' => $jobDesc,
+    'canonical'   => $jobCanonical,
+    'ogType'      => 'article',
+    'jsonLd'      => $jobLd,
+]);
 ?>
 
 <section class="jm-section jm-job-detail" style="padding-top:0;">
@@ -310,6 +385,7 @@ jm_jobs_header($pageTitle, 'jobs');
 <?php if (!empty($relatedJobs)): ?>
     <section class="jm-section">
         <div class="jm-section-head">
+            <?php require_once __DIR__ . '/../includes/header_ads.php'; jm_ad_inline(); ?>
             <div>
                 <h2>Related jobs.</h2>
                 <p>More roles from this company or category.</p>

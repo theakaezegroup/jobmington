@@ -9,27 +9,75 @@
 if (!defined('JOBMINGTON')) { exit; }
 
 /** The banner that should show right now, or null. */
-function jm_header_ad_current(PDO $pdo): ?array {
-    static $cached = false, $ad = null;
-    if ($cached) { return $ad; }
-    $cached = true;
+function jm_header_ad_current(PDO $pdo, string $placement = 'header'): ?array {
+    static $cache = [];
+    if (array_key_exists($placement, $cache)) { return $cache[$placement]; }
 
     try {
-        $stmt = $pdo->query("
+        $stmt = $pdo->prepare("
             SELECT ad_id, name, image_path, image_alt, click_url, bg_color
             FROM header_ads
             WHERE is_active = 1
+              AND placement = ?
               AND (starts_at IS NULL OR starts_at <= NOW())
               AND (ends_at   IS NULL OR ends_at   >= NOW())
             ORDER BY priority DESC, updated_at DESC
             LIMIT 1
         ");
-        $ad = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $stmt->execute([$placement]);
+        $cache[$placement] = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     } catch (Throwable $e) {
-        // A missing table or a database hiccup must never take the header down.
-        $ad = null;
+        // A missing table or a database hiccup must never take a page down.
+        $cache[$placement] = null;
     }
-    return $ad;
+    return $cache[$placement];
+}
+
+/** Count a view without ever interrupting the page. */
+function jm_ad_count_view(PDO $pdo, int $adId): void {
+    try {
+        $pdo->prepare("UPDATE header_ads SET impressions = impressions + 1 WHERE ad_id = ?")->execute([$adId]);
+    } catch (Throwable $e) { /* not worth interrupting a page view */ }
+}
+
+/**
+ * In-content unit: a bordered card that sits inside a page or a results list.
+ * Wider and shorter than a card image but taller than the header strip --
+ * around 1200x300 (supply 2400x600).
+ */
+function jm_ad_inline(?PDO $pdo = null, string $placement = 'inline'): void {
+    static $styled = false;
+
+    if ($pdo === null) {
+        if (!function_exists('db')) { return; }
+        try { $pdo = db(); } catch (Throwable $e) { return; }
+    }
+    $ad = jm_header_ad_current($pdo, $placement);
+    if (!$ad) { return; }
+    jm_ad_count_view($pdo, (int) $ad['ad_id']);
+
+    $href = !empty($ad['click_url']) ? '/jobmington/go/ad.php?id=' . (int) $ad['ad_id'] : '';
+    $alt  = (string) ($ad['image_alt'] ?: $ad['name']);
+    $bg   = preg_match('/^#[0-9a-f]{3,8}$/i', (string) $ad['bg_color']) ? $ad['bg_color'] : '#f7faff';
+
+    if (!$styled) {
+        $styled = true;
+        echo '<style>'
+           . '.jm-adcard{position:relative;display:block;border:1px solid #e4eaf3;border-radius:12px;overflow:hidden;margin:22px 0;}'
+           . '.jm-adcard img{display:block;width:100%;height:auto;}'
+           . '.jm-adcard-tag{position:absolute;top:8px;left:8px;z-index:2;font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#5b6b82;background:rgba(255,255,255,.9);padding:3px 7px;border-radius:4px;}'
+           . '</style>';
+    }
+    ?>
+    <div class="jm-adcard" style="background: <?= e($bg) ?>;" role="complementary" aria-label="Sponsor">
+        <span class="jm-adcard-tag">Ad</span>
+        <?php if ($href !== ''): ?>
+            <a href="<?= e($href) ?>" target="_blank" rel="noopener sponsored"><img src="<?= e($ad['image_path']) ?>" alt="<?= e($alt) ?>" loading="lazy"></a>
+        <?php else: ?>
+            <img src="<?= e($ad['image_path']) ?>" alt="<?= e($alt) ?>" loading="lazy">
+        <?php endif; ?>
+    </div>
+    <?php
 }
 
 /**
@@ -50,11 +98,7 @@ function jm_header_ad_bar(?PDO $pdo = null): void {
     if (!$ad) { return; }
     $printed = true;
 
-    // Count the view. Failure here must not stop the page rendering.
-    try {
-        $pdo->prepare("UPDATE header_ads SET impressions = impressions + 1 WHERE ad_id = ?")
-            ->execute([(int) $ad['ad_id']]);
-    } catch (Throwable $e) { /* not worth interrupting a page view */ }
+    jm_ad_count_view($pdo, (int) $ad['ad_id']);
 
     $src  = $ad['image_path'];
     $alt  = (string) ($ad['image_alt'] ?: $ad['name']);

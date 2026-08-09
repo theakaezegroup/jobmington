@@ -33,6 +33,11 @@ $AD_FIELDS = [
         'kind' => 'text', 'label' => 'Campaign name', 'required' => true, 'max' => 150,
         'description' => 'Internal label so you can tell campaigns apart. Never shown to visitors.',
     ],
+    'placement' => [
+        'kind' => 'select', 'label' => 'Where it appears', 'default' => 'header',
+        'options' => ['header' => 'Header strip (above the nav, every page)', 'inline' => 'In content (job list, job detail, blog posts)'],
+        'description' => 'Header strip is wide and short, around 1200x120. In content is a card, around 1200x300. One ad runs per position.',
+    ],
     'image_alt' => [
         'kind' => 'text', 'label' => 'Image description', 'max' => 200,
         'description' => 'Read aloud by screen readers and shown if the image fails to load. Describe the offer, not the picture.',
@@ -79,6 +84,9 @@ function jm_ad_read(string $key, array $def, array &$errors) {
             $ts = strtotime($raw);
             if ($ts === false) { $errors[] = $def['label'] . ' is not a valid date.'; return null; }
             return date('Y-m-d H:i:s', $ts);
+
+        case 'select':
+            return isset($def['options'][$raw]) ? $raw : ($def['default'] ?? null);
 
         case 'color':
             return preg_match('/^#[0-9a-f]{6}$/i', $raw) ? $raw : ($def['default'] ?? null);
@@ -146,18 +154,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($errors) {
                 $err = implode(' ', $errors);
             } elseif ($adId) {
-                $sql = "UPDATE header_ads SET name=?, image_alt=?, click_url=?, bg_color=?, starts_at=?, ends_at=?, priority=?, is_active=?"
+                $sql = "UPDATE header_ads SET name=?, placement=?, image_alt=?, click_url=?, bg_color=?, starts_at=?, ends_at=?, priority=?, is_active=?"
                      . ($imagePath ? ", image_path=?" : "") . " WHERE ad_id=?";
-                $params = [$values['name'], $values['image_alt'], $values['click_url'], $values['bg_color'],
+                $params = [$values['name'], $values['placement'], $values['image_alt'], $values['click_url'], $values['bg_color'],
                            $values['starts_at'], $values['ends_at'], $values['priority'], $values['is_active']];
                 if ($imagePath) { $params[] = $imagePath; }
                 $params[] = $adId;
                 $pdo->prepare($sql)->execute($params);
                 $msg = 'Ad saved.';
             } else {
-                $pdo->prepare("INSERT INTO header_ads (name, image_path, image_alt, click_url, bg_color, starts_at, ends_at, priority, is_active)
-                               VALUES (?,?,?,?,?,?,?,?,?)")
-                    ->execute([$values['name'], $imagePath, $values['image_alt'], $values['click_url'], $values['bg_color'],
+                $pdo->prepare("INSERT INTO header_ads (name, placement, image_path, image_alt, click_url, bg_color, starts_at, ends_at, priority, is_active)
+                               VALUES (?,?,?,?,?,?,?,?,?,?)")
+                    ->execute([$values['name'], $values['placement'], $imagePath, $values['image_alt'], $values['click_url'], $values['bg_color'],
                                $values['starts_at'], $values['ends_at'], $values['priority'], $values['is_active']]);
                 $msg = 'Ad created.';
             }
@@ -192,6 +200,12 @@ function jm_ad_field(string $key, array $def, ?array $row): void {
                 <input type="checkbox" id="<?= e($id) ?>" name="<?= e($key) ?>" value="1" <?= $val ? 'checked' : '' ?> class="w-4 h-4">
                 <span class="text-sm text-slate-700">Enabled</span>
             </label>
+        <?php elseif ($def['kind'] === 'select'): ?>
+            <select id="<?= e($id) ?>" name="<?= e($key) ?>" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+                <?php foreach ($def['options'] as $ov => $ol): ?>
+                    <option value="<?= e($ov) ?>" <?= (string) $val === (string) $ov ? 'selected' : '' ?>><?= e($ol) ?></option>
+                <?php endforeach; ?>
+            </select>
         <?php elseif ($def['kind'] === 'color'): ?>
             <input type="color" id="<?= e($id) ?>" name="<?= e($key) ?>" value="<?= e($val ?: '#f4f8ff') ?>" class="h-10 w-20 rounded border border-slate-300 bg-white p-1">
         <?php else:

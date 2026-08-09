@@ -672,11 +672,23 @@ function jm_company_logo_url(array $job): string {
     return $domain !== null ? jm_company_logo_from_domain($domain) : '';
 }
 
-function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
+/**
+ * @param array $meta Optional page metadata:
+ *   description  plain-text summary for search results and link previews
+ *   canonical    absolute canonical URL
+ *   image        absolute og:image URL (falls back to the site share cover)
+ *   jsonLd       array encoded as schema.org JSON-LD (JobPosting on job pages)
+ */
+function jm_jobs_header(string $pageTitle, string $active = 'jobs', array $meta = []): void {
     $isLoggedIn = Session::isLoggedIn();
     $dashboardUrl = Session::isAdmin()
         ? '/jobmington/admin/'
         : (Session::isEmployer() ? '/jobmington/employer/dashboard.php' : '/jobmington/seeker/dashboard.php');
+
+    $desc      = trim((string) ($meta['description'] ?? 'Find remote and local jobs across Africa on Jobmington, plus AI tools that get you hired.'));
+    $canonical = (string) ($meta['canonical'] ?? '');
+    $ogImage   = (string) ($meta['image'] ?? SITE_URL . '/assets/images/og-cover.png?v=brand-15');
+    $jsonLd    = $meta['jsonLd'] ?? null;
     ?>
     <!doctype html>
     <html lang="en">
@@ -684,6 +696,23 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= e($pageTitle) ?></title>
+        <meta name="description" content="<?= e($desc) ?>">
+        <?php if ($canonical !== ''): ?><link rel="canonical" href="<?= e($canonical) ?>"><?php endif; ?>
+
+        <meta property="og:type" content="<?= e($meta['ogType'] ?? 'website') ?>">
+        <meta property="og:site_name" content="<?= e(SITE_NAME) ?>">
+        <meta property="og:title" content="<?= e($pageTitle) ?>">
+        <meta property="og:description" content="<?= e($desc) ?>">
+        <?php if ($canonical !== ''): ?><meta property="og:url" content="<?= e($canonical) ?>"><?php endif; ?>
+        <meta property="og:image" content="<?= e($ogImage) ?>">
+        <meta property="og:locale" content="en_US">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="<?= e($pageTitle) ?>">
+        <meta name="twitter:description" content="<?= e($desc) ?>">
+        <meta name="twitter:image" content="<?= e($ogImage) ?>">
+        <?php if (is_array($jsonLd)): ?>
+        <script type="application/ld+json"><?= json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
+        <?php endif; ?>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
         <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">

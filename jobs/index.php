@@ -147,7 +147,11 @@ jm_jobs_header($pageTitle, 'jobs');
         ]) ?>
     <?php else: ?>
         <div class="jm-job-list">
+            <?php require_once __DIR__ . '/../includes/header_ads.php'; $jmRowIdx = 0; ?>
             <?php foreach ($jobs as $job):
+                // A single in-list unit after the 6th result: far enough down that
+                // the first screen of results is untouched.
+                if (++$jmRowIdx === 7) { jm_ad_inline(); }
                 $jobSaved = in_array($job['job_id'], $savedJobIds); ?>
             <div class="jm-job-row-wrap">
                 <a class="jm-job-row" href="/jobmington/jobs/view.php?id=<?= (int) $job['job_id'] ?>">
