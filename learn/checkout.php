@@ -22,7 +22,7 @@ $userId = Session::userId();
 // Must be logged in
 if (!Session::isLoggedIn()) {
     $_SESSION['redirect_after_login'] = currentUrl();
-    redirect('/jobmington/auth/login.php?msg=login_required');
+    Session::requireLogin('Sign in or create a free account to complete your enrolment.');
 }
 
 $courseId = (int) ($_GET['course'] ?? 0);

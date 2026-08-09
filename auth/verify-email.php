@@ -52,6 +52,14 @@ if ($token !== '') {
         }
 
         $verified = true;
+
+        // Verification interrupted something (registering for an event, applying
+        // for a job). Hand the user back to it rather than ending the journey here.
+        $pending = jm_safe_redirect_path((string) ($_SESSION['post_auth_redirect'] ?? ''));
+        if ($pending !== '' && Session::isLoggedIn() && Session::userId() === (int) $user['user_id']) {
+            unset($_SESSION['post_auth_redirect'], $_SESSION['auth_context']);
+            redirect($pending);
+        }
     } else {
         $invalid = true;
     }

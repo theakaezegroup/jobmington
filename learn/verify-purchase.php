@@ -9,7 +9,7 @@ require_once __DIR__ . '/_disabled.php';
 require_once __DIR__ . '/../includes/header.php';
 
 if (!$userId) {
-    redirect('/jobmington/auth/login.php');
+    Session::requireLogin('Sign in to confirm your purchase.');
 }
 
 $courseId = (int) ($_GET['course'] ?? 0);

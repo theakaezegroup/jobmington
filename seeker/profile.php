@@ -30,7 +30,7 @@ function jm_profile_user(PDO $pdo, int $userId): array {
 $user = jm_profile_user($pdo, $userId);
 if (!$user) {
     Session::destroy();
-    redirect('/jobmington/auth/login.php');
+    Session::requireLogin('Sign in to view your profile.');
 }
 
 $countries = $pdo->query("SELECT * FROM countries WHERE is_active = 1 ORDER BY name")->fetchAll();

@@ -81,9 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             /* Block unverified users — send to verification page */
             if (!$_SESSION['is_verified'] && $user['user_type'] !== USER_TYPE_ADMIN) {
+                // Park the destination so verification can hand them back to it
+                // instead of the detour swallowing where they were going.
+                if ($hasSafeRedirect) {
+                    $_SESSION['post_auth_redirect'] = $redirectTo;
+                }
                 redirect('/jobmington/auth/verify-email.php');
             }
 
+            unset($_SESSION['auth_context']);   // consumed; must not linger
             if ($hasSafeRedirect) {
                 redirect($redirectTo);
             }

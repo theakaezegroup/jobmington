@@ -29,7 +29,7 @@ if (isPost()) {
 
     if (!Session::isLoggedIn()) {
         Session::flash('error', 'Unauthorised Access. Please Log in.');
-        redirect('/jobmington/auth/login.php');
+        Session::requireLogin('Sign in or create a free account to start a discussion. We will bring you straight back here.');
     }
 
     $title = Security::clean(post('title', ''));

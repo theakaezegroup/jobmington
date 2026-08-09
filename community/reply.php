@@ -12,7 +12,7 @@ $pdo = db();
 
 if (!Session::isLoggedIn()) {
     Session::flash('error', 'Please sign in to post a reply.');
-    redirect('/jobmington/auth/login.php');
+    Session::requireLogin('Sign in or create a free account to reply. We will bring you straight back here.');
 }
 
 if (!isPost()) {

@@ -14,7 +14,7 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/paystack.php';
 
 Session::start();
-if (!Session::isLoggedIn()) redirect('/jobmington/auth/login.php');
+if (!Session::isLoggedIn()) Session::requireLogin('Sign in to complete your payment.', '/jobmington/payments/');
 
 $pdo = db();
 $userId = Session::userId();

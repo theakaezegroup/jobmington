@@ -20,7 +20,7 @@ $stmt->execute([$userId]);
 $user = $stmt->fetch();
 if (!$user) {
     Session::destroy();
-    redirect('/jobmington/auth/login.php');
+    Session::requireLogin('Sign in to manage your settings.');
 }
 
 $stmt = $pdo->prepare("SELECT * FROM user_settings WHERE user_id = ? LIMIT 1");

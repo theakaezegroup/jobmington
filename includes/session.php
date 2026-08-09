@@ -235,9 +235,21 @@ class Session {
     /**
      * Require login - redirect if not logged in
      */
-    public static function requireLogin(): void {
+    /**
+     * @param string $context Optional note explaining why sign-in is needed.
+     *                        Shown on the auth pages so the visitor is not sent
+     *                        to generic copy with no sign their click registered.
+     * @param string $returnTo Override the return target. Defaults to the current
+     *                        URL, which is right for GET pages; POST-only handlers
+     *                        should pass the page a user can meaningfully return to.
+     */
+    public static function requireLogin(string $context = '', string $returnTo = ''): void {
         if (!self::isLoggedIn()) {
-            $redirect = urlencode($_SERVER['REQUEST_URI'] ?? '/');
+            if ($context !== '') {
+                $_SESSION['auth_context'] = $context;
+            }
+            $target   = $returnTo !== '' ? $returnTo : ($_SERVER['REQUEST_URI'] ?? '/');
+            $redirect = urlencode($target);
             header("Location: /jobmington/auth/login.php?redirect={$redirect}");
             exit;
         }

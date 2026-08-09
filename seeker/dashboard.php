@@ -211,7 +211,11 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
         <section class="jm-dashboard-top">
             <div>
                 <p class="jm-kicker">Dashboard</p>
-                <h1 style="margin:0;color:var(--jm-ink);font-size:52px;line-height:1.05;font-weight:600;">Welcome back, <?= e($firstName) ?>.</h1>
+                <?php /* Someone who just signed up has never been here, so "Welcome
+                          back" is wrong. Flag is set at registration, consumed once. */
+                      $isFirstVisit = !empty($_SESSION['is_new_signup']);
+                      if ($isFirstVisit) { unset($_SESSION['is_new_signup']); } ?>
+                <h1 style="margin:0;color:var(--jm-ink);font-size:52px;line-height:1.05;font-weight:600;"><?= $isFirstVisit ? 'Welcome to Jobmington, ' : 'Welcome back, ' ?><?= e($firstName) ?>.</h1>
                 <p style="max-width:680px;margin:22px 0 0;color:var(--jm-muted);">Track your applications, saved roles, and matched jobs from one quiet workspace.</p>
             </div>
             <aside class="jm-panel">
