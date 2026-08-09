@@ -141,7 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $ctxFor  = (string) ($_SESSION['auth_context_for'] ?? '');
                     $ctxHere = $hasSafeRedirect && $ctxFor !== ''
                         && jm_norm_target($ctxFor) === jm_norm_target($redirectTo);
-                    if (!$ctxHere) { unset($_SESSION['auth_context'], $_SESSION['auth_context_for']); }
+                    // Not shown unless it matches; deliberately not cleared here, so
+                    // an unrelated visit (a footer link, another tab) cannot destroy a
+                    // note the visitor still needs when they return to the real link.
                     $authCtx = $ctxHere ? trim((string) ($_SESSION['auth_context'] ?? '')) : '';
                 ?>
                 <p class="jm-kicker">Sign in</p>

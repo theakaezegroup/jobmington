@@ -145,7 +145,6 @@ $pageTitle = 'Create Account | ' . SITE_NAME;
                     $ctxFor  = (string) ($_SESSION['auth_context_for'] ?? '');
                     $ctxHere = $hasSafeRedirect && $ctxFor !== ''
                         && jm_norm_target($ctxFor) === jm_norm_target($redirectTo);
-                    if (!$ctxHere) { unset($_SESSION['auth_context'], $_SESSION['auth_context_for']); }
                     $authCtx = $ctxHere ? trim((string) ($_SESSION['auth_context'] ?? '')) : '';
                 ?>
                 <p class="jm-kicker">Create account</p>
