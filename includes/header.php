@@ -545,6 +545,7 @@ ob_start();
     
     <!-- Premium Design System -->
     <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css?v=brand-10">
+    <script src="/jobmington/assets/js/jm-image-compress.js?v=brand-15" defer></script>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
