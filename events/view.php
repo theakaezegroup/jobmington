@@ -73,10 +73,6 @@ $taken    = (int) $event['registration_count'];
 $seatsLeft = $capacity > 0 ? max(0, $capacity - $taken) : null;
 $fillPct  = $capacity > 0 ? min(100, (int) round($taken / $capacity * 100)) : 0;
 
-// First character of the host name, for the avatar initial.
-// preg with /u rather than mb_substr: mbstring is not installed on the server.
-$hostInitial = preg_match('/./u', (string) $event['host_name'], $hm) ? strtoupper($hm[0]) : '?';
-
 // "Add to calendar" link. Times are stored in the event's own timezone.
 $gcalDetails = preg_match('/^.{0,900}/us', (string) $event['description'], $dm) ? $dm[0] : '';
 $gcalUrl = '';
@@ -126,7 +122,7 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
 
 /* Host */
 .jm-evd-host { display: flex; gap: 13px; align-items: flex-start; }
-.jm-evd-host-av { width: 42px; height: 42px; border-radius: 50%; background: #eaf1fd; color: #0640a3; display: grid; place-items: center; font-size: 15px; font-weight: 800; flex-shrink: 0; }
+.jm-evd-host-av { width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0; display: block; object-fit: contain; }
 .jm-evd-host-name { font-size: 15px; font-weight: 800; color: #061426; margin: 0 0 3px; }
 .jm-evd-host-bio { font-size: 14px; color: #53667f; line-height: 1.65; margin: 0; white-space: pre-wrap; }
 
@@ -195,7 +191,7 @@ $activeAIPage = "learn"; require_once __DIR__ . '/../includes/ai-header.php';
             <div class="jm-evd-sec">
                 <h2>Host</h2>
                 <div class="jm-evd-host">
-                    <div class="jm-evd-host-av"><?= e($hostInitial) ?></div>
+                    <img class="jm-evd-host-av" src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                     <div>
                         <p class="jm-evd-host-name"><?= e($event['host_name']) ?></p>
                         <?php if (!empty($event['host_bio'])): ?>
