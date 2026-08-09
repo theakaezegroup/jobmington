@@ -234,7 +234,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
 <body class="jm-minimal">
 <div class="jm-shell">
     <header class="jm-header">
-        <a class="jm-logo" href="<?= SITE_URL ?>/"><img src="<?= ASSETS_URL ?>/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
+        <a class="jm-logo" href="<?= SITE_URL ?>/"><img src="<?= ASSETS_URL ?>/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
         <nav class="jm-nav">
             <a href="<?= SITE_URL ?>/jobs/">Jobs</a>
             <a class="jm-button secondary" href="<?= SITE_URL ?>/seeker/dashboard.php">Dashboard</a>

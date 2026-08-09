@@ -125,7 +125,7 @@ $pageTitle = 'Complete Job Payment | ' . SITE_NAME;
 <body class="jm-minimal">
     <div class="jm-shell">
         <header class="jm-header">
-            <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
+            <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
             <nav class="jm-nav" aria-label="Employer navigation">
                 <a href="/jobmington/employer/manage-jobs.php">Jobs</a>
                 <a href="/jobmington/pricing.php">Pricing</a>

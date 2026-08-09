@@ -91,7 +91,7 @@ $pageTitle = 'Employer Dashboard | ' . SITE_NAME;
 <body class="jm-minimal">
     <div class="jm-shell">
         <header class="jm-header">
-            <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
+            <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
             <nav class="jm-nav" aria-label="Employer navigation">
                 <a href="/jobmington/employer/dashboard.php">Dashboard</a>
                 <a href="/jobmington/employer/company-profile.php">Company</a>

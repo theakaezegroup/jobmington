@@ -976,7 +976,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">
-                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                 <span>Jobmington</span>
             </a>
             <button class="jm-mobile-nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="jm-home-nav">

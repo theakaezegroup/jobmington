@@ -393,7 +393,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
 
     <!-- Header -->
     <header class="jm-header">
-        <a class="jm-logo" href="<?= SITE_URL ?>/"><img src="<?= ASSETS_URL ?>/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
+        <a class="jm-logo" href="<?= SITE_URL ?>/"><img src="<?= ASSETS_URL ?>/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
         <nav class="jm-nav">
             <a href="<?= SITE_URL ?>/jobs/">Find jobs</a>
             <a href="<?= SITE_URL ?>/cv-builder/">CV Builder</a>

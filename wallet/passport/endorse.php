@@ -165,7 +165,7 @@ $level = $levelConfig[$endorsement['level']];
         <!-- Logo -->
         <div class="text-center mb-8">
             <a href="<?= SITE_URL ?>">
-                <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-7" alt="Jobmington" class="h-8 mx-auto">
+                <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-8" alt="Jobmington" class="h-8 mx-auto">
             </a>
         </div>
         

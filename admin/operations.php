@@ -492,7 +492,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
 <body class="jm-minimal">
     <div class="jm-shell">
         <header class="jm-header">
-            <a class="jm-logo" href="/jobmington/admin/"><img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
+            <a class="jm-logo" href="/jobmington/admin/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
             <nav class="jm-nav" aria-label="Admin navigation">
                 <a href="/jobmington/admin/">Dashboard</a>
                 <a href="/jobmington/admin/jobs.php">Jobs</a>

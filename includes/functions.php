@@ -637,7 +637,7 @@ if (!function_exists('jm_minimal_footer')) {
             <div class="jm-footer-inner">
                 <div class="jm-footer-brand">
                     <a class="jm-logo" href="/jobmington/">
-                        <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                        <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                         <span>Jobmington</span>
                     </a>
                     <p>Simple hiring for African talent. Find jobs, apply quickly, and manage hiring without the noise.</p>

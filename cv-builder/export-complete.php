@@ -1055,7 +1055,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
     <!-- Jobmington Branding Footer -->
     <footer class="cv-footer">
         <div class="cv-footer-brand">
-            <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-7" alt="Jobmington" class="cv-footer-logo">
+            <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-8" alt="Jobmington" class="cv-footer-logo">
             <span class="cv-footer-text">
                 Created with <a href="<?= SITE_URL ?>" target="_blank">Jobmington</a>
             </span>

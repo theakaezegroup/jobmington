@@ -488,7 +488,7 @@ if ($isAdminArea) {
     <div class="jm-admin-layout">
         <aside class="jm-admin-sidebar" id="jmAdminSidebar">
             <a class="jm-admin-sidebar-brand" href="/jobmington/admin/">
-                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                 <div class="jm-admin-sidebar-brand-text">
                     <strong>Jobmington</strong>
                     <small>Admin Console</small>
@@ -518,7 +518,7 @@ if ($isAdminArea) {
             <header class="jm-admin-topbar">
                 <button class="jm-admin-burger" type="button" id="jmAdminBurger" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
                 <a class="jm-admin-topbar-brand" href="/jobmington/admin/">
-                    <img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""> Admin
+                    <img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""> Admin
                 </a>
             </header>
             <main class="jm-admin-content">
@@ -1202,7 +1202,7 @@ ob_start();
     <div id="preloader">
         <div class="preloader-content">
             <div class="preloader-brand">
-                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="Badge" class="preloader-badge">
+                <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="Badge" class="preloader-badge">
                 <span class="preloader-name">JOBMINGTON</span>
             </div>
             <div class="loader-bar-track">
@@ -1303,7 +1303,7 @@ ob_start();
             <div class="flex items-center gap-6">
                 <a href="/jobmington/" class="flex items-center gap-3 group relative">
                     <div class="relative w-10 h-10 flex items-center justify-center group-hover:scale-105 transition duration-300">
-                        <img src="/jobmington/assets/images/badge.png?v=logo-7" class="relative z-10 w-8 h-8 object-contain drop-shadow-sm jm-brand-mark">
+                        <img src="/jobmington/assets/images/badge.png?v=logo-8" class="relative z-10 w-8 h-8 object-contain drop-shadow-sm jm-brand-mark">
                     </div>
                     <div class="hidden sm:flex flex-col">
                         <span class="font-bold tracking-tight text-xl jm-brand-text" style="font-family: 'Futura Cyrillic Demi'; letter-spacing: 0; color: #101828;">

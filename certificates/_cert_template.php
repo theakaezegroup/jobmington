@@ -177,7 +177,7 @@ $cLft = $inset + $band / 2; $cRgt = $GW - $inset - $band / 2;
 
     <div class="jm-cert-inner">
         <div class="jm-cert-brandrow">
-            <img class="jm-cert-logo" src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+            <img class="jm-cert-logo" src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
             <span class="jm-cert-brandname"><?= e($certBrand) ?></span>
         </div>
         <h2 class="jm-cert-title">Certificate</h2>

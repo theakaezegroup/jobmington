@@ -4,7 +4,7 @@
  * old ?v= query-string variants, which are separate cache keys and would
  * otherwise accumulate in the cache forever.
  */
-const CACHE_VERSION = '2026-08-09';
+const CACHE_VERSION = '2026-08-09.2';
 const CACHE_NAME = `jobmington-pwa-${CACHE_VERSION}`;
 const NETWORK_TIMEOUT_MS = 3000;
 

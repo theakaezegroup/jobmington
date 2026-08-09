@@ -79,7 +79,7 @@ $pageTitle = 'State Icons | ' . SITE_NAME;
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/admin/">
-                <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                 <span>Jobmington Admin</span>
             </a>
             <nav class="jm-nav" aria-label="Admin navigation">

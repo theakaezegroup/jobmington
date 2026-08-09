@@ -690,7 +690,7 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
         <div class="jm-shell">
             <header class="jm-header">
                 <a class="jm-logo" href="/jobmington/">
-                    <img src="/jobmington/assets/images/badge.png?v=logo-7" alt="">
+                    <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                     <span>Jobmington</span>
                 </a>
                 <nav class="jm-nav" aria-label="Main navigation">

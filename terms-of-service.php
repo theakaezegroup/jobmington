@@ -29,7 +29,7 @@ $sections = [
 <body class="jm-minimal">
     <div class="jm-shell">
         <header class="jm-header">
-            <a href="/jobmington/" class="jm-logo"><img src="/jobmington/assets/images/badge.png?v=logo-7" alt=""><span>Jobmington</span></a>
+            <a href="/jobmington/" class="jm-logo"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
             <nav class="jm-nav" aria-label="Primary">
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/employer/">Employers</a>
