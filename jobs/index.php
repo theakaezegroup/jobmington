@@ -9,7 +9,9 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/_job_helpers.php';
 
 Session::start();
-Session::requireVerified();
+// Public on purpose: this and the job pages are the only surfaces search
+// engines can index at any scale, and gating them hid ~30k pages from Google.
+// Signing in is required to act (save, apply), not to look.
 $pdo = db();
 
 $q = trim(Security::clean(get('q', '')));

@@ -9,7 +9,9 @@ require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/_job_helpers.php';
 
 Session::start();
-Session::requireVerified();
+// Public on purpose -- see jobs/index.php. The full description stays visible
+// so the JobPosting schema matches what a visitor actually sees; only acting
+// on the job (apply, save) requires an account.
 $pdo = db();
 $jobId = (int) get('id', 0);
 
@@ -212,7 +214,10 @@ jm_jobs_header($pageTitle, 'jobs', [
         <?php endif; ?>
 
         <div class="jm-job-detail-actions">
-            <?php if ($hasApplied): ?>
+            <?php if (!Session::isLoggedIn()): ?>
+                <a class="jm-button" href="/jobmington/auth/login.php?redirect=<?= urlencode('/jobmington/jobs/view.php?id=' . (int) $jobId) ?>">Sign in to apply</a>
+                <span style="font-size:13px;color:#53667f;">Free account &mdash; we bring you straight back to this role.</span>
+            <?php elseif ($hasApplied): ?>
                 <a class="jm-button secondary" href="/jobmington/seeker/applications.php">Applied</a>
             <?php else: ?>
                 <a class="jm-button" href="/jobmington/jobs/apply.php?id=<?= (int) $jobId ?>">Apply now</a>
