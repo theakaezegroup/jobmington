@@ -56,7 +56,10 @@ $pendingHere  = (int) ($_SESSION[$intentKey] ?? 0) === $eventId;
 
 if ($postedIntent && !Session::isLoggedIn()) {
     // Park the intent, then send them to sign in (that page links to sign-up).
+    // auth_context tells the auth pages why the user is there, so they do not
+    // land on generic "Welcome back" copy with no sign their click registered.
     $_SESSION[$intentKey] = $eventId;
+    $_SESSION['auth_context'] = 'You\'re registering for "' . $event['title'] . '". Sign in or create a free account and we\'ll complete it automatically.';
     redirect('/jobmington/auth/login.php?redirect=' . urlencode('/jobmington/events/view.php?slug=' . $event['slug']));
 }
 
@@ -74,11 +77,11 @@ if ($postedIntent) {
 
 // Already registered before the intent could resume — nothing left to do.
 if ($pendingHere && Session::isLoggedIn() && $registered) {
-    unset($_SESSION[$intentKey]);
+    unset($_SESSION[$intentKey], $_SESSION['auth_context']);
 }
 
 if ($wantsRegister && Session::isLoggedIn()) {
-    unset($_SESSION[$intentKey]);
+    unset($_SESSION[$intentKey], $_SESSION['auth_context']);
 
     if ($isPast) {
         $message = 'This event has already taken place.';

@@ -136,6 +136,9 @@ $pageTitle = 'Create Account | ' . SITE_NAME;
 
         <section class="jm-hero">
             <div>
+                <?php if (!empty($_SESSION['auth_context'])): ?>
+                    <p style="margin:0 0 16px;padding:12px 15px;background:#eaf1fd;border-left:3px solid #0640a3;border-radius:6px;color:#0b1b33;font-size:13.5px;font-weight:600;line-height:1.55;"><?= e($_SESSION['auth_context']) ?></p>
+                <?php endif; ?>
                 <p class="jm-kicker">Create account</p>
                 <h1>Join Jobmington.</h1>
                 <p>Create a seeker account to apply and save roles, or an employer account to set up a company and publish jobs.</p>
