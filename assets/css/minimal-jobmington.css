@@ -4693,3 +4693,54 @@ body.jm-home-page {
     }
 
 }
+
+/* ==========================================================================
+   MOBILE: BRAND-BLUE HEADER BAR
+   The .jm-header normally sits inset inside .jm-shell's padding. On mobile it
+   goes full-bleed with a brand-blue background, and the hamburger sits
+   directly on that blue rather than reading as a white chip.
+   Negative margins (not transform/clip-path) do the bleed, so the fixed
+   .jm-nav drawer keeps the viewport as its containing block.
+   ========================================================================== */
+@media (max-width: 900px) {
+    body.jm-mobile-nav-ready .jm-shell > .jm-header {
+        background: var(--jm-blue);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+        margin: -20px -18px 20px;
+        padding: 10px 18px;
+    }
+
+    body.jm-mobile-nav-ready .jm-shell > .jm-header .jm-logo {
+        color: #ffffff;
+    }
+
+    /* badge.png has the blue tile baked in, which reads as a mismatched square
+       on the blue bar. Swap to the transparent-background mark. */
+    body.jm-mobile-nav-ready .jm-shell > .jm-header .jm-logo img {
+        content: url("/jobmington/assets/images/badge-mark.png?v=logo-7");
+    }
+
+    /* Hamburger sits plainly on the blue — no chip, no border */
+    body.jm-mobile-nav-ready .jm-shell > .jm-header .jm-mobile-nav-toggle {
+        background: transparent;
+        border-color: transparent;
+        color: #ffffff;
+    }
+
+    body.jm-mobile-nav-ready .jm-shell > .jm-header .jm-mobile-nav-toggle:active {
+        opacity: 0.65;
+    }
+
+    /* Open drawer covers the toggle with a white panel — keep the X readable there. */
+    body.jm-mobile-nav-ready.jm-nav-open .jm-shell > .jm-header .jm-mobile-nav-toggle {
+        color: var(--jm-ink);
+    }
+}
+
+@media (max-width: 560px) {
+    /* .jm-shell drops to 18px/14px padding here — keep the bleed flush. */
+    body.jm-mobile-nav-ready .jm-shell > .jm-header {
+        margin: -18px -14px 18px;
+        padding: 10px 14px;
+    }
+}

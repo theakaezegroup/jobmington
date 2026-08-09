@@ -79,7 +79,7 @@ $pageTitle = 'Employer Dashboard | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
         .jm-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
         .jm-stat { border:1px solid var(--jm-line); padding:20px; background:#fff; }

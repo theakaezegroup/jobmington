@@ -684,7 +684,7 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs'): void {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= e($pageTitle) ?></title>
-        <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-14">
+        <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     </head>
     <body class="jm-minimal">
         <div class="jm-shell">

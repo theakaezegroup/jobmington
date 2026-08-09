@@ -139,7 +139,7 @@ $pageTitle = 'Settings | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
         .jm-settings-grid { display:grid; grid-template-columns:220px minmax(0,1fr); gap:36px; }
         .jm-settings-nav { display:grid; gap:10px; align-content:start; }

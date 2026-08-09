@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In | Jobmington</title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
 </head>
 <body class="jm-minimal">
     <div class="jm-shell">

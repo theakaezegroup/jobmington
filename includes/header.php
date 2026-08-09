@@ -180,7 +180,7 @@ if ($isAdminArea) {
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -542,7 +542,7 @@ ob_start();
     
     <!-- Premium Design System -->
     <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css?v=brand-10">
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -1124,6 +1124,76 @@ ob_start();
             border-left: 1px solid #e8edf5 !important;
             box-shadow: none !important;
         }
+
+        /* --- MOBILE: BRAND-BLUE HEADER BAR --- */
+        /* Breakpoint matches Tailwind `lg`, where the hamburger replaces the nav pills. */
+        @media (max-width: 1023.98px) {
+            .island-nav {
+                background: var(--jm-blue, #0640a3) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.16) !important;
+                backdrop-filter: none !important;
+                color: #ffffff !important;
+            }
+            .island-nav.scrolled {
+                background: var(--jm-blue, #0640a3) !important;
+                box-shadow: 0 2px 10px rgba(6, 64, 163, 0.24) !important;
+            }
+            .island-nav .jm-brand-text,
+            .island-nav .jm-region-code {
+                color: #ffffff !important;
+            }
+            .island-nav .jm-region-label {
+                color: #ffffff !important;
+                opacity: 0.66 !important;
+            }
+            .island-nav .jm-nav-divider {
+                background: rgba(255, 255, 255, 0.24) !important;
+            }
+            .island-nav .flag-orb {
+                border: 1px solid rgba(255, 255, 255, 0.38) !important;
+            }
+            /* badge.png has the blue tile baked in, which reads as a mismatched
+               square on the blue bar. Swap to the transparent-background mark. */
+            .island-nav .jm-brand-mark {
+                content: url("/jobmington/assets/images/badge-mark.png?v=logo-7");
+                filter: none !important;
+            }
+            /* Icons and the hamburger sit plainly on the blue — no chip, no border */
+            .island-nav .jm-nav-icon,
+            .island-nav .jm-menu-button,
+            .island-nav .jm-bell-btn,
+            .island-nav .jm-nav-icon:hover,
+            .island-nav .jm-menu-button:hover,
+            .island-nav .jm-bell-btn:hover {
+                background: transparent !important;
+                border: 0 !important;
+                color: #ffffff !important;
+            }
+            /* Touch feedback without reintroducing a box */
+            .island-nav .jm-nav-icon:active,
+            .island-nav .jm-menu-button:active,
+            .island-nav .jm-bell-btn:active {
+                opacity: 0.65;
+            }
+            .island-nav .jm-bell-badge {
+                box-shadow: 0 0 0 2px var(--jm-blue, #0640a3) !important;
+            }
+            .island-nav .jm-auth-link {
+                color: #ffffff !important;
+            }
+            .island-nav .jm-auth-cta {
+                background: #ffffff !important;
+                color: var(--jm-blue, #0640a3) !important;
+            }
+            .island-nav .jm-profile-chip {
+                background: transparent !important;
+                border: 0 !important;
+            }
+            .island-nav .jm-profile-chip span,
+            .island-nav .jm-profile-chip i {
+                color: #ffffff !important;
+            }
+        }
     </style>
 </head>
 <body class="antialiased" style="background: var(--color-canvas); color: var(--color-ink);">
@@ -1233,7 +1303,7 @@ ob_start();
             <div class="flex items-center gap-6">
                 <a href="/jobmington/" class="flex items-center gap-3 group relative">
                     <div class="relative w-10 h-10 flex items-center justify-center group-hover:scale-105 transition duration-300">
-                        <img src="/jobmington/assets/images/badge.png?v=logo-7" class="relative z-10 w-8 h-8 object-contain drop-shadow-sm">
+                        <img src="/jobmington/assets/images/badge.png?v=logo-7" class="relative z-10 w-8 h-8 object-contain drop-shadow-sm jm-brand-mark">
                     </div>
                     <div class="hidden sm:flex flex-col">
                         <span class="font-bold tracking-tight text-xl jm-brand-text" style="font-family: 'Futura Cyrillic Demi'; letter-spacing: 0; color: #101828;">

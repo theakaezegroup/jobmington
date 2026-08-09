@@ -65,7 +65,7 @@ $pageTitle = 'Verify Email | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
 </head>
 <body class="jm-minimal">
     <div class="jm-shell">

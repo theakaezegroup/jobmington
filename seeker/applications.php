@@ -60,7 +60,7 @@ $pageTitle = 'Applications | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-10">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
         .jm-tabs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
         .jm-tabs a { border:1px solid var(--jm-line); color:var(--jm-ink); padding:8px 12px; text-decoration:none; font-size:14px; font-weight:600; }
