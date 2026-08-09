@@ -92,6 +92,60 @@ if (!function_exists('redirectBack')) {
 }
 
 /**
+ * Remember a signed-in visitor's first name so the sign-in page can greet them
+ * by name on their next visit.
+ *
+ * Stores a display name and nothing else -- no user id, no email, nothing that
+ * could identify an account or authenticate anyone. It is a greeting, not a
+ * credential, so it is never trusted for anything but rendering a name.
+ */
+if (!function_exists('jm_remember_visitor')) {
+    function jm_remember_visitor(string $fullName): void {
+        if (headers_sent()) { return; }
+        $first = jm_clean_display_name(explode(' ', trim($fullName))[0] ?? '');
+        if ($first === '') { return; }
+
+        setcookie('jm_visitor', $first, [
+            'expires'  => time() + (86400 * 90),
+            'path'     => '/',
+            'secure'   => !empty($_SERVER['HTTPS']),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+}
+
+if (!function_exists('jm_forget_visitor')) {
+    function jm_forget_visitor(): void {
+        unset($_COOKIE['jm_visitor']);
+        if (headers_sent()) { return; }
+        setcookie('jm_visitor', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => !empty($_SERVER['HTTPS']),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+}
+
+/** First name of a previously signed-in visitor, or '' if this device has none. */
+if (!function_exists('jm_returning_visitor')) {
+    function jm_returning_visitor(): string {
+        return jm_clean_display_name((string) ($_COOKIE['jm_visitor'] ?? ''));
+    }
+}
+
+/** Letters, marks, spaces, apostrophes and hyphens only; capped at 32 chars. */
+if (!function_exists('jm_clean_display_name')) {
+    function jm_clean_display_name(string $name): string {
+        $name = trim(preg_replace('/[^\p{L}\p{M}\'\- ]/u', '', $name) ?? '');
+        // preg rather than mb_substr: mbstring is not installed on the server.
+        return preg_match('/^.{0,32}/u', $name, $m) ? $m[0] : '';
+    }
+}
+
+/**
  * Normalise a return target for comparison.
  *
  * The same destination can arrive spelled differently (/seeker/profile.php vs

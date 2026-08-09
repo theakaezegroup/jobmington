@@ -16,6 +16,14 @@ Session::start();
 $redirectTo = jm_safe_redirect_path(Security::clean(get('redirect', '')));
 $hasSafeRedirect = $redirectTo !== '';
 
+// "Not you?" — drop the remembered name and any persistent login on this device.
+if (get('forget', '') !== '') {
+    require_once __DIR__ . '/../includes/remember.php';
+    jm_forget_visitor();
+    jm_remember_revoke(db());
+    redirect('/jobmington/auth/login.php' . ($hasSafeRedirect ? '?redirect=' . urlencode($redirectTo) : ''));
+}
+
 function jm_login_dashboard_for(string $userType): string {
     if ($userType === USER_TYPE_ADMIN) {
         return '/jobmington/admin/';
@@ -73,10 +81,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['is_verified'] = (bool) $user['is_verified'];
             $_SESSION['login_time'] = time();
 
+            // Greet them by name next time even if the token expires or is cleared.
+            jm_remember_visitor((string) $_SESSION['full_name']);
+
             if ($remember) {
-                $token = bin2hex(random_bytes(32));
-                $expiry = time() + (86400 * 30);
-                setcookie('remember_token', $token, $expiry, '/', '', isset($_SERVER['HTTPS']), true);
+                require_once __DIR__ . '/../includes/remember.php';
+                jm_remember_issue($pdo, (int) $user['user_id']);
+            }
+            // The old remember_token cookie was written but never validated, so it
+            // did nothing. Clear any leftovers rather than leave them on devices.
+            if (!empty($_COOKIE['remember_token']) && !headers_sent()) {
+                setcookie('remember_token', '', time() - 3600, '/');
             }
 
             /* Block unverified users — send to verification page */
@@ -146,11 +161,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // note the visitor still needs when they return to the real link.
                     $authCtx = $ctxHere ? trim((string) ($_SESSION['auth_context'] ?? '')) : '';
                 ?>
+                <?php $visitor = jm_returning_visitor(); ?>
                 <p class="jm-kicker">Sign in</p>
-                <?php /* Never "Welcome back" on a gate arrival: the visitor was sent
-                          here by clicking something and may have no account at all.
-                          Most gates set no note, so this must not depend on one. */ ?>
-                <h1><?= $hasSafeRedirect ? 'Sign in to continue.' : 'Sign in.' ?></h1>
+                <?php /* "Welcome back" only when this device has signed in before.
+                          Never assumed from a gate arrival, since whoever clicked
+                          through may have no account at all. */ ?>
+                <h1><?php
+                    if ($visitor !== '')      { echo 'Welcome back, ' . e($visitor) . '.'; }
+                    elseif ($hasSafeRedirect) { echo 'Sign in to continue.'; }
+                    else                      { echo 'Sign in.'; }
+                ?></h1>
                 <p><?php
                     if ($authCtx !== '') {
                         echo e($authCtx);
@@ -160,6 +180,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         echo 'Sign in to apply, save jobs, manage listings, or continue posting a role.';
                     }
                 ?></p>
+                <?php if ($visitor !== ''): ?>
+                    <p style="margin:10px 0 0;font-size:13px;color:#94a3b8;">
+                        Not <?= e($visitor) ?>?
+                        <a style="color:#0640a3;font-weight:600;" href="/jobmington/auth/login.php?forget=1<?= $hasSafeRedirect ? '&amp;redirect=' . urlencode($redirectTo) : '' ?>">Use a different account</a>
+                    </p>
+                <?php endif; ?>
             </div>
 
             <form method="POST" class="jm-panel">

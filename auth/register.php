@@ -107,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['login_time'] = time();
 
             Security::regenerateCSRF();
+            jm_remember_visitor((string) $form['full_name']);
             // Park the destination so verification hands them back to it.
             if ($hasSafeRedirect) {
                 $_SESSION['post_auth_redirect'] = $redirectTo;

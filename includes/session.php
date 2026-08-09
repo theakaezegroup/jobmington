@@ -64,6 +64,29 @@ class Session {
 
         // Validate session
         self::validate();
+
+        // Restore a persistent login if there is no session but a valid token.
+        self::restoreFromRemember();
+    }
+
+    /**
+     * Sign the visitor back in from a "remember me" cookie.
+     *
+     * Deliberately cheap for the common cases: it does nothing at all unless the
+     * visitor is signed out AND actually presents the cookie, so guests and
+     * signed-in users never pay for a query.
+     */
+    private static function restoreFromRemember(): void {
+        if (self::isLoggedIn()) { return; }
+        if (empty($_COOKIE['jm_remember'])) { return; }
+        if (!function_exists('db')) { return; }   // page did not load the database layer
+
+        try {
+            require_once __DIR__ . '/remember.php';
+            jm_remember_attempt(db());
+        } catch (Throwable $e) {
+            error_log('remember-me restore failed: ' . $e->getMessage());
+        }
     }
 
     /**
