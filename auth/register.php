@@ -135,7 +135,7 @@ $pageTitle = 'Create Account | ' . SITE_NAME;
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/cv-builder/">CV Builder</a>
                 <a href="/jobmington/employer/">Employers</a>
-                <a class="jm-button secondary" href="/jobmington/auth/login.php">Sign in</a>
+                <a class="jm-button secondary" href="/jobmington/auth/login.php<?= $hasSafeRedirect ? '?redirect=' . urlencode($redirectTo) : '' ?>">Sign in</a>
             </nav>
         </header>
 

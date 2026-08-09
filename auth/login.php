@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="/jobmington/jobs/">Find jobs</a>
                 <a href="/jobmington/cv-builder/">CV Builder</a>
                 <a href="/jobmington/employer/">Employers</a>
-                <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
+                <a class="jm-button secondary" href="/jobmington/auth/register.php<?= $hasSafeRedirect ? '?redirect=' . urlencode($redirectTo) : '' ?>">Create account</a>
             </nav>
         </header>
 
