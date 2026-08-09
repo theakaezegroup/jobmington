@@ -22,6 +22,8 @@ $pageTitle = 'Employers | ' . SITE_NAME;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Post jobs on Jobmington, manage applications, and hire African talent from one simple employer workspace.">
     <title><?= e($pageTitle) ?></title>
+    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
+    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
 </head>
 <body class="jm-minimal">

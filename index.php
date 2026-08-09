@@ -208,6 +208,8 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <meta name="theme-color" content="#0640a3">
     <title><?= e($pageTitle) ?></title>
+    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
+    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
     /* ── Homepage overrides ───────────────────────────────────────── */
@@ -973,6 +975,10 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     </style>
 </head>
 <body class="jm-minimal jm-home-page">
+<?php /* Set before the header is parsed. Without this the ≤900px rules stack
+         .jm-header into a column until the footer script adds the class, so the
+         logo and nav paint in the wrong layout and then snap into place. */ ?>
+<script>document.body.classList.add('jm-mobile-nav-ready');</script>
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">

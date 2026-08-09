@@ -19,6 +19,8 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= e($aiPageTitle) ?></title>
+    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
+    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <script>
         window.tailwind = window.tailwind || {};
@@ -36,6 +38,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="jm-minimal jm-ai-page">
+<script>document.body.classList.add('jm-mobile-nav-ready');</script>
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">
