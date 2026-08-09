@@ -979,6 +979,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
          .jm-header into a column until the footer script adds the class, so the
          logo and nav paint in the wrong layout and then snap into place. */ ?>
 <script>document.body.classList.add('jm-mobile-nav-ready');</script>
+<?php require_once __DIR__ . '/includes/header_ads.php'; jm_header_ad_bar(); ?>
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">

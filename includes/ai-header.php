@@ -39,6 +39,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
 </head>
 <body class="jm-minimal jm-ai-page">
 <script>document.body.classList.add('jm-mobile-nav-ready');</script>
+<?php require_once __DIR__ . '/header_ads.php'; jm_header_ad_bar(); ?>
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">
