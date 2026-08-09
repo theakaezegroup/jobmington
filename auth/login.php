@@ -127,12 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <section class="jm-hero">
             <div>
-                <?php if (!empty($_SESSION['auth_context'])): ?>
-                    <p style="margin:0 0 16px;padding:12px 15px;background:#eaf1fd;border-left:3px solid #0640a3;border-radius:6px;color:#0b1b33;font-size:13.5px;font-weight:600;line-height:1.55;"><?= e($_SESSION['auth_context']) ?></p>
-                <?php endif; ?>
-                <p class="jm-kicker">Sign in</p>
-                <h1>Welcome back.</h1>
-                <p>Sign in to apply, save jobs, manage listings, or continue posting a role.</p>
+                <?php $authCtx = trim((string) ($_SESSION['auth_context'] ?? '')); ?>
+                <?php /* "Welcome back" is wrong for someone arriving from an action
+                          who has never had an account, so use neutral copy there. */ ?>
+                <p class="jm-kicker"><?= $authCtx ? 'Almost there' : 'Sign in' ?></p>
+                <h1><?= $authCtx ? 'One more step.' : 'Welcome back.' ?></h1>
+                <p><?= $authCtx
+                        ? e($authCtx)
+                        : 'Sign in to apply, save jobs, manage listings, or continue posting a role.' ?></p>
             </div>
 
             <form method="POST" class="jm-panel">
