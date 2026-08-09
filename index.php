@@ -171,21 +171,44 @@ $dashboardUrl = Session::isAdmin()
     ? '/jobmington/admin/'
     : (Session::isEmployer() ? '/jobmington/employer/dashboard.php' : '/jobmington/seeker/dashboard.php');
 $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
+$pageDescription = "Jobmington — Africa's career platform. Find remote roles that pay in dollars, local jobs near you, and AI tools that get you hired.";
+$shareImageAlt = 'Jobmington — remote and local jobs, plus AI tools built to get you hired.';
+$canonicalUrl = SITE_URL . '/';
+$shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
 ?>
 <!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Jobmington — Africa's career platform. Find remote jobs, unlock AI tools, and build a career that pays in dollars.">
-    <link rel="canonical" href="/">
+    <meta name="description" content="<?= e($pageDescription) ?>">
+    <link rel="canonical" href="<?= e($canonicalUrl) ?>">
+
+    <!-- Open Graph (WhatsApp, LinkedIn, Facebook, Slack) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="<?= e(SITE_NAME) ?>">
+    <meta property="og:title" content="<?= e($pageTitle) ?>">
+    <meta property="og:description" content="<?= e($pageDescription) ?>">
+    <meta property="og:url" content="<?= e($canonicalUrl) ?>">
+    <meta property="og:image" content="<?= e($shareImage) ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="<?= e($shareImageAlt) ?>">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= e($pageTitle) ?>">
+    <meta name="twitter:description" content="<?= e($pageDescription) ?>">
+    <meta name="twitter:image" content="<?= e($shareImage) ?>">
+    <meta name="twitter:image:alt" content="<?= e($shareImageAlt) ?>">
     <link rel="manifest" href="/jobmington/manifest.json?v=clean-urls">
     <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <meta name="theme-color" content="#0640a3">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-12">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
     /* ── Homepage overrides ───────────────────────────────────────── */
     @keyframes jmFadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
@@ -552,9 +575,6 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         padding: 48px 0 0;
         overflow: hidden;
         position: relative;
-        background:
-            radial-gradient(ellipse at 25% 70%, rgba(245,159,34,.02) 0%, transparent 40%),
-            radial-gradient(ellipse at 75% 15%, rgba(6,64,163,.02) 0%, transparent 35%);
     }
     @media(min-width:960px) { .jm-hero2-section { padding-top: 96px; } }
     .jm-hero2-inner {
@@ -598,12 +618,10 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         padding: 16px 28px; border-radius: 10px;
         background: var(--jm-blue); color: #fff !important;
         font-size: 15px; font-weight: 800; text-decoration: none;
-        box-shadow: 0 2px 10px rgba(6,64,163,.15);
-        transition: background .15s, box-shadow .15s;
+        transition: background .15s;
     }
     .jm-hero2-cta-btn:hover {
         background: var(--jm-blue-dark);
-        box-shadow: 0 4px 16px rgba(6,64,163,.2);
     }
 
     /* Stats row */
@@ -614,7 +632,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
     .jm-hero2-avatars img {
         width: 28px; height: 28px; border-radius: 50%;
         border: 2px solid white; object-fit: cover;
-        margin-left: -8px; box-shadow: 0 0 0 2px rgba(6,64,163,.12);
+        margin-left: -8px;
     }
     .jm-hero2-avatars img:first-child { margin-left: 0; }
     .jm-hero2-stat-num { font-size: 16px; font-weight: 800; color: var(--jm-ink); margin: 0; line-height: 1.2; }
@@ -636,7 +654,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
 
     .jm-hc-main {
         border-radius: 16px; overflow: hidden;
-        box-shadow: 0 24px 56px rgba(0,0,0,.18); border: 2px solid white;
+        border: 1px solid var(--jm-line);
     }
     @media(max-width:959px) {
         .jm-hc-main { height: 260px; }
@@ -655,19 +673,19 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
             display: block; position: absolute;
             top: 0; left: 0; width: 160px; height: 200px;
             border-radius: 12px; overflow: hidden;
-            box-shadow: 0 8px 28px rgba(0,0,0,.14); border: 1px solid rgba(255,255,255,.7);
+            border: 1px solid var(--jm-line);
         }
         .jm-hc-tr {
             display: block; position: absolute;
             top: 0; right: 0; width: 140px; height: 180px;
             border-radius: 12px; overflow: hidden;
-            box-shadow: 0 8px 28px rgba(0,0,0,.14); border: 1px solid rgba(255,255,255,.7);
+            border: 1px solid var(--jm-line);
         }
         .jm-hc-br {
             display: block; position: absolute;
             bottom: 0; right: 0; width: 150px; height: 190px;
             border-radius: 12px; overflow: hidden;
-            box-shadow: 0 8px 28px rgba(0,0,0,.14); border: 1px solid rgba(255,255,255,.6);
+            border: 1px solid var(--jm-line);
         }
     }
     .jm-hc-tl img, .jm-hc-tr img, .jm-hc-br img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -677,7 +695,6 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
         position: absolute; z-index: 10;
         background: var(--jm-white); border: 1px solid var(--jm-line);
         border-radius: 12px; padding: 12px;
-        box-shadow: 0 8px 32px rgba(0,0,0,.12);
         animation: jmFadeIn .6s ease both .5s;
     }
     .jm-hc-card-top {
@@ -994,7 +1011,7 @@ $pageTitle = SITE_NAME . ' | Simple hiring for African talent';
 
                     <h1 class="jm-hero2-h1">
                         <span class="jm-hero2-h1-big">Africa's talent. Global demand.</span>
-                        <span class="jm-hero2-h1-sm">Remote jobs and AI tools built to get you <span class="jm-hero2-h1-accent">hired.</span></span>
+                        <span class="jm-hero2-h1-sm">Remote and local jobs, plus AI tools built to get you <span class="jm-hero2-h1-accent">hired.</span></span>
                     </h1>
 
                     <p class="jm-hero2-para">We give African professionals the tools to understand why they're being filtered out, sharpen their positioning, and get in front of the right opportunities — from anywhere on the continent.</p>
