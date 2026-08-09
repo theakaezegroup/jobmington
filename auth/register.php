@@ -9,8 +9,8 @@ require_once __DIR__ . '/../includes/functions.php';
 
 Session::start();
 
-$redirectTo = Security::clean(get('redirect', ''));
-$hasSafeRedirect = str_starts_with($redirectTo, '/jobmington/');
+$redirectTo = jm_safe_redirect_path(Security::clean(get('redirect', '')));
+$hasSafeRedirect = $redirectTo !== '';
 
 if (Session::isLoggedIn()) {
     if ($hasSafeRedirect) {
@@ -37,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $form['email'] = strtolower(trim(Security::clean($_POST['email'] ?? '')));
         $form['phone'] = trim(Security::clean($_POST['phone'] ?? ''));
         $form['user_type'] = ($_POST['user_type'] ?? USER_TYPE_SEEKER) === USER_TYPE_EMPLOYER ? USER_TYPE_EMPLOYER : USER_TYPE_SEEKER;
-        $postedRedirect = Security::clean($_POST['redirect'] ?? '');
-        $redirectTo = str_starts_with($postedRedirect, '/jobmington/') ? $postedRedirect : $redirectTo;
-        $hasSafeRedirect = str_starts_with($redirectTo, '/jobmington/');
+        $postedRedirect = jm_safe_redirect_path(Security::clean($_POST['redirect'] ?? ''));
+        $redirectTo = $postedRedirect !== '' ? $postedRedirect : $redirectTo;
+        $hasSafeRedirect = $redirectTo !== '';
         $password = $_POST['password'] ?? '';
         $confirmPassword = $_POST['confirm_password'] ?? '';
 

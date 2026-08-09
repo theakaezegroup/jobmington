@@ -92,6 +92,41 @@ if (!function_exists('redirectBack')) {
 }
 
 /**
+ * Validate a post-authentication return target.
+ *
+ * The previous test was str_starts_with($target, '/jobmington/'), which only
+ * matched the legacy prefix. Real production paths (/events/..., /wallet/...)
+ * failed it, so every return target built from REQUEST_URI -- including the one
+ * in Session::requireLogin(), used by 33 pages -- was silently discarded and the
+ * user was dumped on the dashboard instead of where they were going.
+ *
+ * Accepts any same-site absolute path. Rejects anything that could leave the
+ * site: absolute URLs, scheme-relative //host, backslash variants, and CR/LF
+ * header injection.
+ */
+if (!function_exists('jm_safe_redirect_path')) {
+    function jm_safe_redirect_path(string $target, string $fallback = ''): string {
+        // Strip every control character, not just CR/LF: browsers remove raw tabs
+        // and newlines while parsing a URL, so "/<TAB>/evil.com" would otherwise
+        // collapse to "//evil.com" and leave the site.
+        $target = trim(preg_replace('/[\x00-\x1F\x7F]/', '', $target));
+
+        if ($target === '' || $target[0] !== '/') {
+            return $fallback;
+        }
+        // Both //evil.com and /\evil.com resolve off-site in browsers.
+        if (isset($target[1]) && ($target[1] === '/' || $target[1] === '\\')) {
+            return $fallback;
+        }
+        // Guard against /javascript:... and similar scheme-ish targets.
+        if (preg_match('#^/+[a-z][a-z0-9+.\-]*:#i', $target)) {
+            return $fallback;
+        }
+        return $target;
+    }
+}
+
+/**
  * Get current URL
  */
 function currentUrl(): string {

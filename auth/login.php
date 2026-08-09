@@ -13,8 +13,8 @@ require_once __DIR__ . '/../includes/functions.php';
 
 Session::start();
 
-$redirectTo = Security::clean(get('redirect', ''));
-$hasSafeRedirect = str_starts_with($redirectTo, '/jobmington/');
+$redirectTo = jm_safe_redirect_path(Security::clean(get('redirect', '')));
+$hasSafeRedirect = $redirectTo !== '';
 
 function jm_login_dashboard_for(string $userType): string {
     if ($userType === USER_TYPE_ADMIN) {
@@ -41,9 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = cleanPost('email');
     $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember']);
-    $postedRedirect = Security::clean(post('redirect', ''));
-    $redirectTo = str_starts_with($postedRedirect, '/jobmington/') ? $postedRedirect : $redirectTo;
-    $hasSafeRedirect = str_starts_with($redirectTo, '/jobmington/');
+    $postedRedirect = jm_safe_redirect_path(Security::clean(post('redirect', '')));
+    $redirectTo = $postedRedirect !== '' ? $postedRedirect : $redirectTo;
+    $hasSafeRedirect = $redirectTo !== '';
     $emailValue = $email;
 
     if ($email === '' || $password === '') {
