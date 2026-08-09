@@ -147,10 +147,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $authCtx = $ctxHere ? trim((string) ($_SESSION['auth_context'] ?? '')) : '';
                 ?>
                 <p class="jm-kicker">Sign in</p>
-                <h1><?= $authCtx ? 'Sign in to continue.' : 'Welcome back.' ?></h1>
-                <p><?= $authCtx
-                        ? e($authCtx)
-                        : 'Sign in to apply, save jobs, manage listings, or continue posting a role.' ?></p>
+                <?php /* Never "Welcome back" on a gate arrival: the visitor was sent
+                          here by clicking something and may have no account at all.
+                          Most gates set no note, so this must not depend on one. */ ?>
+                <h1><?= $hasSafeRedirect ? 'Sign in to continue.' : 'Sign in.' ?></h1>
+                <p><?php
+                    if ($authCtx !== '') {
+                        echo e($authCtx);
+                    } elseif ($hasSafeRedirect) {
+                        echo 'Sign in below, or create a free account if you are new — either way we will bring you straight back.';
+                    } else {
+                        echo 'Sign in to apply, save jobs, manage listings, or continue posting a role.';
+                    }
+                ?></p>
             </div>
 
             <form method="POST" class="jm-panel">

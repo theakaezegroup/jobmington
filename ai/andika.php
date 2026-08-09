@@ -18,7 +18,7 @@ require_once __DIR__ . '/../includes/monetization.php';
 require_once __DIR__ . '/../includes/seeker_premium.php';
 
 Session::start();
-Session::requireLogin();
+Session::requireLogin('Sign in or create a free account to use Andika AI. We will bring you straight back here.');
 
 $pdo        = db();
 $userId     = (int) Session::userId();
