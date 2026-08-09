@@ -771,7 +771,7 @@ if (!function_exists('jm_minimal_footer')) {
 
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-10`).catch(() => {});
+                    navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-15`).catch(() => {});
                 });
             }
         })();

@@ -35,7 +35,7 @@ if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';
-            navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-10`).catch(() => {});
+            navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-15`).catch(() => {});
         });
     }
     </script>
@@ -198,7 +198,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         const pathBase = window.location.pathname.toLowerCase().startsWith('/jobmington/') ? '/jobmington' : '';
-        navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-10`).catch(err => console.log('SW fail:', err));
+        navigator.serviceWorker.register(`${pathBase}/service-worker.js?v=brand-15`).catch(err => console.log('SW fail:', err));
     });
 }
 </script>
