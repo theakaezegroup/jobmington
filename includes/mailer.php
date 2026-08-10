@@ -486,15 +486,20 @@ HTML;
         $where     = !empty($event['is_online']) ? 'Online' : ($event['location'] ?: 'In person');
         $title     = htmlspecialchars((string) $event['title'], ENT_QUOTES, 'UTF-8');
 
+        /*
+         * Every style attribute below is delimited with double quotes.
+         *
+         * The font stack contains single quotes, so a single-quoted style
+         * attribute terminates at the first one and every declaration after it
+         * is thrown away. Buttons lost their padding, colour and weight and
+         * rendered as bare washed-out links.
+         */
         $ff  = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
         $ffd = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
 
-        /*
-         * The poster carries the event far better than any wording, so it leads.
-         * Stored paths keep a legacy /jobmington prefix that production does not
-         * serve, and a mail client will not follow a redirect for an image, so it
-         * is resolved to a direct absolute URL here.
-         */
+        // The poster carries the event better than any wording, so it leads.
+        // Stored paths keep a legacy /jobmington prefix production does not
+        // serve, and a mail client will not follow a redirect for an image.
         $poster = '';
         $cover  = trim((string) ($event['cover_image'] ?? ''));
         if ($cover !== '') {
@@ -502,30 +507,30 @@ HTML;
                 $cover = SITE_URL . '/' . ltrim(preg_replace('#^/?jobmington/#', '', ltrim($cover, '/')), '/');
             }
             $coverSafe = htmlspecialchars($cover, ENT_QUOTES, 'UTF-8');
-            $poster = "<tr><td style='padding:0 0 22px;'>"
-                    . "<img src='{$coverSafe}' alt='" . $title . "' width='520' "
-                    . "style='display:block;width:100%;max-width:520px;height:auto;border:0;outline:none;text-decoration:none;'>"
-                    . "</td></tr>";
+            $poster = '<tr><td style="padding:0 0 22px;">'
+                    . '<img src="' . $coverSafe . '" alt="' . $title . '" width="520" '
+                    . 'style="display:block;width:100%;max-width:520px;height:auto;border:0;outline:none;text-decoration:none;">'
+                    . '</td></tr>';
         }
 
-        // Rows rather than a paragraph: the three things an attendee needs to
-        // act on should survive being skimmed on a phone.
         // PNG rather than inline SVG: Gmail strips <svg> and Outlook will not
         // render it, so a vector icon would simply vanish for most readers.
         $iconBase = SITE_URL . '/assets/images/email/';
         $row = static function (string $icon, string $label, string $value) use ($ff, $ffd, $iconBase): string {
-            return "<tr>"
-                 . "<td width='24' style='padding:0 12px 14px 0;vertical-align:top;'>"
-                 .   "<img src='{$iconBase}{$icon}.png' alt='' width='16' height='16' style='display:block;border:0;'>"
-                 . "</td>"
-                 . "<td style='padding:0 0 14px;vertical-align:top;'>"
-                 .   "<div style='{$ff}font-size:11px;color:#94a3b8;letter-spacing:0.05em;text-transform:uppercase;padding-bottom:2px;'>{$label}</div>"
-                 .   "<div style='{$ffd}font-size:14px;color:#06142a;font-weight:700;line-height:1.45;'>{$value}</div>"
-                 . "</td>"
-                 . "</tr>";
+            return '<tr>'
+                 . '<td width="24" style="padding:0 12px 14px 0;vertical-align:top;">'
+                 .   '<img src="' . $iconBase . $icon . '.png" alt="" width="16" height="16" style="display:block;border:0;">'
+                 . '</td>'
+                 . '<td style="padding:0 0 14px;vertical-align:top;">'
+                 .   '<div style="' . $ff . 'font-size:11px;color:#94a3b8;letter-spacing:0.05em;text-transform:uppercase;padding-bottom:3px;">' . $label . '</div>'
+                 .   '<div style="' . $ffd . 'font-size:15px;color:#06142a;font-weight:700;line-height:1.45;">' . $value . '</div>'
+                 . '</td>'
+                 . '</tr>';
         };
 
-        $details = $row('when', 'When', htmlspecialchars($when, ENT_QUOTES, 'UTF-8') . '<br><span style="' . $ff . 'font-weight:400;color:#475569;">' . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '</span>')
+        $details = $row('when', 'When', htmlspecialchars($when, ENT_QUOTES, 'UTF-8')
+                        . '<br><span style="' . $ff . 'font-weight:400;font-size:14px;color:#475569;">'
+                        . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '</span>')
                  . $row('where', 'Where', htmlspecialchars($where, ENT_QUOTES, 'UTF-8'));
         if (!empty($event['host_name'])) {
             $details .= $row('host', 'Host', htmlspecialchars((string) $event['host_name'], ENT_QUOTES, 'UTF-8'));
@@ -533,48 +538,49 @@ HTML;
 
         $joinUrl = (!empty($event['is_online']) && !empty($event['meeting_url']))
             ? htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') : '';
-
         $primaryUrl   = $joinUrl !== '' ? $joinUrl : htmlspecialchars($eventUrl, ENT_QUOTES, 'UTF-8');
         $primaryLabel = $joinUrl !== '' ? 'Join the session' : 'View event';
 
         $calendarBtn = $calendarUrl
-            ? "<td width='10' style='width:10px;font-size:0;line-height:0;'>&nbsp;</td>"
-              . "<td style='background:#eaf1fd;border:1px solid #d8e4f4;border-radius:8px;'>"
-              . "<a href='" . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . "' "
-              . "style='{$ffd}display:inline-block;padding:13px 22px;color:#0640a3;font-size:14px;font-weight:700;"
-              . "text-decoration:none;border-radius:8px;'>Add to calendar</a></td>"
+            ? '<td width="12" style="width:12px;font-size:0;line-height:0;">&nbsp;</td>'
+              . '<td style="background:#eaf1fd;border:1px solid #cfe0f8;border-radius:8px;">'
+              . '<a href="' . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . '" '
+              . 'style="' . $ffd . 'display:inline-block;padding:14px 24px;color:#0640a3;font-size:14px;'
+              . 'font-weight:700;text-decoration:none;border-radius:8px;">Add to calendar</a></td>'
             : '';
 
         $note = $joinUrl !== ''
-            ? "We will send the link again nearer the time, so there is nothing to keep hold of."
-            : "The joining details follow before it starts.";
+            ? 'We will send the link again nearer the time, so there is nothing to keep hold of.'
+            : 'The joining details follow before it starts.';
 
-        $content = "
-            <h2 style='{$ffd}font-weight:700;color:#06142a;margin:0 0 6px;font-size:22px;line-height:1.2;'>You are registered, {$firstName}.</h2>
-            <p style='{$ff}color:#475569;margin:0 0 22px;line-height:1.7;'>Your place at <strong style='color:#06142a;'>{$title}</strong> is confirmed.</p>
+        $content = '
+            <h2 style="' . $ffd . 'font-weight:700;color:#06142a;margin:0 0 6px;font-size:22px;line-height:1.2;">You are registered, ' . $firstName . '.</h2>
+            <p style="' . $ff . 'color:#475569;margin:0 0 22px;line-height:1.7;">Your place at <strong style="color:#06142a;">' . $title . '</strong> is confirmed.</p>
 
-            <table cellpadding='0' cellspacing='0' border='0' width='100%' style='margin:0 0 4px;'>
-              {$poster}
-              <tr><td style='padding:0 0 22px;'>
-                <table cellpadding='0' cellspacing='0' border='0' width='100%' style='border:1px solid #e4eaf3;'>
-                  <tr><td style='padding:18px 20px;'>
-                    <table cellpadding='0' cellspacing='0' border='0'>{$details}</table>
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 4px;">
+              ' . $poster . '
+              <tr><td style="padding:0 0 22px;">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e4eaf3;border-radius:8px;">
+                  <tr><td style="padding:18px 20px;">
+                    <table cellpadding="0" cellspacing="0" border="0">' . $details . '</table>
                   </td></tr>
                 </table>
               </td></tr>
             </table>
 
-            <p style='{$ff}color:#475569;margin:0 0 22px;line-height:1.7;'>{$note}</p>
+            <p style="' . $ff . 'color:#475569;margin:0 0 22px;line-height:1.7;">' . $note . '</p>
 
-            <table cellpadding='0' cellspacing='0' border='0' style='margin:0 0 24px;'>
+            <table cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
               <tr>
-                <td style='background:#0640a3;border-radius:8px;'><a href='{$primaryUrl}' style='{$ffd}display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>{$primaryLabel}</a></td>
-                {$calendarBtn}
+                <td style="background:#0640a3;border-radius:8px;">
+                  <a href="' . $primaryUrl . '" style="' . $ffd . 'display:inline-block;padding:14px 30px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">' . $primaryLabel . '</a>
+                </td>
+                ' . $calendarBtn . '
               </tr>
             </table>
 
-            <p style='{$ff}color:#94a3b8;font-size:13px;margin:0;'>Cannot make it after all? Ignore this email, there is nothing to cancel.</p>
-        ";
+            <p style="' . $ff . 'color:#94a3b8;font-size:13px;margin:0;">Cannot make it after all? Ignore this email, there is nothing to cancel.</p>
+        ';
 
         return ["You are registered - {$event['title']}", $content];
     }
