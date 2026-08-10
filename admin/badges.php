@@ -26,6 +26,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = Security::clean(post('action', ''));
     
     switch ($action) {
+        case 'award_badge':
+        case 'revoke_badge':
+            require_once __DIR__ . '/../includes/badges.php';
+            $badgeUser = (int) post('badge_user_id', 0);
+            $badgeType = Security::clean(post('badge_type', ''));
+            if ($badgeUser <= 0 || $badgeType === '') {
+                $error = 'Pick a user and a badge.';
+            } elseif ($action === 'award_badge') {
+                $error = awardBadge($badgeUser, $badgeType)
+                    ? '' : 'Could not award that badge. They may already hold it.';
+                if (!$error) { $success = 'Badge awarded.'; }
+            } else {
+                $error = revokeBadge($badgeUser, $badgeType) ? '' : 'They do not hold that badge.';
+                if (!$error) { $success = 'Badge revoked.'; }
+            }
+            break;
+
         case 'distribute_seeds':
             $userId = (int) post('user_id', 0);
             $amount = (float) post('amount', 0);
@@ -108,12 +125,76 @@ try {
     $users = $pdo->query("SELECT user_id, first_name, last_name, email FROM users ORDER BY first_name LIMIT 500")->fetchAll();
 } catch (Exception $e) { $users = []; }
 
+require_once __DIR__ . '/../includes/badges.php';
+$badgeCatalogue = getBadgeTypes();
+$badgeHolders = [];
+try {
+    $bs = $pdo->query("SELECT ub.badge_type, ub.earned_at, u.user_id, u.full_name, u.email
+                       FROM user_badges ub JOIN users u ON u.user_id = ub.user_id
+                       ORDER BY ub.earned_at DESC");
+    foreach ($bs as $row) { $badgeHolders[$row['badge_type']][] = $row; }
+} catch (Throwable $e) { $badgeHolders = []; }
+$allUsers = [];
+try { $allUsers = $pdo->query("SELECT user_id, full_name, email FROM users ORDER BY full_name")->fetchAll(); }
+catch (Throwable $e) { $allUsers = []; }
+
 $pageTitle = 'Badges & Seeds Management - ' . SITE_NAME;
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <div class="min-h-screen bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Badges: the catalogue, who holds what, and manual award/revoke -->
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8">
+            <h2 class="text-xl font-bold text-white mb-1">Badges</h2>
+            <p class="text-slate-400 text-sm mb-6">Three badges, each tied to something the platform can actually verify. Awarded automatically; use this to correct a case by hand.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <?php foreach ($badgeCatalogue as $type => $b): $holders = $badgeHolders[$type] ?? []; ?>
+                    <div class="bg-slate-900 border border-slate-700 rounded-lg p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <img src="/jobmington/assets/images/badges/<?= e($b['icon']) ?>" alt="" class="w-6 h-6">
+                            <span class="font-bold text-white"><?= e($b['name']) ?></span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-2"><?= e($b['how'] ?? $b['description']) ?></p>
+                        <p class="text-sm font-bold text-blue-400"><?= count($holders) ?> holder<?= count($holders) === 1 ? '' : 's' ?></p>
+                        <?php if ($holders): ?>
+                            <ul class="mt-2 space-y-1">
+                                <?php foreach (array_slice($holders, 0, 5) as $h): ?>
+                                    <li class="text-xs text-slate-400 truncate"><?= e($h['full_name'] ?: $h['email']) ?></li>
+                                <?php endforeach; ?>
+                                <?php if (count($holders) > 5): ?><li class="text-xs text-slate-500">and <?= count($holders) - 5 ?> more</li><?php endif; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <form method="post" class="flex flex-wrap items-end gap-3">
+                <?= Security::csrfField() ?>
+                <div class="flex-1 min-w-[220px]">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">User</label>
+                    <select name="badge_user_id" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-white px-3 py-2 text-sm">
+                        <option value="">Select a user</option>
+                        <?php foreach ($allUsers as $u): ?>
+                            <option value="<?= (int) $u['user_id'] ?>"><?= e($u['full_name'] ?: $u['email']) ?> (#<?= (int) $u['user_id'] ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">Badge</label>
+                    <select name="badge_type" class="w-full rounded-lg bg-slate-900 border border-slate-700 text-white px-3 py-2 text-sm">
+                        <?php foreach ($badgeCatalogue as $type => $b): ?>
+                            <option value="<?= e($type) ?>"><?= e($b['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <button name="action" value="award_badge" class="rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-2 text-sm">Award</button>
+                <button name="action" value="revoke_badge" class="rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-bold px-5 py-2 text-sm">Revoke</button>
+            </form>
+        </div>
+
         
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">

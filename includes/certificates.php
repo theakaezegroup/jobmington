@@ -43,6 +43,13 @@ function jm_issue_certificate(PDO $pdo, int $userId, int $courseId, bool $premiu
             ->execute([$code, $userId, $courseId, $premium ? 1 : 0]);
     } catch (Throwable $e) {
         // older schema without is_premium
+        // Finishing a course is the one skills signal we can actually verify.
+        try {
+            require_once __DIR__ . '/badges.php';
+            awardBadge((int) $userId, 'verified-skills');
+        } catch (Throwable $e) {
+            error_log('Skills badge award failed: ' . $e->getMessage());
+        }
         $pdo->prepare("INSERT INTO certificates (cert_code, user_id, course_id) VALUES (?,?,?)")
             ->execute([$code, $userId, $courseId]);
     }

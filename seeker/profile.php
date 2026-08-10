@@ -126,6 +126,16 @@ $profileFields = [
     !empty($user['bio'] ?? $user['cv_summary'] ?? ''),
 ];
 $completion = (int) round((array_sum($profileFields) / count($profileFields)) * 100);
+
+// Only at 100%: a badge for a half-finished profile tells an employer nothing.
+if ($completion === 100) {
+    try {
+        require_once __DIR__ . '/../includes/badges.php';
+        awardBadge((int) $userId, 'verified-blue');
+    } catch (Throwable $e) {
+        error_log('Profile badge award failed: ' . $e->getMessage());
+    }
+}
 $headlineValue = $user['headline'] ?: ($user['cv_headline'] ?? '');
 $bioValue = $user['bio'] ?: ($user['cv_summary'] ?? '');
 $pageTitle = 'Profile | ' . SITE_NAME;

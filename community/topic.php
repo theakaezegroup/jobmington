@@ -12,6 +12,7 @@ require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/forum_reactions.php';
+require_once __DIR__ . '/../includes/badges.php';
 require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
@@ -164,6 +165,16 @@ $replies = $stmt->fetchAll();
 $viewerId    = Session::isLoggedIn() ? (int) Session::userId() : null;
 $canReact    = Session::isLoggedIn();
 $topicReacts = jm_reactions_for($pdo, 'topic', [$topicId], $viewerId);
+
+// One query for every author on the page rather than one per post.
+$authorIds = array_unique(array_merge([(int) $topic['user_id']], array_map('intval', array_column($replies, 'user_id'))));
+$authorBadges = [];
+try {
+    $ph = implode(',', array_fill(0, count($authorIds), '?'));
+    $bs = $pdo->prepare("SELECT user_id, badge_type FROM user_badges WHERE user_id IN ($ph) ORDER BY earned_at ASC");
+    $bs->execute($authorIds);
+    foreach ($bs as $b) { $authorBadges[(int) $b['user_id']][] = $b['badge_type']; }
+} catch (Throwable $e) { $authorBadges = []; }
 $replyReacts = jm_reactions_for($pdo, 'reply', array_column($replies, 'reply_id'), $viewerId);
 
 // Get user's liked reply IDs
@@ -218,7 +229,7 @@ function jm_forum_avatar(array $u): string {
         <div class="jm-tpc-author">
             <?= jm_forum_avatar($topic) ?>
             <div>
-                <div class="nm"><?= e($topic['full_name'] ?: 'Member') ?><?= jm_verified_tick($topic, 14) ?></div>
+                <div class="nm"><?= e($topic['full_name'] ?: 'Member') ?><?= jm_verified_tick($topic, 14) ?><?= renderBadgeRow($authorBadges[(int) $topic['user_id']] ?? [], 'xs', 3) ?></div>
                 <div class="mt"><?= e(timeAgo($topic['created_at'])) ?></div>
             </div>
         </div>
@@ -240,7 +251,7 @@ function jm_forum_avatar(array $u): string {
                     <?= jm_forum_avatar($r) ?>
                     <div class="jm-tpc-reply-main">
                         <div class="jm-tpc-reply-head">
-                            <span class="nm"><?= e($r['full_name'] ?: 'Member') ?><?= jm_verified_tick($r, 13) ?></span>
+                            <span class="nm"><?= e($r['full_name'] ?: 'Member') ?><?= jm_verified_tick($r, 13) ?><?= renderBadgeRow($authorBadges[(int) $r['user_id']] ?? [], 'xs', 3) ?></span>
                             <span class="ag"><?= e(timeAgo($r['created_at'])) ?></span>
                         </div>
                         <?php if (!empty($r['is_verified_answer'])): ?>

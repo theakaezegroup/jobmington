@@ -8,84 +8,41 @@
  * Available badge types with their properties
  */
 function getBadgeTypes(): array {
+    /*
+     * Only what can genuinely be earned today.
+     *
+     * The catalogue previously carried eleven tiers, most describing checks
+     * that do not exist here: no government ID check, no company verification,
+     * no top-rated ranking. A badge nobody can earn is decoration, and one
+     * awarded without the check behind it is worse than none. The SVGs for the
+     * retired tiers remain in assets/images/badges for when the verification
+     * behind them exists.
+     */
     return [
-        'verified-blue' => [
-            'name' => 'Verified',
-            'description' => 'Basic profile verification completed',
-            'icon' => 'verified-blue.svg',
-            'color' => '#3b82f6',
-            'tier' => 1
-        ],
         'verified-email' => [
             'name' => 'Email Verified',
             'description' => 'Email address has been confirmed',
             'icon' => 'verified-email.svg',
             'color' => '#10b981',
-            'tier' => 1
+            'tier' => 1,
+            'how' => 'Awarded when you confirm your email address.',
         ],
-        'verified-id' => [
-            'name' => 'ID Verified',
-            'description' => 'Government ID has been verified',
-            'icon' => 'verified-id.svg',
-            'color' => '#6366f1',
-            'tier' => 2
+        'verified-blue' => [
+            'name' => 'Profile Complete',
+            'description' => 'Full profile with headline, bio and location',
+            'icon' => 'verified-blue.svg',
+            'color' => '#3b82f6',
+            'tier' => 1,
+            'how' => 'Awarded when every field on your profile is filled in.',
         ],
         'verified-skills' => [
             'name' => 'Skills Certified',
-            'description' => 'Professional skills have been assessed and certified',
+            'description' => 'Completed a course and earned a certificate',
             'icon' => 'verified-skills.svg',
             'color' => '#f59e0b',
-            'tier' => 2
+            'tier' => 2,
+            'how' => 'Awarded when you finish a course and a certificate is issued.',
         ],
-        'verified-company' => [
-            'name' => 'Verified Company',
-            'description' => 'Business registration has been verified',
-            'icon' => 'verified-company.svg',
-            'color' => '#6366f1',
-            'tier' => 2
-        ],
-        'verified-gold' => [
-            'name' => 'Gold Member',
-            'description' => 'Premium gold tier membership',
-            'icon' => 'verified-gold.svg',
-            'color' => '#f59e0b',
-            'tier' => 3
-        ],
-        'verified-platinum' => [
-            'name' => 'Platinum Member',
-            'description' => 'Elite platinum tier membership',
-            'icon' => 'verified-platinum.svg',
-            'color' => '#94a3b8',
-            'tier' => 4
-        ],
-        'verified-pro' => [
-            'name' => 'Professional',
-            'description' => 'Recognized as a verified professional',
-            'icon' => 'verified-pro.svg',
-            'color' => '#8b5cf6',
-            'tier' => 3
-        ],
-        'verified-elite' => [
-            'name' => 'Elite',
-            'description' => 'Top performer in the community',
-            'icon' => 'verified-elite.svg',
-            'color' => '#f59e0b',
-            'tier' => 4
-        ],
-        'verified-top-rated' => [
-            'name' => 'Top Rated',
-            'description' => 'Consistently high ratings from employers',
-            'icon' => 'verified-top-rated.svg',
-            'color' => '#ef4444',
-            'tier' => 4
-        ],
-        'verified-new-member' => [
-            'name' => 'New Member',
-            'description' => 'Recently joined the platform',
-            'icon' => 'verified-new-member.svg',
-            'color' => '#06b6d4',
-            'tier' => 1
-        ]
     ];
 }
 
@@ -147,7 +104,7 @@ function renderBadgeRow(array $badgeTypes, string $size = 'md', int $maxShow = 5
     $visible = array_slice($validBadges, 0, $maxShow);
     $remaining = count($validBadges) - $maxShow;
     
-    $html = '<div class="badge-row flex items-center gap-1">';
+    $html = '<span class="badge-row inline-flex items-center gap-1 align-middle ml-1">';
     
     foreach ($visible as $badgeType) {
         $html .= renderBadge($badgeType, $size);
@@ -157,7 +114,7 @@ function renderBadgeRow(array $badgeTypes, string $size = 'md', int $maxShow = 5
         $html .= "<span class=\"text-xs text-slate-500 ml-1\">+{$remaining}</span>";
     }
     
-    $html .= '</div>';
+    $html .= '</span>';
     
     return $html;
 }
