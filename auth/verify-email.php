@@ -12,6 +12,68 @@ Session::start();
 $token     = trim((string) ($_GET['token'] ?? ''));
 $verified  = false;
 $invalid   = false;
+$resendMsg = '';
+$resendErr = '';
+
+/*
+ * Resend.
+ *
+ * Without this the page was a dead end: an unverified account cannot sign in
+ * (login.php bounces it straight back here), and this page only offered "Sign
+ * in", which looped. The copy already told people to request a new link, but
+ * nothing existed to request it with.
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'resend') {
+    if (!Security::verifyCSRF()) {
+        $resendErr = 'Security check failed. Please try again.';
+    } elseif (!Session::isLoggedIn()) {
+        $resendErr = 'Sign in first so we know which address to send to.';
+    } else {
+        $last = (int) ($_SESSION['verify_resend_at'] ?? 0);
+        if (time() - $last < 120) {
+            $wait = 120 - (time() - $last);
+            $resendErr = "Just sent one. Try again in {$wait} seconds.";
+        } else {
+            try {
+                $pdo  = db();
+                $stmt = $pdo->prepare("SELECT user_id, full_name, email, is_verified FROM users WHERE user_id = ? LIMIT 1");
+                $stmt->execute([(int) Session::userId()]);
+                $me = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$me) {
+                    $resendErr = 'We could not find that account.';
+                } elseif ((int) $me['is_verified'] === 1) {
+                    $verified  = true;   // already done elsewhere; do not send again
+                    $_SESSION['is_verified'] = true;
+                } else {
+                    // Fresh token each time, so an older link cannot be reused.
+                    $newToken = bin2hex(random_bytes(32));
+                    $pdo->prepare("UPDATE users SET activation_token = ? WHERE user_id = ?")
+                        ->execute([$newToken, (int) $me['user_id']]);
+
+                    require_once __DIR__ . '/../includes/mailer.php';
+                    $sent = Mailer::sendVerificationEmail($me['email'], $me['full_name'], $newToken);
+
+                    $_SESSION['verify_resend_at'] = time();
+                    $resendMsg = $sent
+                        ? 'Sent. Check ' . $me['email'] . ', including your spam folder.'
+                        : '';
+                    $resendErr = $sent ? '' : 'We could not send it just now. Please try again shortly.';
+                }
+                Security::regenerateCSRF();
+            } catch (Throwable $e) {
+                error_log('Verification resend failed: ' . $e->getMessage());
+                $resendErr = 'Something went wrong. Please try again.';
+            }
+        }
+    }
+}
+
+// Someone already signed in but unverified is the person who needs the resend.
+$pendingEmail = '';
+if (Session::isLoggedIn() && empty($_SESSION['is_verified'])) {
+    $pendingEmail = (string) Session::get('email');
+}
 
 if ($token !== '') {
     $pdo  = db();
@@ -122,12 +184,36 @@ $pageTitle = 'Verify Email | ' . SITE_NAME;
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0640a3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     </div>
                     <h1 style="font-size:24px;font-weight:800;color:var(--jm-ink);margin:0 0 12px;">Check your inbox.</h1>
-                    <p style="color:var(--jm-muted);margin:0 0 28px;line-height:1.7;">We sent a verification link to your email. Click it to confirm your address and unlock access to jobs and AI tools.</p>
-                    <p style="font-size:13px;color:var(--jm-muted);margin:0 0 28px;">Didn't get it? Check your spam folder, or sign in and request a new link.</p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                        <a class="jm-button" href="/jobmington/auth/login.php">Sign in</a>
-                        <a class="jm-button secondary" href="/jobmington/">Back to home</a>
-                    </div>
+                    <p style="color:var(--jm-muted);margin:0 0 20px;line-height:1.7;">
+                        We sent a verification link<?= $pendingEmail !== '' ? ' to <strong style="color:var(--jm-ink);">' . e($pendingEmail) . '</strong>' : ' to your email' ?>.
+                        Click it to confirm your address and unlock jobs and AI tools.
+                    </p>
+
+                    <?php if ($resendMsg): ?>
+                        <p style="background:#e6f5f1;color:#0a6454;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:600;margin:0 0 18px;"><?= e($resendMsg) ?></p>
+                    <?php endif; ?>
+                    <?php if ($resendErr): ?>
+                        <p style="background:#fdecea;color:#991b1b;border-radius:8px;padding:11px 14px;font-size:13px;font-weight:600;margin:0 0 18px;"><?= e($resendErr) ?></p>
+                    <?php endif; ?>
+
+                    <?php if ($pendingEmail !== ''): ?>
+                        <p style="font-size:13px;color:var(--jm-muted);margin:0 0 16px;">Not there? Check spam first, then send it again.</p>
+                        <form method="post" style="margin:0 0 20px;">
+                            <?= Security::csrfField() ?>
+                            <input type="hidden" name="action" value="resend">
+                            <button class="jm-button" type="submit">Resend verification email</button>
+                        </form>
+                        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            <a class="jm-button secondary" href="/jobmington/auth/logout.php">Use a different account</a>
+                            <a class="jm-button secondary" href="/jobmington/">Back to home</a>
+                        </div>
+                    <?php else: ?>
+                        <p style="font-size:13px;color:var(--jm-muted);margin:0 0 28px;">Didn't get it? Check your spam folder, then sign in to send a new link.</p>
+                        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            <a class="jm-button" href="/jobmington/auth/login.php">Sign in</a>
+                            <a class="jm-button secondary" href="/jobmington/">Back to home</a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </section>
