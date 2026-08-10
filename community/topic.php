@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/forum_reactions.php';
 require_once __DIR__ . '/../includes/learn_nav.php';
 
 Session::start();
@@ -41,6 +42,20 @@ if (!$topic) {
 
 // Increment Views
 $pdo->prepare("UPDATE forum_topics SET views = views + 1 WHERE topic_id = ?")->execute([$topicId]);
+
+// React. Runs before the reply handler, which would otherwise treat this
+// submission as an empty reply. Redirect after so a refresh does not re-toggle.
+if (isPost() && Security::verifyCSRF() && !empty($_POST['react'])) {
+    Session::requireLogin('Sign in or create a free account to react to posts.');
+    $parts = explode(':', (string) $_POST['react']);
+    if (count($parts) === 3) {
+        [$rType, $rId, $rKind] = $parts;
+        [$ok, $note] = jm_reaction_toggle($pdo, $rType, (int) $rId, (int) Session::userId(), $rKind);
+        if (!$ok) { Session::flash('error', $note); }
+    }
+    Security::regenerateCSRF();
+    redirect('/jobmington/community/topic.php?id=' . $topicId);
+}
 
 // Post Reply
 if (isPost() && Security::verifyCSRF()) {
@@ -146,6 +161,11 @@ $stmt = $pdo->prepare("
 $stmt->execute([$topicId]);
 $replies = $stmt->fetchAll();
 
+$viewerId    = Session::isLoggedIn() ? (int) Session::userId() : null;
+$canReact    = Session::isLoggedIn();
+$topicReacts = jm_reactions_for($pdo, 'topic', [$topicId], $viewerId);
+$replyReacts = jm_reactions_for($pdo, 'reply', array_column($replies, 'reply_id'), $viewerId);
+
 // Get user's liked reply IDs
 $userLikedReplies = [];
 if (Session::isLoggedIn()) {
@@ -203,8 +223,9 @@ function jm_forum_avatar(array $u): string {
             </div>
         </div>
         <div class="jm-tpc-content"><?= e($topic['content']) ?></div>
+        <?= jm_reaction_styles() ?>
+        <?= jm_reaction_bar('topic', (int) $topicId, $topicReacts[(int) $topicId] ?? [], $canReact, $viewerId === (int) $topic['user_id']) ?>
         <div class="jm-tpc-stats">
-            <span><?= (int)$topic['likes'] ?> likes</span>
             <span><?= count($replies) ?> repl<?= count($replies) === 1 ? 'y' : 'ies' ?></span>
             <span><?= (int)$topic['views'] ?> views</span>
         </div>
@@ -222,7 +243,11 @@ function jm_forum_avatar(array $u): string {
                             <span class="nm"><?= e($r['full_name'] ?: 'Member') ?><?= jm_verified_tick($r, 13) ?></span>
                             <span class="ag"><?= e(timeAgo($r['created_at'])) ?></span>
                         </div>
+                        <?php if (!empty($r['is_verified_answer'])): ?>
+                            <span class="jm-verified-answer"><img src="<?= e(asset('images/badge.png?v=logo-8')) ?>" alt="">Verified by Jobmington</span>
+                        <?php endif; ?>
                         <div class="jm-tpc-reply-body"><?= e($r['content']) ?></div>
+                        <?= jm_reaction_bar('reply', (int) $r['reply_id'], $replyReacts[(int) $r['reply_id']] ?? [], $canReact, $viewerId === (int) $r['user_id']) ?>
                     </div>
                 </div>
             <?php endforeach; ?>
