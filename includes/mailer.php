@@ -518,8 +518,8 @@ HTML;
         $iconBase = SITE_URL . '/assets/images/email/';
         $row = static function (string $icon, string $label, string $value) use ($ff, $ffd, $iconBase): string {
             return '<tr>'
-                 . '<td width="24" style="padding:0 12px 14px 0;vertical-align:top;">'
-                 .   '<img src="' . $iconBase . $icon . '.png" alt="" width="16" height="16" style="display:block;border:0;">'
+                 . '<td width="30" style="padding:0 12px 14px 0;vertical-align:top;">'
+                 .   '<img src="' . $iconBase . $icon . '.png" alt="" width="20" height="20" style="display:block;border:0;">'
                  . '</td>'
                  . '<td style="padding:0 0 14px;vertical-align:top;">'
                  .   '<div style="' . $ff . 'font-size:11px;color:#94a3b8;letter-spacing:0.05em;text-transform:uppercase;padding-bottom:3px;">' . $label . '</div>'
@@ -545,8 +545,8 @@ HTML;
             ? '<td width="12" style="width:12px;font-size:0;line-height:0;">&nbsp;</td>'
               . '<td style="background:#eaf1fd;border:1px solid #cfe0f8;border-radius:8px;">'
               . '<a href="' . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . '" '
-              . 'style="' . $ffd . 'display:inline-block;padding:14px 24px;color:#0640a3;font-size:14px;'
-              . 'font-weight:700;text-decoration:none;border-radius:8px;">Add to calendar</a></td>'
+              . 'style="' . $ffd . 'display:inline-block;padding:12px 18px;color:#0640a3;font-size:13px;'
+              . 'font-weight:700;text-decoration:none;border-radius:8px;white-space:nowrap;">Add to calendar</a></td>'
             : '';
 
         $note = $joinUrl !== ''
@@ -573,7 +573,7 @@ HTML;
             <table cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
               <tr>
                 <td style="background:#0640a3;border-radius:8px;">
-                  <a href="' . $primaryUrl . '" style="' . $ffd . 'display:inline-block;padding:14px 30px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;">' . $primaryLabel . '</a>
+                  <a href="' . $primaryUrl . '" style="' . $ffd . 'display:inline-block;padding:12px 20px;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;white-space:nowrap;">' . $primaryLabel . '</a>
                 </td>
                 ' . $calendarBtn . '
               </tr>
