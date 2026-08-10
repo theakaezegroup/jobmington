@@ -125,6 +125,8 @@ function ensureSeedsSchema(): void {
         ['daily_login', 5, 'earn', 'Daily login bonus'],
         ['referral_signup', 200, 'earn', 'Refer a friend who signs up'],
         ['interview_scheduled', 50, 'earn', 'Get an interview scheduled'],
+        ['forum_worked_for_me', 5, 'earn', 'Someone confirmed your advice worked for them'],
+
         // ── SPEND (Seeds): Andika chat + light engagement perks only. ──────────
         // Premium AI tools (CV optimizer, cover letter, cold pitch, interview prep)
         // are paid for in Credits, NOT Seeds — see includes/monetization.php.

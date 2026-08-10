@@ -32,13 +32,7 @@ return function (PDO $pdo): void {
         $pdo->exec("ALTER TABLE forum_replies ADD COLUMN is_verified_answer TINYINT(1) NOT NULL DEFAULT 0");
     }
 
-    // Seeds rate for the one reaction that pays. Modest on purpose: it should
-    // recognise a genuinely useful answer, not become an income stream.
-    $exists = $pdo->prepare("SELECT COUNT(*) FROM seed_rates WHERE action = ?");
-    $exists->execute(['forum_worked_for_me']);
-    if (!(int) $exists->fetchColumn()) {
-        $pdo->prepare("INSERT INTO seed_rates (action, seeds_amount, type, description, is_active)
-                       VALUES (?, ?, 'earn', ?, 1)")
-            ->execute(['forum_worked_for_me', 5.00, 'Someone confirmed your advice worked for them']);
-    }
+    // The Seeds rate itself lives in the canonical list in includes/seeds.php.
+    // Inserting it here would not survive: ensureSeedsSchema() deletes any rate
+    // outside that list on the next seeds call.
 };
