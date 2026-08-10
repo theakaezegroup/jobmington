@@ -17,7 +17,7 @@ $success = '';
 
 function jm_profile_user(PDO $pdo, int $userId): array {
     $stmt = $pdo->prepare("
-        SELECT u.*, cv.cv_id, cv.headline AS cv_headline, cv.summary AS cv_summary
+        SELECT u.*, cv.cv_id, cv.headline AS cv_headline, cv.summary AS cv_summary, cv.city AS cv_city
         FROM users u
         LEFT JOIN cv_profiles cv ON u.user_id = cv.user_id
         WHERE u.user_id = ?
@@ -77,9 +77,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->beginTransaction();
                 [$firstName, $lastName] = array_pad(explode(' ', $fullName, 2), 2, '');
 
+                // headline, bio and city are columns on cv_profiles, not users.
+                // Writing them here made the whole statement fail, the transaction
+                // roll back, and every save report "Profile could not be saved".
                 $stmt = $pdo->prepare("
                     UPDATE users
-                    SET first_name = ?, last_name = ?, full_name = ?, phone = ?, headline = ?, bio = ?, city = ?, country_id = ?, profile_image = ?, updated_at = NOW()
+                    SET first_name = ?, last_name = ?, full_name = ?, phone = ?, country_id = ?, profile_image = ?, updated_at = NOW()
                     WHERE user_id = ?
                 ");
                 $stmt->execute([
@@ -87,9 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $lastName,
                     $fullName,
                     $phone ?: null,
-                    $headline ?: null,
-                    $bio ?: null,
-                    $city ?: null,
                     $countryId ?: null,
                     $profileImage,
                     $userId
@@ -121,7 +121,7 @@ $profileFields = [
     !empty($user['full_name']),
     !empty($user['email']),
     !empty($user['phone']),
-    !empty($user['city']),
+    !empty($user['cv_city'] ?? ''),
     !empty($user['headline'] ?? $user['cv_headline'] ?? ''),
     !empty($user['bio'] ?? $user['cv_summary'] ?? ''),
 ];
@@ -136,8 +136,8 @@ if ($completion === 100) {
         error_log('Profile badge award failed: ' . $e->getMessage());
     }
 }
-$headlineValue = $user['headline'] ?: ($user['cv_headline'] ?? '');
-$bioValue = $user['bio'] ?: ($user['cv_summary'] ?? '');
+$headlineValue = $user['cv_headline'] ?? '';
+$bioValue = $user['cv_summary'] ?? '';
 $pageTitle = 'Profile | ' . SITE_NAME;
 ?>
 <!doctype html>
@@ -216,7 +216,7 @@ $pageTitle = 'Profile | ' . SITE_NAME;
                         </div>
                         <div class="jm-field">
                             <label for="city">City</label>
-                            <input class="jm-input" id="city" name="city" value="<?= e($user['city'] ?? '') ?>">
+                            <input class="jm-input" id="city" name="city" value="<?= e($user['cv_city'] ?? '') ?>">
                         </div>
                     </div>
 
