@@ -164,7 +164,7 @@ function jm_forum_avatar(array $u): string {
 ?>
 <style>
 .jm-tpc { max-width:760px; margin:0 auto; padding:36px 20px 72px; }
-.jm-tpc-av { width:42px; height:42px; border-radius:50%; flex-shrink:0; object-fit:cover; background:#eef5ff; display:grid; place-items:center; color:#0640a3; font-weight:800; font-size:16px; }
+.jm-tpc-av { width:30px; height:30px; border-radius:6px; flex-shrink:0; object-fit:cover; display:block; }
 .jm-tpc-cat { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.07em; color:#0640a3; }
 .jm-tpc h1 { font-size:clamp(24px,4vw,34px); font-weight:800; letter-spacing:-.02em; color:#061426; line-height:1.2; margin:8px 0 14px; }
 .jm-tpc-card { background:#fff; border:1px solid #e4eaf3; border-radius:14px; padding:22px; margin-bottom:24px; }

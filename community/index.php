@@ -54,7 +54,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
 @media(max-width:820px){ .jm-forum-grid{grid-template-columns:1fr;} }
 .jm-topic { display:flex; gap:14px; padding:16px 18px; background:#fff; border:1px solid #e4eaf3; border-radius:12px; margin-bottom:10px; text-decoration:none; transition:box-shadow .14s,transform .14s; }
 .jm-topic:hover { box-shadow:0 8px 22px rgba(6,20,38,.08); transform:translateY(-1px); }
-.jm-topic-av { width:42px; height:42px; border-radius:50%; flex-shrink:0; object-fit:cover; background:#eef5ff; display:grid; place-items:center; color:#0640a3; font-weight:800; font-size:16px; }
+.jm-topic-av { width:30px; height:30px; border-radius:6px; flex-shrink:0; object-fit:cover; display:block; }
 .jm-topic-main { flex:1; min-width:0; }
 .jm-topic-cat { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:#0640a3; }
 .jm-topic-title { font-size:16px; font-weight:700; color:#061426; line-height:1.3; margin:2px 0 4px; }
