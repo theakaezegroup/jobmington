@@ -219,12 +219,12 @@ class Mailer {
       <td style="background:#0640a3;padding:26px 40px;">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="padding-right:13px;vertical-align:middle;">
-              <img src="{$mark}" alt="Jobmington" width="34" height="34" style="display:block;border:0;">
+            <td style="padding-right:14px;vertical-align:middle;">
+              <img src="{$mark}" alt="Jobmington" width="46" height="46" style="display:block;border:0;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="{$ffd}font-size:21px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span><br>
-              <span style="{$ff}font-size:10px;color:#b9cdf0;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
+              <span style="{$ffd}font-size:19px;font-weight:700;color:#ffffff;letter-spacing:-0.01em;">Jobmington</span><br>
+              <span style="{$ff}font-size:10px;color:#d6e4fa;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
             </td>
           </tr>
         </table>
