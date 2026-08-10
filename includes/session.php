@@ -34,7 +34,20 @@ class Session {
 
         // Secure session settings
         ini_set('session.cookie_httponly', 1);
-        ini_set('session.cookie_samesite', 'Strict');
+        /*
+         * Lax, not Strict.
+         *
+         * Strict withholds the session cookie on every cross-site navigation,
+         * including someone clicking a verification or password-reset link from
+         * their email client. PHP then starts a fresh session and replaces the
+         * cookie, so the visitor lands apparently signed out and any CSRF token
+         * they already held no longer matches: "Security check failed".
+         *
+         * Lax still withholds the cookie on cross-site POSTs and subresource
+         * requests, which are the vectors CSRF actually uses, and token checks
+         * run on top of it. It is also what browsers default to when unset.
+         */
+        ini_set('session.cookie_samesite', 'Lax');
         ini_set('session.use_strict_mode', 1);
         ini_set('session.use_only_cookies', 1);
         ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
