@@ -519,7 +519,7 @@ HTML;
         $row = static function (string $icon, string $label, string $value) use ($ff, $ffd, $iconBase): string {
             return '<tr>'
                  . '<td width="30" style="padding:0 12px 14px 0;vertical-align:top;">'
-                 .   '<img src="' . $iconBase . $icon . '.png?v=2" alt="" width="20" height="20" style="display:block;border:0;">'
+                 .   '<img src="' . $iconBase . $icon . '.png?v=3" alt="" width="20" height="20" style="display:block;border:0;">'
                  . '</td>'
                  . '<td style="padding:0 0 14px;vertical-align:top;">'
                  .   '<div style="' . $ff . 'font-size:11px;color:#94a3b8;letter-spacing:0.05em;text-transform:uppercase;padding-bottom:3px;">' . $label . '</div>'
