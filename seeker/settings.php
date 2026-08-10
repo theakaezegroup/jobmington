@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errors)) {
-                $stmt = $pdo->prepare("UPDATE users SET email = ?, phone = ?, updated_at = NOW() WHERE user_id = ?");
+                $stmt = $pdo->prepare("UPDATE users SET email = ?, phone = ? WHERE user_id = ?");
                 $stmt->execute([$email, $phone ?: null, $userId]);
                 $_SESSION['email'] = $email;
                 $user['email'] = $email;
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (empty($errors)) {
-                $stmt = $pdo->prepare("UPDATE users SET password_hash = ?, updated_at = NOW() WHERE user_id = ?");
+                $stmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE user_id = ?");
                 $stmt->execute([Security::hashPassword($new), $userId]);
                 $success = 'Password changed.';
             }

@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // roll back, and every save report "Profile could not be saved".
                 $stmt = $pdo->prepare("
                     UPDATE users
-                    SET first_name = ?, last_name = ?, full_name = ?, phone = ?, country_id = ?, profile_image = ?, updated_at = NOW()
+                    SET first_name = ?, last_name = ?, full_name = ?, phone = ?, country_id = ?, profile_image = ?
                     WHERE user_id = ?
                 ");
                 $stmt->execute([
@@ -110,7 +110,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'Profile saved.';
                 $user = jm_profile_user($pdo, $userId);
             } catch (Throwable $e) {
-                $pdo->rollBack();
+                if ($pdo->inTransaction()) { $pdo->rollBack(); }
+                // Logged, not just shown: this failed for every user for a long
+                // time precisely because the real reason was thrown away here.
+                error_log('Profile save failed for user ' . $userId . ': ' . $e->getMessage());
                 $errors[] = 'Profile could not be saved.';
             }
         }
