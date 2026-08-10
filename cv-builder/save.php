@@ -50,7 +50,7 @@ try {
     // 1. Update Main Profile
     $stmt = $pdo->prepare("
         UPDATE cv_profiles SET 
-            full_name = ?, email = ?, phone = ?, city = ?, 
+            full_name = ?, email = ?, phone = ?, location = ?, 
             headline = ?, summary = ?, updated_at = NOW()
         WHERE cv_id = ? AND user_id = ?
     ");
@@ -104,12 +104,11 @@ try {
     // 4. Update Skills
     $pdo->prepare("DELETE FROM cv_skills WHERE cv_id = ?")->execute([$cvId]);
     if (!empty($input['skills'])) {
-        $stmtSkill = $pdo->prepare("INSERT INTO cv_skills (cv_id, skill_name, proficiency) VALUES (?, ?, ?)");
+        $stmtSkill = $pdo->prepare("INSERT INTO cv_skills (cv_id, skill_name) VALUES (?, ?)");
         foreach ($input['skills'] as $skill) {
             $stmtSkill->execute([
                 $cvId,
                 Security::clean($skill['name'] ?? ''),
-                'intermediate'
             ]);
         }
     }

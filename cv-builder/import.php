@@ -172,8 +172,8 @@ try {
     // Insert skills
     if (!empty($cvData['skills'])) {
         $stmtSkill = $pdo->prepare("
-            INSERT INTO cv_skills (cv_id, skill_name, level)
-            VALUES (?, ?, 'Intermediate')
+            INSERT INTO cv_skills (cv_id, skill_name)
+            VALUES (?, ?)
         ");
         foreach ($cvData['skills'] as $skill) {
             if (!empty($skill) && is_string($skill)) {

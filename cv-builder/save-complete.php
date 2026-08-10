@@ -199,13 +199,12 @@ try {
         if (empty($skill['name'])) continue;
         
         $stmt = $pdo->prepare("
-            INSERT INTO cv_skills (cv_id, skill_name, level)
-            VALUES (?, ?, ?)
+            INSERT INTO cv_skills (cv_id, skill_name)
+            VALUES (?, ?)
         ");
         $stmt->execute([
             $cvId,
             $skill['name'],
-            'Intermediate' // Default level
         ]);
     }
     
