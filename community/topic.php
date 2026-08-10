@@ -24,7 +24,7 @@ if ($topicId <= 0) {
 
 // Get Topic
 $stmt = $pdo->prepare("
-    SELECT ft.*, u.full_name, u.profile_image, u.user_type, fc.name as category_name,
+    SELECT ft.*, u.full_name, u.profile_image, u.user_type, u.is_official, fc.name as category_name,
            (SELECT COUNT(*) FROM forum_likes WHERE topic_id = ft.topic_id) as likes
     FROM forum_topics ft
     JOIN users u ON ft.user_id = u.user_id
@@ -136,7 +136,7 @@ if (Session::isLoggedIn()) {
 
 // Get Replies with like counts
 $stmt = $pdo->prepare("
-    SELECT fr.*, u.full_name, u.profile_image, u.user_type,
+    SELECT fr.*, u.full_name, u.profile_image, u.user_type, u.is_official,
            (SELECT COUNT(*) FROM forum_likes WHERE reply_id = fr.reply_id) as likes
     FROM forum_replies fr
     JOIN users u ON fr.user_id = u.user_id
@@ -159,11 +159,7 @@ $activeAIPage = 'learn';
 require_once __DIR__ . '/../includes/ai-header.php';
 
 function jm_forum_avatar(array $u): string {
-    $img = !empty($u['profile_image']) ? (function_exists('profileImage') ? profileImage($u['profile_image']) : $u['profile_image']) : '';
-    if ($img) {
-        return '<img class="jm-tpc-av" src="' . e($img) . '" alt="">';
-    }
-    return '<span class="jm-tpc-av">' . e(strtoupper(substr($u['full_name'] ?: 'J', 0, 1))) . '</span>';
+    return jm_author_avatar($u, 'jm-tpc-av');
 }
 ?>
 <style>
@@ -202,7 +198,7 @@ function jm_forum_avatar(array $u): string {
         <div class="jm-tpc-author">
             <?= jm_forum_avatar($topic) ?>
             <div>
-                <div class="nm"><?= e($topic['full_name'] ?: 'Member') ?></div>
+                <div class="nm"><?= e($topic['full_name'] ?: 'Member') ?><?= jm_verified_tick($topic, 14) ?></div>
                 <div class="mt"><?= e(timeAgo($topic['created_at'])) ?></div>
             </div>
         </div>
@@ -223,7 +219,7 @@ function jm_forum_avatar(array $u): string {
                     <?= jm_forum_avatar($r) ?>
                     <div class="jm-tpc-reply-main">
                         <div class="jm-tpc-reply-head">
-                            <span class="nm"><?= e($r['full_name'] ?: 'Member') ?></span>
+                            <span class="nm"><?= e($r['full_name'] ?: 'Member') ?><?= jm_verified_tick($r, 13) ?></span>
                             <span class="ag"><?= e(timeAgo($r['created_at'])) ?></span>
                         </div>
                         <div class="jm-tpc-reply-body"><?= e($r['content']) ?></div>

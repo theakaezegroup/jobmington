@@ -27,7 +27,7 @@ try {
     $params = [];
     if ($filterCat > 0) { $where = "WHERE ft.category_id = ?"; $params[] = $filterCat; }
 
-    $sql = "SELECT ft.*, u.full_name, u.profile_image, fc.name AS category_name,
+    $sql = "SELECT ft.*, u.full_name, u.profile_image, u.is_official, fc.name AS category_name,
                    (SELECT COUNT(*) FROM forum_replies WHERE topic_id = ft.topic_id) AS replies
             FROM forum_topics ft
             LEFT JOIN users u ON ft.user_id = u.user_id
@@ -90,18 +90,13 @@ require_once __DIR__ . '/../includes/ai-header.php';
                 <div class="jm-forum-empty">No discussions yet. <a href="/jobmington/community/new-topic.php" style="color:#0640a3;">Start the first one.</a></div>
             <?php else: foreach ($feed as $t): ?>
                 <a class="jm-topic" href="/jobmington/community/topic.php?id=<?= (int)$t['topic_id'] ?>">
-                    <?php $img = !empty($t['profile_image']) ? (function_exists('profileImage') ? profileImage($t['profile_image']) : $t['profile_image']) : ''; ?>
-                    <?php if ($img): ?>
-                        <img class="jm-topic-av" src="<?= e($img) ?>" alt="">
-                    <?php else: ?>
-                        <span class="jm-topic-av"><?= e(strtoupper(substr($t['full_name'] ?: 'J', 0, 1))) ?></span>
-                    <?php endif; ?>
+                    <?= jm_author_avatar($t, 'jm-topic-av') ?>
                     <div class="jm-topic-main">
                         <?php if ($t['category_name']): ?><span class="jm-topic-cat"><?= e($t['category_name']) ?></span><?php endif; ?>
                         <div class="jm-topic-title"><?= e($t['title']) ?></div>
                         <div class="jm-topic-snippet"><?= e(excerpt($t['content'], 140)) ?></div>
                         <div class="jm-topic-meta">
-                            <span><?= e($t['full_name'] ?: 'Member') ?></span>
+                            <span><?= e($t['full_name'] ?: 'Member') ?><?= jm_verified_tick($t, 13) ?></span>
                             <span><?= (int)$t['replies'] ?> repl<?= (int)$t['replies'] === 1 ? 'y' : 'ies' ?></span>
                             <span><?= (int)$t['views'] ?> views</span>
                             <span><?= e(timeAgo($t['created_at'])) ?></span>

@@ -92,6 +92,32 @@ if (!function_exists('redirectBack')) {
 }
 
 /**
+ * Author identity used across the community.
+ *
+ * Falls back to the brand badge rather than a letter tile, and shows a verified
+ * tick for accounts flagged is_official so the platform voice is distinguishable
+ * from a member with the same display name.
+ */
+if (!function_exists('jm_author_avatar')) {
+    function jm_author_avatar(array $u, string $class = 'jm-topic-av'): string {
+        $img = !empty($u['profile_image']) && function_exists('profileImage')
+            ? profileImage($u['profile_image'])
+            : (!empty($u['profile_image']) ? $u['profile_image'] : asset('images/badge.png?v=logo-8'));
+        return '<img class="' . e($class) . '" src="' . e($img) . '" alt="">';
+    }
+}
+
+if (!function_exists('jm_verified_tick')) {
+    function jm_verified_tick(array $u, int $size = 14): string {
+        if (empty($u['is_official'])) { return ''; }
+        return '<img src="' . e(asset('images/badges/verified-blue.svg')) . '"'
+             . ' width="' . $size . '" height="' . $size . '"'
+             . ' style="display:inline-block;vertical-align:-2px;margin-left:4px;flex:0 0 auto;"'
+             . ' alt="Verified" title="Official Jobmington account">';
+    }
+}
+
+/**
  * Remember a signed-in visitor's first name so the sign-in page can greet them
  * by name on their next visit.
  *
