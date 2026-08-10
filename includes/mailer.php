@@ -542,7 +542,7 @@ HTML;
         $primaryLabel = $joinUrl !== '' ? 'Join the session' : 'View event';
 
         $calendarBtn = $calendarUrl
-            ? '<td width="12" style="width:12px;font-size:0;line-height:0;">&nbsp;</td>'
+            ? '<td width="18" style="width:18px;"><div style="width:18px;height:1px;line-height:1px;font-size:1px;">&nbsp;</div></td>'
               . '<td style="background:#eaf1fd;border:1px solid #cfe0f8;border-radius:8px;">'
               . '<a href="' . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . '" '
               . 'style="' . $ffd . 'display:inline-block;padding:12px 18px;color:#0640a3;font-size:13px;'
