@@ -80,6 +80,36 @@ class Session {
 
         // Restore a persistent login if there is no session but a valid token.
         self::restoreFromRemember();
+
+        // Suspending an account must end sessions that are already running.
+        self::enforceActive();
+    }
+
+    /**
+     * Drop a session whose account has since been deactivated.
+     *
+     * Throttled to once a minute: correctness here is worth a query, but not one
+     * on every asset and page load. A database problem is deliberately ignored
+     * rather than signing everybody out.
+     */
+    private static function enforceActive(): void {
+        if (!self::isLoggedIn() || !function_exists('db')) { return; }
+        if (time() - (int) ($_SESSION['_active_check'] ?? 0) < 60) { return; }
+        $_SESSION['_active_check'] = time();
+
+        try {
+            $stmt = db()->prepare('SELECT is_active FROM users WHERE user_id = ? LIMIT 1');
+            $stmt->execute([(int) self::userId()]);
+            $row = $stmt->fetch();
+            if (!$row || (int) $row['is_active'] !== 1) {
+                if (function_exists('jm_forget_visitor')) { jm_forget_visitor(); }
+                self::destroy();
+                header('Location: /jobmington/auth/login.php?error=account_disabled');
+                exit;
+            }
+        } catch (Throwable $e) {
+            error_log('Active-account check failed: ' . $e->getMessage());
+        }
     }
 
     /**

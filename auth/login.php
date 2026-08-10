@@ -43,6 +43,9 @@ if (Session::isLoggedIn()) {
 
 $pdo = db();
 $error = '';
+if (($_GET['error'] ?? '') === 'account_disabled') {
+    $error = 'This account has been deactivated. Get in touch if you think that is a mistake.';
+}
 $emailValue = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -70,6 +73,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && $user['locked_until'] && strtotime($user['locked_until']) > time()) {
             $minutesLeft = ceil((strtotime($user['locked_until']) - time()) / 60);
             $error = "Account locked. Try again in {$minutesLeft} minutes.";
+        } elseif ($user && !(int) $user['is_active'] && password_verify($password, $user['password_hash'])) {
+            // Checked only after the password verifies, so account state is never
+            // revealed to someone guessing at addresses.
+            $error = 'This account has been deactivated. Get in touch if you think that is a mistake.';
         } elseif ($user && password_verify($password, $user['password_hash'])) {
             $pdo->prepare("UPDATE users SET failed_login_attempts = 0, locked_until = NULL, last_login = NOW() WHERE user_id = ?")->execute([$user['user_id']]);
 
