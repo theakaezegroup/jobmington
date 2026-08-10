@@ -17,7 +17,7 @@ $success = '';
 
 function jm_profile_user(PDO $pdo, int $userId): array {
     $stmt = $pdo->prepare("
-        SELECT u.*, cv.cv_id, cv.headline AS cv_headline, cv.summary AS cv_summary, cv.city AS cv_city
+        SELECT u.*, cv.cv_id, cv.headline AS cv_headline, cv.summary AS cv_summary, cv.location AS cv_location
         FROM users u
         LEFT JOIN cv_profiles cv ON u.user_id = cv.user_id
         WHERE u.user_id = ?
@@ -96,10 +96,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
 
                 if (!empty($user['cv_id'])) {
-                    $stmt = $pdo->prepare("UPDATE cv_profiles SET full_name = ?, phone = ?, city = ?, headline = ?, summary = ?, updated_at = NOW() WHERE cv_id = ?");
+                    $stmt = $pdo->prepare("UPDATE cv_profiles SET full_name = ?, phone = ?, location = ?, headline = ?, summary = ?, updated_at = NOW() WHERE cv_id = ?");
                     $stmt->execute([$fullName, $phone ?: null, $city ?: null, $headline ?: null, $bio ?: null, $user['cv_id']]);
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO cv_profiles (user_id, full_name, email, phone, city, headline, summary) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO cv_profiles (user_id, full_name, email, phone, location, headline, summary) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt->execute([$userId, $fullName, $user['email'] ?? null, $phone ?: null, $city ?: null, $headline ?: null, $bio ?: null]);
                 }
 
@@ -121,7 +121,7 @@ $profileFields = [
     !empty($user['full_name']),
     !empty($user['email']),
     !empty($user['phone']),
-    !empty($user['cv_city'] ?? ''),
+    !empty($user['cv_location'] ?? ''),
     !empty($user['headline'] ?? $user['cv_headline'] ?? ''),
     !empty($user['bio'] ?? $user['cv_summary'] ?? ''),
 ];
@@ -216,7 +216,7 @@ $pageTitle = 'Profile | ' . SITE_NAME;
                         </div>
                         <div class="jm-field">
                             <label for="city">City</label>
-                            <input class="jm-input" id="city" name="city" value="<?= e($user['cv_city'] ?? '') ?>">
+                            <input class="jm-input" id="city" name="city" value="<?= e($user['cv_location'] ?? '') ?>">
                         </div>
                     </div>
 

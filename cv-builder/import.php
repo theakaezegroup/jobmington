@@ -96,7 +96,7 @@ try {
     
     // Create CV profile
     $stmt = $pdo->prepare("
-        INSERT INTO cv_profiles (user_id, title, template, full_name, email, phone, city, headline, summary, created_at, updated_at)
+        INSERT INTO cv_profiles (user_id, title, template, full_name, email, phone, location, headline, summary, created_at, updated_at)
         VALUES (?, ?, 'obsidian', ?, ?, ?, ?, ?, ?, NOW(), NOW())
     ");
     $importedName = trim((string) ($cvData['name'] ?? ''));
