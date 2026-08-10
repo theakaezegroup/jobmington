@@ -550,7 +550,7 @@ HTML;
             : '';
 
         $note = $joinUrl !== ''
-            ? 'We will send the link again nearer the time, so there is nothing to keep hold of.'
+            ? 'We will remind you the day before and again an hour before it starts.'
             : 'The joining details follow before it starts.';
 
         $content = '
@@ -583,6 +583,82 @@ HTML;
         ';
 
         return ["You are registered - {$event['title']}", $content];
+    }
+
+    /* ── 6c. Event reminder — 24 hours and 1 hour before ────────── */
+    public static function sendEventReminder(string $email, string $name, array $event, string $eventUrl, string $window, string $calendarUrl = ''): bool {
+        [$subject, $content] = self::composeEventReminder($name, $event, $eventUrl, $window, $calendarUrl);
+        return (new self())->send($email, $subject, $content);
+    }
+
+    /** $window is '24h' or '1h'. Split out so it can be asserted without sending. */
+    public static function composeEventReminder(string $name, array $event, string $eventUrl, string $window, string $calendarUrl = ''): array {
+        $firstName = explode(' ', trim($name))[0] ?: 'there';
+        $start     = strtotime($event['starts_at']);
+        $time      = date('g:i A', $start) . ($event['timezone'] ? ' ' . $event['timezone'] : '');
+        $title     = htmlspecialchars((string) $event['title'], ENT_QUOTES, 'UTF-8');
+        $soon      = $window === '1h';
+
+        // Double quotes throughout: the font stack contains single quotes and
+        // would otherwise terminate the attribute and drop every declaration.
+        $ff  = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+        $ffd = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+
+        $poster = '';
+        $cover  = trim((string) ($event['cover_image'] ?? ''));
+        if ($cover !== '' && !$soon) {
+            // The hour-before note stays short and link-first; the poster is for
+            // the day-before mail, which is the one that has to sell attendance.
+            if (!preg_match('#^https?://#i', $cover)) {
+                $cover = SITE_URL . '/' . ltrim(preg_replace('#^/?jobmington/#', '', ltrim($cover, '/')), '/');
+            }
+            $poster = '<tr><td style="padding:0 0 22px;"><img src="' . htmlspecialchars($cover, ENT_QUOTES, 'UTF-8')
+                    . '" alt="' . $title . '" width="520" style="display:block;width:100%;max-width:520px;height:auto;border:0;"></td></tr>';
+        }
+
+        $joinUrl = (!empty($event['is_online']) && !empty($event['meeting_url']))
+            ? htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') : '';
+        $primaryUrl   = $joinUrl !== '' ? $joinUrl : htmlspecialchars($eventUrl, ENT_QUOTES, 'UTF-8');
+        $primaryLabel = $joinUrl !== '' ? 'Join the session' : 'View event';
+
+        $heading = $soon
+            ? 'Starting in about an hour, ' . $firstName . '.'
+            : 'Tomorrow, ' . $firstName . '.';
+        $lead = $soon
+            ? '<strong style="color:#06142a;">' . $title . '</strong> starts at ' . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '.'
+            : '<strong style="color:#06142a;">' . $title . '</strong> runs tomorrow at ' . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '.';
+
+        $calendarBtn = (!$soon && $calendarUrl)
+            ? '<td width="18" style="width:18px;"><div style="width:18px;height:1px;line-height:1px;font-size:1px;">&nbsp;</div></td>'
+              . '<td style="background:#eaf1fd;border:1px solid #cfe0f8;border-radius:8px;">'
+              . '<a href="' . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . '" style="' . $ffd
+              . 'display:inline-block;padding:12px 18px;color:#0640a3;font-size:13px;font-weight:700;'
+              . 'text-decoration:none;border-radius:8px;white-space:nowrap;">Add to calendar</a></td>'
+            : '';
+
+        $content = '
+            <h2 style="' . $ffd . 'font-weight:700;color:#06142a;margin:0 0 6px;font-size:22px;line-height:1.2;">' . $heading . '</h2>
+            <p style="' . $ff . 'color:#475569;margin:0 0 22px;line-height:1.7;">' . $lead . '</p>
+
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 4px;">' . $poster . '</table>
+
+            <table cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+              <tr>
+                <td style="background:#0640a3;border-radius:8px;">
+                  <a href="' . $primaryUrl . '" style="' . $ffd . 'display:inline-block;padding:12px 20px;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;white-space:nowrap;">' . $primaryLabel . '</a>
+                </td>
+                ' . $calendarBtn . '
+              </tr>
+            </table>
+
+            <p style="' . $ff . 'color:#94a3b8;font-size:13px;margin:0;">You are on the list, so there is nothing else to do.</p>
+        ';
+
+        $subject = $soon
+            ? "Starting soon - {$event['title']}"
+            : "Tomorrow - {$event['title']}";
+
+        return [$subject, $content];
     }
 
     /* ── 7. Password changed — account security ─────────────────── */
