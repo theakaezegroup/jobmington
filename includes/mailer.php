@@ -223,7 +223,7 @@ class Mailer {
               <img src="{$mark}" alt="Jobmington" width="56" height="56" style="display:block;border:0;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="{$ffd}font-size:19px;font-weight:700;color:#ffffff;letter-spacing:-0.01em;">Jobmington</span><br>
+              <span style="{$ffd}font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span><br>
               <span style="{$ff}font-size:10px;color:#d6e4fa;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
             </td>
           </tr>
