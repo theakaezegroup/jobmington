@@ -14,12 +14,26 @@ function jm_learn_nav(string $active = ''): string {
     if (!$stylePrinted) {
         $stylePrinted = true;
         $style = '<style>'
-            . '.jm-learnnav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 28px;padding:6px;background:#fff;border:1px solid #e4eaf3;border-radius:12px;}'
+            . '.jm-learnnav-wrap{position:relative;margin:0 0 28px;}'
+            . '.jm-learnnav{display:flex;gap:6px;flex-wrap:wrap;margin:0;padding:6px;background:#fff;border:1px solid #e4eaf3;border-radius:12px;}'
             . '.jm-learnnav a{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:8px;font-size:13.5px;font-weight:700;color:#53667f;text-decoration:none;transition:background .14s,color .14s;}'
             . '.jm-learnnav a svg{width:15px;height:15px;}'
             . '.jm-learnnav a:hover{background:#f3f7fd;color:#0640a3;}'
             . '.jm-learnnav a.active{background:#0640a3;color:#fff;}'
-            . '@media(max-width:560px){.jm-learnnav{overflow-x:auto;flex-wrap:nowrap;}.jm-learnnav a{white-space:nowrap;}}'
+            /* One scrolling row rather than a ragged wrap. Breakpoint raised to 700px
+               so the lumpy 3-then-2 wrap never happens. */
+            . '@media(max-width:700px){'
+            .   '.jm-learnnav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}'
+            .   '.jm-learnnav::-webkit-scrollbar{display:none;}'
+            .   '.jm-learnnav a{white-space:nowrap;}'
+            /* Fades sit on the wrapper, not the scroller, or they would scroll away
+               with the content. They only appear on the side that has more to show. */
+            .   '.jm-learnnav-wrap::before,.jm-learnnav-wrap::after{content:"";position:absolute;top:1px;bottom:1px;width:34px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:2;}'
+            .   '.jm-learnnav-wrap::before{left:1px;border-radius:12px 0 0 12px;background:linear-gradient(to right,#fff 30%,rgba(255,255,255,0));}'
+            .   '.jm-learnnav-wrap::after{right:1px;border-radius:0 12px 12px 0;background:linear-gradient(to left,#fff 30%,rgba(255,255,255,0));}'
+            .   '.jm-learnnav-wrap.has-left::before{opacity:1;}'
+            .   '.jm-learnnav-wrap.has-right::after{opacity:1;}'
+            . '}'
             . '</style>';
     }
 
@@ -39,5 +53,29 @@ function jm_learn_nav(string $active = ''): string {
             . htmlspecialchars($it['label']) . '</a>';
     }
 
-    return $style . '<nav class="jm-learnnav" aria-label="Learn sections">' . $links . '</nav>';
+    static $scriptPrinted = false;
+    $script = '';
+    if (!$scriptPrinted) {
+        $scriptPrinted = true;
+        $script = '<script>(function(){'
+            . 'var w=document.querySelector(".jm-learnnav-wrap");if(!w)return;'
+            . 'var n=w.querySelector(".jm-learnnav");if(!n)return;'
+            /* Land with the current section visible: otherwise the active pill can
+               sit off-screen and the bar looks like it is highlighting nothing. */
+            . 'var a=n.querySelector("a.active");'
+            . 'if(a){var want=a.offsetLeft-14;if(want>0)n.scrollLeft=want;}'
+            . 'function u(){var max=n.scrollWidth-n.clientWidth;'
+            .   'w.classList.toggle("has-left",n.scrollLeft>2);'
+            .   'w.classList.toggle("has-right",n.scrollLeft<max-2);}'
+            . 'u();'
+            . 'n.addEventListener("scroll",u,{passive:true});'
+            . 'window.addEventListener("resize",u);'
+            . '})();</script>';
+    }
+
+    return $style
+        . '<div class="jm-learnnav-wrap">'
+        . '<nav class="jm-learnnav" aria-label="Learn sections">' . $links . '</nav>'
+        . '</div>'
+        . $script;
 }
