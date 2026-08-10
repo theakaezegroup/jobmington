@@ -31,9 +31,10 @@ if (isset($_GET['export'])) {
     if ($evRow) {
         $rs = $pdo->prepare("
             SELECT r.name, r.email, r.registered_at, r.reminder_24h_at, r.reminder_1h_at,
-                   u.phone, u.city
+                   u.phone, c.name AS country
             FROM event_registrations r
             LEFT JOIN users u ON u.user_id = r.user_id
+            LEFT JOIN countries c ON c.country_id = u.country_id
             WHERE r.event_id = ?
             ORDER BY r.registered_at ASC
         ");
@@ -53,10 +54,10 @@ if (isset($_GET['export'])) {
 
         $out = fopen('php://output', 'w');
         fwrite($out, "\xEF\xBB\xBF");   // BOM, so Excel reads accents correctly
-        fputcsv($out, ['Name', 'Email', 'Phone', 'City', 'Registered at', 'Reminded 24h', 'Reminded 1h']);
+        fputcsv($out, ['Name', 'Email', 'Phone', 'Country', 'Registered at', 'Reminded 24h', 'Reminded 1h']);
         while ($r = $rs->fetch(PDO::FETCH_ASSOC)) {
             fputcsv($out, [
-                $safe($r['name']), $safe($r['email']), $safe($r['phone']), $safe($r['city']),
+                $safe($r['name']), $safe($r['email']), $safe($r['phone']), $safe($r['country']),
                 $r['registered_at'], $r['reminder_24h_at'] ?: '', $r['reminder_1h_at'] ?: '',
             ]);
         }
@@ -265,7 +266,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <a href="/jobmington/admin/events.php" style="font-size:13px;font-weight:700;color:#5b6b82;text-decoration:none;">Close</a>
                     </div>
                 </div>
-                <p style="font-size:12px;color:#5b6b82;margin:0 0 14px;"><?= count($registrants) ?> registered. The CSV includes phone and city where the person has them on their profile.</p>
+                <p style="font-size:12px;color:#5b6b82;margin:0 0 14px;"><?= count($registrants) ?> registered. The CSV includes phone and country where the person has them on their profile.</p>
 
                 <?php if (!$registrants): ?>
                     <p style="font-size:13px;color:#94a3b8;margin:0;">Nobody has registered yet.</p>
