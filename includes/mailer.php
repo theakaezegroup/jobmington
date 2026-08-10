@@ -480,41 +480,92 @@ HTML;
     public static function composeEventRegistration(string $name, array $event, string $eventUrl, string $calendarUrl = ''): array {
         $firstName = explode(' ', trim($name))[0] ?: 'there';
         $start     = strtotime($event['starts_at']);
-        $when      = date('l, j F Y', $start) . ' at ' . date('g:i A', $start)
-                   . ($event['timezone'] ? ' ' . $event['timezone'] : '');
+        $when      = date('l, j F Y', $start);
+        $time      = date('g:i A', $start) . ($event['timezone'] ? ' ' . $event['timezone'] : '');
         $where     = !empty($event['is_online']) ? 'Online' : ($event['location'] ?: 'In person');
         $title     = htmlspecialchars((string) $event['title'], ENT_QUOTES, 'UTF-8');
-        $host      = !empty($event['host_name'])
-            ? "<tr><td style='padding:6px 0;color:#94a3b8;font-size:13px;'>Host</td><td style='padding:6px 0;color:#06142a;font-size:13px;font-weight:600;'>" . htmlspecialchars((string) $event['host_name'], ENT_QUOTES, 'UTF-8') . "</td></tr>"
-            : '';
 
-        // The join link is only meaningful for an online session that has one.
-        $joinRow = (!empty($event['is_online']) && !empty($event['meeting_url']))
-            ? "<p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Join here when it starts: <a href='" . htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') . "' style='color:#0640a3;'>" . htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') . "</a></p>"
-            : "<p style='color:#475569;margin:0 0 20px;line-height:1.75;'>We'll email you the joining details before it starts.</p>";
+        $ff  = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+        $ffd = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
+
+        /*
+         * The poster carries the event far better than any wording, so it leads.
+         * Stored paths keep a legacy /jobmington prefix that production does not
+         * serve, and a mail client will not follow a redirect for an image, so it
+         * is resolved to a direct absolute URL here.
+         */
+        $poster = '';
+        $cover  = trim((string) ($event['cover_image'] ?? ''));
+        if ($cover !== '') {
+            if (!preg_match('#^https?://#i', $cover)) {
+                $cover = SITE_URL . '/' . ltrim(preg_replace('#^/?jobmington/#', '', ltrim($cover, '/')), '/');
+            }
+            $coverSafe = htmlspecialchars($cover, ENT_QUOTES, 'UTF-8');
+            $poster = "<tr><td style='padding:0 0 22px;'>"
+                    . "<img src='{$coverSafe}' alt='" . $title . "' width='520' "
+                    . "style='display:block;width:100%;max-width:520px;height:auto;border:0;outline:none;text-decoration:none;'>"
+                    . "</td></tr>";
+        }
+
+        // Rows rather than a paragraph: the three things an attendee needs to
+        // act on should survive being skimmed on a phone.
+        $row = static function (string $label, string $value) use ($ff, $ffd): string {
+            return "<tr>"
+                 . "<td style='{$ff}font-size:12px;color:#94a3b8;padding:0 16px 6px 0;white-space:nowrap;vertical-align:top;'>{$label}</td>"
+                 . "<td style='{$ffd}font-size:14px;color:#06142a;font-weight:700;padding:0 0 6px;vertical-align:top;'>{$value}</td>"
+                 . "</tr>";
+        };
+
+        $details = $row('When', htmlspecialchars($when, ENT_QUOTES, 'UTF-8') . '<br><span style="' . $ff . 'font-weight:400;color:#475569;">' . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '</span>')
+                 . $row('Where', htmlspecialchars($where, ENT_QUOTES, 'UTF-8'));
+        if (!empty($event['host_name'])) {
+            $details .= $row('Host', htmlspecialchars((string) $event['host_name'], ENT_QUOTES, 'UTF-8'));
+        }
+
+        $joinUrl = (!empty($event['is_online']) && !empty($event['meeting_url']))
+            ? htmlspecialchars((string) $event['meeting_url'], ENT_QUOTES, 'UTF-8') : '';
+
+        $primaryUrl   = $joinUrl !== '' ? $joinUrl : htmlspecialchars($eventUrl, ENT_QUOTES, 'UTF-8');
+        $primaryLabel = $joinUrl !== '' ? 'Join the session' : 'View event';
 
         $calendarBtn = $calendarUrl
-            ? "<a href='{$calendarUrl}' style='display:inline-block;padding:13px 22px;color:#0640a3;font-size:14px;font-weight:700;text-decoration:none;border:1px solid #d8e4f4;'>Add to calendar</a>"
+            ? "<td style='padding-left:10px;'><a href='" . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . "' "
+              . "style='{$ffd}display:inline-block;padding:13px 22px;color:#0640a3;font-size:14px;font-weight:700;"
+              . "text-decoration:none;border:1px solid #d8e4f4;'>Add to calendar</a></td>"
             : '';
 
+        $note = $joinUrl !== ''
+            ? "We will send the link again nearer the time, so there is nothing to keep hold of."
+            : "The joining details follow before it starts.";
+
         $content = "
-            <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>You're registered, {$firstName}.</h2>
-            <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your place at <strong style='color:#06142a;'>{$title}</strong> is confirmed.</p>
-            <table cellpadding='0' cellspacing='0' style='margin:0 0 22px;border-collapse:collapse;'>
-              <tr><td style='padding:6px 18px 6px 0;color:#94a3b8;font-size:13px;'>When</td><td style='padding:6px 0;color:#06142a;font-size:13px;font-weight:600;'>{$when}</td></tr>
-              <tr><td style='padding:6px 18px 6px 0;color:#94a3b8;font-size:13px;'>Where</td><td style='padding:6px 0;color:#06142a;font-size:13px;font-weight:600;'>{$where}</td></tr>
-              {$host}
+            <h2 style='{$ffd}font-weight:700;color:#06142a;margin:0 0 6px;font-size:22px;line-height:1.2;'>You are registered, {$firstName}.</h2>
+            <p style='{$ff}color:#475569;margin:0 0 22px;line-height:1.7;'>Your place at <strong style='color:#06142a;'>{$title}</strong> is confirmed.</p>
+
+            <table cellpadding='0' cellspacing='0' border='0' width='100%' style='margin:0 0 4px;'>
+              {$poster}
+              <tr><td style='padding:0 0 22px;'>
+                <table cellpadding='0' cellspacing='0' border='0' width='100%' style='border:1px solid #e4eaf3;'>
+                  <tr><td style='padding:18px 20px;'>
+                    <table cellpadding='0' cellspacing='0' border='0'>{$details}</table>
+                  </td></tr>
+                </table>
+              </td></tr>
             </table>
-            {$joinRow}
-            <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
+
+            <p style='{$ff}color:#475569;margin:0 0 22px;line-height:1.7;'>{$note}</p>
+
+            <table cellpadding='0' cellspacing='0' border='0' style='margin:0 0 24px;'>
               <tr>
-                <td style='background:#0640a3;'><a href='{$eventUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View event</a></td>
-                <td style='padding-left:10px;'>{$calendarBtn}</td>
+                <td style='background:#0640a3;'><a href='{$primaryUrl}' style='{$ffd}display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>{$primaryLabel}</a></td>
+                {$calendarBtn}
               </tr>
             </table>
-            <p style='color:#94a3b8;font-size:13px;margin:0;'>Can no longer make it? Just ignore this email — no action needed.</p>
+
+            <p style='{$ff}color:#94a3b8;font-size:13px;margin:0;'>Cannot make it after all? Ignore this email, there is nothing to cancel.</p>
         ";
-        return ["You're registered — {$event['title']}", $content];
+
+        return ["You are registered - {$event['title']}", $content];
     }
 
     /* ── 7. Password changed — account security ─────────────────── */
