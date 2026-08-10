@@ -174,6 +174,9 @@ class Mailer {
      */
     private function buildTemplate(string $subject, string $content): string {
         $logo    = 'https://jobmington.com/assets/images/badge.png';
+        // The transparent mark, not the badge: a blue tile on a blue header
+        // reads as a mismatched square, the same problem the mobile header had.
+        $mark    = 'https://jobmington.com/assets/images/badge-mark.png?v=logo-7';
         $year    = date('Y');
         $siteUrl = 'https://jobmington.com';
 
@@ -211,19 +214,17 @@ class Mailer {
   <!-- Card — sharp corners, no border-radius -->
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:0;">
 
-    <!-- White header -->
+    <!-- Brand-blue header, matching the site -->
     <tr>
-      <td style="background:#ffffff;padding:28px 40px;">
+      <td style="background:#0640a3;padding:26px 40px;">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <!-- Badge on white background — full contrast -->
-            <td style="padding-right:14px;vertical-align:middle;">
-              <img src="{$logo}" alt="JM" width="40" height="40" style="display:block;">
+            <td style="padding-right:13px;vertical-align:middle;">
+              <img src="{$mark}" alt="Jobmington" width="34" height="34" style="display:block;border:0;">
             </td>
-            <!-- Brand name once -->
             <td style="vertical-align:middle;">
-              <span style="{$ffd}font-size:22px;font-weight:700;color:#06142a;letter-spacing:-0.02em;">Jobmington</span><br>
-              <span style="{$ff}font-size:10px;color:#94a3b8;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
+              <span style="{$ffd}font-size:21px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span><br>
+              <span style="{$ff}font-size:10px;color:#b9cdf0;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
             </td>
           </tr>
         </table>
@@ -509,17 +510,25 @@ HTML;
 
         // Rows rather than a paragraph: the three things an attendee needs to
         // act on should survive being skimmed on a phone.
-        $row = static function (string $label, string $value) use ($ff, $ffd): string {
+        // PNG rather than inline SVG: Gmail strips <svg> and Outlook will not
+        // render it, so a vector icon would simply vanish for most readers.
+        $iconBase = SITE_URL . '/assets/images/email/';
+        $row = static function (string $icon, string $label, string $value) use ($ff, $ffd, $iconBase): string {
             return "<tr>"
-                 . "<td style='{$ff}font-size:12px;color:#94a3b8;padding:0 16px 6px 0;white-space:nowrap;vertical-align:top;'>{$label}</td>"
-                 . "<td style='{$ffd}font-size:14px;color:#06142a;font-weight:700;padding:0 0 6px;vertical-align:top;'>{$value}</td>"
+                 . "<td width='24' style='padding:0 12px 14px 0;vertical-align:top;'>"
+                 .   "<img src='{$iconBase}{$icon}.png' alt='' width='16' height='16' style='display:block;border:0;'>"
+                 . "</td>"
+                 . "<td style='padding:0 0 14px;vertical-align:top;'>"
+                 .   "<div style='{$ff}font-size:11px;color:#94a3b8;letter-spacing:0.05em;text-transform:uppercase;padding-bottom:2px;'>{$label}</div>"
+                 .   "<div style='{$ffd}font-size:14px;color:#06142a;font-weight:700;line-height:1.45;'>{$value}</div>"
+                 . "</td>"
                  . "</tr>";
         };
 
-        $details = $row('When', htmlspecialchars($when, ENT_QUOTES, 'UTF-8') . '<br><span style="' . $ff . 'font-weight:400;color:#475569;">' . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '</span>')
-                 . $row('Where', htmlspecialchars($where, ENT_QUOTES, 'UTF-8'));
+        $details = $row('when', 'When', htmlspecialchars($when, ENT_QUOTES, 'UTF-8') . '<br><span style="' . $ff . 'font-weight:400;color:#475569;">' . htmlspecialchars($time, ENT_QUOTES, 'UTF-8') . '</span>')
+                 . $row('where', 'Where', htmlspecialchars($where, ENT_QUOTES, 'UTF-8'));
         if (!empty($event['host_name'])) {
-            $details .= $row('Host', htmlspecialchars((string) $event['host_name'], ENT_QUOTES, 'UTF-8'));
+            $details .= $row('host', 'Host', htmlspecialchars((string) $event['host_name'], ENT_QUOTES, 'UTF-8'));
         }
 
         $joinUrl = (!empty($event['is_online']) && !empty($event['meeting_url']))
@@ -529,9 +538,10 @@ HTML;
         $primaryLabel = $joinUrl !== '' ? 'Join the session' : 'View event';
 
         $calendarBtn = $calendarUrl
-            ? "<td style='padding-left:10px;'><a href='" . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . "' "
+            ? "<td style='padding-left:10px;background:#eaf1fd;border:1px solid #d8e4f4;'>"
+              . "<a href='" . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . "' "
               . "style='{$ffd}display:inline-block;padding:13px 22px;color:#0640a3;font-size:14px;font-weight:700;"
-              . "text-decoration:none;border:1px solid #d8e4f4;'>Add to calendar</a></td>"
+              . "text-decoration:none;'>Add to calendar</a></td>"
             : '';
 
         $note = $joinUrl !== ''
