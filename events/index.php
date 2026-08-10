@@ -175,27 +175,38 @@ function jm_event_row(array $ev, bool $isPast = false): string {
 .jm-ev-empty p { font-size: 14px; color: #53667f; margin: 0; }
 
 @media (max-width: 720px) {
-    /* The poster used to be hidden here, which lost the most compelling part of
-       a listing on the screen most people browse it from. It now drops to a
-       full-width band beneath the details instead of being squeezed beside them. */
+    /* Image-first card, the way event listings are scanned on a phone: picture,
+       then decide whether to read. The poster gets full width, the copy sits on
+       plain background so every word stays legible, and only the date overlays
+       the artwork -- it carries its own solid chip, so it reads over any poster.
+       Laying the title itself over the image would fight the poster's own text
+       and land on faces. */
     .jm-ev-row {
-        grid-template-columns: 52px minmax(0,1fr);
-        grid-template-areas: "date main" "thumb thumb";
-        gap: 14px;
-        padding: 18px 2px;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "media" "main";
+        gap: 12px;
+        padding: 16px 2px 20px;
         align-items: start;
     }
-    .jm-ev-date  { grid-area: date; padding: 7px 3px 6px; }
-    .jm-ev-main  { grid-area: main; }
     .jm-ev-thumb {
-        grid-area: thumb;
+        grid-area: media;
         width: 100%;
         aspect-ratio: 16 / 9;
-        margin-top: 2px;
     }
+    .jm-ev-date {
+        grid-area: media;            /* same cell as the poster: overlays it */
+        align-self: start;
+        justify-self: start;
+        margin: 10px;
+        z-index: 2;
+        padding: 6px 9px 5px;
+        background: #fff;            /* opaque, so it survives a busy poster */
+        border-color: rgba(6, 20, 38, .08);
+    }
+    .jm-ev-main { grid-area: main; }
     .jm-ev-go { display: none; }
-    .jm-ev-date .d { font-size: 20px; }
-    .jm-ev-title { font-size: 15.5px; }
+    .jm-ev-date .d { font-size: 19px; }
+    .jm-ev-title { font-size: 16px; }
     .jm-ev-tabs { gap: 20px; }
 }
 </style>
