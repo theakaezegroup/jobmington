@@ -567,7 +567,7 @@ $ftone = static function (?string $s): string {
         <?php if (empty($recentUsers)): ?>
             <div class="nc-empty">No users yet.</div>
         <?php else: ?>
-        <table class="nc-feed-table">
+        <div class="jm-tablewrap"><table class="nc-feed-table">
             <?php foreach ($recentUsers as $u): ?>
             <tr>
                 <td>
@@ -580,7 +580,7 @@ $ftone = static function (?string $s): string {
                 </td>
             </tr>
             <?php endforeach; ?>
-        </table>
+        </table></div>
         <?php endif; ?>
     </div>
 
@@ -589,7 +589,7 @@ $ftone = static function (?string $s): string {
         <?php if (empty($recentJobs)): ?>
             <div class="nc-empty">No jobs yet.</div>
         <?php else: ?>
-        <table class="nc-feed-table">
+        <div class="jm-tablewrap"><table class="nc-feed-table">
             <?php foreach ($recentJobs as $j): ?>
             <tr>
                 <td>
@@ -602,7 +602,7 @@ $ftone = static function (?string $s): string {
                 </td>
             </tr>
             <?php endforeach; ?>
-        </table>
+        </table></div>
         <?php endif; ?>
     </div>
 
@@ -611,7 +611,7 @@ $ftone = static function (?string $s): string {
         <?php if (empty($recentApplications)): ?>
             <div class="nc-empty">No applications yet.</div>
         <?php else: ?>
-        <table class="nc-feed-table">
+        <div class="jm-tablewrap"><table class="nc-feed-table">
             <?php foreach ($recentApplications as $a): ?>
             <tr>
                 <td>
@@ -624,7 +624,7 @@ $ftone = static function (?string $s): string {
                 </td>
             </tr>
             <?php endforeach; ?>
-        </table>
+        </table></div>
         <?php endif; ?>
     </div>
 
@@ -633,7 +633,7 @@ $ftone = static function (?string $s): string {
         <?php if (empty($recentPayments)): ?>
             <div class="nc-empty">No transactions yet.</div>
         <?php else: ?>
-        <table class="nc-feed-table">
+        <div class="jm-tablewrap"><table class="nc-feed-table">
             <?php foreach ($recentPayments as $p): ?>
             <tr>
                 <td>
@@ -646,7 +646,7 @@ $ftone = static function (?string $s): string {
                 </td>
             </tr>
             <?php endforeach; ?>
-        </table>
+        </table></div>
         <?php endif; ?>
     </div>
 </div>
@@ -658,7 +658,7 @@ $ftone = static function (?string $s): string {
         <?php if (empty($recentActivity)): ?>
             <div class="nc-empty">No activity recorded.</div>
         <?php else: ?>
-        <table class="nc-feed-table">
+        <div class="jm-tablewrap"><table class="nc-feed-table">
             <?php foreach ($recentActivity as $act): ?>
             <tr>
                 <td>
@@ -670,7 +670,7 @@ $ftone = static function (?string $s): string {
                 </td>
             </tr>
             <?php endforeach; ?>
-        </table>
+        </table></div>
         <?php endif; ?>
     </div>
 
@@ -679,7 +679,7 @@ $ftone = static function (?string $s): string {
         <?php if (empty($latestWebhooks)): ?>
             <div class="nc-empty">No webhook activity.</div>
         <?php else: ?>
-        <table class="nc-feed-table">
+        <div class="jm-tablewrap"><table class="nc-feed-table">
             <?php foreach ($latestWebhooks as $w):
                 $bad = empty($w['processed']) || !empty($w['error_message']); ?>
             <tr>
@@ -693,7 +693,7 @@ $ftone = static function (?string $s): string {
                 </td>
             </tr>
             <?php endforeach; ?>
-        </table>
+        </table></div>
         <?php endif; ?>
     </div>
 </div>

@@ -42,7 +42,7 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
 
         <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-sm">
+            <div class="jm-tablewrap"><table class="w-full text-sm">
                 <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
                     <tr>
                         <th class="text-left p-4">Country</th>
@@ -71,7 +71,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
-            </table>
+            </table></div>
         </div>
     </div>
 </div>

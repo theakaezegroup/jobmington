@@ -160,7 +160,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
                         <textarea name="badge_description" rows="2" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"></textarea>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Icon</label>
                             <select name="badge_icon" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">

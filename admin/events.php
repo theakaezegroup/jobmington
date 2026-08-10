@@ -181,7 +181,7 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 
     <div>
-        <table class="jm-ev-table">
+        <div class="jm-tablewrap"><table class="jm-ev-table">
             <thead><tr><th>Event</th><th>When</th><th>Regs</th><th>Status</th><th></th></tr></thead>
             <tbody>
             <?php if (empty($events)): ?>
@@ -202,7 +202,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </tr>
             <?php endforeach; endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 </div>
 

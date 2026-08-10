@@ -163,7 +163,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <textarea name="description" rows="2" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"></textarea>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pass %</label>
                             <input type="number" name="passing_score" value="70" min="0" max="100" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
@@ -285,7 +285,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     <button type="submit" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
                                 </form>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                                 <span class="<?= $q['correct_option'] === 'A' ? 'text-emerald-400' : 'text-slate-400' ?>">A: <?= e($q['option_a']) ?></span>
                                 <span class="<?= $q['correct_option'] === 'B' ? 'text-emerald-400' : 'text-slate-400' ?>">B: <?= e($q['option_b']) ?></span>
                                 <?php if ($q['option_c']): ?><span class="<?= $q['correct_option'] === 'C' ? 'text-emerald-400' : 'text-slate-400' ?>">C: <?= e($q['option_c']) ?></span><?php endif; ?>

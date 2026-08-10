@@ -218,7 +218,7 @@ require_once __DIR__ . '/../includes/header.php';
     <form id="addcat" method="post" style="display:none;"><?= Security::csrfField() ?><input type="hidden" name="action" value="add_category"></form>
 
     <div>
-        <table class="jm-ad-table">
+        <div class="jm-tablewrap"><table class="jm-ad-table">
             <thead><tr><th></th><th>Title</th><th>Category</th><th>Views</th><th>Status</th><th></th></tr></thead>
             <tbody>
             <?php if (empty($posts)): ?>
@@ -240,7 +240,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </tr>
             <?php endforeach; endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 </div>
 

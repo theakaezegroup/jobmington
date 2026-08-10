@@ -472,6 +472,16 @@ if ($isAdminArea) {
             .ja-quick { grid-template-columns: repeat(2, minmax(0,1fr)); }
             .ja-grid-3 { grid-template-columns: 1fr; }
         }
+        /* Data tables scroll inside their own box so a wide table never forces
+           the whole page sideways. Cells stay on one line: wrapping a 9-column
+           table into a phone width makes it unreadable rather than compact. */
+        .jm-tablewrap { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .jm-tablewrap > table { width: 100%; }
+        @media (max-width: 768px) {
+            .jm-tablewrap > table { min-width: 640px; }
+            .jm-tablewrap th, .jm-tablewrap td { white-space: nowrap; }
+        }
+
         @media (max-width: 1024px) {
             .jm-admin-sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(11,27,51,.18); }
             body.jm-admin.nav-open .jm-admin-sidebar { transform: translateX(0); }

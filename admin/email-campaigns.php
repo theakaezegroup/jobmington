@@ -603,6 +603,7 @@ require_once __DIR__ . '/../includes/header.php';
             <p>Create your first campaign to reach your users directly.</p>
         </div>
     <?php else: ?>
+        <div class="jm-tablewrap">
         <table class="ec-table">
             <thead>
                 <tr>
@@ -680,6 +681,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 

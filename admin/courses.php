@@ -200,7 +200,7 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 
     <div>
-        <table class="jm-ad-table">
+        <div class="jm-tablewrap"><table class="jm-ad-table">
             <thead><tr><th></th><th>Course</th><th>Category</th><th>Modules</th><th>Enrolled</th><th>Status</th><th></th></tr></thead>
             <tbody>
             <?php if (empty($courses)): ?>
@@ -223,7 +223,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </tr>
             <?php endforeach; endif; ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 </div>
 
