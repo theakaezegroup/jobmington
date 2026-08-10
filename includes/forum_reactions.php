@@ -46,7 +46,7 @@ function jm_reactions_for(PDO $pdo, string $type, array $ids, ?int $viewerId): a
     try {
         $stmt = $pdo->prepare("SELECT target_id, kind, COUNT(*) AS n
                                FROM forum_reactions
-                               WHERE target_type = ? AND target_id IN ($in)
+                               WHERE target_type = ? AND target_id IN ($in) AND kind IS NOT NULL
                                GROUP BY target_id, kind");
         $stmt->execute(array_merge([$type], $ids));
         foreach ($stmt as $r) {
@@ -55,7 +55,8 @@ function jm_reactions_for(PDO $pdo, string $type, array $ids, ?int $viewerId): a
 
         if ($viewerId) {
             $stmt = $pdo->prepare("SELECT target_id, kind FROM forum_reactions
-                                   WHERE target_type = ? AND target_id IN ($in) AND user_id = ?");
+                                   WHERE target_type = ? AND target_id IN ($in) AND user_id = ?
+                                     AND kind IS NOT NULL");
             $stmt->execute(array_merge([$type], $ids, [$viewerId]));
             foreach ($stmt as $r) {
                 $out[(int) $r['target_id']]['mine'][$r['kind']] = true;
@@ -83,26 +84,42 @@ function jm_reaction_toggle(PDO $pdo, string $type, int $targetId, int $userId, 
         if (!$authorId) { return [false, 'That post no longer exists.']; }
         if ($authorId === $userId) { return [false, 'You cannot react to your own post.']; }
 
-        $find = $pdo->prepare("SELECT reaction_id FROM forum_reactions
-                               WHERE target_type = ? AND target_id = ? AND user_id = ? AND kind = ? LIMIT 1");
-        $find->execute([$type, $targetId, $userId, $kind]);
-        $existing = $find->fetchColumn();
+        // One row per person per post. Picking a different kind replaces the
+        // previous choice rather than stacking on top of it: a reader's verdict
+        // on a post is one thing, and the kinds conflict with each other.
+        $find = $pdo->prepare("SELECT reaction_id, kind, seeds_paid FROM forum_reactions
+                               WHERE target_type = ? AND target_id = ? AND user_id = ? LIMIT 1");
+        $find->execute([$type, $targetId, $userId]);
+        $row = $find->fetch(PDO::FETCH_ASSOC);
 
-        if ($existing) {
-            $pdo->prepare("DELETE FROM forum_reactions WHERE reaction_id = ?")->execute([$existing]);
+        $wasPaid = $row ? (int) $row['seeds_paid'] === 1 : false;
+
+        if ($row && $row['kind'] === $kind) {
+            // Same button again: withdraw. The row stays so seeds_paid is
+            // remembered, otherwise toggling would pay the author repeatedly.
+            $pdo->prepare("UPDATE forum_reactions SET kind = NULL WHERE reaction_id = ?")
+                ->execute([$row['reaction_id']]);
             return [true, 'removed'];
         }
 
-        $pdo->prepare("INSERT INTO forum_reactions (target_type, target_id, user_id, kind) VALUES (?,?,?,?)")
-            ->execute([$type, $targetId, $userId, $kind]);
+        if ($row) {
+            $pdo->prepare("UPDATE forum_reactions SET kind = ?, created_at = NOW() WHERE reaction_id = ?")
+                ->execute([$kind, $row['reaction_id']]);
+        } else {
+            $pdo->prepare("INSERT INTO forum_reactions (target_type, target_id, user_id, kind) VALUES (?,?,?,?)")
+                ->execute([$type, $targetId, $userId, $kind]);
+        }
 
-        // Only the outcome reaction pays, and only on the way in. Seeds failing
-        // must not undo a reaction that was recorded successfully.
-        if ($kind === 'worked') {
+        // Only the outcome reaction pays, once per person per post ever. Seeds
+        // failing must not undo a reaction that was recorded successfully.
+        if ($kind === 'worked' && !$wasPaid) {
             try {
                 require_once __DIR__ . '/seeds.php';
                 awardSeeds($authorId, 'forum_worked_for_me', $targetId,
                            'Someone confirmed your advice worked');
+                $pdo->prepare("UPDATE forum_reactions SET seeds_paid = 1
+                               WHERE target_type = ? AND target_id = ? AND user_id = ?")
+                    ->execute([$type, $targetId, $userId]);
             } catch (Throwable $e) {
                 error_log('Reaction seed award failed: ' . $e->getMessage());
             }
