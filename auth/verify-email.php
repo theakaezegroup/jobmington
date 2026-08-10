@@ -12,6 +12,7 @@ Session::start();
 $token     = trim((string) ($_GET['token'] ?? ''));
 $verified  = false;
 $invalid   = false;
+$inactive  = false;
 $resendMsg = '';
 $resendErr = '';
 
@@ -77,14 +78,26 @@ if (Session::isLoggedIn() && empty($_SESSION['is_verified'])) {
 
 if ($token !== '') {
     $pdo  = db();
+    /*
+     * is_active is checked in PHP rather than in the WHERE clause, so a
+     * deactivated account can be told apart from a bad token. Filtering it out
+     * in SQL made both look identical, and the page then blamed the link. That
+     * sends people round in circles requesting new links, since every new link
+     * fails for the same reason the last one did.
+     */
     $stmt = $pdo->prepare("
-        SELECT user_id, full_name, email
+        SELECT user_id, full_name, email, is_active
         FROM users
-        WHERE activation_token = ? AND is_verified = 0 AND is_active = 1
+        WHERE activation_token = ? AND is_verified = 0
         LIMIT 1
     ");
     $stmt->execute([$token]);
     $user = $stmt->fetch();
+
+    if ($user && (int) $user['is_active'] !== 1) {
+        $inactive = true;
+        $user = null;   // nothing further should treat this as verifiable
+    }
 
     if ($user) {
         $pdo->prepare("
@@ -122,7 +135,7 @@ if ($token !== '') {
             unset($_SESSION['post_auth_redirect'], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
             redirect($pending);
         }
-    } else {
+    } elseif (!$inactive) {
         $invalid = true;
     }
 }
@@ -163,6 +176,19 @@ $pageTitle = 'Verify Email | ' . SITE_NAME;
                     <h1 style="font-size:24px;font-weight:800;color:var(--jm-ink);margin:0 0 12px;">Email verified.</h1>
                     <p style="color:var(--jm-muted);margin:0 0 28px;line-height:1.7;">Your account is confirmed. You can now sign in and access all jobs and AI tools on Jobmington.</p>
                     <a class="jm-button" href="/jobmington/auth/login.php">Sign in</a>
+                </div>
+
+            <?php elseif ($inactive): ?>
+                <div class="jm-panel" style="max-width:480px;margin:60px auto;text-align:center;padding:48px 40px;">
+                    <div style="width:64px;height:64px;border-radius:50%;background:#fff8ee;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59f22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg>
+                    </div>
+                    <h1 style="font-size:24px;font-weight:800;color:var(--jm-ink);margin:0 0 12px;">This account is not active.</h1>
+                    <p style="color:var(--jm-muted);margin:0 0 28px;line-height:1.7;">Your link is fine. The account it belongs to has been deactivated, so it cannot be verified. Requesting another link will not help. Get in touch and we can sort it out.</p>
+                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                        <a class="jm-button" href="/jobmington/contact.php">Contact us</a>
+                        <a class="jm-button secondary" href="/jobmington/">Back to home</a>
+                    </div>
                 </div>
 
             <?php elseif ($invalid): ?>
