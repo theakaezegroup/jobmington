@@ -404,6 +404,8 @@ require_once __DIR__ . '/../includes/header.php';
 
 /* Feed cards */
 .nc-feeds { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
+@media (max-width:900px){ .nc-mid, .nc-feeds { grid-template-columns: 1fr; } }
+@media (max-width:560px){ .nc-att-list { grid-template-columns: 1fr; } }
 .nc-feed-card { background: #fff; border: 1px solid #e4eaf3; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(11,27,51,.04); }
 .nc-feed-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f0f4f9; background: #fafbfd; }
 .nc-feed-head h3 { margin: 0; font-size: 12px; font-weight: 800; color: #0b1b33; text-transform: uppercase; letter-spacing: .08em; }

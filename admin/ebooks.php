@@ -129,12 +129,13 @@ require_once __DIR__ . '/../includes/header.php';
 .jm-eb-checks { display:flex; gap:16px; flex-wrap:wrap; margin:6px 0 14px; }
 .jm-eb-checks label { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#0b1b33; }
 .jm-eb-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:560px){ .jm-eb-row2 { grid-template-columns:1fr; } }
 .jm-eb-table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e4eaf3; border-radius:12px; overflow:hidden; }
 .jm-eb-table th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#5b6b82; padding:11px 14px; background:#fafbfd; border-bottom:1px solid #e4eaf3; }
 .jm-eb-table td { padding:11px 14px; border-bottom:1px solid #f0f4f9; font-size:13px; color:#0b1b33; vertical-align:middle; }
 .jm-eb-pill { font-size:10px; font-weight:800; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
 .jm-eb-pill.on { background:#e6f5f1; color:#0a6454; } .jm-eb-pill.off { background:#f0f3f8; color:#475569; }
-.jm-eb-actions { display:flex; gap:6px; }
+.jm-eb-actions { display:flex; gap:6px; flex-wrap:wrap; }
 .jm-eb-actions button, .jm-eb-actions a { font-size:11px; font-weight:700; padding:5px 9px; border-radius:6px; border:1px solid #d8e4f4; background:#fff; color:#0640a3; cursor:pointer; text-decoration:none; }
 .jm-eb-msg { padding:11px 14px; border-radius:8px; margin-bottom:16px; font-size:13px; font-weight:600; }
 .jm-eb-msg.ok { background:#e6f5f1; color:#0a6454; } .jm-eb-msg.err { background:#fdecea; color:#991b1b; }

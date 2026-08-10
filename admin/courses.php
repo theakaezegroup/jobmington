@@ -134,6 +134,7 @@ require_once __DIR__ . '/../includes/header.php';
 .jm-ad-field input, .jm-ad-field textarea, .jm-ad-field select { width:100%; box-sizing:border-box; border:1px solid #d8e4f4; border-radius:8px; padding:9px 11px; font:inherit; font-size:13px; background:#fbfdff; }
 .jm-ad-field textarea { min-height:70px; resize:vertical; }
 .jm-ad-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:560px){ .jm-ad-row2 { grid-template-columns:1fr; } }
 .jm-ad-checks { display:flex; gap:14px; flex-wrap:wrap; margin:6px 0 14px; }
 .jm-ad-checks label { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#0b1b33; }
 .jm-ad-table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e4eaf3; border-radius:12px; overflow:hidden; }

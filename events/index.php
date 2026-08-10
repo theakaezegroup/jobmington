@@ -175,9 +175,25 @@ function jm_event_row(array $ev, bool $isPast = false): string {
 .jm-ev-empty p { font-size: 14px; color: #53667f; margin: 0; }
 
 @media (max-width: 720px) {
-    .jm-ev-row { grid-template-columns: 52px minmax(0,1fr); gap: 14px; padding: 18px 2px; align-items: start; }
-    .jm-ev-thumb, .jm-ev-go { display: none; }
-    .jm-ev-date { padding: 7px 3px 6px; }
+    /* The poster used to be hidden here, which lost the most compelling part of
+       a listing on the screen most people browse it from. It now drops to a
+       full-width band beneath the details instead of being squeezed beside them. */
+    .jm-ev-row {
+        grid-template-columns: 52px minmax(0,1fr);
+        grid-template-areas: "date main" "thumb thumb";
+        gap: 14px;
+        padding: 18px 2px;
+        align-items: start;
+    }
+    .jm-ev-date  { grid-area: date; padding: 7px 3px 6px; }
+    .jm-ev-main  { grid-area: main; }
+    .jm-ev-thumb {
+        grid-area: thumb;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        margin-top: 2px;
+    }
+    .jm-ev-go { display: none; }
     .jm-ev-date .d { font-size: 20px; }
     .jm-ev-title { font-size: 15.5px; }
     .jm-ev-tabs { gap: 20px; }

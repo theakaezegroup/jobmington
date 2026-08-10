@@ -123,6 +123,7 @@ require_once __DIR__ . '/../includes/header.php';
 .jm-ev-field input, .jm-ev-field textarea, .jm-ev-field select { width:100%; box-sizing:border-box; border:1px solid #d8e4f4; border-radius:8px; padding:9px 11px; font:inherit; font-size:13px; background:#fbfdff; }
 .jm-ev-field textarea { min-height:80px; resize:vertical; }
 .jm-ev-row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:560px){ .jm-ev-row2 { grid-template-columns:1fr; } }
 .jm-ev-checks { display:flex; gap:16px; flex-wrap:wrap; margin:6px 0 14px; }
 .jm-ev-checks label { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#0b1b33; }
 .jm-ev-table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e4eaf3; border-radius:12px; overflow:hidden; }
@@ -130,7 +131,7 @@ require_once __DIR__ . '/../includes/header.php';
 .jm-ev-table td { padding:11px 14px; border-bottom:1px solid #f0f4f9; font-size:13px; color:#0b1b33; }
 .jm-ev-pill { font-size:10px; font-weight:800; text-transform:uppercase; padding:2px 8px; border-radius:99px; }
 .jm-ev-pill.on { background:#e6f5f1; color:#0a6454; } .jm-ev-pill.off { background:#f0f3f8; color:#475569; }
-.jm-ev-actions { display:flex; gap:6px; }
+.jm-ev-actions { display:flex; gap:6px; flex-wrap:wrap; }
 .jm-ev-actions button, .jm-ev-actions a { font-size:11px; font-weight:700; padding:5px 9px; border-radius:6px; border:1px solid #d8e4f4; background:#fff; color:#0640a3; cursor:pointer; text-decoration:none; }
 .jm-ev-msg { padding:11px 14px; border-radius:8px; margin-bottom:16px; font-size:13px; font-weight:600; }
 .jm-ev-msg.ok { background:#e6f5f1; color:#0a6454; } .jm-ev-msg.err { background:#fdecea; color:#991b1b; }
