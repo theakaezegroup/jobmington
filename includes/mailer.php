@@ -220,7 +220,7 @@ class Mailer {
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
             <td style="padding-right:14px;vertical-align:middle;">
-              <img src="{$mark}" alt="Jobmington" width="46" height="46" style="display:block;border:0;">
+              <img src="{$mark}" alt="Jobmington" width="56" height="56" style="display:block;border:0;">
             </td>
             <td style="vertical-align:middle;">
               <span style="{$ffd}font-size:19px;font-weight:700;color:#ffffff;letter-spacing:-0.01em;">Jobmington</span><br>
@@ -326,8 +326,8 @@ HTML;
             <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Application received, {$firstName}.</h2>
             <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your application for <strong style='color:#06142a;'>{$jobTitle}</strong> at <strong style='color:#06142a;'>{$company}</strong> has been submitted. We'll let you know if there are any updates.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='{$jobUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View job</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='{$jobUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>View job</a>
               </td></tr>
             </table>
             <p style='color:#94a3b8;font-size:13px;margin:0;'>Track all your applications from your <a href='https://jobmington.com/seeker/applications' style='color:#0640a3;'>applications dashboard</a>.</p>
@@ -365,8 +365,8 @@ HTML;
             </table>
             <p style='color:#475569;margin:0 0 24px;line-height:1.75;'>{$statusNote}</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View applications</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>View applications</a>
               </td></tr>
             </table>
         ";
@@ -396,8 +396,8 @@ HTML;
             <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Jobmington found roles that align with your skills, experience, and location. Here are a few to get you started:</p>
             <div style='border-left:3px solid #f59f22;padding-left:16px;margin:0 0 24px;'>{$jobsList}</div>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Browse all matches</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>Browse all matches</a>
               </td></tr>
             </table>
         ";
@@ -433,8 +433,8 @@ HTML;
             </table>
             <p style='color:#475569;margin:0 0 24px;line-height:1.75;'>All AI tools and Premium features are now unlocked on your account.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Go to dashboard</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='{$url}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>Go to dashboard</a>
               </td></tr>
             </table>
         ";
@@ -447,8 +447,8 @@ HTML;
             <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>New application received.</h2>
             <p style='color:#475569;margin:0 0 20px;line-height:1.75;'><strong style='color:#06142a;'>{$applicantName}</strong> has applied for the <strong style='color:#06142a;'>{$jobTitle}</strong> role at {$companyName}.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='{$applicationsUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Review application</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='{$applicationsUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>Review application</a>
               </td></tr>
             </table>
             <p style='color:#94a3b8;font-size:13px;margin:0;'>Manage all applications from your <a href='https://jobmington.com/employer/applications' style='color:#0640a3;'>employer dashboard</a>.</p>
@@ -462,8 +462,8 @@ HTML;
             <h2 style='font-weight:700;color:#06142a;margin:0 0 12px;font-size:22px;line-height:1.2;'>Your role is live.</h2>
             <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>The <strong style='color:#06142a;'>{$jobTitle}</strong> listing for <strong style='color:#06142a;'>{$companyName}</strong> is now live on Jobmington and visible to job seekers.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 24px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='{$jobUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>View listing</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='{$jobUrl}' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>View listing</a>
               </td></tr>
             </table>
             <p style='color:#94a3b8;font-size:13px;margin:0;'>Track applications from your <a href='https://jobmington.com/employer/applications' style='color:#0640a3;'>applications dashboard</a>.</p>
@@ -538,10 +538,11 @@ HTML;
         $primaryLabel = $joinUrl !== '' ? 'Join the session' : 'View event';
 
         $calendarBtn = $calendarUrl
-            ? "<td style='padding-left:10px;background:#eaf1fd;border:1px solid #d8e4f4;'>"
+            ? "<td width='10' style='width:10px;font-size:0;line-height:0;'>&nbsp;</td>"
+              . "<td style='background:#eaf1fd;border:1px solid #d8e4f4;border-radius:8px;'>"
               . "<a href='" . htmlspecialchars($calendarUrl, ENT_QUOTES, 'UTF-8') . "' "
               . "style='{$ffd}display:inline-block;padding:13px 22px;color:#0640a3;font-size:14px;font-weight:700;"
-              . "text-decoration:none;'>Add to calendar</a></td>"
+              . "text-decoration:none;border-radius:8px;'>Add to calendar</a></td>"
             : '';
 
         $note = $joinUrl !== ''
@@ -567,7 +568,7 @@ HTML;
 
             <table cellpadding='0' cellspacing='0' border='0' style='margin:0 0 24px;'>
               <tr>
-                <td style='background:#0640a3;'><a href='{$primaryUrl}' style='{$ffd}display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>{$primaryLabel}</a></td>
+                <td style='background:#0640a3;border-radius:8px;'><a href='{$primaryUrl}' style='{$ffd}display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>{$primaryLabel}</a></td>
                 {$calendarBtn}
               </tr>
             </table>
@@ -587,8 +588,8 @@ HTML;
             <p style='color:#475569;margin:0 0 20px;line-height:1.75;'>Your Jobmington password was successfully changed on <strong style='color:#06142a;'>{$time}</strong>.</p>
             <p style='color:#475569;margin:0 0 24px;line-height:1.75;'>If you made this change, no action is needed. If you did not change your password, please <a href='https://jobmington.com/auth/forgot-password' style='color:#0640a3;font-weight:700;'>reset it immediately</a> and contact us.</p>
             <table cellpadding='0' cellspacing='0' style='margin:0 0 16px;'>
-              <tr><td style='background:#0640a3;'>
-                <a href='https://jobmington.com/auth/login' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;'>Sign in to your account</a>
+              <tr><td style='background:#0640a3;border-radius:8px;'>
+                <a href='https://jobmington.com/auth/login' style='display:inline-block;padding:13px 28px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px;'>Sign in to your account</a>
               </td></tr>
             </table>
         ";
