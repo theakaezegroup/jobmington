@@ -216,15 +216,15 @@ class Mailer {
 
     <!-- Brand-blue header, matching the site -->
     <tr>
-      <td style="background:#0640a3;padding:26px 40px;">
+      <td style="background:#0640a3;padding:24px 28px;">
         <table cellpadding="0" cellspacing="0" border="0">
           <tr>
-            <td style="padding-right:14px;vertical-align:middle;">
+            <td style="padding-right:12px;vertical-align:middle;" width="68">
               <img src="{$mark}" alt="Jobmington" width="56" height="56" style="display:block;border:0;">
             </td>
             <td style="vertical-align:middle;">
-              <span style="{$ffd}font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.02em;">Jobmington</span><br>
-              <span style="{$ff}font-size:10px;color:#d6e4fa;letter-spacing:0.06em;text-transform:uppercase;">Simple hiring for African talent</span>
+              <span style="{$ffd}font-size:18px;font-weight:700;color:#ffffff;letter-spacing:-0.01em;white-space:nowrap;">Jobmington</span><br>
+              <span style="{$ff}font-size:10px;color:#d6e4fa;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;">Simple hiring for African talent</span>
             </td>
           </tr>
         </table>
