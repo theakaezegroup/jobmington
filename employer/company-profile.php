@@ -123,8 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $slug = jm_company_unique_slug($pdo, $name, (int) $company['company_id']);
             $stmt = $pdo->prepare("
                 UPDATE companies
-                SET name = ?, slug = ?, logo = ?, cover_image = ?, industry = ?, company_size = ?, website = ?,
-                    description = ?, country_id = ?, city = ?, address = ?, updated_at = NOW()
+                SET name = ?, slug = ?, logo = ?, cover_image = ?, industry = ?, size = ?, website = ?,
+                    description = ?, country_id = ?, location = ?, address = ?, updated_at = NOW()
                 WHERE company_id = ? AND user_id = ?
             ");
             $stmt->execute([
@@ -213,7 +213,7 @@ $pageTitle = 'Company Profile | ' . SITE_NAME;
                             <label for="company_size">Company size</label>
                             <select class="jm-select" id="company_size" name="company_size">
                                 <option value="">Select size</option>
-                                <?php foreach ($companySizes as $size): ?><option value="<?= e($size) ?>" <?= ($company['company_size'] ?? '') === $size ? 'selected' : '' ?>><?= e($size) ?></option><?php endforeach; ?>
+                                <?php foreach ($companySizes as $size): ?><option value="<?= e($size) ?>" <?= ($company['size'] ?? '') === $size ? 'selected' : '' ?>><?= e($size) ?></option><?php endforeach; ?>
                             </select>
                         </div>
                         <div class="jm-field"><label for="website">Website</label><input class="jm-input" id="website" type="url" name="website" value="<?= e($company['website'] ?? '') ?>"></div>
@@ -226,7 +226,7 @@ $pageTitle = 'Company Profile | ' . SITE_NAME;
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="jm-field"><label for="city">City</label><input class="jm-input" id="city" name="city" value="<?= e($company['city'] ?? '') ?>"></div>
+                        <div class="jm-field"><label for="city">City</label><input class="jm-input" id="city" name="city" value="<?= e($company['location'] ?? '') ?>"></div>
                     </div>
                     <div class="jm-field" style="margin-top:18px;"><label for="address">Address</label><input class="jm-input" id="address" name="address" value="<?= e($company['address'] ?? '') ?>"></div>
                     <div class="jm-field" style="margin-top:18px;"><label for="description">Description</label><textarea class="jm-textarea" id="description" name="description"><?= e($company['description'] ?? '') ?></textarea></div>

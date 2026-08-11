@@ -116,9 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 INSERT INTO jobs (
                     company_id, category_id, title, slug, description, apply_link, requirements, benefits,
                     job_type, experience_level, salary_min, salary_max, salary_currency, show_salary,
-                    country_id, city, application_url, application_email, deadline, expires_at,
+                    country_id, city, application_email, expires_at,
                     is_featured, is_active, posted_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             ");
             $stmt->execute([
                 (int) $company['company_id'],
@@ -137,9 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $form['show_salary'],
                 $form['country_id'],
                 $form['city'] ?: null,
-                $form['application_url'] ?: null,
                 $form['application_email'] ?: null,
-                $form['deadline'] ?: null,
                 $expiresAt,
                 (!$isPaidPackage && $package['featured']) ? 1 : 0,
                 $isPaidPackage ? 0 : 1,

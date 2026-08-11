@@ -55,8 +55,9 @@ $form = [
     'country_id' => $job['country_id'] ?? '',
     'city' => $job['city'] ?? '',
     'application_email' => $job['application_email'] ?? '',
-    'application_url' => $job['application_url'] ?: ($job['apply_link'] ?? ''),
-    'deadline' => $job['deadline'] ?? '',
+    'application_url' => $job['apply_link'] ?? '',
+    // expires_at may carry a time; the date input needs a bare Y-m-d.
+    'deadline' => substr((string) ($job['expires_at'] ?? ''), 0, 10),
     'is_active' => (int) ($job['is_active'] ?? 1),
     'is_featured' => (int) ($job['is_featured'] ?? 0),
 ];
@@ -121,8 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 UPDATE jobs SET
                     category_id = ?, title = ?, slug = ?, description = ?, requirements = ?, benefits = ?,
                     job_type = ?, experience_level = ?, salary_min = ?, salary_max = ?, salary_currency = ?,
-                    show_salary = ?, country_id = ?, city = ?, application_email = ?, application_url = ?,
-                    apply_link = ?, deadline = ?, is_featured = ?, is_active = ?
+                    show_salary = ?, country_id = ?, city = ?, application_email = ?,
+                    apply_link = ?, expires_at = COALESCE(?, expires_at), is_featured = ?, is_active = ?
                 WHERE job_id = ? AND company_id = ?
             ");
             $stmt->execute([
@@ -141,7 +142,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $form['country_id'],
                 $form['city'] ?: null,
                 $form['application_email'] ?: null,
-                $form['application_url'] ?: null,
                 $form['application_url'] ?: null,
                 $form['deadline'] ?: null,
                 $form['is_featured'],
