@@ -116,7 +116,11 @@ if (class_exists('LocationDetector')) {
         if (!empty($detectedFlag)) $locationData['flagUrl'] = $detectedFlag;
         
         $locationData['supportedCountries'] = LocationDetector::getSupportedCountries();
-    } catch (Throwable $e) {}
+    } catch (Throwable $e) {
+        // Best effort: the fallback below covers a failed lookup, but a
+        // permanently broken detector should not be invisible.
+        error_log('LocationDetector: ' . $e->getMessage());
+    }
 }
 
 // Fallback insurance
