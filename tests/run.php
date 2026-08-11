@@ -93,5 +93,21 @@ if ($base && !isset($opts['no-http'])) {
     check('bad unsubscribe token shows invalid', str_contains($body('/unsubscribe?e=a@b.com&t=bad'), 'invalid'));
 }
 
+// Schema audit. Skipped rather than failed when the database is unreachable,
+// so the unit checks still run on a machine without MySQL.
+require_once __DIR__ . '/schema_audit.php';
+
+try {
+    require_once __DIR__ . '/../config/database.php';
+    $issues = jm_schema_audit(db(), dirname(__DIR__));
+
+    check('no INSERT/UPDATE names a missing column', $issues === []);
+    foreach ($issues as [$file, $kind, $table, $col]) {
+        printf("      %-42s %-6s %s.%s\n", $file, $kind, $table, $col);
+    }
+} catch (Throwable $e) {
+    echo "  [skip] schema audit: " . $e->getMessage() . "\n";
+}
+
 echo "\n== Result: {$passed} passed, {$failed} failed ==\n";
 exit($failed === 0 ? 0 : 1);

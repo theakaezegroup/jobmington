@@ -22,3 +22,7 @@ upgrade_db.php
 jobs.json
 *.bak
 .claude/
+
+# Local DB dumps and timestamped env backups, never in git
+/backups/
+.env.bak.*
