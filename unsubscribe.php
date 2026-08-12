@@ -56,11 +56,7 @@ $pageTitle = 'Unsubscribe | ' . SITE_NAME;
                 <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                 <span>Jobmington</span>
             </a>
-            <nav class="jm-nav" aria-label="Main navigation">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/cv-builder/">CV Builder</a>
-                <a href="/jobmington/employer/">Employers</a>
-            </nav>
+            <?php require_once __DIR__ . '/includes/navigation.php'; jm_site_nav(); ?>
         </header>
 
         <section class="jm-section" style="padding-top:0;">

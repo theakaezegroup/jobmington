@@ -30,17 +30,7 @@ $pageTitle = 'Employers | ' . SITE_NAME;
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-            <nav class="jm-nav" aria-label="Main navigation">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a class="active" href="/jobmington/employer/">Employers</a>
-                <?php if (Session::isLoggedIn()): ?>
-                    <a href="/jobmington/seeker/dashboard.php">Dashboard</a>
-                    <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
-                <?php else: ?>
-                    <a href="/jobmington/auth/login.php">Sign in</a>
-                    <a class="jm-button secondary" href="/jobmington/auth/register.php?type=employer">Create account</a>
-                <?php endif; ?>
-            </nav>
+            <?php require_once __DIR__ . '/../includes/navigation.php'; jm_site_nav(); ?>
         </header>
 
         <section class="jm-hero">

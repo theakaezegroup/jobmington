@@ -68,12 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['csrf_token'])) {
     <div class="jm-shell">
         <header class="jm-header">
             <a href="/jobmington/" class="jm-logo"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-            <nav class="jm-nav" aria-label="Primary">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/employer/">Employers</a>
-                <a href="/jobmington/auth/login.php">Sign in</a>
-                <a href="/jobmington/employer/post-job.php" class="jm-button secondary">Post a job</a>
-            </nav>
+            <?php require_once __DIR__ . '/includes/navigation.php'; jm_site_nav(); ?>
         </header>
 
         <section class="jm-hero">
