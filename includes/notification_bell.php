@@ -36,7 +36,7 @@ function jm_notification_bell(): void {
         </div>
     </div>
     <style>
-        .jm-bell-btn { position:relative; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
+        .jm-bell-btn { position:relative; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
         .jm-bell-btn:hover { background:#f6f8fb; }
         /* On the brand-blue mobile bar the bell sits plainly on the blue, like
            the logo and the hamburger, rather than as a white tile. */
@@ -48,8 +48,8 @@ function jm_notification_bell(): void {
         /* Lifted out of the slide-in drawer, so it needs to look right in a
            header row it was not originally sitting in. */
         .jm-header > .jm-bell { flex:0 0 auto; margin-left:auto; }
-        .jm-bell-btn svg { width:18px; height:18px; }
-        .jm-bell-badge { position:absolute; top:-5px; right:-5px; min-width:17px; height:17px; padding:0 4px; border-radius:99px; background:#e11d2a; color:#fff; font-size:10px; font-weight:800; line-height:17px; text-align:center; box-shadow:0 0 0 2px #fff; display:none; }
+        .jm-bell-btn svg { width:16px; height:16px; }
+        .jm-bell-badge { position:absolute; top:-4px; right:-4px; min-width:15px; height:15px; padding:0 3.5px; border-radius:99px; background:#e11d2a; color:#fff; font-size:9px; font-weight:800; line-height:15px; text-align:center; box-shadow:0 0 0 2px #fff; display:none; }
         .jm-bell-badge.show { display:block; }
         .jm-bell-ring { animation: jmBellRing .9s ease; }
         @keyframes jmBellRing { 0%,100%{transform:rotate(0)} 20%{transform:rotate(14deg)} 40%{transform:rotate(-12deg)} 60%{transform:rotate(8deg)} 80%{transform:rotate(-5deg)} }
