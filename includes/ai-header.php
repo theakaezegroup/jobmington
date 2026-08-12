@@ -100,13 +100,19 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
                 <span></span>
             </button>
             <nav class="jm-nav" id="jm-ai-nav" aria-label="Main navigation">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/cv-builder/">CV Builder</a>
-                <a class="<?= $activeAIPage === 'tools' ? 'active' : '' ?>" href="/jobmington/tools/">Tools</a>
-                <a class="<?= $activeAIPage === 'learn' ? 'active' : '' ?>" href="/jobmington/learn/">Learn</a>
-                <a class="<?= $activeAIPage === 'andika' ? 'active' : '' ?>" href="/jobmington/ai/andika.php">Andika AI</a>
-                <a href="/jobmington/employer/">Employers</a>
-                <a href="/jobmington/pricing.php">Pricing</a>
+                <?php
+                /* Rendered from the shared list rather than typed out here. The
+                   hand-written copy had drifted: it was missing Home and Post a
+                   Job, said "Find jobs" where the other header said "Find Jobs",
+                   and sent Employers somewhere else entirely. */
+                require_once __DIR__ . '/navigation.php';
+                $jmAiActive = ['tools' => '/tools/', 'learn' => '/learn/', 'andika' => '/ai/andika.php'];
+                foreach (Navigation::getMainItems() as $item):
+                    $isActive = isset($jmAiActive[$activeAIPage])
+                        && str_ends_with($item['url'], $jmAiActive[$activeAIPage]);
+                ?>
+                    <a class="<?= $isActive ? 'active' : '' ?>" href="<?= e($item['url']) ?>"><?= e($item['label']) ?></a>
+                <?php endforeach; ?>
                 <?php if ($isLoggedIn): ?>
                     <a href="<?= e($dashboardUrl) ?>">Dashboard</a>
                     <?php require_once __DIR__ . '/notification_bell.php'; jm_notification_bell(); ?>

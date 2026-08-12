@@ -117,6 +117,35 @@ if ($base && !isset($opts['no-http'])) {
     check('bad unsubscribe token shows invalid', str_contains($body('/unsubscribe?e=a@b.com&t=bad'), 'invalid'));
 }
 
+/*
+ * Navigation. Both site headers used to hand-write their own list and had
+ * drifted on four items and two labels, so this checks that neither has gone
+ * back to typing links in directly.
+ */
+require_once __DIR__ . '/../includes/navigation.php';
+
+$navItems = Navigation::getMainItems();
+check('navigation list is not empty', count($navItems) >= 5);
+
+$aiHeader = (string) @file_get_contents(__DIR__ . '/../includes/ai-header.php');
+$mainHeader = (string) @file_get_contents(__DIR__ . '/../includes/header.php');
+
+check('ai-header renders the shared nav', str_contains($aiHeader, 'Navigation::getMainItems()'));
+check('main header renders the shared nav', str_contains($mainHeader, '$navItems'));
+
+// A link typed straight into a nav is how the two lists came apart.
+$strayNavLinks = 0;
+if (preg_match('#<nav[^>]*class="jm-nav"[^>]*>(.*?)</nav>#s', $aiHeader, $m)) {
+    preg_match_all('#<a\s[^>]*href="/jobmington/[^"]*"#', $m[1], $hits);
+    foreach ($hits[0] as $hit) {
+        // Sign in, sign out and the dashboard are session state, not nav items.
+        if (!preg_match('#/auth/|dashboardUrl#', $hit)) {
+            $strayNavLinks++;
+        }
+    }
+}
+check('no hand-written links left in the ai nav', $strayNavLinks === 0);
+
 // Tool registry audit. No database needed: it reads the files.
 require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/../includes/monetization.php';

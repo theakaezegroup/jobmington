@@ -56,35 +56,7 @@ final class HeaderConfig {
     public function setTitle(string $t): self { $this->title = $t; return $this; }
 }
 
-final class Navigation {
-    public static function getMainItems(): array {
-        return [
-            ['url' => '/jobmington/', 'label' => 'Home', 'icon' => 'home'],
-            ['url' => '/jobmington/jobs', 'label' => 'Find Jobs', 'icon' => 'briefcase'],
-            ['url' => '/jobmington/cv-builder/', 'label' => 'CV Builder', 'icon' => 'document'],
-            ['url' => '/jobmington/tools/', 'label' => 'Tools', 'icon' => 'tools'],
-            ['url' => '/jobmington/learn/', 'label' => 'Learn', 'icon' => 'graduation'],
-            ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles'],
-            ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus'],
-            ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users'],
-        ];
-    }
-
-    public static function getIcon(string $name, string $class = 'w-5 h-5'): string {
-        $icons = [
-            'home' => '<path d="M3 10.5L12 3l9 7.5"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',
-            'briefcase' => '<path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M12 12v.01"/>',
-            'plus' => '<path d="M12 5v14"/><path d="M5 12h14"/>',
-            'sparkles' => '<path d="M12 3l1.9 5.8a2 2 0 001.3 1.3L21 12l-5.8 1.9a2 2 0 00-1.3 1.3L12 21l-1.9-5.8a2 2 0 00-1.3-1.3L3 12l5.8-1.9a2 2 0 001.3-1.3L12 3z"/><path d="M5 3v4"/><path d="M3 5h4"/>',
-            'graduation' => '<path d="M22 10l-10-5L2 10l10 5 10-5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/><path d="M22 10v6"/>',
-            'users' => '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
-            'document' => '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
-            'blog' => '<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/>',
-            'tools' => '<path d="M14.7 6.3a4 4 0 00-5.4 5.4l-6 6a1.4 1.4 0 002 2l6-6a4 4 0 005.4-5.4l-2.3 2.3-2-2 2.3-2.3z"/>',
-        ];
-        return sprintf('<svg class="%s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">%s</svg>', $class, $icons[$name] ?? $icons['briefcase']);
-    }
-}
+require_once __DIR__ . '/navigation.php';
 
 // 3. LOAD DATA
 $headerConfig = HeaderConfig::getInstance();
