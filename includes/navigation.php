@@ -86,6 +86,37 @@ if (!function_exists('jm_login_dashboard_for')) {
     }
 }
 
+
+/**
+ * Is this nav item the section the visitor is currently in?
+ *
+ * Was str_contains($item['url'], $activeUrl), which is a substring test. The
+ * home page passes '/', every URL contains a slash, so every link came back
+ * active and .jm-nav a.active is underlined. That is where the underlines came
+ * from: not styling, a matcher that said yes to everything.
+ *
+ * Compares real path segments, and never treats the site root as a prefix
+ * match, or it would claim every page again.
+ */
+if (!function_exists('jm_nav_is_active')) {
+    function jm_nav_is_active(string $itemUrl, string $override = ''): bool {
+        $strip = static fn(string $u): string
+            => rtrim(preg_replace('#^/jobmington#', '', strtok($u, '?')) ?: '/', '/');
+
+        $item = $strip($itemUrl);
+        if ($item === '') {
+            return false;   // the root is the logo's job, never a highlighted item
+        }
+
+        $here = $override !== '' ? $strip($override) : $strip((string) ($_SERVER['REQUEST_URI'] ?? '/'));
+        if ($here === '') {
+            return false;
+        }
+
+        return $here === $item || str_starts_with($here . '/', $item . '/');
+    }
+}
+
 /**
  * Render the standard nav for the "minimal" page family.
  *
@@ -105,7 +136,7 @@ if (!function_exists('jm_site_nav')) {
         ?>
         <nav class="jm-nav"<?= $navId !== '' ? ' id="' . e($navId) . '"' : '' ?> aria-label="<?= e($ariaLabel) ?>">
             <?php foreach (Navigation::getCompactItems() as $item): ?>
-                <a class="<?= $activeUrl !== '' && str_contains($item['url'], $activeUrl) ? 'active' : '' ?>"
+                <a class="<?= jm_nav_is_active($item['url'], $activeUrl) ? 'active' : '' ?>"
                    href="<?= e($item['url']) ?>"><?= e($item['label']) ?></a>
             <?php endforeach; ?>
 

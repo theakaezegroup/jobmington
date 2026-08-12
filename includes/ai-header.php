@@ -108,8 +108,9 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
                 require_once __DIR__ . '/navigation.php';
                 $jmAiActive = ['tools' => '/tools/', 'learn' => '/learn/', 'andika' => '/ai/andika.php'];
                 foreach (Navigation::getCompactItems() as $item):
-                    $isActive = isset($jmAiActive[$activeAIPage])
-                        && str_ends_with($item['url'], $jmAiActive[$activeAIPage]);
+                    // Same matcher as everywhere else, with the page's own hint
+                    // taking precedence where it sets one.
+                    $isActive = jm_nav_is_active($item['url'], $jmAiActive[$activeAIPage] ?? '');
                 ?>
                     <a class="<?= $isActive ? 'active' : '' ?>" href="<?= e($item['url']) ?>"><?= e($item['label']) ?></a>
                 <?php endforeach; ?>
