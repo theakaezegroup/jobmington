@@ -71,7 +71,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
 
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-24">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-25">
     <script>
         window.tailwind = window.tailwind || {};
         window.tailwind.config = {
@@ -90,8 +90,11 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
 <body class="jm-minimal jm-ai-page">
 <script>document.body.classList.add('jm-mobile-nav-ready');</script>
 <?php require_once __DIR__ . '/header_ads.php'; jm_header_ad_bar(); ?>
-    <div class="jm-shell">
-        <header class="jm-header">
+    <?php /* Deliberately not inside .jm-shell. That wrapper closed straight
+             after the header, so the header had a parent only as tall as
+             itself and position:sticky had nothing to stick against. Its
+             insets come from the stylesheet instead. */ ?>
+    <header class="jm-header">
             <a class="jm-logo" href="/jobmington/">
                 <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                 <span>Jobmington</span>
@@ -123,6 +126,5 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
                     <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
                 <?php endif; ?>
             </nav>
-        </header>
-    </div>
+    </header>
     <main class="jm-ai-main">

@@ -359,6 +359,23 @@ body.jm-ai-page {
     min-height: 100vh;
 }
 
+/* On these pages the header is a child of body, not of the shell, so it is
+   already full width and needs no negative margin. The padding puts its
+   contents on the same line the shell would have. 18px matches the phone's
+   shell padding exactly, so this changes nothing there. */
+body.jm-ai-page > .jm-header {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: max(18px, calc(50vw - 586px));
+    padding-right: max(18px, calc(50vw - 586px));
+}
+@media (min-width: 901px) {
+    body.jm-ai-page > .jm-header {
+        padding-left: max(24px, calc(50vw - 586px));
+        padding-right: max(24px, calc(50vw - 586px));
+    }
+}
+
 body.jm-ai-page .jm-header {
     border-bottom: 0 !important;
     margin-bottom: 0 !important;
