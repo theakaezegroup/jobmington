@@ -25,15 +25,15 @@ $where = ["u.user_type = 'seeker'", 'u.is_active = 1'];
 $params = [];
 
 if ($search !== '') {
-    $where[] = '(u.full_name LIKE ? OR u.headline LIKE ? OR cv.headline LIKE ? OR cv.summary LIKE ?)';
+    $where[] = '(u.full_name LIKE ? OR cv.headline LIKE ? OR cv.summary LIKE ?)';
     $like = '%' . $search . '%';
-    array_push($params, $like, $like, $like, $like);
+    array_push($params, $like, $like, $like);
 }
 
 if ($location !== '') {
-    $where[] = '(u.city LIKE ? OR cv.city LIKE ?)';
+    $where[] = 'cv.location LIKE ?';
     $like = '%' . $location . '%';
-    array_push($params, $like, $like);
+    array_push($params, $like);
 }
 
 if ($level !== '') {
@@ -55,8 +55,8 @@ $totalTalents = (int) $stmt->fetchColumn();
 $pagination = paginate($totalTalents, $perPage, $page);
 
 $stmt = $pdo->prepare("
-    SELECT u.user_id, u.full_name, u.email, u.phone, u.profile_image, u.headline, u.bio, u.city AS user_city,
-           cv.headline AS cv_headline, cv.summary AS cv_summary, cv.city AS cv_city,
+    SELECT u.user_id, u.full_name, u.email, u.phone, u.profile_image,
+           cv.headline AS cv_headline, cv.summary AS cv_summary, cv.location AS cv_city,
            tp.level AS passport_level, tp.level_points,
            (SELECT COUNT(*) FROM job_applications ja WHERE ja.user_id = u.user_id) AS application_count
     FROM users u
@@ -126,12 +126,12 @@ jm_employer_header($pageTitle, 'talent');
                         <img src="<?= e(profileImage($talent['profile_image'] ?? null)) ?>" alt="" style="width:54px;height:54px;object-fit:cover;border:1px solid var(--jm-line);">
                         <div>
                             <h3 style="margin-bottom:2px;"><?= e($talent['full_name'] ?: 'Job seeker') ?></h3>
-                            <p style="margin:0;"><?= e($talent['cv_headline'] ?: $talent['headline'] ?: 'Open to work') ?></p>
+                            <p style="margin:0;"><?= e($talent['cv_headline'] ?: 'Open to work') ?></p>
                         </div>
                     </div>
-                    <p><?= e(excerpt($talent['cv_summary'] ?: $talent['bio'] ?: 'No summary yet.', 150)) ?></p>
+                    <p><?= e(excerpt($talent['cv_summary'] ?: 'No summary yet.', 150)) ?></p>
                     <div class="jm-inline-actions">
-                        <span class="jm-badge"><?= e($talent['cv_city'] ?: $talent['user_city'] ?: 'Location open') ?></span>
+                        <span class="jm-badge"><?= e($talent['cv_city'] ?: 'Location open') ?></span>
                         <?php if (!empty($talent['passport_level'])): ?><span class="jm-badge"><?= e(ucfirst($talent['passport_level'])) ?></span><?php endif; ?>
                     </div>
                     <div class="jm-form-actions">

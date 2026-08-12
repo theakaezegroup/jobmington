@@ -437,8 +437,8 @@ class JobMatcher {
     private function getUserProfile(int $userId): ?array {
         // Basic user info
         $stmt = $this->pdo->prepare("
-            SELECT u.user_id, u.country_id, u.city,
-                   cv.headline, cv.summary
+            SELECT u.user_id, u.country_id,
+                   cv.headline, cv.summary, cv.location
             FROM users u
             LEFT JOIN cv_profiles cv ON u.user_id = cv.user_id
             WHERE u.user_id = ?
@@ -486,7 +486,7 @@ class JobMatcher {
         return [
             'user_id'          => $user['user_id'],
             'country_id'       => $user['country_id'],
-            'city'             => $user['city'],
+            'city'             => $user['location'] ?? '',
             'headline'         => $user['headline'] ?? '',
             'summary'          => $user['summary'] ?? '',
             'skills'           => $skills,

@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $stmt = $pdo->prepare("
     SELECT ja.*, j.title AS job_title, j.job_id, j.job_type, j.city AS job_city,
-           u.user_id, u.full_name, u.email, u.phone, u.profile_image, u.headline, u.bio, u.city AS user_city,
-           cv.cv_id, cv.title AS cv_title, cv.headline AS cv_headline, cv.summary AS cv_summary, cv.city AS cv_city
+           u.user_id, u.full_name, u.email, u.phone, u.profile_image,
+           cv.cv_id, cv.title AS cv_title, cv.headline AS cv_headline, cv.summary AS cv_summary, cv.location AS cv_city
     FROM job_applications ja
     JOIN jobs j ON ja.job_id = j.job_id
     LEFT JOIN users u ON ja.user_id = u.user_id
@@ -91,14 +91,14 @@ jm_employer_header($pageTitle, 'applications');
                 <img src="<?= e(profileImage($application['profile_image'] ?? null)) ?>" alt="" style="width:72px;height:72px;object-fit:cover;border:1px solid var(--jm-line);">
                 <div>
                     <h2 style="margin-bottom:4px;"><?= e($application['full_name'] ?: 'Candidate') ?></h2>
-                    <p style="margin:0;"><?= e($application['headline'] ?: $application['cv_headline'] ?: 'Job seeker') ?></p>
+                    <p style="margin:0;"><?= e($application['cv_headline'] ?: 'Job seeker') ?></p>
                 </div>
             </div>
 
             <div class="jm-key-list">
                 <div><span>Email</span><strong><?= e($application['email'] ?: 'Not available') ?></strong></div>
                 <div><span>Phone</span><strong><?= e($application['phone'] ?: 'Not available') ?></strong></div>
-                <div><span>Location</span><strong><?= e($application['cv_city'] ?: $application['user_city'] ?: 'Not provided') ?></strong></div>
+                <div><span>Location</span><strong><?= e($application['cv_city'] ?: 'Not provided') ?></strong></div>
                 <div><span>Status</span><strong><?= e(jm_employer_status_text($application['status'] ?? 'pending')) ?></strong></div>
                 <div><span>Role</span><strong><?= e($application['job_title']) ?></strong></div>
             </div>
@@ -111,7 +111,7 @@ jm_employer_header($pageTitle, 'applications');
             <?php endif; ?>
 
             <h2 style="margin-top:32px;">Profile summary</h2>
-            <p style="white-space:pre-line;"><?= e($application['cv_summary'] ?: $application['bio'] ?: 'No profile summary yet.') ?></p>
+            <p style="white-space:pre-line;"><?= e($application['cv_summary'] ?: 'No profile summary yet.') ?></p>
         </main>
 
         <aside class="jm-panel">

@@ -117,10 +117,12 @@ $pagination = paginate($totalApplications, $perPage, $page);
 
 $stmt = $pdo->prepare("
     SELECT ja.*, j.title AS job_title, j.job_id,
-           u.full_name, u.email, u.phone, u.profile_image, u.headline
+           u.full_name, u.email, u.phone, u.profile_image,
+           cv.headline
     FROM job_applications ja
     JOIN jobs j ON ja.job_id = j.job_id
     LEFT JOIN users u ON ja.user_id = u.user_id
+    LEFT JOIN cv_profiles cv ON cv.user_id = ja.user_id
     WHERE {$whereClause}
     ORDER BY ja.applied_at DESC
     LIMIT {$pagination['per_page']} OFFSET {$pagination['offset']}
