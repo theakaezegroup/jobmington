@@ -215,9 +215,9 @@ function jm_ai_tools(): array {
 }
 
 /**
- * The tools a customer can actually buy right now: built, switched on, and not
- * free. A tool in beta is deliberately absent, because a beta invite does not
- * charge. Use this for price lists, not jm_ai_tools().
+ * The tools a customer can spend credits on right now: built and switched on.
+ * A tool in beta is deliberately absent, because a beta invite does not charge.
+ * Use this where someone is about to pay.
  */
 function jm_ai_tools_purchasable(): array {
     require_once __DIR__ . '/tools.php';
@@ -228,6 +228,29 @@ function jm_ai_tools_purchasable(): array {
         if (empty($registry['built']) || jm_tool_status($key) !== 'on') {
             continue;
         }
+        $out[$key] = $tool;
+    }
+
+    return $out;
+}
+
+/**
+ * The shop window: everything built and not switched off, each carrying its
+ * status so a page can say "in beta" instead of quoting a price nobody can pay
+ * yet. Wider than jm_ai_tools_purchasable() on purpose. A tool that does not
+ * exist is still absent, because listing those is what put four imaginary
+ * products on the pricing page.
+ */
+function jm_ai_tools_listed(): array {
+    require_once __DIR__ . '/tools.php';
+
+    $out = [];
+    foreach (jm_ai_tools() as $key => $tool) {
+        $registry = jm_tool($key);
+        if (empty($registry['built']) || jm_tool_status($key) === 'off') {
+            continue;
+        }
+        $tool['status'] = jm_tool_status($key);
         $out[$key] = $tool;
     }
 

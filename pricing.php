@@ -248,6 +248,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     .jm-p-tool-table tbody td { padding:12px 16px; color:var(--jm-ink); }
     .jm-p-tool-table .tone-green { color:#0f766e; font-weight:700; }
     .jm-p-tool-table .tone-free  { color:var(--jm-blue); font-weight:700; }
+    .jm-p-beta { display:inline-block; margin-left:7px; padding:2px 8px; border-radius:99px; background:#fdf0d5; color:#8a5a00; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; vertical-align:middle; }
 
     /* ── Credit pack selector ────────────────────────────────────── */
     .jm-p-packs {
@@ -574,11 +575,26 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 </tr>
             </thead>
             <tbody>
-                <?php foreach (jm_ai_tools_purchasable() as $tool): ?>
+                <?php foreach (jm_ai_tools_listed() as $tool): $isBeta = ($tool['status'] ?? 'on') === 'beta'; ?>
                 <tr>
-                    <td><strong><?= e($tool['name']) ?></strong><br><span style="font-size:12px;color:var(--jm-muted);"><?= e($tool['description']) ?></span></td>
+                    <td>
+                        <strong><?= e($tool['name']) ?></strong>
+                        <?php if ($isBeta): ?><span class="jm-p-beta">Beta</span><?php endif; ?>
+                        <br><span style="font-size:12px;color:var(--jm-muted);"><?= e($tool['description']) ?></span>
+                    </td>
                     <td class="tone-green">✓ Included</td>
-                    <td><?= $tool['is_free'] ? '<span class="tone-free">Free</span>' : e(jm_format_ngn($tool['ngn_price'])) . ' (' . $tool['credit_cost'] . ' credit' . ($tool['credit_cost'] > 1 ? 's' : '') . ')' ?></td>
+                    <td><?php
+                        // A tool in beta is free to the people invited into it, so
+                        // quoting a price here would be asking for money we do not
+                        // take yet.
+                        if ($isBeta) {
+                            echo '<span class="tone-free">Free while in beta</span>';
+                        } elseif ($tool['is_free']) {
+                            echo '<span class="tone-free">Free</span>';
+                        } else {
+                            echo e(jm_format_ngn($tool['ngn_price'])) . ' (' . $tool['credit_cost'] . ' credit' . ($tool['credit_cost'] > 1 ? 's' : '') . ')';
+                        }
+                    ?></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
