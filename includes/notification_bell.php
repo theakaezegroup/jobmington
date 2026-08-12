@@ -38,6 +38,16 @@ function jm_notification_bell(): void {
     <style>
         .jm-bell-btn { position:relative; width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
         .jm-bell-btn:hover { background:#f6f8fb; }
+        /* On the brand-blue mobile bar the bell sits plainly on the blue, like
+           the logo and the hamburger, rather than as a white tile. */
+        @media (max-width: 1023.98px) {
+            .island-nav .jm-bell-btn { background:transparent !important; border-color:transparent !important; color:#ffffff !important; }
+            .island-nav .jm-bell-btn:hover { background:rgba(255,255,255,.14) !important; }
+            .island-nav .jm-bell-badge { box-shadow:0 0 0 2px #0640a3; }
+        }
+        /* Lifted out of the slide-in drawer, so it needs to look right in a
+           header row it was not originally sitting in. */
+        .jm-header > .jm-bell { flex:0 0 auto; margin-left:auto; }
         .jm-bell-btn svg { width:18px; height:18px; }
         .jm-bell-badge { position:absolute; top:-5px; right:-5px; min-width:17px; height:17px; padding:0 4px; border-radius:99px; background:#e11d2a; color:#fff; font-size:10px; font-weight:800; line-height:17px; text-align:center; box-shadow:0 0 0 2px #fff; display:none; }
         .jm-bell-badge.show { display:block; }
@@ -180,6 +190,38 @@ function jm_notification_bell(): void {
                 list.querySelectorAll('.jm-bell-item').forEach(function (i) { i.classList.remove('unread'); });
             });
         });
+        /* Keep the bell in the header row, not inside the menu.
+           .jm-nav turns into a fixed drawer under 900px on the minimal pages,
+           and the bell is rendered inside that nav, so its badge was invisible
+           until you opened the menu. This lifts it into the header while the
+           drawer mode is active and puts it back afterwards. */
+        var bellWrap = btn.closest('.jm-bell');
+        var drawer = window.matchMedia('(max-width: 900px)');
+        var homeNav = bellWrap ? bellWrap.parentElement : null;
+        var homeNext = bellWrap ? bellWrap.nextSibling : null;
+
+        function placeBell() {
+            if (!bellWrap || !homeNav || !homeNav.classList.contains('jm-nav')) { return; }
+            var header = homeNav.closest('.jm-header');
+            if (!header) { return; }
+
+            if (drawer.matches) {
+                if (bellWrap.parentElement !== header) {
+                    // Before the hamburger, so the order reads bell then menu.
+                    var toggle = header.querySelector('.jm-mobile-nav-toggle');
+                    header.insertBefore(bellWrap, toggle || null);
+                }
+            } else if (bellWrap.parentElement !== homeNav) {
+                homeNav.insertBefore(bellWrap, homeNext);
+            }
+        }
+        placeBell();
+        // The hamburger is injected by the footer script, which may run after
+        // this one, so place again once everything has settled.
+        window.addEventListener('load', placeBell);
+        if (drawer.addEventListener) { drawer.addEventListener('change', placeBell); }
+        else if (drawer.addListener) { drawer.addListener(placeBell); }
+
         load(false);
         /* Polling pauses with the tab. Every signed-in member on every open
            page was hitting the endpoint every 45 seconds whether or not
