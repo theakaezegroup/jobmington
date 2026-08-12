@@ -158,7 +158,7 @@ require_once __DIR__ . '/../includes/header.php';
             <?php if (!$rows): ?>
                 <p class="p-8 text-center text-slate-500">Nothing recorded for that filter yet.</p>
             <?php else: ?>
-            <div class="jm-tablewrap"><table class="w-full text-sm">
+            <div class="jm-tablewrap"><table class="w-full text-sm jm-stacktable">
                 <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
                     <tr>
                         <th class="text-left px-4 py-3">When</th>
@@ -172,8 +172,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <tbody>
                 <?php foreach ($rows as $r): ?>
                     <tr class="border-t border-slate-100">
-                        <td class="px-4 py-3 text-slate-500 whitespace-nowrap"><?= e(date('j M, H:i', strtotime($r['created_at']))) ?></td>
-                        <td class="px-4 py-3">
+                        <td data-label="When" class="px-4 py-3 text-slate-500 whitespace-nowrap"><?= e(date('j M, H:i', strtotime($r['created_at']))) ?></td>
+                        <td data-label="Who" class="px-4 py-3">
                             <?php if ($r['full_name']): ?>
                                 <span class="font-semibold text-slate-900"><?= e($r['full_name']) ?></span>
                                 <span class="block text-xs text-slate-500"><?= e($r['email']) ?></span>
@@ -181,12 +181,12 @@ require_once __DIR__ . '/../includes/header.php';
                                 <span class="text-slate-400">Signed out</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3">
+                        <td data-label="Action" class="px-4 py-3">
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700"><?= e($r['action']) ?></span>
                         </td>
-                        <td class="px-4 py-3 text-slate-600"><?= e($r['details'] ?? '') ?></td>
-                        <td class="px-4 py-3 text-slate-400 text-xs font-mono"><?= e($r['route'] ?? '') ?></td>
-                        <td class="px-4 py-3 text-slate-400 text-xs font-mono"><?= e($r['ip_address'] ?? '') ?></td>
+                        <td data-label="Details" class="px-4 py-3 text-slate-600"><?= e($r['details'] ?? '') ?></td>
+                        <td data-label="Route" class="px-4 py-3 text-slate-400 text-xs font-mono"><?= e($r['route'] ?? '') ?></td>
+                        <td data-label="IP" class="px-4 py-3 text-slate-400 text-xs font-mono"><?= e($r['ip_address'] ?? '') ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>

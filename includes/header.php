@@ -488,6 +488,48 @@ if ($isAdminArea) {
             .jm-tablewrap th, .jm-tablewrap td { white-space: nowrap; }
         }
 
+        /* Opt-in: a table that becomes one card per row on a phone instead of
+           scrolling sideways. Add class="jm-stacktable" to the table and
+           data-label="Header" to each cell that needs its column name back.
+           Must come after the rule above so it can undo the nowrap. */
+        /* Selectors are prefixed with .jm-tablewrap so they outrank the Tailwind
+           utility classes some of these tables carry. */
+        @media (max-width: 768px) {
+            .jm-tablewrap > table.jm-stacktable { min-width: 0; }
+            .jm-tablewrap .jm-stacktable,
+            .jm-tablewrap .jm-stacktable tbody,
+            .jm-tablewrap .jm-stacktable tr,
+            .jm-tablewrap .jm-stacktable td {
+                display: block; width: 100%; box-sizing: border-box;
+            }
+            .jm-tablewrap .jm-stacktable { border: 0; background: transparent; }
+            .jm-tablewrap .jm-stacktable thead { display: none; }
+            .jm-tablewrap .jm-stacktable tr {
+                background: #fff; border: 1px solid #e4eaf3; border-radius: 12px;
+                margin-bottom: 10px; padding: 14px;
+            }
+            .jm-tablewrap .jm-stacktable td {
+                border: 0; padding: 0;
+                white-space: normal; overflow-wrap: anywhere;
+            }
+            .jm-tablewrap .jm-stacktable td[data-label] {
+                display: flex; align-items: baseline; justify-content: space-between;
+                gap: 14px; padding: 8px 0; border-top: 1px solid #f0f4f9;
+            }
+            .jm-tablewrap .jm-stacktable td[data-label]::before {
+                content: attr(data-label);
+                flex: none; font-size: 11px; font-weight: 700;
+                text-transform: uppercase; letter-spacing: .06em; color: #5b6b82;
+            }
+            /* The trailing actions cell has no label, so give it its own rule. */
+            .jm-tablewrap .jm-stacktable td:last-child:not([data-label]) {
+                padding-top: 12px; border-top: 1px solid #f0f4f9;
+            }
+            .jm-tablewrap .jm-stacktable td:first-child { padding-bottom: 2px; }
+            /* An empty-state cell spans the card rather than becoming a row. */
+            .jm-tablewrap .jm-stacktable td[colspan] { padding: 10px 0; text-align: center; }
+        }
+
         @media (max-width: 1024px) {
             .jm-admin-sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(11,27,51,.18); }
             body.jm-admin.nav-open .jm-admin-sidebar { transform: translateX(0); }

@@ -165,7 +165,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <?= $q !== '' ? 'Nobody matches that search.' : 'Nobody has registered for this one yet.' ?>
                 </p>
             <?php else: ?>
-            <div class="jm-tablewrap"><table class="w-full text-sm">
+            <div class="jm-tablewrap"><table class="w-full text-sm jm-stacktable">
                 <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
                     <tr>
                         <th class="text-left px-4 py-3">Name</th>
@@ -181,18 +181,18 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php foreach ($rows as $r): ?>
                     <tr class="border-t border-slate-100">
                         <td class="px-4 py-3 font-semibold text-slate-900"><?= e($r['name']) ?></td>
-                        <td class="px-4 py-3 text-slate-600"><?= e($r['email']) ?></td>
-                        <td class="px-4 py-3 text-slate-600"><?= e($r['phone'] ?? '') ?></td>
-                        <td class="px-4 py-3 text-slate-600"><?= e($r['country'] ?? '') ?></td>
-                        <td class="px-4 py-3">
+                        <td data-label="Email" class="px-4 py-3 text-slate-600"><?= e($r['email']) ?></td>
+                        <td data-label="Phone" class="px-4 py-3 text-slate-600"><?= e($r['phone'] ?? '') ?></td>
+                        <td data-label="Country" class="px-4 py-3 text-slate-600"><?= e($r['country'] ?? '') ?></td>
+                        <td data-label="Account" class="px-4 py-3">
                             <?php if ($r['account_id']): ?>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">Yes</span>
                             <?php else: ?>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500">Guest</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-4 py-3 text-slate-500 whitespace-nowrap"><?= e(date('j M, H:i', strtotime($r['registered_at']))) ?></td>
-                        <td class="px-4 py-3 text-xs whitespace-nowrap">
+                        <td data-label="Registered" class="px-4 py-3 text-slate-500 whitespace-nowrap"><?= e(date('j M, H:i', strtotime($r['registered_at']))) ?></td>
+                        <td data-label="Reminders" class="px-4 py-3 text-xs whitespace-nowrap">
                             <span class="<?= $r['reminder_24h_at'] ? 'text-emerald-700 font-bold' : 'text-slate-400' ?>">24h</span>
                             <span class="text-slate-300">/</span>
                             <span class="<?= $r['reminder_1h_at'] ? 'text-emerald-700 font-bold' : 'text-slate-400' ?>">1h</span>

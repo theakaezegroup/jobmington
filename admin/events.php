@@ -184,7 +184,7 @@ require_once __DIR__ . '/../includes/header.php';
 
     <div>
 
-        <div class="jm-tablewrap"><table class="jm-ev-table">
+        <div class="jm-tablewrap"><table class="jm-ev-table jm-stacktable">
             <thead><tr><th>Event</th><th>When</th><th>Regs</th><th>Status</th><th></th></tr></thead>
             <tbody>
             <?php if (empty($events)): ?>
@@ -192,9 +192,9 @@ require_once __DIR__ . '/../includes/header.php';
             <?php else: foreach ($events as $ev): ?>
                 <tr>
                     <td><strong><?= e($ev['title']) ?></strong><div style="font-size:11px;color:#94a3b8;"><?= ucfirst($ev['event_type']) ?> &middot; <?= $ev['is_online'] ? 'Online' : e($ev['location'] ?: 'In person') ?></div></td>
-                    <td style="font-size:12px;"><?= e(date('M d, Y', strtotime($ev['starts_at']))) ?><br><span style="color:#94a3b8;"><?= e(date('h:i A', strtotime($ev['starts_at']))) ?></span></td>
-                    <td><a href="/jobmington/admin/event-registrants.php?event_id=<?= (int)$ev['event_id'] ?>" style="color:#0640a3;font-weight:700;"><?= (int) $ev['registration_count'] ?><?= $ev['capacity'] ? '/' . (int)$ev['capacity'] : '' ?></a></td>
-                    <td><span class="jm-ev-pill <?= $ev['is_published'] ? 'on' : 'off' ?>"><?= $ev['is_published'] ? 'Live' : 'Hidden' ?></span></td>
+                    <td data-label="When" style="font-size:12px;"><?= e(date('M d, Y', strtotime($ev['starts_at']))) ?><br><span style="color:#94a3b8;"><?= e(date('h:i A', strtotime($ev['starts_at']))) ?></span></td>
+                    <td data-label="Regs"><a href="/jobmington/admin/event-registrants.php?event_id=<?= (int)$ev['event_id'] ?>" style="color:#0640a3;font-weight:700;"><?= (int) $ev['registration_count'] ?><?= $ev['capacity'] ? '/' . (int)$ev['capacity'] : '' ?></a></td>
+                    <td data-label="Status"><span class="jm-ev-pill <?= $ev['is_published'] ? 'on' : 'off' ?>"><?= $ev['is_published'] ? 'Live' : 'Hidden' ?></span></td>
                     <td>
                         <div class="jm-ev-actions">
                             <a href="/jobmington/admin/event-registrants.php?event_id=<?= (int)$ev['event_id'] ?>">Registrants</a>
