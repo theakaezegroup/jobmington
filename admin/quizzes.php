@@ -113,7 +113,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="min-h-screen bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
                 <a href="/jobmington/admin/" class="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest mb-2 inline-block transition">
                     <i class="fas fa-arrow-left mr-1"></i> Admin Dashboard

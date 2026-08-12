@@ -120,20 +120,24 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="min-h-screen bg-slate-100 py-8">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center justify-between mb-8">
-            <div>
+        <!-- Stacks on a phone. Side by side with no wrap, the heading and a
+             select full of long course titles fought for the same row and
+             pushed the page sideways. min-w-0 stops the select insisting on
+             the width of its longest option. -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+            <div class="min-w-0">
                 <a href="/jobmington/admin/courses.php" class="text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest">Courses</a>
                 <h1 class="text-3xl font-bold text-slate-900 mt-2">Course Modules</h1>
                 <p class="text-slate-600">Add, edit and order the lessons inside each course.</p>
             </div>
-            <form method="get" class="flex gap-2">
-                <select name="course_id" class="px-3 py-2 rounded-lg border border-slate-200 bg-white">
+            <form method="get" class="flex gap-2 w-full md:w-auto">
+                <select name="course_id" class="flex-1 min-w-0 md:flex-none md:max-w-xs px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm">
                     <option value="0">All courses</option>
                     <?php foreach ($courses as $course): ?>
                         <option value="<?= (int) $course['course_id'] ?>" <?= $courseId === (int) $course['course_id'] ? 'selected' : '' ?>><?= e($course['title']) ?></option>
                     <?php endforeach; ?>
                 </select>
-                <button class="px-4 py-2 bg-slate-900 text-white rounded-lg font-bold" type="submit">Filter</button>
+                <button class="px-4 py-2 bg-slate-900 text-white rounded-lg font-bold text-sm whitespace-nowrap" type="submit">Filter</button>
             </form>
         </div>
 

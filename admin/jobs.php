@@ -85,7 +85,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="bg-gray-100 min-h-screen py-8">
     <div class="max-w-6xl mx-auto px-4">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <h1 class="text-2xl font-heading font-bold">Jobs</h1>
             <a href="/jobmington/employer/post-job.php" class="bg-primary px-4 py-2 text-white rounded-lg">Add Job</a>
         </div>
