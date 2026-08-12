@@ -989,7 +989,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
             <button class="jm-mobile-nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="jm-home-nav">
                 <span></span>
             </button>
-            <?php require_once __DIR__ . '/includes/navigation.php'; jm_site_nav('/'); ?>
+            <?php require_once __DIR__ . '/includes/navigation.php'; jm_site_nav('/', 'Main navigation', 'jm-home-nav'); ?>
         </header>
 
         <!-- ── Hero ──────────────────────────────────────────────────── -->

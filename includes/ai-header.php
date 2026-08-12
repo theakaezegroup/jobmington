@@ -107,7 +107,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
                    and sent Employers somewhere else entirely. */
                 require_once __DIR__ . '/navigation.php';
                 $jmAiActive = ['tools' => '/tools/', 'learn' => '/learn/', 'andika' => '/ai/andika.php'];
-                foreach (Navigation::getMainItems() as $item):
+                foreach (Navigation::getCompactItems() as $item):
                     $isActive = isset($jmAiActive[$activeAIPage])
                         && str_ends_with($item['url'], $jmAiActive[$activeAIPage]);
                 ?>

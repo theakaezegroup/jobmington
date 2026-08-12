@@ -18,18 +18,35 @@ if (!defined('JOBMINGTON')) {
 
 if (!class_exists('Navigation')) {
 final class Navigation {
+    /**
+     * Every item. Used by the two full headers, which have the width and a
+     * hamburger to fall back on.
+     *
+     * `compact` marks the ones that also belong in a narrow bar. The minimal
+     * page family renders its nav as a flex row with a 26px gap beside the
+     * logo, sized for about five items; putting the whole list in there wrapped
+     * it onto a second row and scattered the header. One list, two densities.
+     */
     public static function getMainItems(): array {
         return [
-            ['url' => '/jobmington/', 'label' => 'Home', 'icon' => 'home'],
-            ['url' => '/jobmington/jobs', 'label' => 'Find Jobs', 'icon' => 'briefcase'],
-            ['url' => '/jobmington/cv-builder/', 'label' => 'CV Builder', 'icon' => 'document'],
-            ['url' => '/jobmington/tools/', 'label' => 'Tools', 'icon' => 'tools'],
-            ['url' => '/jobmington/learn/', 'label' => 'Learn', 'icon' => 'graduation'],
-            ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles'],
-            ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus'],
-            ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users'],
-            ['url' => '/jobmington/pricing.php', 'label' => 'Pricing', 'icon' => 'briefcase'],
+            ['url' => '/jobmington/', 'label' => 'Home', 'icon' => 'home', 'compact' => false],   // the logo is the home link
+            ['url' => '/jobmington/jobs', 'label' => 'Find Jobs', 'icon' => 'briefcase', 'compact' => true],
+            ['url' => '/jobmington/cv-builder/', 'label' => 'CV Builder', 'icon' => 'document', 'compact' => true],
+            ['url' => '/jobmington/tools/', 'label' => 'Tools', 'icon' => 'tools', 'compact' => true],
+            ['url' => '/jobmington/learn/', 'label' => 'Learn', 'icon' => 'graduation', 'compact' => true],
+            ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles', 'compact' => false],
+            ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus', 'compact' => false],
+            ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users', 'compact' => true],
+            ['url' => '/jobmington/pricing.php', 'label' => 'Pricing', 'icon' => 'briefcase', 'compact' => true],
         ];
+    }
+
+    /** The subset that fits a narrow bar. Derived, never a second list. */
+    public static function getCompactItems(): array {
+        return array_values(array_filter(
+            self::getMainItems(),
+            static fn(array $i): bool => !empty($i['compact'])
+        ));
     }
 
     public static function getIcon(string $name, string $class = 'w-5 h-5'): string {
@@ -73,15 +90,15 @@ if (!function_exists('jm_login_dashboard_for')) {
  * anybody was signed in at all, so a signed-in seeker was told to sign in.
  */
 if (!function_exists('jm_site_nav')) {
-    function jm_site_nav(string $activeUrl = '', string $ariaLabel = 'Main navigation'): void {
+    function jm_site_nav(string $activeUrl = '', string $ariaLabel = 'Main navigation', string $navId = ''): void {
         $loggedIn = class_exists('Session') && Session::isLoggedIn();
         $dash = '/jobmington/seeker/dashboard.php';
         if ($loggedIn && function_exists('jm_login_dashboard_for')) {
             $dash = jm_login_dashboard_for(Session::userType() ?? '');
         }
         ?>
-        <nav class="jm-nav" aria-label="<?= e($ariaLabel) ?>">
-            <?php foreach (Navigation::getMainItems() as $item): ?>
+        <nav class="jm-nav"<?= $navId !== '' ? ' id="' . e($navId) . '"' : '' ?> aria-label="<?= e($ariaLabel) ?>">
+            <?php foreach (Navigation::getCompactItems() as $item): ?>
                 <a class="<?= $activeUrl !== '' && str_contains($item['url'], $activeUrl) ? 'active' : '' ?>"
                    href="<?= e($item['url']) ?>"><?= e($item['label']) ?></a>
             <?php endforeach; ?>
@@ -118,10 +135,10 @@ if (!function_exists('jm_site_nav')) {
  * @param array $links [key => [href, label]] for this workspace.
  */
 if (!function_exists('jm_workspace_nav')) {
-    function jm_workspace_nav(array $links, string $active = '', string $ariaLabel = 'Main navigation'): void {
+    function jm_workspace_nav(array $links, string $active = '', string $ariaLabel = 'Main navigation', string $navId = ''): void {
         $loggedIn = class_exists('Session') && Session::isLoggedIn();
         ?>
-        <nav class="jm-nav" aria-label="<?= e($ariaLabel) ?>">
+        <nav class="jm-nav"<?= $navId !== '' ? ' id="' . e($navId) . '"' : '' ?> aria-label="<?= e($ariaLabel) ?>">
             <a href="/jobmington/jobs/">Find Jobs</a>
             <?php foreach ($links as $key => [$href, $label]): ?>
                 <a class="<?= $active === $key ? 'active' : '' ?>" href="<?= e($href) ?>"><?= e($label) ?></a>
