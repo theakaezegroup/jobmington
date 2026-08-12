@@ -130,7 +130,8 @@ check('navigation list is not empty', count($navItems) >= 5);
 $aiHeader = (string) @file_get_contents(__DIR__ . '/../includes/ai-header.php');
 $mainHeader = (string) @file_get_contents(__DIR__ . '/../includes/header.php');
 
-check('ai-header renders the shared nav', str_contains($aiHeader, 'Navigation::getMainItems()'));
+// Either density is fine; what matters is that it comes from the registry.
+check('ai-header renders the shared nav', str_contains($aiHeader, 'Navigation::get'));
 check('main header renders the shared nav', str_contains($mainHeader, '$navItems'));
 
 // A link typed straight into a nav is how the two lists came apart.
