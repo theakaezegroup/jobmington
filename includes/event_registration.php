@@ -29,6 +29,19 @@ if (!defined('JOBMINGTON')) {
 }
 
 require_once __DIR__ . '/../config/database.php';
+/*
+ * security.php before functions.php, not after. Both declare e(); only
+ * functions.php guards the declaration, so loading security.php second is an
+ * outright fatal. Every page loads them in this order already, which is why
+ * nothing had ever tripped over it.
+ *
+ * It is here at all because jm_log_activity() reaches for
+ * Security::getClientIP(). Pages that register people happen to have loaded it
+ * anyway, so the dependency stayed invisible until this file was called from
+ * somewhere that had not, and the activity log then failed quietly inside its
+ * own catch.
+ */
+require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/functions.php';
 
 /**
