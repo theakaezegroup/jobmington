@@ -53,18 +53,25 @@ function jm_event_intent_audit(PDO $pdo): array
         return $id;
     };
 
-    /** Make a throwaway account, optionally with an event intent parked on it. */
-    $makeUser = function (?int $pendingEventId) use ($pdo, $stamp, &$userIds): int {
+    /**
+     * Make a throwaway account with any number of event intents parked on it.
+     * @param array<int,int>|int|null $pending
+     */
+    $makeUser = function ($pending) use ($pdo, $stamp, &$userIds): int {
         $email = $stamp . '-' . bin2hex(random_bytes(3)) . '@example.invalid';
         // The constant, not a literal: user_type is an enum on the server and a
         // guessed value fails the whole audit at the first fixture.
         $pdo->prepare("
             INSERT INTO users (first_name, last_name, full_name, email, password_hash,
-                               user_type, is_active, is_verified, pending_event_id, created_at)
-            VALUES ('Audit', 'Fixture', 'Audit Fixture', ?, 'x', ?, 1, 1, ?, NOW())
-        ")->execute([$email, USER_TYPE_SEEKER, $pendingEventId]);
+                               user_type, is_active, is_verified, created_at)
+            VALUES ('Audit', 'Fixture', 'Audit Fixture', ?, 'x', ?, 1, 1, NOW())
+        ")->execute([$email, USER_TYPE_SEEKER]);
         $id = (int) $pdo->lastInsertId();
         $userIds[] = $id;
+
+        foreach ((array) ($pending ?? []) as $eventId) {
+            jm_park_pending_event($id, (int) $eventId);
+        }
         return $id;
     };
 
@@ -78,10 +85,11 @@ function jm_event_intent_audit(PDO $pdo): array
         $s->execute([$eventId]);
         return (int) $s->fetchColumn();
     };
+    /** How many unfinished registrations are still parked on the account. */
     $intentOn = function (int $userId) use ($pdo): int {
-        $s = $pdo->prepare("SELECT pending_event_id FROM users WHERE user_id = ?");
+        $s = $pdo->prepare("SELECT COUNT(*) FROM pending_event_registrations WHERE user_id = ?");
         $s->execute([$userId]);
-        return (int) ($s->fetchColumn() ?: 0);
+        return (int) $s->fetchColumn();
     };
     $notifications = function (int $userId) use ($pdo): int {
         $s = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND type = 'event'");
@@ -190,6 +198,69 @@ function jm_event_intent_audit(PDO $pdo): array
         $goneFlash = jm_flash_take();
         if (!$goneFlash) { $fail('missing event', 'said nothing at all'); }
 
+        /* ---------------------------------------------------------------
+         * 9. Two events clicked before signing up.
+         *
+         *    This used to be one slot, so the second click overwrote the
+         *    first and that person simply never got registered for it, with
+         *    nothing said. Both must go through, and the note must account
+         *    for both rather than naming one and dropping the other.
+         * ------------------------------------------------------------- */
+        $eventA = $makeEvent('+30 days', 50);
+        $eventB = $makeEvent('+40 days', 50);
+        $both   = $makeUser([$eventA, $eventB]);
+
+        jm_settle_pending_event($both);
+        $bothFlash = jm_flash_take();
+
+        if (!$registered($eventA, $both))  { $fail('two events', 'the first event was dropped, which is the bug'); }
+        if (!$registered($eventB, $both))  { $fail('two events', 'the second event was not registered'); }
+        if ($countOn($eventA) !== 1)       { $fail('two events', 'first counter is ' . $countOn($eventA)); }
+        if ($countOn($eventB) !== 1)       { $fail('two events', 'second counter is ' . $countOn($eventB)); }
+        if ($intentOn($both) !== 0)        { $fail('two events', $intentOn($both) . ' intent(s) left parked'); }
+        if ($notifications($both) !== 2)   { $fail('two events', 'expected 2 notifications, got ' . $notifications($both)); }
+
+        if (!$bothFlash) {
+            $fail('two events', 'no note at all');
+        } else {
+            $titleA = (string) $pdo->query("SELECT title FROM events WHERE event_id = {$eventA}")->fetchColumn();
+            $titleB = (string) $pdo->query("SELECT title FROM events WHERE event_id = {$eventB}")->fetchColumn();
+            $whole  = $bothFlash['title'] . ' ' . $bothFlash['message'];
+
+            if (!str_contains($whole, $titleA) || !str_contains($whole, $titleB)) {
+                $fail('two events', 'the note does not name both events');
+            }
+            if (($bothFlash['tone'] ?? '') !== 'ok') {
+                $fail('two events', 'two successful registrations produced a warning');
+            }
+        }
+
+        /* ---------------------------------------------------------------
+         * 10. One works, one is full. The note must not report only the
+         *     good half, which is the tempting way to write this.
+         * ------------------------------------------------------------- */
+        $goodEvent = $makeEvent('+30 days', 50);
+        $fullEvent2 = $makeEvent('+30 days', 1, 1);
+        $mixed = $makeUser([$goodEvent, $fullEvent2]);
+
+        jm_settle_pending_event($mixed);
+        $mixedFlash = jm_flash_take();
+
+        if (!$registered($goodEvent, $mixed))       { $fail('mixed', 'the available event was not registered'); }
+        if ($registered($fullEvent2, $mixed))       { $fail('mixed', 'registered into a full event'); }
+        if (!$mixedFlash) {
+            $fail('mixed', 'no note at all');
+        } else {
+            $fullTitle = (string) $pdo->query("SELECT title FROM events WHERE event_id = {$fullEvent2}")->fetchColumn();
+            $whole = $mixedFlash['title'] . ' ' . $mixedFlash['message'];
+            if (!str_contains($whole, $fullTitle)) {
+                $fail('mixed', 'the note stays quiet about the event they did not get');
+            }
+            if (($mixedFlash['tone'] ?? '') !== 'warn') {
+                $fail('mixed', 'a partial outcome was reported as unqualified success');
+            }
+        }
+
     } catch (Throwable $e) {
         $problems[] = 'audit threw: ' . $e->getMessage();
     } finally {
@@ -198,6 +269,7 @@ function jm_event_intent_audit(PDO $pdo): array
             if ($userIds) {
                 $in = implode(',', array_map('intval', $userIds));
                 $pdo->exec("DELETE FROM event_registrations WHERE user_id IN ({$in})");
+                $pdo->exec("DELETE FROM pending_event_registrations WHERE user_id IN ({$in})");
                 $pdo->exec("DELETE FROM notifications WHERE user_id IN ({$in})");
                 $pdo->exec("DELETE FROM activity_logs WHERE user_id IN ({$in})");
                 $pdo->exec("DELETE FROM users WHERE user_id IN ({$in})");

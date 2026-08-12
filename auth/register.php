@@ -104,14 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              * session does not exist. The account row travels with them, so the
              * registration can still be completed and mentioned.
              */
-            $pendingEvent = (int) ($_SESSION['pending_event_registration'] ?? 0);
-            if ($pendingEvent > 0) {
-                try {
-                    $pdo->prepare("UPDATE users SET pending_event_id = ? WHERE user_id = ?")
-                        ->execute([$pendingEvent, $userId]);
-                } catch (Throwable $e) {
-                    error_log('Parking pending event intent failed: ' . $e->getMessage());
-                }
+            require_once __DIR__ . '/../includes/event_registration.php';
+            foreach (jm_session_intents() as $pendingEvent) {
+                jm_park_pending_event($userId, $pendingEvent);
             }
 
             // Welcome Seeds (free engagement currency).

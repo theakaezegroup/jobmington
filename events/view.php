@@ -51,16 +51,17 @@ if (Session::isLoggedIn()) {
  * in the session and completed the moment the user is next on this page while
  * logged in — no second click, and it survives the verification detour.
  */
-$intentKey    = 'pending_event_registration';
 $postedIntent = $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'register';
-$pendingHere  = (int) ($_SESSION[$intentKey] ?? 0) === $eventId;
+$pendingHere  = in_array($eventId, jm_session_intents(), true);
 
 if ($postedIntent && !Session::isLoggedIn()) {
     // Park the intent, then send them to sign in (that page links to sign-up).
     // auth_context tells the auth pages why the user is there, so they do not
     // land on generic "Welcome back" copy with no sign their click registered.
+    // A set, not a slot: someone browsing signed out will click Register on
+    // two events before making an account, and the first must not be dropped.
     $returnTo = '/jobmington/events/view.php?slug=' . $event['slug'];
-    $_SESSION[$intentKey] = $eventId;
+    jm_session_intent_add($eventId);
     $_SESSION['auth_context'] = 'You\'re registering for "' . $event['title'] . '". Sign in or create a free account and we\'ll complete it automatically.';
     $_SESSION['auth_context_for'] = $returnTo;
     redirect('/jobmington/auth/login.php?redirect=' . urlencode($returnTo));
@@ -80,11 +81,13 @@ if ($postedIntent) {
 
 // Already registered before the intent could resume — nothing left to do.
 if ($pendingHere && Session::isLoggedIn() && $registered) {
-    unset($_SESSION[$intentKey], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
+    jm_session_intent_remove($eventId);
+    jm_clear_pending_event((int) Session::userId(), $eventId);
 }
 
 if ($wantsRegister && Session::isLoggedIn()) {
-    unset($_SESSION[$intentKey], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
+    // Only this event's intent. Any other one they parked is still owed to them.
+    jm_session_intent_remove($eventId);
 
     if (!$registered) {
         /*
@@ -112,8 +115,7 @@ if ($wantsRegister && Session::isLoggedIn()) {
 
         // The account-level copy of the intent, in case one was parked there
         // and the person got back here before verification consumed it.
-        $pdo->prepare("UPDATE users SET pending_event_id = NULL WHERE user_id = ? AND pending_event_id = ?")
-            ->execute([(int) Session::userId(), $eventId]);
+        jm_clear_pending_event((int) Session::userId(), $eventId);
 
         Security::regenerateCSRF();
     }

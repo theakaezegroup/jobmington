@@ -155,6 +155,105 @@ function jm_register_for_event(int $eventId, int $userId, string $name, string $
 }
 
 /**
+ * The events someone clicked Register on before they had an account.
+ *
+ * Held per person rather than one at a time, because a visitor browsing events
+ * signed out will click Register on two of them and then go and make an
+ * account, and losing the first one is not a reasonable outcome.
+ */
+function jm_park_pending_event(int $userId, int $eventId): void
+{
+    if ($userId <= 0 || $eventId <= 0) {
+        return;
+    }
+    try {
+        db()->prepare("INSERT IGNORE INTO pending_event_registrations (user_id, event_id) VALUES (?, ?)")
+            ->execute([$userId, $eventId]);
+    } catch (Throwable $e) {
+        error_log('Parking pending event intent failed: ' . $e->getMessage());
+    }
+}
+
+/** @return array<int, int> event ids, oldest click first */
+function jm_pending_events(int $userId): array
+{
+    if ($userId <= 0) {
+        return [];
+    }
+    try {
+        $stmt = db()->prepare("SELECT event_id FROM pending_event_registrations WHERE user_id = ? ORDER BY created_at, event_id");
+        $stmt->execute([$userId]);
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    } catch (Throwable $e) {
+        error_log('Reading pending event intents failed: ' . $e->getMessage());
+        return [];
+    }
+}
+
+function jm_clear_pending_event(int $userId, int $eventId): void
+{
+    try {
+        db()->prepare("DELETE FROM pending_event_registrations WHERE user_id = ? AND event_id = ?")
+            ->execute([$userId, $eventId]);
+    } catch (Throwable $e) {
+        error_log('Clearing pending event intent failed: ' . $e->getMessage());
+    }
+}
+
+/**
+ * The same set, carried in the session before there is an account to hang it
+ * on. Tolerates the single integer the key used to hold, so a session that was
+ * already open when this shipped still resumes instead of being dropped.
+ *
+ * @return array<int, int>
+ */
+function jm_session_intents(): array
+{
+    $raw = $_SESSION['pending_event_registration'] ?? null;
+
+    if (is_array($raw)) {
+        return array_values(array_unique(array_filter(array_map('intval', $raw))));
+    }
+    return ((int) $raw) > 0 ? [(int) $raw] : [];
+}
+
+function jm_session_intent_add(int $eventId): void
+{
+    $ids = jm_session_intents();
+    if (!in_array($eventId, $ids, true)) {
+        $ids[] = $eventId;
+    }
+    $_SESSION['pending_event_registration'] = $ids;
+}
+
+function jm_session_intent_remove(int $eventId): void
+{
+    $ids = array_values(array_diff(jm_session_intents(), [$eventId]));
+
+    if ($ids) {
+        $_SESSION['pending_event_registration'] = $ids;
+    } else {
+        // Nothing left to finish, so the context that explained the detour
+        // goes too rather than following them around the site.
+        unset($_SESSION['pending_event_registration'], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
+    }
+}
+
+/** When the event starts, in its own timezone rather than the server's. */
+function jm_event_when(array $event): string
+{
+    try {
+        if (empty($event['starts_at'])) {
+            return '';
+        }
+        return (new DateTime($event['starts_at'], new DateTimeZone(($event['timezone'] ?? '') ?: 'Africa/Lagos')))
+            ->format('l j F, g:ia');
+    } catch (Throwable $e) {
+        return '';
+    }
+}
+
+/**
  * Finish the registration someone started before they had an account, and
  * leave them a note saying so.
  *
@@ -171,97 +270,142 @@ function jm_register_for_event(int $eventId, int $userId, string $name, string $
  */
 function jm_settle_pending_event(int $userId): bool
 {
+    $ids = jm_pending_events($userId);
+    if (!$ids) {
+        return false;
+    }
+
     $pdo = db();
-
-    try {
-        $stmt = $pdo->prepare("SELECT pending_event_id FROM users WHERE user_id = ? LIMIT 1");
-        $stmt->execute([$userId]);
-        $eventId = (int) ($stmt->fetchColumn() ?: 0);
-    } catch (Throwable $e) {
-        error_log('Reading pending event intent failed: ' . $e->getMessage());
-        return false;
-    }
-
-    if ($eventId <= 0) {
-        return false;
-    }
-
     $who = $pdo->prepare("SELECT full_name, email FROM users WHERE user_id = ? LIMIT 1");
     $who->execute([$userId]);
     $person = $who->fetch(PDO::FETCH_ASSOC) ?: ['full_name' => '', 'email' => ''];
 
-    $outcome = jm_register_for_event($eventId, $userId, (string) $person['full_name'], (string) $person['email']);
-    $event   = $outcome['event'];
-    $title   = (string) ($event['title'] ?? 'the event');
-    $link    = '/jobmington/events/view.php?slug=' . rawurlencode((string) ($event['slug'] ?? ''));
+    $done = [];   // registered or already on the list
+    $lost = [];   // full, finished or gone: worth saying, nothing to retry
+    $stuck = 0;   // a real failure, left parked for the next attempt
 
-    // The date, in the event's own timezone rather than the server's.
-    $when = '';
-    try {
-        if (!empty($event['starts_at'])) {
-            $when = (new DateTime($event['starts_at'], new DateTimeZone(($event['timezone'] ?? '') ?: 'Africa/Lagos')))
-                ->format('l j F, g:ia');
+    foreach ($ids as $eventId) {
+        $outcome = jm_register_for_event($eventId, $userId, (string) $person['full_name'], (string) $person['email']);
+        $event   = $outcome['event'];
+        $title   = (string) ($event['title'] ?? 'an event');
+        $slug    = (string) ($event['slug'] ?? '');
+
+        switch ($outcome['status']) {
+            case 'registered':
+            case 'already':
+                $done[] = ['title' => $title, 'slug' => $slug, 'when' => jm_event_when($event ?? [])];
+                jm_clear_pending_event($userId, $eventId);
+                break;
+
+            case 'full':
+                $lost[] = $title . ' filled up while you were confirming your email';
+                jm_clear_pending_event($userId, $eventId);
+                break;
+
+            case 'past':
+                $lost[] = $title . ' has already taken place';
+                jm_clear_pending_event($userId, $eventId);
+                break;
+
+            case 'missing':
+                // Nothing to go back to, so nothing to retry either.
+                jm_clear_pending_event($userId, $eventId);
+                break;
+
+            default:
+                // A real error. Keep it parked so the next sign-in tries again.
+                $stuck++;
+                break;
         }
-    } catch (Throwable $e) {
-        $when = '';
     }
 
-    /*
-     * The note names the thing they originally came to do. Someone who signed
-     * up purely to attend an event does not arrive at a dashboard thinking
-     * "dashboard", they arrive thinking "did my event registration work".
-     */
-    switch ($outcome['status']) {
-        case 'registered':
-        case 'already':
-            jm_flash_set(
-                'You are registered for ' . $title . '.',
-                'That is what you came to Jobmington for, and it is confirmed'
-                    . ($when !== '' ? ' for ' . $when : '')
-                    . '. The details are in your email, and we will remind you the day before and an hour before it starts.',
-                $link,
-                'View the event',
-                'ok'
-            );
-            break;
-
-        case 'full':
-            jm_flash_set(
-                'We could not hold you a seat for ' . $title . '.',
-                'It filled up while you were confirming your email address. Your account is ready, and the event page will say if a place opens up.',
-                $link,
-                'View the event',
-                'warn'
-            );
-            break;
-
-        case 'past':
-            jm_flash_set(
-                $title . ' has already taken place.',
-                'That is the event you signed up to attend. Your account is ready, and the recording will be on the event page if there is one.',
-                $link,
-                'View the event',
-                'warn'
-            );
-            break;
-
-        default:
-            // Leave the intent in place so the next sign-in can try again.
-            jm_flash_set(
-                'We could not finish your registration for ' . $title . '.',
-                'Your account is verified and ready. Open the event and press Register once more, and it will go through.',
-                $link,
-                'Finish registering',
-                'warn'
-            );
-            return true;
-    }
-
-    try {
-        $pdo->prepare("UPDATE users SET pending_event_id = NULL WHERE user_id = ?")->execute([$userId]);
-    } catch (Throwable $e) {
-        error_log('Clearing pending event intent failed: ' . $e->getMessage());
-    }
+    jm_flash_set(...jm_compose_event_note($done, $lost, $stuck));
 
     return true;
+}
+
+/**
+ * Turn what happened into one note.
+ *
+ * Split out because settling several events at once has more outcomes than
+ * reads comfortably inside the loop that produces them, and because the exact
+ * wording is the whole point of this feature rather than an afterthought.
+ *
+ * @param array<int, array{title:string,slug:string,when:string}> $done
+ * @param array<int, string> $lost human phrases, already past-tense
+ * @return array{0:string,1:string,2:string,3:string,4:string} args for jm_flash_set
+ */
+function jm_compose_event_note(array $done, array $lost, int $stuck): array
+{
+    $listing = static function (array $phrases): string {
+        if (count($phrases) === 1) {
+            return $phrases[0];
+        }
+        $last = array_pop($phrases);
+        return implode(', ', $phrases) . ' and ' . $last;
+    };
+
+    $eventsUrl = '/jobmington/events/';
+    $link      = $done ? '/jobmington/events/view.php?slug=' . rawurlencode($done[0]['slug']) : $eventsUrl;
+    $linkText  = 'View the event';
+
+    if (count($done) > 1) {
+        $link     = $eventsUrl;
+        $linkText = 'See all events';
+    }
+
+    // Nothing went through at all.
+    if (!$done) {
+        if ($stuck > 0) {
+            return [
+                'We could not finish your event registration.',
+                'Your account is verified and ready. Open the event and press Register once more, and it will go through.',
+                $eventsUrl, 'Browse events', 'warn',
+            ];
+        }
+        if ($lost) {
+            return [
+                'About the event you signed up for.',
+                ucfirst($listing($lost)) . '. Your account is ready, and the event page will have the details.',
+                $eventsUrl, 'Browse events', 'warn',
+            ];
+        }
+        // An intent pointing at nothing that still exists.
+        return [
+            'Your account is ready.',
+            'The event you originally signed up for is no longer listed, but everything else on Jobmington is open to you.',
+            $eventsUrl, 'Browse events', 'warn',
+        ];
+    }
+
+    $titles = array_column($done, 'title');
+
+    if (count($done) === 1) {
+        $when  = $done[0]['when'];
+        $title = 'You are registered for ' . $titles[0] . '.';
+        $body  = 'That is what you came to Jobmington for, and it is confirmed'
+               . ($when !== '' ? ' for ' . $when : '')
+               . '. The details are in your email, and we will remind you the day before and an hour before it starts.';
+    } else {
+        $each = [];
+        foreach ($done as $d) {
+            $each[] = $d['when'] !== '' ? $d['title'] . ' on ' . $d['when'] : $d['title'];
+        }
+        $title = 'You are registered for ' . count($done) . ' events.';
+        $body  = $listing($each) . '. Those are what you came to Jobmington for, the details are in your email, '
+               . 'and we will remind you before each one.';
+    }
+
+    // Some worked and some did not. Say both rather than only the good half.
+    if ($lost || $stuck > 0) {
+        if ($lost) {
+            $body .= ' One thing though: ' . $listing($lost) . '.';
+        }
+        if ($stuck > 0) {
+            $body .= ' We could not finish one of the others, so open it and press Register once more.';
+        }
+        return [$title, $body, $link, $linkText, 'warn'];
+    }
+
+    return [$title, $body, $link, $linkText, 'ok'];
 }
