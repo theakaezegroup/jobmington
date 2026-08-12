@@ -503,6 +503,7 @@ if ($isAdminArea) {
             .jm-admin-content { padding: 18px 14px; }
         }
     </style>
+    <?php require_once __DIR__ . '/stacktable.php'; ?>
 </head>
 <body class="jm-admin">
     <div class="jm-admin-layout">
@@ -600,8 +601,6 @@ ob_start();
             }
         }
     </script>
-
-    <?php require_once __DIR__ . '/stacktable.php'; ?>
 
     <style nonce="<?= $cspNonce ?>">
         .hide-scrollbar::-webkit-scrollbar { display: none; }
