@@ -144,7 +144,7 @@ function jm_event_row(array $ev, bool $isPast = false): string {
    about 18px of corner, the same third of the width the smaller one leaves.
    The chip sits on the poster on mobile, so the arc reads against the artwork
    rather than against the page. */
-.jm-ev-date::before { content: ''; position: absolute; width: 44px; height: 44px; border-radius: 50%; background: #f59f22; right: -26px; bottom: -26px; }
+.jm-ev-date::before { content: ''; position: absolute; width: 44px; height: 44px; border-radius: 50%; background: #f59f22; right: -31px; bottom: -31px; }
 .jm-ev-date > span { position: relative; z-index: 1; }
 .jm-ev-date .m { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; color: #0640a3; line-height: 1; }
 .jm-ev-date .d { font-size: 23px; font-weight: 800; color: #061426; line-height: 1.15; letter-spacing: -.02em; }
