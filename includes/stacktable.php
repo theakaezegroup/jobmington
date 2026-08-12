@@ -101,32 +101,37 @@ document.addEventListener('DOMContentLoaded', function () {
         );
         if (!heads.length) { return; }
 
-        // The row's title is the first column that actually has a name. Several
-        // of these tables lead with an unnamed thumbnail column, so assuming
-        // column zero labelled the course title "Course" instead of letting it
-        // head the card.
+        // Which column heads the card. Normally the first one with a name,
+        // since several tables lead with an unnamed thumbnail. A table whose
+        // first named column is an ID or a sort order says so itself with
+        // data-title-col, rather than this guessing from the header text.
         var titleIndex = 0;
         for (var h = 0; h < heads.length; h++) {
             if (heads[h] !== '') { titleIndex = h; break; }
         }
+        var declared = parseInt(table.getAttribute('data-title-col'), 10);
+        if (!isNaN(declared) && declared >= 0 && declared < heads.length) {
+            titleIndex = declared;
+        }
 
         table.querySelectorAll('tbody tr').forEach(function (row) {
             Array.prototype.forEach.call(row.children, function (cell, i) {
-                // Any unnamed column before the title is a thumbnail. Mark it so
-                // the card can sit it beside the title rather than stranding a
-                // lone rectangle on a line of its own.
-                if (i < titleIndex && !cell.hasAttribute('colspan')) {
-                    cell.classList.add('jm-cell-thumb');
-                    return;
-                }
                 // An empty-state cell spans the card, and anything already
                 // labelled by hand was labelled deliberately.
                 if (i === titleIndex || cell.hasAttribute('data-label') || cell.hasAttribute('colspan')) {
                     return;
                 }
-                if (heads[i]) {
-                    cell.setAttribute('data-label', heads[i]);
+                // An unnamed column before the title is a thumbnail: no label to
+                // give it, and it sits beside the title rather than stranding a
+                // lone rectangle on a line of its own. A named one before the
+                // title is ordinary data and still gets its label.
+                if (heads[i] === '') {
+                    if (i < titleIndex) {
+                        cell.classList.add('jm-cell-thumb');
+                    }
+                    return;
                 }
+                cell.setAttribute('data-label', heads[i]);
             });
         });
     });
