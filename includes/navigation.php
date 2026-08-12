@@ -26,6 +26,12 @@ final class Navigation {
      * page family renders its nav as a flex row with a 26px gap beside the
      * logo, sized for about five items; putting the whole list in there wrapped
      * it onto a second row and scattered the header. One list, two densities.
+     *
+     * The compact set has a hard budget. The hamburger takes over at 900px, so
+     * at 901px the bar has roughly 679px once the 48px shell padding, the logo
+     * and the gap are taken out. Five items plus Dashboard, the bell and Sign
+     * out come to about 664px. Adding a sixth costs another 79px and wraps.
+     * Anything added to the compact set has to be measured, not assumed.
      */
     public static function getMainItems(): array {
         return [
@@ -37,7 +43,7 @@ final class Navigation {
             ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles', 'compact' => false],
             ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus', 'compact' => false],
             ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users', 'compact' => true],
-            ['url' => '/jobmington/pricing.php', 'label' => 'Pricing', 'icon' => 'briefcase', 'compact' => true],
+            ['url' => '/jobmington/pricing.php', 'label' => 'Pricing', 'icon' => 'briefcase', 'compact' => false],
         ];
     }
 
