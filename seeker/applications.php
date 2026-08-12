@@ -62,7 +62,7 @@ $pageTitle = 'Applications | ' . SITE_NAME;
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-17">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-18">
     <style>
         .jm-tabs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
         .jm-tabs a { border:1px solid var(--jm-line); color:var(--jm-ink); padding:8px 12px; text-decoration:none; font-size:14px; font-weight:600; }

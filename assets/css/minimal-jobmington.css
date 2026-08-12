@@ -222,6 +222,8 @@ html {
     scroll-behavior: smooth;
 }
 
+body { overflow-x: clip; }
+
 body.jm-minimal {
     margin: 0;
     background: linear-gradient(180deg, #ffffff 0%, var(--jm-surface) 48%, #f5f9ff 100%);
@@ -273,8 +275,8 @@ body.jm-home-page {
     position: sticky;
     top: 0;
     z-index: 900;
-    margin: 0 -24px 16px;
-    padding: 10px 24px 12px;
+    margin: 0 calc(50% - 50vw) 16px;
+    padding: 10px calc(50vw - 50%) 12px;
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
@@ -2670,7 +2672,6 @@ body.jm-home-page {
     display: none;
 }
 
-.jm-home-page .jm-header,
 .jm-home-page .jm-strip-carousel,
 .jm-home-page .jm-home-hero,
 .jm-home-page .jm-home-stats,
@@ -2682,7 +2683,12 @@ body.jm-home-page {
 .jm-home-page .jm-header {
     align-items: center;
     margin-bottom: 26px;
-    padding: 0 0 26px;
+    /* Vertical only. The horizontal padding is what holds the contents on the
+       shell margin while the bar itself runs full width, and the shorthand
+       here was resetting it to zero. */
+    padding-top: 4px;
+    padding-bottom: 14px;
+    z-index: 2;
 }
 
 .jm-home-page .jm-logo {
@@ -4136,14 +4142,6 @@ body.jm-home-page {
         z-index: 2400;
     }
 
-    /* The shell narrows to 18px here, so the bleed has to match or the bar
-       stops short of the screen edge. */
-    .jm-header {
-        margin-left: -18px;
-        margin-right: -18px;
-        padding-left: 18px;
-        padding-right: 18px;
-    }
 
     body.jm-mobile-nav-ready .jm-mobile-nav-toggle {
         display: inline-flex;

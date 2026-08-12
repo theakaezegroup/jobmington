@@ -81,7 +81,7 @@ $pageTitle = 'Employer Dashboard | ' . SITE_NAME;
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-17">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-18">
     <style>
         .jm-stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
         .jm-stat { border:1px solid var(--jm-line); padding:20px; background:#fff; }
