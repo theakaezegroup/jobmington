@@ -133,18 +133,40 @@ function jm_account_deletion_audit(PDO $pdo): array
             ->execute([$userId, 'Delete Audit Topic ' . $stamp]);
         $topicId = (int) $pdo->lastInsertId();
 
-        // Money: a seeds ledger entry, which must survive the person.
-        $hasSeeds = jm_table_exists($pdo, 'seed_transactions');
-        if ($hasSeeds) {
-            $cols = [];
+        /*
+         * Money: a seeds ledger entry, which must survive the person.
+         *
+         * Built from the live columns rather than a remembered shape. The
+         * first version hardcoded (user_id, amount) and died on the server,
+         * where balance_after is NOT NULL with no default. A fixture that only
+         * works on the machine it was written on tests nothing.
+         */
+        $hasSeeds = false;
+        if (jm_table_exists($pdo, 'seed_transactions')) {
+            $insert = ['user_id' => $userId, 'amount' => 10];
+
             foreach ($pdo->query("SHOW COLUMNS FROM seed_transactions") as $c) {
-                $cols[$c['Field']] = $c;
+                $field = $c['Field'];
+                if ($field === 'user_id' || $field === 'amount' || $c['Extra'] === 'auto_increment') {
+                    continue;
+                }
+                // Anything the table insists on gets something harmless.
+                if ($c['Null'] === 'NO' && $c['Default'] === null) {
+                    $insert[$field] = str_contains(strtolower((string) $c['Type']), 'char')
+                                   || str_contains(strtolower((string) $c['Type']), 'text')
+                                   || str_contains(strtolower((string) $c['Type']), 'enum')
+                        ? 'audit'
+                        : 0;
+                }
             }
-            if (isset($cols['amount'])) {
-                $pdo->prepare("INSERT INTO seed_transactions (user_id, amount, created_at) VALUES (?, 10, NOW())")
-                    ->execute([$userId]);
-            } else {
-                $hasSeeds = false;
+
+            if (array_key_exists('amount', $insert)) {
+                $cols  = array_keys($insert);
+                $marks = implode(', ', array_fill(0, count($cols), '?'));
+                $names = '`' . implode('`, `', $cols) . '`';
+                $pdo->prepare("INSERT INTO seed_transactions ({$names}) VALUES ({$marks})")
+                    ->execute(array_values($insert));
+                $hasSeeds = true;
             }
         }
 
