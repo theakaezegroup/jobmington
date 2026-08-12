@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Sign In | Jobmington</title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-23">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-24">
 </head>
 <body class="jm-minimal">
     <div class="jm-shell">

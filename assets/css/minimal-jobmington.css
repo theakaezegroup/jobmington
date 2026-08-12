@@ -4194,6 +4194,19 @@ body.jm-home-page {
     .jm-header .jm-mobile-nav-toggle span,
     .jm-header .jm-mobile-nav-toggle::before,
     .jm-header .jm-mobile-nav-toggle::after { background: #ffffff; }
+
+    /* Open, the button sits on top of the white drawer rather than on the blue
+       bar, so a white X on it is invisible. Same trap the drawer's links fell
+       into: the bar's colours must stop at the bar. */
+    body.jm-nav-open .jm-header .jm-mobile-nav-toggle {
+        background: #ffffff !important;
+        border-color: #d8e4f4 !important;
+        color: var(--jm-ink) !important;
+    }
+    body.jm-nav-open .jm-header .jm-mobile-nav-toggle::before,
+    body.jm-nav-open .jm-header .jm-mobile-nav-toggle::after {
+        background: var(--jm-ink);
+    }
     .jm-header .jm-bell-badge { box-shadow: 0 0 0 2px #0640a3; }
 
     /* The nav is not in the bar here, it is a white slide-in panel, so the
