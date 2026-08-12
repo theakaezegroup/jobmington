@@ -910,5 +910,15 @@ if (!function_exists('jm_minimal_footer')) {
     }
 }
 
+/**
+ * Shorthand for the activity trail. Same thing as Security::logActivity, named
+ * to match the other jm_ helpers so call sites read consistently.
+ */
+if (!function_exists('jm_log_activity')) {
+    function jm_log_activity(?int $userId, string $action, ?string $details = null): void {
+        Security::logActivity($userId, $action, $details);
+    }
+}
+
 require_once __DIR__ . '/illustration-states.php';
 ?>

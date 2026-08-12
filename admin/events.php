@@ -14,59 +14,6 @@ Session::start();
 Session::requireAdmin();
 $pdo = db();
 
-/*
- * CSV export of an event's registrants.
- *
- * Runs before any output so the download headers are the first thing sent.
- * Fields that begin with =, +, - or @ are prefixed with an apostrophe: a
- * spreadsheet treats those as formulas, so a name like "=cmd|..." would
- * execute on open. The prefix is invisible in the cell and defuses it.
- */
-if (isset($_GET['export'])) {
-    $exportId = (int) $_GET['export'];
-    $ev = $pdo->prepare("SELECT title, slug, starts_at FROM events WHERE event_id = ? LIMIT 1");
-    $ev->execute([$exportId]);
-    $evRow = $ev->fetch(PDO::FETCH_ASSOC);
-
-    if ($evRow) {
-        $rs = $pdo->prepare("
-            SELECT r.name, r.email, r.registered_at, r.reminder_24h_at, r.reminder_1h_at,
-                   u.phone, c.name AS country
-            FROM event_registrations r
-            LEFT JOIN users u ON u.user_id = r.user_id
-            LEFT JOIN countries c ON c.country_id = u.country_id
-            WHERE r.event_id = ?
-            ORDER BY r.registered_at ASC
-        ");
-        $rs->execute([$exportId]);
-
-        $safe = static function ($v): string {
-            $v = (string) $v;
-            return ($v !== '' && strpbrk($v[0], "=+-@") !== false) ? "'" . $v : $v;
-        };
-
-        $file = 'registrants-' . preg_replace('/[^a-z0-9\-]+/i', '-', (string) $evRow['slug'])
-              . '-' . date('Y-m-d') . '.csv';
-
-        header('Content-Type: text/csv; charset=utf-8');
-        header('Content-Disposition: attachment; filename="' . $file . '"');
-        header('Cache-Control: no-store');
-
-        $out = fopen('php://output', 'w');
-        fwrite($out, "\xEF\xBB\xBF");   // BOM, so Excel reads accents correctly
-        fputcsv($out, ['Name', 'Email', 'Phone', 'Country', 'Registered at', 'Reminded 24h', 'Reminded 1h']);
-        while ($r = $rs->fetch(PDO::FETCH_ASSOC)) {
-            fputcsv($out, [
-                $safe($r['name']), $safe($r['email']), $safe($r['phone']), $safe($r['country']),
-                $r['registered_at'], $r['reminder_24h_at'] ?: '', $r['reminder_1h_at'] ?: '',
-            ]);
-        }
-        fclose($out);
-        exit;
-    }
-}
-$pdo = db();
-
 $msg = '';
 $err = '';
 
@@ -163,24 +110,6 @@ if (isset($_GET['edit'])) {
 }
 
 $events = $pdo->query("SELECT * FROM events ORDER BY starts_at DESC")->fetchAll(PDO::FETCH_ASSOC);
-$viewId = (int) ($_GET['registrants'] ?? 0);
-$viewEvent = null;
-$registrants = [];
-if ($viewId > 0) {
-    try {
-        $q = $pdo->prepare("SELECT * FROM events WHERE event_id = ? LIMIT 1");
-        $q->execute([$viewId]);
-        $viewEvent = $q->fetch(PDO::FETCH_ASSOC) ?: null;
-
-        $q = $pdo->prepare("SELECT r.*, u.phone FROM event_registrations r
-                            LEFT JOIN users u ON u.user_id = r.user_id
-                            WHERE r.event_id = ? ORDER BY r.registered_at ASC");
-        $q->execute([$viewId]);
-        $registrants = $q->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Throwable $e) {
-        $viewEvent = null; $registrants = [];
-    }
-}
 
 $pageTitle = 'Events - ' . SITE_NAME;
 require_once __DIR__ . '/../includes/header.php';
@@ -254,42 +183,6 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 
     <div>
-        <?php if ($viewEvent): ?>
-            <div class="jm-ev-card" style="margin-bottom:18px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
-                    <h2 style="margin:0;">Registrants &mdash; <?= e($viewEvent['title']) ?></h2>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        <?php if ($registrants): ?>
-                            <a class="jm-ev-btn" style="width:auto;display:inline-block;text-decoration:none;padding:8px 14px;"
-                               href="?export=<?= (int)$viewId ?>">Download CSV</a>
-                        <?php endif; ?>
-                        <a href="/jobmington/admin/events.php" style="font-size:13px;font-weight:700;color:#5b6b82;text-decoration:none;">Close</a>
-                    </div>
-                </div>
-                <p style="font-size:12px;color:#5b6b82;margin:0 0 14px;"><?= count($registrants) ?> registered. The CSV includes phone and country where the person has them on their profile.</p>
-
-                <?php if (!$registrants): ?>
-                    <p style="font-size:13px;color:#94a3b8;margin:0;">Nobody has registered yet.</p>
-                <?php else: ?>
-                    <div class="jm-tablewrap"><table class="jm-ev-table">
-                        <thead><tr><th>Name</th><th>Email</th><th>Registered</th><th>Reminders</th></tr></thead>
-                        <tbody>
-                        <?php foreach ($registrants as $r): ?>
-                            <tr>
-                                <td><?= e($r['name'] ?: 'Member') ?></td>
-                                <td><a href="mailto:<?= e($r['email']) ?>" style="color:#0640a3;"><?= e($r['email']) ?></a></td>
-                                <td style="font-size:12px;color:#5b6b82;"><?= e(date('j M Y, g:i A', strtotime($r['registered_at']))) ?></td>
-                                <td style="font-size:12px;color:#5b6b82;">
-                                    <?= $r['reminder_24h_at'] ? 'day-before sent' : 'day-before pending' ?><br>
-                                    <?= $r['reminder_1h_at'] ? 'hour-before sent' : 'hour-before pending' ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        </tbody>
-                    </table></div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
 
         <div class="jm-tablewrap"><table class="jm-ev-table">
             <thead><tr><th>Event</th><th>When</th><th>Regs</th><th>Status</th><th></th></tr></thead>
@@ -300,7 +193,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <tr>
                     <td><strong><?= e($ev['title']) ?></strong><div style="font-size:11px;color:#94a3b8;"><?= ucfirst($ev['event_type']) ?> &middot; <?= $ev['is_online'] ? 'Online' : e($ev['location'] ?: 'In person') ?></div></td>
                     <td style="font-size:12px;"><?= e(date('M d, Y', strtotime($ev['starts_at']))) ?><br><span style="color:#94a3b8;"><?= e(date('h:i A', strtotime($ev['starts_at']))) ?></span></td>
-                    <td><a href="?registrants=<?= (int)$ev['event_id'] ?>" style="color:#0640a3;font-weight:700;"><?= (int) $ev['registration_count'] ?><?= $ev['capacity'] ? '/' . (int)$ev['capacity'] : '' ?></a></td>
+                    <td><a href="/jobmington/admin/event-registrants.php?event_id=<?= (int)$ev['event_id'] ?>" style="color:#0640a3;font-weight:700;"><?= (int) $ev['registration_count'] ?><?= $ev['capacity'] ? '/' . (int)$ev['capacity'] : '' ?></a></td>
                     <td><span class="jm-ev-pill <?= $ev['is_published'] ? 'on' : 'off' ?>"><?= $ev['is_published'] ? 'Live' : 'Hidden' ?></span></td>
                     <td>
                         <div class="jm-ev-actions">

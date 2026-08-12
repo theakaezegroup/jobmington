@@ -9,11 +9,19 @@ require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../includes/security.php';
 require_once __DIR__ . '/../../includes/session.php';
 require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../../includes/tools.php';
 
 Session::start();
 $pdo = db();
 
 $passportNumber = $_GET['id'] ?? null;
+
+// A passport someone has shared stays reachable by its link even while the
+// tool is in beta. Sharing is the whole point of it. Only the owner's own
+// passport view goes behind the gate.
+if (!$passportNumber) {
+    jm_require_tool('passport');
+}
 $isOwner = false;
 $passport = null;
 

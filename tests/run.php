@@ -93,6 +93,16 @@ if ($base && !isset($opts['no-http'])) {
     check('bad unsubscribe token shows invalid', str_contains($body('/unsubscribe?e=a@b.com&t=bad'), 'invalid'));
 }
 
+// Tool registry audit. No database needed: it reads the files.
+require_once __DIR__ . '/../includes/tools.php';
+require_once __DIR__ . '/tools_audit.php';
+
+$toolProblems = jm_tools_audit(dirname(__DIR__));
+check('tool gating agrees with the registry', $toolProblems === []);
+foreach ($toolProblems as $problem) {
+    echo "      {$problem}\n";
+}
+
 // Schema audit. Skipped rather than failed when the database is unreachable,
 // so the unit checks still run on a machine without MySQL.
 require_once __DIR__ . '/schema_audit.php';

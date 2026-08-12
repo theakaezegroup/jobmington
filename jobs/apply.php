@@ -103,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$existingApplication) {
             ");
             $stmt->execute([$jobId, $userId, $coverLetter ?: null, $cvPath]);
             $applicationId = (int) $pdo->lastInsertId();
+            jm_log_activity($userId, 'job_apply', $job['title'] ?? ('job ' . $jobId));
 
             $pdo->prepare("UPDATE jobs SET applications_count = COALESCE(applications_count, 0) + 1 WHERE job_id = ?")->execute([$jobId]);
 

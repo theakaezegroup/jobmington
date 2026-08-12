@@ -6,10 +6,12 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/_cv_helpers.php';
 
 Session::start();
 Session::requireLogin();
+jm_require_tool('cv_builder');
 
 $pdo = db();
 $stmt = $pdo->prepare("SELECT * FROM cv_profiles WHERE user_id = ? ORDER BY updated_at DESC, created_at DESC");

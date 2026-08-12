@@ -86,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $userId = (int) $pdo->lastInsertId();
+            jm_log_activity($userId, 'signup', $form['user_type'] . ' - ' . $form['email']);
 
             // Welcome Seeds (free engagement currency).
             try {

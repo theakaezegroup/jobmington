@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/tools.php';
 
 header('Content-Type: application/json');
 Session::start();
@@ -18,6 +19,8 @@ Session::start();
 if (!Session::isLoggedIn()) {
     jsonError('Please log in.', 401);
 }
+// Both the builder and the optimizer extract CVs; either one is enough.
+jm_require_tool_api('cv_builder', 'cv_roast');
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('POST required.', 405);
 }

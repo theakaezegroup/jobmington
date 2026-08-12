@@ -88,6 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['is_verified'] = (bool) $user['is_verified'];
             $_SESSION['login_time'] = time();
 
+            jm_log_activity((int) $user['user_id'], 'login', $remember ? 'with remember me' : null);
+
             // Greet them by name next time even if the token expires or is cleared.
             jm_remember_visitor((string) $_SESSION['full_name']);
 
@@ -122,9 +124,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lockout = $attempts >= 5 ? date('Y-m-d H:i:s', strtotime('+15 minutes')) : null;
                 $pdo->prepare("UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE user_id = ?")->execute([$attempts, $lockout, $user['user_id']]);
                 $error = $attempts >= 5 ? 'Too many failed attempts. Account locked for 15 minutes.' : 'Invalid credentials. Please try again.';
+                jm_log_activity((int) $user['user_id'], $attempts >= 5 ? 'login_locked' : 'login_failed', 'attempt ' . $attempts);
             } else {
                 usleep(random_int(100000, 300000));
                 $error = 'Invalid credentials. Please try again.';
+                jm_log_activity(null, 'login_unknown_email', $email);
             }
         }
     }

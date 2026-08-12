@@ -127,16 +127,33 @@ class Security {
     
     // --- ACTIVITY LOGGING ---
     
+    /**
+     * Record something a person did.
+     *
+     * Never throws. An audit trail that can take a page down with it is worse
+     * than no audit trail, and for a long time this method did exactly that:
+     * the activity_logs table did not exist, so every call site raised.
+     */
     public static function logActivity(?int $userId, string $action, ?string $details = null): void {
-        $pdo = db();
-        $stmt = $pdo->prepare("INSERT INTO activity_logs (user_id, action, details, ip_address, user_agent, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
-        $stmt->execute([
-            $userId, 
-            $action, 
-            $details, 
-            self::getClientIP(), 
-            substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
-        ]);
+        try {
+            $route = strtok((string) ($_SERVER['REQUEST_URI'] ?? ''), '?');
+
+            $stmt = db()->prepare("
+                INSERT INTO activity_logs (user_id, action, details, route, method, ip_address, user_agent, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+            ");
+            $stmt->execute([
+                $userId ?: null,
+                substr($action, 0, 60),
+                $details !== null ? substr($details, 0, 500) : null,
+                substr($route, 0, 255),
+                substr((string) ($_SERVER['REQUEST_METHOD'] ?? ''), 0, 10),
+                self::getClientIP(),
+                substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)
+            ]);
+        } catch (Throwable $e) {
+            error_log('logActivity(' . $action . '): ' . $e->getMessage());
+        }
     }
     
     // --- FILE UPLOAD SECURITY ---

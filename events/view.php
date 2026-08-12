@@ -94,6 +94,7 @@ if ($wantsRegister && Session::isLoggedIn()) {
             // Insert and bump the counter together, so the count cannot drift
             // from the number of rows if either statement fails.
             $pdo->beginTransaction();
+            jm_log_activity($userId ?: null, 'event_register', $event['title'] ?? ('event ' . $eventId));
             $pdo->prepare("INSERT INTO event_registrations (event_id, user_id, name, email) VALUES (?, ?, ?, ?)")
                 ->execute([$eventId, (int) Session::userId(), Session::get('full_name'), Session::get('email')]);
             $pdo->prepare("UPDATE events SET registration_count = registration_count + 1 WHERE event_id = ?")->execute([$eventId]);

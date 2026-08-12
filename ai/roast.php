@@ -8,9 +8,11 @@ require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/monetization.php';
 require_once __DIR__ . '/../includes/seeker_premium.php';
+require_once __DIR__ . '/../includes/tools.php';
 
 Session::start();
 Session::requireLogin('Sign in or create a free account to roast your CV. We will bring you straight back here.');
+jm_require_tool('cv_roast');
 
 $pdo         = db();
 $userId      = (int) Session::userId();

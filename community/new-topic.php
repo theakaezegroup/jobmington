@@ -42,6 +42,7 @@ if (isPost()) {
     }
 
     try {
+        jm_log_activity($userId, 'forum_topic', $title);
         $stmt = $pdo->prepare("INSERT INTO forum_topics (category_id, user_id, title, content, created_at) VALUES (?, ?, ?, ?, NOW())");
         $stmt->execute([$categoryId ?: null, Session::userId(), $title, $content]);
         $topicId = $pdo->lastInsertId();

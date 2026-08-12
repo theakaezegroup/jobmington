@@ -40,6 +40,7 @@ if ($content === '' || strlen($content) < 5) {
 try {
     $pdo->beginTransaction();
 
+    jm_log_activity($userId, 'forum_reply', 'topic ' . $topicId);
     $stmt = $pdo->prepare("INSERT INTO forum_replies (topic_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())");
     $stmt->execute([$topicId, $userId, $content]);
 

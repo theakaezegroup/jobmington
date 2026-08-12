@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/../includes/monetization.php';
 require_once __DIR__ . '/../includes/seeker_premium.php';
 
@@ -20,6 +21,7 @@ Session::start();
 if (!Session::isLoggedIn()) {
     jsonError('Please log in to roast or optimize a CV.', 401);
 }
+jm_require_tool_api('cv_roast');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Invalid request method.', 405);

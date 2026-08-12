@@ -11,6 +11,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/../ai/JobMatcher.php';
 
 header('Content-Type: application/json');
@@ -21,6 +22,7 @@ Session::start();
 if (!Session::isLoggedIn()) {
     jsonError('Please log in to view job matches', 401);
 }
+jm_require_tool_api('job_match');
 
 $userId = Session::userId();
 

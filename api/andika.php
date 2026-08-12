@@ -11,11 +11,13 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/../includes/seeds.php';
 
 header('Content-Type: application/json');
 
 Session::start();
+jm_require_tool_api('andika');
 
 $input = json_decode(file_get_contents("php://input"), true);
 $message = $input['message'] ?? '';

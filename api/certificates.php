@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/../includes/tools.php';
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -30,10 +31,14 @@ try {
         jsonResponse(['success' => true, 'data' => $certificate]);
     }
 
+    // Verifying a certificate by its code is public and stays that way: the
+    // whole point is that an employer can check one. Only listing your own
+    // certificates is the gated tool.
     Session::start();
     if (!Session::isLoggedIn()) {
         jsonResponse(['success' => false, 'message' => 'Unauthorized'], 401);
     }
+    jm_require_tool_api('certificates');
 
     $stmt = $pdo->prepare("
         SELECT cert.certificate_id, cert.verification_code, cert.issued_at, cert.pdf_path,

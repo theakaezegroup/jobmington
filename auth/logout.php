@@ -17,6 +17,7 @@ Session::start();
 // Revoke this device's persistent login before the session goes away, or the
 // next request would silently sign the user straight back in.
 $userId = Session::isLoggedIn() ? (int) Session::userId() : null;
+jm_log_activity($userId, 'logout');
 jm_remember_revoke(db(), $userId);
 
 // Signing out is an explicit "I am done here", which on a shared device also
