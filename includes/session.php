@@ -140,6 +140,17 @@ class Session {
                 header('Location: /jobmington/auth/login.php?error=account_disabled');
                 exit;
             }
+
+            /*
+             * Presence, stamped on the same throttle rather than its own.
+             * This block already runs at most once a minute per person, so
+             * marking them present here costs one extra write instead of a
+             * second scheduled query, and nothing is written for guests.
+             */
+            $route = strtok((string) ($_SERVER['REQUEST_URI'] ?? ''), '?');
+            $route = preg_replace('#^/jobmington#', '', $route) ?: '/';
+            db()->prepare('UPDATE users SET last_seen_at = NOW(), last_seen_route = ? WHERE user_id = ?')
+                ->execute([substr($route, 0, 190), (int) self::userId()]);
         } catch (Throwable $e) {
             error_log('Active-account check failed: ' . $e->getMessage());
         }

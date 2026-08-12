@@ -44,6 +44,18 @@ function jm_notification_bell(): void {
         .jm-bell-ring { animation: jmBellRing .9s ease; }
         @keyframes jmBellRing { 0%,100%{transform:rotate(0)} 20%{transform:rotate(14deg)} 40%{transform:rotate(-12deg)} 60%{transform:rotate(8deg)} 80%{transform:rotate(-5deg)} }
         .jm-bell-panel { position:absolute; top:48px; right:0; width:340px; max-width:88vw; background:#fff; border:1px solid #e8edf5; border-radius:14px; box-shadow:0 20px 48px -16px rgba(16,24,40,.28); z-index:200; overflow:hidden; }
+        /* On a phone the panel stops hanging off the button and becomes a sheet
+           pinned to the viewport. Anchored absolutely it was 340px wide next to
+           a button a few pixels from the right edge, so it either overflowed or
+           was clipped by whichever ancestor happened to hide its overflow. */
+        @media (max-width: 600px) {
+            .jm-bell { position:static; }
+            .jm-bell-panel {
+                position:fixed; top:auto; left:10px; right:10px; width:auto; max-width:none;
+                border-radius:16px; box-shadow:0 -6px 20px rgba(16,24,40,.10), 0 24px 60px -18px rgba(16,24,40,.42);
+            }
+            .jm-bell-list { max-height:min(58vh, 420px); }
+        }
         .jm-bell-panel[hidden] { display:none; }
         .jm-bell-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #f0f4f9; }
         .jm-bell-head span { font-size:13px; font-weight:800; color:#101828; text-transform:uppercase; letter-spacing:.05em; }
@@ -129,7 +141,18 @@ function jm_notification_bell(): void {
         }
         btn.addEventListener('click', function (e) {
             e.stopPropagation();
-            if (panel.hasAttribute('hidden')) { panel.removeAttribute('hidden'); list.innerHTML = '<div class="jm-bell-empty">Loading&hellip;</div>'; load(true); }
+            if (panel.hasAttribute('hidden')) {
+                panel.removeAttribute('hidden');
+                // Sit just under the button that opened it, whatever header
+                // that button happens to live in.
+                if (window.matchMedia('(max-width: 600px)').matches) {
+                    panel.style.top = Math.round(btn.getBoundingClientRect().bottom + 10) + 'px';
+                } else {
+                    panel.style.top = '';
+                }
+                list.innerHTML = '<div class="jm-bell-empty">Loading&hellip;</div>';
+                load(true);
+            }
             else { panel.setAttribute('hidden', ''); }
         });
         document.addEventListener('click', function (e) { if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) panel.setAttribute('hidden', ''); });

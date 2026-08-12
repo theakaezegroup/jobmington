@@ -69,7 +69,8 @@ if (isPost()) {
 
 // Fetch recent jobs
 try {
-    $stmt = $pdo->query("SELECT j.job_id, j.title, j.slug, j.is_active, j.is_featured, j.posted_at, c.name AS company_name
+    $stmt = $pdo->query("SELECT j.job_id, j.title, j.slug, j.is_active, j.is_featured, j.posted_at, c.name AS company_name,
+                                (SELECT COUNT(*) FROM saved_jobs s WHERE s.job_id = j.job_id) AS saved_count
                          FROM jobs j
                          LEFT JOIN companies c ON j.company_id = c.company_id
                          ORDER BY j.posted_at DESC
@@ -99,13 +100,14 @@ require_once __DIR__ . '/../includes/header.php';
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Company</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Featured</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Saved</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posted</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                     <?php if (empty($jobs)): ?>
-                        <tr><td colspan="7" class="px-6 py-4 text-gray-500">No jobs found.</td></tr>
+                        <tr><td colspan="8" class="px-6 py-4 text-gray-500">No jobs found.</td></tr>
                     <?php else: ?>
                         <?php foreach ($jobs as $j): ?>
                         <tr>
@@ -114,6 +116,7 @@ require_once __DIR__ . '/../includes/header.php';
                             <td class="px-6 py-4"><?= e($j['company_name'] ?? '—') ?></td>
                             <td class="px-6 py-4"><?= $j['is_active'] ? '<span class="text-green-600">Active</span>' : '<span class="text-gray-500">Inactive</span>' ?></td>
                             <td class="px-6 py-4"><?= $j['is_featured'] ? '<span class="text-yellow-600">Yes</span>' : 'No' ?></td>
+                            <td class="px-6 py-4"><a href="/jobmington/admin/audience.php?type=job&id=<?= (int) $j['job_id'] ?>&action=saved" style="color:#0640a3;font-weight:700;"><?= (int) ($j['saved_count'] ?? 0) ?></a></td>
                             <td class="px-6 py-4"><?= e(formatDateTime($j['posted_at'])) ?></td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">

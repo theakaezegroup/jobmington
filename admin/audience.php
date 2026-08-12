@@ -86,6 +86,25 @@ $types = [
             ],
         ],
     ],
+    'job' => [
+        'label'  => 'Job',
+        'table'  => 'jobs',
+        'id'     => 'job_id',
+        'title'  => 'title',
+        'back'   => '/jobmington/admin/jobs.php',
+        'actions' => [
+            'saved' => [
+                'label' => 'Saved',
+                'sql'   => "SELECT s.user_id, s.saved_at AS at, NULL AS detail
+                            FROM saved_jobs s WHERE s.job_id = :id",
+            ],
+            'applied' => [
+                'label' => 'Applied',
+                'sql'   => "SELECT a.user_id, a.applied_at AS at, a.status AS detail
+                            FROM job_applications a WHERE a.job_id = :id",
+            ],
+        ],
+    ],
     'blog_post' => [
         'label'  => 'Post',
         'table'  => 'blog_posts',

@@ -144,6 +144,7 @@ if ($isAdminArea) {
             ['href' => '/jobmington/admin/operations.php', 'label' => 'Operations', 'icon' => 'fa-heartbeat', 'match' => '/admin/operations'],
             ['href' => '/jobmington/admin/tools.php', 'label' => 'Tool Access', 'icon' => 'fa-toggle-on', 'match' => '/admin/tools'],
             ['href' => '/jobmington/admin/activity.php', 'label' => 'Activity', 'icon' => 'fa-wave-square', 'match' => '/admin/activity'],
+            ['href' => '/jobmington/admin/online.php', 'label' => 'Who is online', 'icon' => 'fa-signal', 'match' => '/admin/online'],
             ['href' => '/jobmington/admin/header-ads.php', 'label' => 'Header Ads', 'icon' => 'fa-rectangle-ad', 'match' => '/admin/header-ads'],
         ],
         'Learning' => [
@@ -1479,8 +1480,6 @@ ob_start();
                     <i class="fas fa-bookmark text-sm"></i>
                 </a>
 
-                <!-- Notifications -->
-                <?php require_once __DIR__ . '/notification_bell.php'; jm_notification_bell(); ?>
                 <?php endif; ?>
 
                 <?php if ($isLoggedIn): 
@@ -1526,6 +1525,14 @@ ob_start();
                     </div>
                 <?php endif; ?>
                 
+                <?php if ($isLoggedIn): ?>
+                    <!-- Notifications. Last before the menu button: on a phone the
+                         bell and the hamburger are the two controls you reach for,
+                         so they belong next to each other rather than with the
+                         bell buried between the search and the avatar. -->
+                    <?php require_once __DIR__ . '/notification_bell.php'; jm_notification_bell(); ?>
+                <?php endif; ?>
+
                 <button id="mobile-toggle" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg transition jm-menu-button" style="background: #ffffff; border: 1px solid #e8edf5; color: #101828;">
                     <i class="fas fa-bars"></i>
                 </button>
