@@ -20,6 +20,11 @@ if (!defined('JOBMINGTON')) {
     exit('Forbidden');
 }
 
+// The statuses live in the database, so this file depends on db(). Declaring
+// it here rather than trusting every caller to have loaded it: pricing.php had
+// not, and the gate quietly fell open as a result.
+require_once __DIR__ . '/../config/database.php';
+
 /**
  * Every tool, described once.
  *
@@ -204,15 +209,18 @@ function jm_tool_statuses(): array
         return $cache;
     }
 
-    // A tool with no row yet is treated as on, matching the migration's seed.
-    $cache = array_fill_keys(array_keys(jm_tools()), 'on');
+    // Fail closed. If the flags cannot be read we do not know what is meant to
+    // be open, and guessing 'on' means one missing include silently unlocks
+    // every gated tool, which is exactly what happened on pricing.php. A tool
+    // with a row is whatever that row says; the seed gives every real tool one.
+    $cache = array_fill_keys(array_keys(jm_tools()), 'off');
 
     try {
         foreach (db()->query("SELECT tool_key, status FROM tool_flags") as $row) {
             $cache[$row['tool_key']] = $row['status'];
         }
     } catch (Throwable $e) {
-        error_log('jm_tool_statuses: ' . $e->getMessage());
+        error_log('jm_tool_statuses (every tool now reads as off): ' . $e->getMessage());
     }
 
     return $cache;
@@ -220,7 +228,8 @@ function jm_tool_statuses(): array
 
 function jm_tool_status(string $key): string
 {
-    return jm_tool_statuses()[$key] ?? 'on';
+    // Unknown key means an unregistered tool, which nobody should reach.
+    return jm_tool_statuses()[$key] ?? 'off';
 }
 
 /**
