@@ -21,8 +21,8 @@ function jm_notification_bell(): void {
     <div class="jm-bell" style="position:relative;">
         <button type="button" id="jm-bell-btn" class="jm-bell-btn" title="Notifications" aria-label="Notifications">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span id="jm-bell-badge" class="jm-bell-badge">0</span>
         </button>
+        <span id="jm-bell-badge" class="jm-bell-badge">0</span>
         <div id="jm-bell-panel" class="jm-bell-panel" hidden>
             <div class="jm-bell-head">
                 <span>Notifications</span>
@@ -36,7 +36,13 @@ function jm_notification_bell(): void {
         </div>
     </div>
     <style>
-        .jm-bell-btn { position:relative; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
+        .jm-bell-btn { position:relative; overflow:hidden; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
+        /* The yellow round, masked inside the bell button; only its arc shows.
+           Borrowed from the chat launcher: a second shape pushed mostly outside
+           a parent that hides its overflow, so what is left is a corner of
+           colour rather than a decoration sitting on top of the button. */
+        .jm-bell-btn::before { content:''; position:absolute; width:30px; height:30px; border-radius:50%; background:#f59f22; right:-15px; bottom:-15px; }
+        .jm-bell-btn svg { position:relative; z-index:1; }
         .jm-bell-btn:hover { background:#f6f8fb; }
         /* On the brand-blue mobile bar the bell sits plainly on the blue, like
            the logo and the hamburger, rather than as a white tile. */
@@ -49,7 +55,7 @@ function jm_notification_bell(): void {
            header row it was not originally sitting in. */
         .jm-header > .jm-bell { flex:0 0 auto; margin-left:auto; }
         .jm-bell-btn svg { width:16px; height:16px; }
-        .jm-bell-badge { position:absolute; top:-4px; right:-4px; min-width:15px; height:15px; padding:0 3.5px; border-radius:99px; background:#e11d2a; color:#fff; font-size:9px; font-weight:800; line-height:15px; text-align:center; box-shadow:0 0 0 2px #fff; display:none; }
+        .jm-bell-badge { position:absolute; pointer-events:none; top:-4px; right:-4px; min-width:15px; height:15px; padding:0 3.5px; border-radius:99px; background:#e11d2a; color:#fff; font-size:9px; font-weight:800; line-height:15px; text-align:center; box-shadow:0 0 0 2px #fff; display:none; }
         .jm-bell-badge.show { display:block; }
         .jm-bell-ring { animation: jmBellRing .9s ease; }
         @keyframes jmBellRing { 0%,100%{transform:rotate(0)} 20%{transform:rotate(14deg)} 40%{transform:rotate(-12deg)} 60%{transform:rotate(8deg)} 80%{transform:rotate(-5deg)} }
@@ -59,7 +65,6 @@ function jm_notification_bell(): void {
            a button a few pixels from the right edge, so it either overflowed or
            was clipped by whichever ancestor happened to hide its overflow. */
         @media (max-width: 600px) {
-            .jm-bell { position:static; }
             .jm-bell-panel {
                 position:fixed; top:auto; left:10px; right:10px; width:auto; max-width:none;
                 border-radius:16px; box-shadow:0 -6px 20px rgba(16,24,40,.10), 0 24px 60px -18px rgba(16,24,40,.42);
