@@ -146,6 +146,39 @@ if (preg_match('#<nav[^>]*class="jm-nav"[^>]*>(.*?)</nav>#s', $aiHeader, $m)) {
 }
 check('no hand-written links left in the ai nav', $strayNavLinks === 0);
 
+/*
+ * Nobody decides the signed-in state for themselves any more. It used to be
+ * hardcoded in twelve files, and employer/post-job.php keyed it off a role
+ * rather than off being signed in, so a signed-in seeker was shown "Sign in"
+ * and offered an account they already had.
+ */
+$navFiles = array_merge(
+    glob(__DIR__ . '/../*.php') ?: [],
+    glob(__DIR__ . '/../*/*.php') ?: [],
+    glob(__DIR__ . '/../*/*/*.php') ?: []
+);
+$handWritten = [];
+foreach ($navFiles as $file) {
+    $path = str_replace(DIRECTORY_SEPARATOR, '/', $file);
+    if (preg_match('#/(vendor|node_modules|database|tests|cron|includes)/#', $path)) {
+        continue;
+    }
+    $src = (string) @file_get_contents($file);
+    if (!preg_match('#<nav[^>]*class="jm-nav"#', $src)) {
+        continue;
+    }
+    // A nav that still spells out its own auth links is one that can get the
+    // signed-in state wrong.
+    if (preg_match('#<a[^>]*>\s*Sign in\s*</a>#i', $src) || preg_match('#<a[^>]*>\s*Sign out\s*</a>#i', $src)) {
+        $handWritten[] = basename(dirname($path)) . '/' . basename($path);
+    }
+}
+check('no page hand-writes its own sign in/out links', $handWritten === []);
+foreach ($handWritten as $f) {
+    echo "      {$f}
+";
+}
+
 // Tool registry audit. No database needed: it reads the files.
 require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/../includes/monetization.php';
