@@ -138,7 +138,14 @@ function jm_event_row(array $ev, bool $isPast = false): string {
 .jm-ev-row.is-past:hover { opacity: 1; }
 
 /* Date block */
-.jm-ev-date { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid #e4eaf3; border-radius: 10px; padding: 9px 4px 8px; background: #fff; }
+.jm-ev-date { position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 1px solid #e4eaf3; border-radius: 10px; padding: 9px 4px 8px; background: #fff; }
+/* The yellow round, masked inside the date chip; only its arc shows. Same
+   treatment as the notification bell, scaled: a 44px round at -26px leaves
+   about 18px of corner, the same third of the width the smaller one leaves.
+   The chip sits on the poster on mobile, so the arc reads against the artwork
+   rather than against the page. */
+.jm-ev-date::before { content: ''; position: absolute; width: 44px; height: 44px; border-radius: 50%; background: #f59f22; right: -26px; bottom: -26px; }
+.jm-ev-date > span { position: relative; z-index: 1; }
 .jm-ev-date .m { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; color: #0640a3; line-height: 1; }
 .jm-ev-date .d { font-size: 23px; font-weight: 800; color: #061426; line-height: 1.15; letter-spacing: -.02em; }
 .jm-ev-date .w { font-size: 9.5px; font-weight: 700; letter-spacing: .09em; color: #94a3b8; line-height: 1; }
