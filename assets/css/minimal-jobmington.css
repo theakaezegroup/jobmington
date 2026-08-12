@@ -2686,9 +2686,14 @@ body.jm-home-page {
     /* Vertical only. The horizontal padding is what holds the contents on the
        shell margin while the bar itself runs full width, and the shorthand
        here was resetting it to zero. */
-    padding-top: 4px;
+    padding-top: 10px;
     padding-bottom: 14px;
-    z-index: 2;
+    /* No z-index here. The base rule sets 900, and overriding it with 2 put the
+       header underneath the hero cards and the ticker fades, which are 10. */
+
+    /* The ad bar is a sibling above the shell, and the shell's own top padding
+       was showing between the two as a band of page. Pulled up to meet it. */
+    margin-top: -24px;
 }
 
 .jm-home-page .jm-logo {
@@ -4129,6 +4134,8 @@ body.jm-home-page {
     .jm-home-page .jm-nav {
         gap: 18px;
     }
+
+    .jm-home-page .jm-header { margin-top: -20px; }   /* shell padding is 20px here */
 
     body.jm-mobile-nav-ready .jm-header,
     body.jm-mobile-nav-ready.jm-home-page .jm-header {
