@@ -266,9 +266,71 @@ body.jm-home-page {
     align-items: center;
     justify-content: space-between;
     gap: 24px;
-    padding: 8px 0 12px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid var(--jm-line);
+    /* Sticky, so the nav is there when you are deep in a long job list rather
+       than only at the very top of it. Bled out to the shell edges with a
+       negative margin and matching padding, or the background would sit as a
+       floating strip with page showing either side of it. */
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    margin: 0 -24px 16px;
+    padding: 10px 24px 12px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    /* Brand blue rather than the grey line: it signs the bar without weight. */
+    border-bottom: 1px solid rgba(6, 64, 163, 0.28);
+    transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+
+/* ── Brand blue once you start reading ────────────────────────────────
+   Frosted at rest, because the blur is doing real work: content passing
+   under reads as depth and a solid colour throws that away. Translucent
+   when blue, so the blur survives the change.
+
+   Every child is restyled with it. Leaving any of them would put dark ink
+   or a white tile on blue. */
+.jm-header.is-stuck {
+    background: rgba(6, 64, 163, 0.94);
+    border-bottom-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 2px 14px rgba(6, 64, 163, 0.20);
+}
+.jm-header.is-stuck .jm-logo,
+.jm-header.is-stuck .jm-nav a { color: #ffffff; }
+.jm-header.is-stuck .jm-nav a { opacity: .92; }
+.jm-header.is-stuck .jm-nav a:hover { opacity: 1; color: #ffffff; }
+.jm-header.is-stuck .jm-nav a.active {
+    color: #ffffff;
+    text-decoration-color: #f59f22;   /* the underline picks up brand yellow */
+}
+/* The secondary button is white with a blue border, which disappears. */
+.jm-header.is-stuck .jm-nav a.jm-button.secondary {
+    background: transparent;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.42);
+}
+.jm-header.is-stuck .jm-nav a.jm-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+/* Bell and hamburger sit plainly on the blue, as they do on the other header. */
+.jm-header.is-stuck .jm-bell-btn,
+.jm-header.is-stuck .jm-mobile-nav-toggle {
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.30) !important;
+    color: #ffffff !important;
+}
+.jm-header.is-stuck .jm-bell-btn:hover,
+.jm-header.is-stuck .jm-mobile-nav-toggle:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+}
+.jm-header.is-stuck .jm-mobile-nav-toggle span,
+.jm-header.is-stuck .jm-mobile-nav-toggle::before,
+.jm-header.is-stuck .jm-mobile-nav-toggle::after { background: #ffffff; }
+/* The badge ring was white to lift it off a white bar. */
+.jm-header.is-stuck .jm-bell-badge { box-shadow: 0 0 0 2px #0640a3; }
+
+@media (prefers-reduced-motion: reduce) {
+    .jm-header { transition: none; }
 }
 
 .jm-home-page .jm-header {
@@ -4068,8 +4130,19 @@ body.jm-home-page {
         flex-direction: row;
         gap: 14px;
         justify-content: space-between;
-        position: relative;
+        /* Sticky, not relative: this rule used to undo the base one and the
+           header scrolled away on a phone. Above the drawer, as before. */
+        position: sticky;
         z-index: 2400;
+    }
+
+    /* The shell narrows to 18px here, so the bleed has to match or the bar
+       stops short of the screen edge. */
+    .jm-header {
+        margin-left: -18px;
+        margin-right: -18px;
+        padding-left: 18px;
+        padding-right: 18px;
     }
 
     body.jm-mobile-nav-ready .jm-mobile-nav-toggle {
