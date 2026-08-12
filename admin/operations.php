@@ -356,16 +356,15 @@ $smokePaths = [
 $cronCommand = '*/45 * * * * cd /var/www/jobmington && /usr/bin/php cron/run_job_scrapers.php --limit=80 >> logs/job-scraper-cron.log 2>&1';
 $pageTitle = 'Operations | ' . SITE_NAME;
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e($pageTitle) ?></title>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
-    <?php require_once __DIR__ . '/../includes/stacktable.php'; ?>
+require_once __DIR__ . '/../includes/header.php';
+?>
+<!-- This page used to build its own document, with its own header and a
+     five-link nav that matched nothing else in the admin. It uses the
+     shared chrome now. The minimal stylesheet comes along because the
+     markup below depends on its section and panel classes; its global
+     rules are scoped to body.jm-minimal, which this page no longer is, so
+     they cannot fight the admin shell. -->
+<link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
         .jm-backup-grid {
             display: grid;
@@ -492,19 +491,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
             }
         }
     </style>
-</head>
-<body class="jm-minimal">
-    <div class="jm-shell">
-        <header class="jm-header">
-            <a class="jm-logo" href="/jobmington/admin/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-            <nav class="jm-nav" aria-label="Admin navigation">
-                <a href="/jobmington/admin/">Dashboard</a>
-                <a href="/jobmington/admin/jobs.php">Jobs</a>
-                <a href="/jobmington/admin/users.php">Users</a>
-                <a class="active" href="/jobmington/admin/operations.php">Operations</a>
-                <a href="/jobmington/">View site</a>
-            </nav>
-        </header>
+<div class="jm-shell">
 
         <?php foreach (Session::getFlash('success') as $message): ?>
             <div class="jm-flash success"><?= e($message) ?></div>
@@ -791,7 +778,5 @@ $pageTitle = 'Operations | ' . SITE_NAME;
             ?></pre>
         </section>
 
-        <?php jm_minimal_footer(); ?>
     </div>
-</body>
-</html>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>
