@@ -15,6 +15,12 @@ if (!defined('JOBMINGTON')) {
     exit('Forbidden');
 }
 
+// The settings live in the database, so this file depends on db(). Declared
+// here rather than trusting each caller: pricing.php does not load the
+// database layer, and a guard that quietly skips when db() is missing is a
+// maintenance mode with holes in it.
+require_once __DIR__ . '/../config/database.php';
+
 /**
  * Every stored setting, read once per request.
  */
@@ -87,6 +93,9 @@ function jm_maintenance_allows(string $path): bool
         '/assets',
         '/uploads',
         '/api/webhooks',
+        '/unsubscribe',
+        '/payments',
+        '/learn/verify-purchase',
         '/favicon.ico',
         '/service-worker.js',
         '/robots.txt',

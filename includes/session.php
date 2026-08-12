@@ -108,9 +108,6 @@ class Session {
      */
     private static function maintenanceGate(): void
     {
-        if (!function_exists('db')) {
-            return;
-        }
         if (!function_exists('jm_maintenance_guard')) {
             $file = __DIR__ . '/maintenance.php';
             if (!is_file($file)) {
