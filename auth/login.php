@@ -24,15 +24,7 @@ if (get('forget', '') !== '') {
     redirect('/jobmington/auth/login.php' . ($hasSafeRedirect ? '?redirect=' . urlencode($redirectTo) : ''));
 }
 
-function jm_login_dashboard_for(string $userType): string {
-    if ($userType === USER_TYPE_ADMIN) {
-        return '/jobmington/admin/';
-    }
-    if ($userType === USER_TYPE_EMPLOYER) {
-        return '/jobmington/employer/dashboard.php';
-    }
-    return '/jobmington/seeker/dashboard.php';
-}
+require_once __DIR__ . '/../includes/navigation.php';   // jm_login_dashboard_for
 
 if (Session::isLoggedIn()) {
     if ($hasSafeRedirect) {

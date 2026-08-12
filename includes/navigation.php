@@ -48,3 +48,58 @@ final class Navigation {
     }
 }
 }
+
+
+/** Where a given role lands after signing in. */
+if (!function_exists('jm_login_dashboard_for')) {
+    function jm_login_dashboard_for(string $userType): string {
+        if ($userType === USER_TYPE_ADMIN) {
+            return '/jobmington/admin/';
+        }
+        if ($userType === USER_TYPE_EMPLOYER) {
+            return '/jobmington/employer/dashboard.php';
+        }
+        return '/jobmington/seeker/dashboard.php';
+    }
+}
+
+/**
+ * Render the standard nav for the "minimal" page family.
+ *
+ * Roughly thirty pages hand-write their own <nav>, which is why the items
+ * differ depending on where you are standing. This gives those pages the
+ * shared list and, importantly, one correct answer for the signed-in state:
+ * several of them decided what to show from a role rather than from whether
+ * anybody was signed in at all, so a signed-in seeker was told to sign in.
+ */
+if (!function_exists('jm_site_nav')) {
+    function jm_site_nav(string $activeUrl = '', string $ariaLabel = 'Main navigation'): void {
+        $loggedIn = class_exists('Session') && Session::isLoggedIn();
+        $dash = '/jobmington/seeker/dashboard.php';
+        if ($loggedIn && function_exists('jm_login_dashboard_for')) {
+            $dash = jm_login_dashboard_for(Session::userType() ?? '');
+        }
+        ?>
+        <nav class="jm-nav" aria-label="<?= e($ariaLabel) ?>">
+            <?php foreach (Navigation::getMainItems() as $item): ?>
+                <a class="<?= $activeUrl !== '' && str_contains($item['url'], $activeUrl) ? 'active' : '' ?>"
+                   href="<?= e($item['url']) ?>"><?= e($item['label']) ?></a>
+            <?php endforeach; ?>
+
+            <?php if ($loggedIn): ?>
+                <a href="<?= e($dash) ?>">Dashboard</a>
+                <?php
+                if (is_file(__DIR__ . '/notification_bell.php')) {
+                    require_once __DIR__ . '/notification_bell.php';
+                    jm_notification_bell();
+                }
+                ?>
+                <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
+            <?php else: ?>
+                <a href="/jobmington/auth/login.php">Sign in</a>
+                <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
+            <?php endif; ?>
+        </nav>
+        <?php
+    }
+}

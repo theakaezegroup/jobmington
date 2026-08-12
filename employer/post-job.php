@@ -197,17 +197,15 @@ $pageTitle = 'Post a Job | ' . SITE_NAME;
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-            <nav class="jm-nav" aria-label="Primary">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/employer/">Employers</a>
-                <?php if ($isEmployer): ?>
-                    <a href="/jobmington/employer/dashboard.php">Dashboard</a>
-                    <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
-                <?php else: ?>
-                    <a href="/jobmington/auth/login.php">Sign in</a>
-                    <a class="jm-button secondary" href="/jobmington/auth/register.php?type=employer">Create account</a>
-                <?php endif; ?>
-            </nav>
+            <?php
+            /* This nav was hand-written with four links and decided what to
+               show from $isEmployer rather than from whether anyone was signed
+               in, so a signed-in seeker was shown "Sign in" and offered to
+               create an account they already had. It renders the shared list
+               now, with the signed-in state answered once. */
+            require_once __DIR__ . '/../includes/navigation.php';
+            jm_site_nav('/employer/', 'Primary');
+            ?>
         </header>
 
         <section class="jm-section" style="padding-top:0;">
