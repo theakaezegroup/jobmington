@@ -42,14 +42,27 @@ $jmStickyNonce = isset($cspNonce) && $cspNonce !== '' ? ' nonce="' . htmlspecial
             var mark  = plain ? plain.replace('badge.png', 'badge-mark.png') : null;
             var swaps = !!(plain && mark && mark !== plain);
 
+            var onPhone = window.matchMedia('(max-width: 900px)');
             var stuck = null;
+            var shown = null;
             function paint() {
                 var next = window.scrollY > 20;
-                if (next === stuck) { return; }   // only touch the DOM on a change
-                stuck = next;
-                header.classList.toggle('is-stuck', next);
-                if (swaps) { logo.src = next ? mark : plain; }
+                if (next !== stuck) {
+                    stuck = next;
+                    header.classList.toggle('is-stuck', next);
+                }
+                /* The phone bar is blue whether or not the page has moved, so
+                   the mark is right there at all times. On desktop it follows
+                   the scroll state. */
+                if (swaps) {
+                    var wantMark = onPhone.matches || next;
+                    if (wantMark !== shown) {
+                        shown = wantMark;
+                        logo.src = wantMark ? mark : plain;
+                    }
+                }
             }
+            if (onPhone.addEventListener) { onPhone.addEventListener('change', paint); }
 
             paint();
             window.addEventListener('scroll', paint, { passive: true });

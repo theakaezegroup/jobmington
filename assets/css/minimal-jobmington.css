@@ -4167,6 +4167,51 @@ body.jm-home-page {
 
     .jm-home-page .jm-header { margin-top: -20px; }   /* shell padding is 20px here */
 
+    /* ── Phone: brand blue at all times ───────────────────────────────
+       Not frosted-then-blue like the desktop. A frosted white bar on a
+       white page is invisible, which is exactly what it was. Solid, so
+       there is no blur to see through either. */
+    .jm-header::before,
+    .jm-header.is-stuck::before {
+        background: #0640a3;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+    .jm-header,
+    .jm-header.is-stuck {
+        border-bottom-color: rgba(255, 255, 255, 0.16);
+    }
+
+    /* The bar's own contents are always on blue, so always white. */
+    .jm-header > .jm-logo { color: #ffffff; }
+    .jm-header .jm-bell-btn,
+    .jm-header .jm-mobile-nav-toggle {
+        background: transparent !important;
+        border-color: rgba(255, 255, 255, 0.30) !important;
+        color: #ffffff !important;
+    }
+    .jm-header .jm-mobile-nav-toggle span,
+    .jm-header .jm-mobile-nav-toggle::before,
+    .jm-header .jm-mobile-nav-toggle::after { background: #ffffff; }
+    .jm-header .jm-bell-badge { box-shadow: 0 0 0 2px #0640a3; }
+
+    /* The nav is not in the bar here, it is a white slide-in panel, so the
+       bar's white-on-blue text colour must not follow it in. That rule is
+       what emptied the menu: white links on a white drawer. */
+    .jm-header .jm-nav a,
+    .jm-header.is-stuck .jm-nav a {
+        color: var(--jm-ink);
+        opacity: 1;
+    }
+    .jm-header .jm-nav a.active,
+    .jm-header.is-stuck .jm-nav a.active { color: var(--jm-blue); }
+    .jm-header .jm-nav a.jm-button.secondary,
+    .jm-header.is-stuck .jm-nav a.jm-button.secondary {
+        background: #ffffff;
+        color: var(--jm-blue) !important;
+        border-color: #b8c8df;
+    }
+
     body.jm-mobile-nav-ready .jm-header,
     body.jm-mobile-nav-ready.jm-home-page .jm-header {
         align-items: center;
