@@ -355,7 +355,6 @@ $smokePaths = [
 
 $cronCommand = '*/45 * * * * cd /var/www/jobmington && /usr/bin/php cron/run_job_scrapers.php --limit=80 >> logs/job-scraper-cron.log 2>&1';
 $pageTitle = 'Operations | ' . SITE_NAME;
-?>
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <!-- This page used to build its own document, with its own header and a
