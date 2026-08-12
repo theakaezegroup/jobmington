@@ -49,6 +49,7 @@ if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
 
 <!-- Global Toast Container -->
 <?php require_once __DIR__ . '/feedback.php'; ?>
+<?php require_once __DIR__ . '/sticky_header.php'; ?>
 
 <!-- Global Modal Overlay -->
 <div class="jm-modal-overlay" id="jm-modal-overlay">

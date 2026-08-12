@@ -1,6 +1,7 @@
     </main>
 
     <?php require_once __DIR__ . '/feedback.php'; ?>
+    <?php require_once __DIR__ . '/sticky_header.php'; ?>
 
     <script>
     (() => {

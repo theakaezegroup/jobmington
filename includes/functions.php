@@ -878,27 +878,6 @@ if (!function_exists('jm_minimal_footer')) {
                 }
             });
 
-            /* Brand blue once the page has moved. Same threshold the other
-               header uses, so the two behave identically. The logo swaps to
-               the transparent mark, because the badge is a blue tile and a
-               blue tile on a blue bar is the mismatched square already taken
-               off the mobile header. */
-            headers.forEach((header) => {
-                const logo = header.querySelector('.jm-logo img');
-                const plain = logo ? logo.getAttribute('src') : null;
-                const onBlue = plain ? plain.replace('badge.png', 'badge-mark.png') : null;
-
-                const paint = () => {
-                    const stuck = window.scrollY > 20;
-                    header.classList.toggle('is-stuck', stuck);
-                    if (logo && onBlue && onBlue !== plain) {
-                        logo.src = stuck ? onBlue : plain;
-                    }
-                };
-                paint();
-                window.addEventListener('scroll', paint, { passive: true });
-            });
-
             if (!nav || !toggle) return;
 
             const backdrop = document.createElement('div');
@@ -929,6 +908,7 @@ if (!function_exists('jm_minimal_footer')) {
         </script>
         <?php
         require_once __DIR__ . '/feedback.php';
+        require_once __DIR__ . '/sticky_header.php';
     }
 }
 
