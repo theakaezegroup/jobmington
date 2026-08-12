@@ -150,13 +150,23 @@ function jm_account_deletion_audit(PDO $pdo): array
                 if ($field === 'user_id' || $field === 'amount' || $c['Extra'] === 'auto_increment') {
                     continue;
                 }
-                // Anything the table insists on gets something harmless.
+                // Anything the table insists on gets something harmless and,
+                // for an enum, something it will actually accept: its own
+                // first member. A made-up string is silently truncated under
+                // STRICT mode, which surfaces as a failed audit rather than a
+                // failed fixture and sends you looking in the wrong place.
                 if ($c['Null'] === 'NO' && $c['Default'] === null) {
-                    $insert[$field] = str_contains(strtolower((string) $c['Type']), 'char')
-                                   || str_contains(strtolower((string) $c['Type']), 'text')
-                                   || str_contains(strtolower((string) $c['Type']), 'enum')
-                        ? 'audit'
-                        : 0;
+                    $type = strtolower((string) $c['Type']);
+
+                    if (preg_match("/^enum\('([^']*)'/", (string) $c['Type'], $m)) {
+                        $insert[$field] = $m[1];
+                    } elseif (str_contains($type, 'char') || str_contains($type, 'text')) {
+                        $insert[$field] = 'audit';
+                    } elseif (str_contains($type, 'date') || str_contains($type, 'time')) {
+                        $insert[$field] = date('Y-m-d H:i:s');
+                    } else {
+                        $insert[$field] = 0;
+                    }
                 }
             }
 
