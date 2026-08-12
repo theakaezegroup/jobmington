@@ -148,7 +148,7 @@ require_once __DIR__ . '/../includes/header.php';
                             </p>
                             <div class="flex items-center gap-3 pt-4 border-t border-white/5">
                                 <img src="<?= profileImage($post['author_image']) ?>" class="w-6 h-6 rounded-full object-cover">
-                                <span class="text-xs text-slate-300 font-bold">By <?= e($post['author_name']) ?></span>
+                                <span class="text-xs text-slate-300 font-bold">By <?= e($post['author_name'] ?: 'Jobmington') ?></span>
                             </div>
                         </div>
                     </article>

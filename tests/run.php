@@ -224,6 +224,19 @@ try {
     foreach ($intentProblems as $problem) {
         echo "      {$problem}\n";
     }
+
+    /*
+     * Account deletion. The coverage half of this is the point: nothing
+     * cascades in this database, so a new table with a user_id in it has to be
+     * classified or every future deletion leaves rows behind.
+     */
+    require_once __DIR__ . '/account_deletion_audit.php';
+
+    $deletionProblems = jm_account_deletion_audit(db());
+    check('deleting an account leaves nothing behind', $deletionProblems === []);
+    foreach ($deletionProblems as $problem) {
+        echo "      {$problem}\n";
+    }
 } catch (Throwable $e) {
     echo "  [skip] schema audit: " . $e->getMessage() . "\n";
 }

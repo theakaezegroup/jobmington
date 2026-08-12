@@ -27,7 +27,7 @@ try {
     $params = [];
     if ($filterCat > 0) { $where = "WHERE ft.category_id = ?"; $params[] = $filterCat; }
 
-    $sql = "SELECT ft.*, u.full_name, u.profile_image, u.is_official, fc.name AS category_name,
+    $sql = "SELECT ft.*, COALESCE(u.full_name, 'Former member') AS full_name, u.profile_image, u.is_official, fc.name AS category_name,
                    (SELECT COUNT(*) FROM forum_replies WHERE topic_id = ft.topic_id) AS replies
             FROM forum_topics ft
             LEFT JOIN users u ON ft.user_id = u.user_id

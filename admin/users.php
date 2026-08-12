@@ -410,6 +410,24 @@ require_once __DIR__ . '/../includes/header.php';
         border-color: #ffc9c9;
         color: #b42318;
     }
+    /* Sits in the same row as the buttons and matches their box, but stays a
+       link, because it opens the confirmation page rather than doing anything. */
+    .admin-users-delete {
+        align-items: center;
+        background: #fff5f5;
+        border: 1px solid #ffc9c9;
+        border-radius: 8px;
+        color: #b42318;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 600;
+        min-height: 34px;
+        padding: 7px 9px;
+        text-decoration: none;
+    }
+    .admin-users-delete:hover {
+        background: #ffe9e9;
+    }
     .admin-users-flash {
         border: 1px solid #d8e4f4;
         border-radius: 8px;
@@ -613,6 +631,12 @@ require_once __DIR__ . '/../includes/header.php';
                                     <input type="hidden" name="user_id" value="<?= (int) $user['user_id'] ?>">
                                     <button type="submit">Temp password</button>
                                 </form>
+                                <?php /* A link, not a button in this row. Deleting is the one thing
+                                          here that cannot be undone, so it goes via a page that
+                                          shows what would go with it and asks for the email. */ ?>
+                                <?php if ((int) $user['user_id'] !== $currentAdminId): ?>
+                                    <a class="admin-users-delete" href="/jobmington/admin/delete-user.php?id=<?= (int) $user['user_id'] ?>">Delete</a>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>

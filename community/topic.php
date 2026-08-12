@@ -26,10 +26,13 @@ if ($topicId <= 0) {
 
 // Get Topic
 $stmt = $pdo->prepare("
-    SELECT ft.*, u.full_name, u.profile_image, u.user_type, u.is_official, fc.name as category_name,
+    SELECT ft.*, COALESCE(u.full_name, 'Former member') AS full_name,
+           u.profile_image, u.user_type, u.is_official, fc.name as category_name,
            (SELECT COUNT(*) FROM forum_likes WHERE topic_id = ft.topic_id) as likes
     FROM forum_topics ft
-    JOIN users u ON ft.user_id = u.user_id
+    /* LEFT, or deleting an account would 404 a thread a dozen people replied
+       to. The author is allowed to be gone; the discussion is not theirs alone. */
+    LEFT JOIN users u ON ft.user_id = u.user_id
     LEFT JOIN forum_categories fc ON ft.category_id = fc.id
     WHERE ft.topic_id = ?
 ");
@@ -153,10 +156,13 @@ if (Session::isLoggedIn()) {
 
 // Get Replies with like counts
 $stmt = $pdo->prepare("
-    SELECT fr.*, u.full_name, u.profile_image, u.user_type, u.is_official,
+    SELECT fr.*, COALESCE(u.full_name, 'Former member') AS full_name,
+           u.profile_image, u.user_type, u.is_official,
            (SELECT COUNT(*) FROM forum_likes WHERE reply_id = fr.reply_id) as likes
     FROM forum_replies fr
-    JOIN users u ON fr.user_id = u.user_id
+    /* LEFT: one deleted member must not silently remove their reply from the
+       middle of a conversation that reads as a conversation. */
+    LEFT JOIN users u ON fr.user_id = u.user_id
     WHERE fr.topic_id = ?
     ORDER BY fr.created_at ASC
 ");
