@@ -49,6 +49,12 @@ $jmStackNonce = isset($cspNonce) && $cspNonce !== '' ? ' nonce="' . htmlspecialc
     table.jm-stacktable tr {
         background: #fff; border: 1px solid #e4eaf3; border-radius: 12px;
         margin-bottom: 10px; padding: 14px;
+        overflow: hidden;   /* contains the floated thumbnail below */
+    }
+    /* Thumbnail beside the title, so the card opens with a proper heading
+       rather than a stray rectangle on its own line. */
+    table.jm-stacktable td.jm-cell-thumb {
+        float: left; width: auto; margin: 0 12px 4px 0; padding: 0;
     }
     table.jm-stacktable td {
         border: 0; padding: 0;
@@ -70,8 +76,20 @@ $jmStackNonce = isset($cspNonce) && $cspNonce !== '' ? ' nonce="' . htmlspecialc
     table.jm-stacktable td:first-child { padding-bottom: 2px; }
     /* An empty-state cell spans the card rather than becoming a labelled row. */
     table.jm-stacktable td[colspan] { padding: 10px 0; text-align: center; }
-    /* Nothing inside a card may push it wider than the screen. */
+    /* Nothing inside a card may push it wider than the screen. A leading
+       thumbnail column keeps a sensible size instead of filling the card. */
     table.jm-stacktable td img { max-width: 100%; height: auto; }
+
+    /* A log is dense by nature and reads better staying a table: one card per
+       line would turn a screenful of entries into a page of scrolling. It keeps
+       the table shape and drops the columns that are context rather than
+       content, so it still fits without going sideways. */
+    table.jm-densetable { min-width: 0; }
+    table.jm-densetable th, table.jm-densetable td {
+        white-space: normal; overflow-wrap: anywhere;
+        padding-left: 10px; padding-right: 10px; font-size: 12px;
+    }
+    table.jm-densetable .jm-col-optional { display: none; }
 }
 </style>
 <script<?= $jmStackNonce ?>>
@@ -83,12 +101,27 @@ document.addEventListener('DOMContentLoaded', function () {
         );
         if (!heads.length) { return; }
 
+        // The row's title is the first column that actually has a name. Several
+        // of these tables lead with an unnamed thumbnail column, so assuming
+        // column zero labelled the course title "Course" instead of letting it
+        // head the card.
+        var titleIndex = 0;
+        for (var h = 0; h < heads.length; h++) {
+            if (heads[h] !== '') { titleIndex = h; break; }
+        }
+
         table.querySelectorAll('tbody tr').forEach(function (row) {
             Array.prototype.forEach.call(row.children, function (cell, i) {
-                // The first column is the row's own name, an empty-state cell
-                // spans the card, and anything already labelled by hand was
-                // labelled deliberately.
-                if (i === 0 || cell.hasAttribute('data-label') || cell.hasAttribute('colspan')) {
+                // Any unnamed column before the title is a thumbnail. Mark it so
+                // the card can sit it beside the title rather than stranding a
+                // lone rectangle on a line of its own.
+                if (i < titleIndex && !cell.hasAttribute('colspan')) {
+                    cell.classList.add('jm-cell-thumb');
+                    return;
+                }
+                // An empty-state cell spans the card, and anything already
+                // labelled by hand was labelled deliberately.
+                if (i === titleIndex || cell.hasAttribute('data-label') || cell.hasAttribute('colspan')) {
                     return;
                 }
                 if (heads[i]) {
