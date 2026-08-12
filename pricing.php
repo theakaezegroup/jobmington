@@ -22,7 +22,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/minimal-jobmington.css?v=brand-19">
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/minimal-jobmington.css?v=brand-20">
     <style>
     /* ── Animations ─────────────────────────────────────────────── */
     @keyframes fadeUp {

@@ -277,9 +277,12 @@ body.jm-home-page {
     z-index: 900;
     margin: 0 calc(50% - 50vw) 16px;
     padding: 10px calc(50vw - 50%) 12px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    /* The frosting lives on a pseudo-element, not here. backdrop-filter makes
+       an element a containing block for position:fixed descendants, and the
+       mobile drawer is a fixed, full-height panel rendered inside this header,
+       so putting the blur on the header itself trapped the whole menu inside a
+       sixty pixel strip. */
+    background: transparent;
     /* Brand blue rather than the grey line: it signs the bar without weight. */
     border-bottom: 1px solid rgba(6, 64, 163, 0.28);
     transition: background .25s ease, border-color .25s ease, box-shadow .25s ease;
@@ -292,8 +295,19 @@ body.jm-home-page {
 
    Every child is restyled with it. Leaving any of them would put dark ink
    or a white tile on blue. */
+.jm-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: background .25s ease;
+}
+
+.jm-header.is-stuck::before { background: rgba(6, 64, 163, 0.94); }
 .jm-header.is-stuck {
-    background: rgba(6, 64, 163, 0.94);
     border-bottom-color: rgba(255, 255, 255, 0.16);
     box-shadow: 0 2px 14px rgba(6, 64, 163, 0.20);
 }

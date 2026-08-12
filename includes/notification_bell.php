@@ -36,13 +36,8 @@ function jm_notification_bell(): void {
         </div>
     </div>
     <style>
-        .jm-bell-btn { position:relative; overflow:hidden; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
-        /* The yellow round, masked inside the bell button; only its arc shows.
-           Borrowed from the chat launcher: a second shape pushed mostly outside
-           a parent that hides its overflow, so what is left is a corner of
-           colour rather than a decoration sitting on top of the button. */
-        .jm-bell-btn::before { content:''; position:absolute; width:30px; height:30px; border-radius:50%; background:#f59f22; left:-19px; bottom:-19px; }
-        .jm-bell-btn svg { position:relative; z-index:1; }
+        .jm-bell-btn { position:relative; width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:#fff; border:1px solid #e8edf5; color:#101828; cursor:pointer; padding:0; transition:background .15s; }
+.jm-bell-btn svg { position:relative; z-index:1; }
         .jm-bell-btn:hover { background:#f6f8fb; }
         /* On the brand-blue mobile bar the bell sits plainly on the blue, like
            the logo and the hamburger, rather than as a white tile. */
