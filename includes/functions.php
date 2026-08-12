@@ -922,40 +922,72 @@ if (!function_exists('jm_log_activity')) {
 }
 
 /**
- * Tell everybody about something: a new event, a new course, a new ebook.
+ * Announce something to the membership: a new event, course or ebook.
  *
- * One INSERT ... SELECT rather than a loop of sendNotification calls, so
- * announcing to the whole membership is a single statement instead of a query
- * per person.
+ * Writes one broadcast row, not one row per member. The first version copied
+ * the message to everybody, so the table grew as members times announcements
+ * and the bell's unread count scanned all of it on every poll. Fine at ten
+ * members, a problem well before ten thousand, and the sort of thing that is
+ * cheap to get right now and expensive to change later.
  *
- * Only active, verified accounts. Somebody who never confirmed their email did
- * not ask to hear from us, and a suspended account should not be collecting
- * announcements while it is suspended.
- *
- * @param string|null $excludeType Skip a user_type, e.g. do not tell employers
- *                                 about a job-seeker course.
- * @return int How many people were told.
+ * @param string|null $onlyType Restrict to a user_type, or null for everybody.
+ * @return int How many people it will reach, for the admin's confirmation.
  */
 if (!function_exists('jm_notify_all')) {
     function jm_notify_all(string $type, string $title, string $message = '', ?string $link = null, ?string $onlyType = null): int {
         try {
-            $sql = "INSERT INTO notifications (user_id, type, title, message, link, is_read, created_at)
-                    SELECT user_id, ?, ?, ?, ?, 0, NOW()
-                    FROM users
-                    WHERE is_active = 1 AND is_verified = 1";
-            $args = [$type, $title, $message, $link];
+            $pdo = db();
+            $pdo->prepare("
+                INSERT INTO broadcasts (type, title, message, link, audience, created_by, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, NOW())
+            ")->execute([
+                $type, $title, $message, $link, $onlyType,
+                (class_exists('Session') && Session::isLoggedIn()) ? (int) Session::userId() : null,
+            ]);
 
+            // Reach is counted, not stored: the point of the change is that we
+            // do not write a row per person.
+            $sql = "SELECT COUNT(*) FROM users WHERE is_active = 1 AND is_verified = 1";
+            $args = [];
             if ($onlyType !== null) {
                 $sql .= " AND user_type = ?";
                 $args[] = $onlyType;
             }
-
-            $stmt = db()->prepare($sql);
+            $stmt = $pdo->prepare($sql);
             $stmt->execute($args);
-            return $stmt->rowCount();
+            return (int) $stmt->fetchColumn();
         } catch (Throwable $e) {
             error_log('jm_notify_all(' . $type . '): ' . $e->getMessage());
             return 0;
+        }
+    }
+}
+
+/**
+ * The broadcasts a given person should see.
+ *
+ * Nothing published before they joined: a new member does not want to arrive to
+ * a backlog of announcements about events that have already happened.
+ */
+if (!function_exists('jm_broadcasts_for')) {
+    function jm_broadcasts_for(int $userId, int $limit = 12): array {
+        try {
+            $stmt = db()->prepare("
+                SELECT b.broadcast_id, b.type, b.title, b.message, b.link, b.created_at,
+                       (r.user_id IS NOT NULL) AS is_read
+                FROM broadcasts b
+                JOIN users u ON u.user_id = ?
+                LEFT JOIN broadcast_reads r ON r.broadcast_id = b.broadcast_id AND r.user_id = u.user_id
+                WHERE (b.audience IS NULL OR b.audience = u.user_type)
+                  AND b.created_at >= u.created_at
+                ORDER BY b.created_at DESC
+                LIMIT {$limit}
+            ");
+            $stmt->execute([$userId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable $e) {
+            error_log('jm_broadcasts_for: ' . $e->getMessage());
+            return [];
         }
     }
 }

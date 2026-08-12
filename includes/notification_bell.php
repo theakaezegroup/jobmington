@@ -102,8 +102,8 @@ function jm_notification_bell(): void {
         /* Detection is by newest id, not by unread count. A count only tells
            you the number changed: read two and receive two and it has not
            moved, so the arrival was silent. An id only ever goes up. */
-        var seenId = parseInt(localStorage.getItem('jm_notif_seen_id') || '0', 10) || 0;
-        var primed = seenId > 0;
+        var seenAt = parseInt(localStorage.getItem('jm_notif_seen_at') || '0', 10) || 0;
+        var primed = seenAt > 0;
         function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
         function setBadge(n) { if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.add('show'); } else { badge.classList.remove('show'); } }
         function render(items) {
@@ -136,14 +136,14 @@ function jm_notification_bell(): void {
                        watching. On a browser that has never seen this account,
                        every existing notification would otherwise be announced
                        as new the moment the page loads. */
-                    if (primed && latest > seenId) {
+                    if (primed && latest > seenAt) {
                         btn.classList.add('jm-bell-ring');
                         setTimeout(function () { btn.classList.remove('jm-bell-ring'); }, 1000);
                         if (window.JM && JM.sound) { JM.sound('notify'); }
                     }
-                    if (latest > seenId) {
-                        seenId = latest;
-                        localStorage.setItem('jm_notif_seen_id', String(seenId));
+                    if (latest > seenAt) {
+                        seenAt = latest;
+                        localStorage.setItem('jm_notif_seen_at', String(seenAt));
                     }
                     primed = true;
                     if (open) render(d.data.items || []);
