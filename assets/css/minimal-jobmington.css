@@ -608,6 +608,22 @@ body.jm-ai-page .jm-header {
     outline-offset: 3px;
 }
 
+
+/* In the header the secondary button sits among text links, so it is sized to
+   belong there rather than to carry a page's main action. The nav's hover
+   underline is also removed from it: an underline on a bordered button reads
+   as a mistake rather than as a link. */
+.jm-nav a.jm-button {
+    min-height: 34px;
+    padding: 0 14px;
+    font-size: 13.5px;
+    border-radius: 8px;
+}
+.jm-nav a.jm-button:hover,
+.jm-header.is-stuck .jm-nav a.jm-button:hover {
+    text-decoration: none;
+}
+
 .jm-logo {
     display: inline-flex;
     align-items: center;
