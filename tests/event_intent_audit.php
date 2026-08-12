@@ -33,10 +33,13 @@ function jm_event_intent_audit(PDO $pdo): array
     /** Make a throwaway event. $when is anything strtotime understands. */
     $makeEvent = function (string $when, int $capacity, int $taken = 0) use ($pdo, $stamp, &$eventIds): int {
         $slug = $stamp . '-' . bin2hex(random_bytes(3));
+        // Unpublished, so running this against the live database cannot put a
+        // fixture in front of a visitor. Registration does not check the flag,
+        // which is what makes that safe rather than lucky.
         $pdo->prepare("
             INSERT INTO events (title, slug, description, starts_at, ends_at, timezone,
                                 is_online, capacity, registration_count, is_published, created_at)
-            VALUES (?, ?, 'audit fixture', ?, ?, 'Africa/Lagos', 1, ?, ?, 1, NOW())
+            VALUES (?, ?, 'audit fixture', ?, ?, 'Africa/Lagos', 1, ?, ?, 0, NOW())
         ")->execute([
             'Audit Event ' . $slug,
             $slug,
