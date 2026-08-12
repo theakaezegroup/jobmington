@@ -522,6 +522,11 @@ if ($isAdminArea) {
         body.jm-admin .jm-ev-card,
         body.jm-admin .jm-eb-card,
         body.jm-admin .jm-backup-card,
+        body.jm-admin .nc-card,
+        body.jm-admin .nc-feed-card,
+        body.jm-admin .nc-stat,
+        body.jm-admin .nc-chip,
+        body.jm-admin .ec-personalise,
         body.jm-admin .ec-card,
         body.jm-admin .ec-table-wrap,
         body.jm-admin div.bg-white.rounded-xl,
@@ -534,6 +539,26 @@ if ($isAdminArea) {
             box-shadow: var(--admin-shadow);
             background: var(--admin-card);
         }
+
+
+        /* The dashboard had a second card system of its own. Same surface,
+           same headings, so the panel does not change language when you land
+           on it. */
+        body.jm-admin .nc-card-head,
+        body.jm-admin .nc-feed-head {
+            border-bottom: 0;
+            background: none;
+            padding: 18px 20px 6px;
+        }
+        body.jm-admin .nc-card-head h3,
+        body.jm-admin .nc-feed-head h3 {
+            font-size: 15px; text-transform: none; letter-spacing: -.015em;
+        }
+        /* The 4px coloured spine on each stat tile was another hard edge. */
+        body.jm-admin .nc-stat { border-left: 0; padding: 22px; }
+        body.jm-admin .nc-stat:hover,
+        body.jm-admin .nc-feed-card:hover { box-shadow: var(--admin-shadow-lift); }
+        body.jm-admin .jm-eb-table { border: 0; box-shadow: var(--admin-shadow); border-radius: var(--admin-radius); overflow: hidden; }
 
         /* Tables carried the same outline. Inside a card they need none at
            all; standing alone they become the card. */
