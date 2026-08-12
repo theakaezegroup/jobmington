@@ -23,6 +23,15 @@ require_once __DIR__ . '/../includes/mailer.php';
 $opts = getopt('', ['base::', 'no-http']);
 $base = isset($opts['base']) ? rtrim((string) $opts['base'], '/') : null;
 
+/*
+ * Started here rather than next to the check that needs it. A session cannot
+ * begin once anything has been printed, and every check prints, so starting it
+ * later silently does nothing and the checks that read it all fail together
+ * looking like a bug in the thing under test. Cookies off: there is no browser.
+ */
+ini_set('session.use_cookies', '0');
+@session_start();
+
 $passed = 0;
 $failed = 0;
 
@@ -202,6 +211,18 @@ try {
     check('no INSERT/UPDATE names a missing column', $issues === []);
     foreach ($issues as [$file, $kind, $table, $col]) {
         printf("      %-42s %-6s %s.%s\n", $file, $kind, $table, $col);
+    }
+
+    /*
+     * The event-registration journey, end to end. Needs a session because the
+     * note it leaves is carried in one.
+     */
+    require_once __DIR__ . '/event_intent_audit.php';
+
+    $intentProblems = jm_event_intent_audit(db());
+    check('event registration survives the sign-up detour', $intentProblems === []);
+    foreach ($intentProblems as $problem) {
+        echo "      {$problem}\n";
     }
 } catch (Throwable $e) {
     echo "  [skip] schema audit: " . $e->getMessage() . "\n";

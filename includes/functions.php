@@ -222,6 +222,96 @@ if (!function_exists('jm_safe_redirect_path')) {
 }
 
 /**
+ * A one-shot note carried across a redirect.
+ *
+ * For the case where something finished on one request and the person only
+ * arrives on the next one, so the page that can tell them is not the page that
+ * did the work. Verifying an email is the example that forced this: the
+ * registration it completes happens during the redirect, and without somewhere
+ * to leave a message the user lands on a dashboard with no sign that the thing
+ * they originally came to do actually happened.
+ *
+ * Read once and gone, so a refresh does not keep re-announcing old news.
+ */
+if (!function_exists('jm_flash_set')) {
+    function jm_flash_set(string $title, string $message = '', string $linkUrl = '', string $linkText = '', string $tone = 'ok'): void {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+        $_SESSION['jm_flash'] = [
+            'title'     => $title,
+            'message'   => $message,
+            'link_url'  => $linkUrl,
+            'link_text' => $linkText,
+            'tone'      => $tone === 'warn' ? 'warn' : 'ok',
+        ];
+    }
+}
+
+if (!function_exists('jm_flash_take')) {
+    /** @return array{title:string,message:string,link_url:string,link_text:string,tone:string}|null */
+    function jm_flash_take(): ?array {
+        if (session_status() !== PHP_SESSION_ACTIVE || empty($_SESSION['jm_flash'])) {
+            return null;
+        }
+        $flash = $_SESSION['jm_flash'];
+        unset($_SESSION['jm_flash']);
+        return is_array($flash) ? $flash : null;
+    }
+}
+
+/**
+ * Draw the one-shot note, if there is one.
+ *
+ * Inline styles and a plain wrapping flex row, deliberately: this appears on
+ * two dashboards and must not need a stylesheet change or carry a media query
+ * of its own. It stacks on a narrow screen because the row wraps.
+ */
+if (!function_exists('jm_flash_render')) {
+    function jm_flash_render(): void {
+        $flash = jm_flash_take();
+        if (!$flash) {
+            return;
+        }
+
+        $ok     = ($flash['tone'] ?? 'ok') !== 'warn';
+        $bg     = $ok ? '#eef5ff' : '#fff8ee';
+        $edge   = $ok ? 'rgba(6,64,163,0.22)' : 'rgba(245,159,34,0.32)';
+        $accent = $ok ? '#0640a3' : '#f59f22';
+        $icon   = $ok
+            ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+            : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+
+        echo '<div role="status" style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;'
+           . 'background:' . $bg . ';border:1px solid ' . $edge . ';border-radius:14px;'
+           . 'padding:18px 20px;margin:0 0 24px;">';
+
+        echo '<span style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;'
+           . 'width:36px;height:36px;border-radius:50%;background:#fff;">'
+           . '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="' . $accent . '" stroke-width="2.5" '
+           . 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $icon . '</svg></span>';
+
+        echo '<div style="flex:1 1 240px;min-width:0;">';
+        echo '<p style="margin:0 0 4px;font-weight:700;color:var(--jm-ink);font-size:15px;line-height:1.4;">'
+           . e((string) $flash['title']) . '</p>';
+
+        if (($flash['message'] ?? '') !== '') {
+            echo '<p style="margin:0;color:var(--jm-muted);font-size:14px;line-height:1.6;">'
+               . e((string) $flash['message']) . '</p>';
+        }
+
+        $url = jm_safe_redirect_path((string) ($flash['link_url'] ?? ''));
+        if ($url !== '' && ($flash['link_text'] ?? '') !== '') {
+            echo '<a href="' . e($url) . '" style="display:inline-block;margin-top:10px;font-weight:700;'
+               . 'font-size:14px;color:' . $accent . ';text-decoration:none;">'
+               . e((string) $flash['link_text']) . ' &rarr;</a>';
+        }
+
+        echo '</div></div>';
+    }
+}
+
+/**
  * Get current URL
  */
 function currentUrl(): string {

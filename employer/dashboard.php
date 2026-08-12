@@ -97,6 +97,8 @@ $pageTitle = 'Employer Dashboard | ' . SITE_NAME;
             <?php require_once __DIR__ . '/../includes/navigation.php'; jm_workspace_nav(['dashboard' => ['/jobmington/employer/dashboard.php', 'Dashboard'], 'company' => ['/jobmington/employer/company-profile.php', 'Company'], 'jobs' => ['/jobmington/employer/manage-jobs.php', 'Jobs'], 'applications' => ['/jobmington/employer/applications.php', 'Applications'], 'talent' => ['/jobmington/employer/talent-pool.php', 'Talent'], 'pricing' => ['/jobmington/pricing.php', 'Pricing']], 'dashboard'); ?>
         </header>
 
+        <?php jm_flash_render();   /* one-shot note from whatever redirected here */ ?>
+
         <section class="jm-section" style="padding-top:0;">
             <div class="jm-section-head">
                 <div>

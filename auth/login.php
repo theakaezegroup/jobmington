@@ -106,7 +106,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             unset($_SESSION['auth_context'], $_SESSION['auth_context_for']);   // consumed; must not linger
-            if ($hasSafeRedirect) {
+
+            /*
+             * Someone who signed up to attend an event, then verified on a
+             * different device from the one they registered on, arrives here
+             * with the registration still unfinished. Finish it and leave the
+             * note, so this route ends the same way as verifying in place.
+             *
+             * Costs one indexed read per sign-in and does nothing at all for
+             * the overwhelming majority who have no intent parked.
+             */
+            require_once __DIR__ . '/../includes/event_registration.php';
+            $settled = jm_settle_pending_event((int) $user['user_id']);
+
+            if ($hasSafeRedirect && !$settled) {
                 redirect($redirectTo);
             }
             redirect(jm_login_dashboard_for($user['user_type']));

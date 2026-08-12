@@ -199,6 +199,11 @@ $pageTitle = 'Dashboard | ' . SITE_NAME;
             <?php require_once __DIR__ . '/../includes/navigation.php'; jm_workspace_nav(['dashboard' => ['/jobmington/seeker/dashboard.php', 'Dashboard'], 'applications' => ['/jobmington/seeker/applications.php', 'Applications'], 'saved' => ['/jobmington/jobs/saved.php', 'Saved jobs'], 'profile' => ['/jobmington/seeker/profile.php', 'Profile']], 'dashboard'); ?>
         </header>
 
+        <?php /* Anything finished on the request that redirected here says so,
+                  above the fold. An event registration completed at verification
+                  is the reason this exists. Shown once. */
+              jm_flash_render(); ?>
+
         <section class="jm-dashboard-top">
             <div>
                 <p class="jm-kicker">Dashboard</p>

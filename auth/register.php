@@ -97,6 +97,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $form['user_type'] === USER_TYPE_EMPLOYER ? '/employer/post-job.php' : '/cv-builder/'
             );
 
+            /*
+             * The event that sent them here, moved off the session and onto the
+             * account. The verification link is very often opened on a phone
+             * while the account was made on a laptop, and on that phone the
+             * session does not exist. The account row travels with them, so the
+             * registration can still be completed and mentioned.
+             */
+            $pendingEvent = (int) ($_SESSION['pending_event_registration'] ?? 0);
+            if ($pendingEvent > 0) {
+                try {
+                    $pdo->prepare("UPDATE users SET pending_event_id = ? WHERE user_id = ?")
+                        ->execute([$pendingEvent, $userId]);
+                } catch (Throwable $e) {
+                    error_log('Parking pending event intent failed: ' . $e->getMessage());
+                }
+            }
+
             // Welcome Seeds (free engagement currency).
             try {
                 require_once __DIR__ . '/../includes/seeds.php';

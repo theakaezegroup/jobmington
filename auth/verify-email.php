@@ -148,10 +148,30 @@ if ($token !== '') {
 
         $verified = true;
 
-        // Verification interrupted something (registering for an event, applying
-        // for a job). Hand the user back to it rather than ending the journey here.
+        $isThisPerson = Session::isLoggedIn() && Session::userId() === (int) $user['user_id'];
+
+        /*
+         * Plenty of people only came here to attend an event, and were made to
+         * create an account on the way. Finish that registration and hand them
+         * a note about it, rather than dropping them on a dashboard that says
+         * nothing about the one thing they came to do.
+         *
+         * Only for a signed-in request. A link fetched by a mail scanner has no
+         * session, and settling the intent there would leave the note somewhere
+         * nobody reads; the intent stays put and the next sign-in collects it.
+         */
+        if ($isThisPerson) {
+            require_once __DIR__ . '/../includes/event_registration.php';
+            if (jm_settle_pending_event((int) $user['user_id'])) {
+                unset($_SESSION['post_auth_redirect'], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
+                redirect(Session::isEmployer() ? '/jobmington/employer/dashboard.php' : '/jobmington/seeker/dashboard.php');
+            }
+        }
+
+        // Verification interrupted something else (applying for a job, say).
+        // Hand the user back to it rather than ending the journey here.
         $pending = jm_safe_redirect_path((string) ($_SESSION['post_auth_redirect'] ?? ''));
-        if ($pending !== '' && Session::isLoggedIn() && Session::userId() === (int) $user['user_id']) {
+        if ($pending !== '' && $isThisPerson) {
             unset($_SESSION['post_auth_redirect'], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
             redirect($pending);
         }

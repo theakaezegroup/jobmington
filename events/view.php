@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/event_registration.php';
 
 Session::start();
 $pdo = db();
@@ -85,42 +86,35 @@ if ($pendingHere && Session::isLoggedIn() && $registered) {
 if ($wantsRegister && Session::isLoggedIn()) {
     unset($_SESSION[$intentKey], $_SESSION['auth_context'], $_SESSION['auth_context_for']);
 
-    if ($isPast) {
-        $message = 'This event has already taken place.';
-    } elseif ($isFull) {
-        $message = 'This event is fully booked.';
-    } elseif (!$registered) {
-        try {
-            // Insert and bump the counter together, so the count cannot drift
-            // from the number of rows if either statement fails.
-            $pdo->beginTransaction();
-            jm_log_activity($userId ?: null, 'event_register', $event['title'] ?? ('event ' . $eventId));
-            if ($userId) {
-                sendNotification(
-                    (int) $userId,
-                    'event',
-                    'You are registered for ' . ($event['title'] ?? 'the event'),
-                    'We will remind you the day before and an hour before it starts.',
-                    '/events/view.php?slug=' . ($event['slug'] ?? '')
-                );
-            }
-            $pdo->prepare("INSERT INTO event_registrations (event_id, user_id, name, email) VALUES (?, ?, ?, ?)")
-                ->execute([$eventId, (int) Session::userId(), Session::get('full_name'), Session::get('email')]);
-            $pdo->prepare("UPDATE events SET registration_count = registration_count + 1 WHERE event_id = ?")->execute([$eventId]);
-            $pdo->commit();
+    if (!$registered) {
+        /*
+         * The insert, the counter, the notification and the confirmation email
+         * all live in includes/event_registration.php, because verification
+         * completes registrations too and the two paths drifting apart is how
+         * one of them ends up silently skipping the email.
+         */
+        $outcome = jm_register_for_event(
+            $eventId,
+            (int) Session::userId(),
+            (string) Session::get('full_name'),
+            (string) Session::get('email')
+        );
 
+        if ($outcome['status'] === 'registered') {
             $registered = true;
             $justJoined = true;
             $event['registration_count']++;
-        } catch (PDOException $e) {
-            if ($pdo->inTransaction()) { $pdo->rollBack(); }
-            if ($e->getCode() === '23000') {
-                $registered = true;   // unique key (event_id, user_id): already registered
-            } else {
-                $message = 'We could not complete your registration. Please try again.';
-                error_log('Event registration failed for event ' . $eventId . ': ' . $e->getMessage());
-            }
+        } elseif ($outcome['status'] === 'already') {
+            $registered = true;
+        } else {
+            $message = $outcome['message'];
         }
+
+        // The account-level copy of the intent, in case one was parked there
+        // and the person got back here before verification consumed it.
+        $pdo->prepare("UPDATE users SET pending_event_id = NULL WHERE user_id = ? AND pending_event_id = ?")
+            ->execute([(int) Session::userId(), $eventId]);
+
         Security::regenerateCSRF();
     }
 }
@@ -132,46 +126,9 @@ $taken    = (int) $event['registration_count'];
 $seatsLeft = $capacity > 0 ? max(0, $capacity - $taken) : null;
 $fillPct  = $capacity > 0 ? min(100, (int) round($taken / $capacity * 100)) : 0;
 
-// "Add to calendar" link. Times are stored in the event's own timezone.
-$gcalDetails = preg_match('/^.{0,900}/us', (string) $event['description'], $dm) ? $dm[0] : '';
-$gcalUrl = '';
-try {
-    $tz  = new DateTimeZone($event['timezone'] ?: 'Africa/Lagos');
-    $gs  = new DateTime($event['starts_at'], $tz);
-    $ge  = !empty($event['ends_at']) ? new DateTime($event['ends_at'], $tz) : (clone $gs)->modify('+1 hour');
-    $utc = new DateTimeZone('UTC');
-    $gs->setTimezone($utc);
-    $ge->setTimezone($utc);
-    $gcalUrl = 'https://calendar.google.com/calendar/render?' . http_build_query([
-        'action'   => 'TEMPLATE',
-        'text'     => $event['title'],
-        'dates'    => $gs->format('Ymd\THis\Z') . '/' . $ge->format('Ymd\THis\Z'),
-        'details'  => $gcalDetails,
-        'location' => $event['is_online'] ? ($event['meeting_url'] ?: 'Online') : (string) $event['location'],
-    ]);
-} catch (Throwable $e) {
-    $gcalUrl = '';
-}
-
-// Confirmation email. Sent here so the calendar link is already built.
-// A mail failure must never break a registration that is already committed.
-if ($justJoined) {
-    $attendeeEmail = trim((string) Session::get('email'));
-    if ($attendeeEmail !== '') {
-        try {
-            require_once __DIR__ . '/../includes/mailer.php';
-            Mailer::sendEventRegistration(
-                $attendeeEmail,
-                (string) Session::get('full_name'),
-                $event,
-                SITE_URL . '/events/view.php?slug=' . rawurlencode((string) $event['slug']),
-                $gcalUrl
-            );
-        } catch (Throwable $e) {
-            error_log('Event confirmation email failed for event ' . $eventId . ': ' . $e->getMessage());
-        }
-    }
-}
+// "Add to calendar" link, for the button on this page. The confirmation email
+// builds its own from the same helper.
+$gcalUrl = jm_event_calendar_url($event);
 
 $pageTitle = $event['title'] . ' - ' . SITE_NAME;
 
