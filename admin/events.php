@@ -85,7 +85,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $slug = jm_event_slug($pdo, $title);
                         $pdo->prepare("INSERT INTO events (title, slug, event_type, description, host_name, starts_at, ends_at, is_online, location, meeting_url, capacity, is_free, price, is_published, is_featured, cover_image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                             ->execute([$title,$slug,$type,$description,$host,$startsAt,$endsAt,$isOnline,$location,$meetingUrl,$capacity,$isFree,$price,$isPublished,$isFeatured,$cover]);
-                        $msg = 'Event created.';
+                        if ($isPublished) {
+                            $told = jm_notify_all(
+                                'event',
+                                'New event: ' . $title,
+                                date('l j F', strtotime($startsAt)) . ' at ' . date('g:i A', strtotime($startsAt)) . '. Register to save your place.',
+                                '/events/view.php?slug=' . $slug
+                            );
+                            $msg = 'Event created. ' . number_format($told) . ' members notified.';
+                        } else {
+                            $msg = 'Event created as a draft, so nobody was notified yet.';
+                        }
                     }
                 }
             } elseif ($action === 'delete') {

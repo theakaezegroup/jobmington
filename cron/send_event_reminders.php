@@ -90,6 +90,16 @@ function jm_send_window(PDO $pdo, string $column, string $within, string $window
             $eventUrl = SITE_URL . '/events/view.php?slug=' . rawurlencode((string) $r['slug']);
             $calendar = jm_event_calendar_url($r);
             $ok = Mailer::sendEventReminder($to, (string) $r['name'], $r, $eventUrl, $window, $calendar);
+            // Same reminder in the app, for anyone who does not read email.
+            if ($ok && !empty($r['user_id'])) {
+                sendNotification(
+                    (int) $r['user_id'],
+                    'event',
+                    $window === '1h' ? 'Starting within the hour: ' . $r['title'] : 'Tomorrow: ' . $r['title'],
+                    $window === '1h' ? 'Your session begins shortly.' : 'A reminder that you are registered.',
+                    $eventUrl
+                );
+            }
             if ($ok) {
                 $sent++;
                 jm_log("  {$window}: sent to {$to}");

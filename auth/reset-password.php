@@ -48,6 +48,15 @@ if (!$invalid && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($errors)) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
+            // Tell them their own password changed. If it was not them,
+            // this is the first thing they should see.
+            sendNotification(
+                (int) $user['user_id'],
+                'security',
+                'Your password was changed',
+                'If this was not you, reset it again straight away and contact us.',
+                '/seeker/settings.php'
+            );
             $pdo->prepare("UPDATE users SET password_hash = ?, reset_token = NULL, reset_expires = NULL WHERE user_id = ?")
                 ->execute([$hash, (int) $user['user_id']]);
 

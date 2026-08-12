@@ -109,6 +109,14 @@ if ($token !== '') {
             $_SESSION['is_verified'] = true;
         }
 
+        sendNotification(
+            (int) $user['user_id'],
+            'account',
+            'Your email is verified',
+            'Everything on Jobmington is open to you now.',
+            '/seeker/dashboard.php'
+        );
+
         // Reward email verification with Seeds (once — awardEmailVerificationBonus
         // is safe to call, but guard against repeat verifies via the token reset).
         try {

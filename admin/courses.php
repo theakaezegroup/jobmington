@@ -87,7 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $slug = jm_course_slug($pdo, $title);
                         $pdo->prepare("INSERT INTO courses (category_id,title,slug,short_description,description,instructor_name,instructor_bio,difficulty,course_type,duration_hours,is_external,external_url,is_free,price,seed_price,has_certificate,certificate_provider,is_published,is_featured,tags,thumbnail) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
                             ->execute([$categoryId,$title,$slug,$short,$desc,$instructor,$instrBio,$difficulty,$type,$hours,$isExternal,$externalUrl ?: null,$isFree,$price,$seedPrice,$hasCert,$certProv ?: null,$isPublished,$isFeatured,$tags ?: null,$thumb]);
-                        $msg = 'Course created.';
+                        if ($isPublished) {
+                            $told = jm_notify_all('course', 'New course: ' . $title, 'Now open in the academy.', '/learn/course.php?id=' . (int) $pdo->lastInsertId());
+                            $msg = 'Course created. ' . number_format($told) . ' members notified.';
+                        } else {
+                            $msg = 'Course created as a draft, so nobody was notified yet.';
+                        }
                     }
                 }
             } elseif ($action === 'delete') {

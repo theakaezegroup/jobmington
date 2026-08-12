@@ -922,6 +922,45 @@ if (!function_exists('jm_log_activity')) {
 }
 
 /**
+ * Tell everybody about something: a new event, a new course, a new ebook.
+ *
+ * One INSERT ... SELECT rather than a loop of sendNotification calls, so
+ * announcing to the whole membership is a single statement instead of a query
+ * per person.
+ *
+ * Only active, verified accounts. Somebody who never confirmed their email did
+ * not ask to hear from us, and a suspended account should not be collecting
+ * announcements while it is suspended.
+ *
+ * @param string|null $excludeType Skip a user_type, e.g. do not tell employers
+ *                                 about a job-seeker course.
+ * @return int How many people were told.
+ */
+if (!function_exists('jm_notify_all')) {
+    function jm_notify_all(string $type, string $title, string $message = '', ?string $link = null, ?string $onlyType = null): int {
+        try {
+            $sql = "INSERT INTO notifications (user_id, type, title, message, link, is_read, created_at)
+                    SELECT user_id, ?, ?, ?, ?, 0, NOW()
+                    FROM users
+                    WHERE is_active = 1 AND is_verified = 1";
+            $args = [$type, $title, $message, $link];
+
+            if ($onlyType !== null) {
+                $sql .= " AND user_type = ?";
+                $args[] = $onlyType;
+            }
+
+            $stmt = db()->prepare($sql);
+            $stmt->execute($args);
+            return $stmt->rowCount();
+        } catch (Throwable $e) {
+            error_log('jm_notify_all(' . $type . '): ' . $e->getMessage());
+            return 0;
+        }
+    }
+}
+
+/**
  * Record that someone looked at a piece of content.
  *
  * Deduplicated per person per item per hour, so a reader who refreshes or

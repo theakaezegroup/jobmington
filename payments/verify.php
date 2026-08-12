@@ -115,6 +115,13 @@ try {
             
             // Log activity
             Security::logActivity($userId, 'payment_success', 'Payment of ₦' . number_format($amount) . ' successful. Added ' . $credits . ' Seeds.');
+            sendNotification(
+                $userId,
+                'payment',
+                number_format($credits) . ' Seeds added to your wallet',
+                'Your payment of ₦' . number_format($amount) . ' went through.',
+                '/wallet/'
+            );
             
             $pdo->commit();
             

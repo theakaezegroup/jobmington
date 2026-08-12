@@ -87,7 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $slug = jm_ebook_slug($pdo, $title);
                         $pdo->prepare("INSERT INTO ebooks (title, slug, author, category, description, pages, is_free, price, seed_price, is_published, is_featured, cover_image, file_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")
                             ->execute([$title,$slug,$author,$category,$description,$pages,$isFree,$price,$seedPrice,$isPublished,$isFeatured,$cover,$file]);
-                        $msg = 'Ebook created.';
+                        if ($isPublished) {
+                            $told = jm_notify_all('ebook', 'New ebook: ' . $title, 'Free to read in the library.', '/ebooks/view.php?slug=' . $slug);
+                            $msg = 'Ebook created. ' . number_format($told) . ' members notified.';
+                        } else {
+                            $msg = 'Ebook created as a draft, so nobody was notified yet.';
+                        }
                     }
                 }
             } elseif ($action === 'delete') {

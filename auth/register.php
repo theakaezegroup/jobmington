@@ -87,6 +87,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $userId = (int) $pdo->lastInsertId();
             jm_log_activity($userId, 'signup', $form['user_type'] . ' - ' . $form['email']);
+            sendNotification(
+                $userId,
+                'welcome',
+                'Welcome to Jobmington, ' . explode(' ', trim($form['full_name']))[0],
+                $form['user_type'] === USER_TYPE_EMPLOYER
+                    ? 'Post your first role and start receiving applications.'
+                    : 'Build your CV, then let the AI tools sharpen it for the roles you want.',
+                $form['user_type'] === USER_TYPE_EMPLOYER ? '/employer/post-job.php' : '/cv-builder/'
+            );
 
             // Welcome Seeds (free engagement currency).
             try {
