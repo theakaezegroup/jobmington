@@ -206,6 +206,13 @@ if ($isAdminArea) {
             --admin-amber: #b66b00;
             --admin-red: #b42318;
             --admin-sidebar-w: 250px;
+            /* One radius and one elevation for every surface in the panel, so
+               cards read as the same material instead of each page inventing
+               its own outline. */
+            --admin-radius: 16px;
+            --admin-radius-sm: 12px;
+            --admin-shadow: 0 1px 2px rgba(11,27,51,.04), 0 10px 26px -14px rgba(11,27,51,.16);
+            --admin-shadow-lift: 0 2px 6px rgba(11,27,51,.06), 0 20px 44px -20px rgba(11,27,51,.24);
         }
         body.jm-admin {
             margin: 0;
@@ -297,12 +304,12 @@ if ($isAdminArea) {
         .jm-admin-topbar-brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 800; color: var(--admin-ink); text-decoration: none; }
         .jm-admin-topbar-brand img { width: 26px; height: 26px; }
 
-        .jm-admin-content { flex: 1; padding: 28px 28px 40px; }
+        .jm-admin-content { flex: 1; padding: 30px 30px 48px; }
 
         .jm-admin-footer {
             color: var(--admin-muted); display: flex; flex-wrap: wrap;
             font-size: 11.5px; gap: 10px; justify-content: space-between;
-            padding: 12px 28px 18px; border-top: 1px solid var(--admin-line);
+            padding: 14px 30px 20px; border-top: 0;
         }
 
         .jm-admin-backdrop {
@@ -324,34 +331,28 @@ if ($isAdminArea) {
         .ja-pagehead p { margin: 0; font-size: 13.5px; color: var(--admin-muted); }
         .ja-statuschip {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 700;
-            background: #fff; border: 1px solid var(--admin-line);
-            box-shadow: 0 1px 3px rgba(11,27,51,.06);
+            padding: 8px 15px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
+            background: #fff; border: 0;
+            box-shadow: var(--admin-shadow);
             white-space: nowrap;
         }
         .ja-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--admin-green); flex-shrink: 0; }
         .ja-dot.down { background: var(--admin-red); }
 
         /* KPI cards */
-        .ja-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 24px; }
+        .ja-kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 16px; margin-bottom: 26px; }
         .ja-kpi {
             position: relative; display: block; text-decoration: none;
             background: var(--admin-card);
-            border: 1px solid var(--admin-line);
-            border-radius: 12px; padding: 20px 20px 16px;
+            border: 0;
+            border-radius: var(--admin-radius); padding: 22px;
             overflow: hidden;
-            box-shadow: 0 1px 4px rgba(11,27,51,.05);
-            transition: box-shadow .18s, transform .18s;
+            box-shadow: var(--admin-shadow);
+            transition: box-shadow .2s ease, transform .2s ease;
         }
-        .ja-kpi::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: var(--admin-line);
-        }
-        .ja-kpi:hover { box-shadow: 0 8px 24px rgba(11,27,51,.1); transform: translateY(-2px); }
-        .ja-kpi.tone-blue::before    { background: var(--admin-blue); }
-        .ja-kpi.tone-good::before    { background: var(--admin-green); }
-        .ja-kpi.tone-warning::before { background: var(--admin-amber); }
-        .ja-kpi.tone-neutral::before { background: #94a3b8; }
+        /* The 3px strip across the top of each tile was one more hard line.
+           The tinted icon already carries the tone. */
+        .ja-kpi:hover { box-shadow: var(--admin-shadow-lift); transform: translateY(-2px); }
 
         .ja-kpi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
         .ja-kpi-ico {
@@ -368,28 +369,30 @@ if ($isAdminArea) {
         .ja-kpi-det { font-size: 11.5px; color: #94a3b8; margin-top: 4px; line-height: 1.5; }
 
         /* Grid layouts */
-        .ja-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; }
-        .ja-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; margin-bottom: 24px; }
+        .ja-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 26px; }
+        .ja-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; margin-bottom: 26px; }
 
         /* Cards */
         .ja-card {
-            background: var(--admin-card); border: 1px solid var(--admin-line);
-            border-radius: 12px; overflow: hidden;
-            box-shadow: 0 1px 4px rgba(11,27,51,.05);
+            background: var(--admin-card); border: 0;
+            border-radius: var(--admin-radius); overflow: hidden;
+            box-shadow: var(--admin-shadow);
         }
+        /* No grey strip and no divider: a card should read as one surface, not
+           as a header glued to a body. */
         .ja-card-head {
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            padding: 14px 18px; border-bottom: 1px solid var(--admin-line);
-            background: #fafbfd;
+            padding: 20px 22px 6px; border-bottom: 0;
+            background: none;
         }
-        .ja-card-head h2 { margin: 0; font-size: 13.5px; font-weight: 800; color: var(--admin-ink); text-transform: uppercase; letter-spacing: .05em; }
+        .ja-card-head h2 { margin: 0; font-size: 15px; font-weight: 800; color: var(--admin-ink); text-transform: none; letter-spacing: -.015em; }
         .ja-card-head a {
             font-size: 12px; font-weight: 700; color: var(--admin-blue);
             text-decoration: none; padding: 4px 10px;
             background: var(--admin-blue-soft); border-radius: 6px;
         }
         .ja-card-head a:hover { background: #d9e8ff; }
-        .ja-card-body { padding: 4px 18px 12px; }
+        .ja-card-body { padding: 6px 22px 20px; }
 
         /* Attention tiles */
         .ja-attention { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -502,6 +505,81 @@ if ($isAdminArea) {
             .ja-attention { grid-template-columns: 1fr; }
             .jm-admin-content { padding: 18px 14px; }
         }
+
+        /* ── One surface for every card in the panel ────────────────
+           The admin grew three visual languages: Tailwind cards with
+           border-slate-200, pages with their own .jm-*-card CSS, and a few
+           built for a dark theme. Each drew its own outline, which is what
+           made the panel read as a pile of boxes rather than a dashboard.
+
+           This normalises them all to the same borderless surface. It is
+           deliberately scoped so it cannot touch a form control: an input
+           without its border is invisible, so anything that is a field, or
+           carries a field's rounded-lg without a shadow, is left alone. */
+        body.jm-admin .ja-panel,
+        body.jm-admin .jm-panel,
+        body.jm-admin .jm-ad-card,
+        body.jm-admin .jm-ev-card,
+        body.jm-admin .jm-eb-card,
+        body.jm-admin .jm-backup-card,
+        body.jm-admin .ec-card,
+        body.jm-admin .ec-table-wrap,
+        body.jm-admin div.bg-white.rounded-xl,
+        body.jm-admin div.bg-white.rounded-2xl,
+        body.jm-admin div.bg-white.rounded-lg.shadow,
+        body.jm-admin form.bg-white.rounded-xl,
+        body.jm-admin form.bg-white.rounded-lg.shadow {
+            border: 0;
+            border-radius: var(--admin-radius);
+            box-shadow: var(--admin-shadow);
+            background: var(--admin-card);
+        }
+
+        /* Tables carried the same outline. Inside a card they need none at
+           all; standing alone they become the card. */
+        body.jm-admin .jm-ev-table,
+        body.jm-admin .jm-ad-table,
+        body.jm-admin .ec-table {
+            border: 0;
+            border-radius: var(--admin-radius);
+            overflow: hidden;
+            box-shadow: var(--admin-shadow);
+        }
+        body.jm-admin .ja-card .jm-ev-table,
+        body.jm-admin .ja-card .jm-ad-table,
+        body.jm-admin div.bg-white .jm-ev-table,
+        body.jm-admin div.bg-white .jm-ad-table { box-shadow: none; border-radius: 0; }
+
+        /* Header rows: tone, not a rule. */
+        body.jm-admin .jm-ev-table th,
+        body.jm-admin .jm-ad-table th,
+        body.jm-admin .ec-table th,
+        body.jm-admin thead.bg-slate-50 th {
+            border-bottom: 0;
+            background: #f7f9fd;
+        }
+        body.jm-admin .jm-ev-table td,
+        body.jm-admin .jm-ad-table td { border-bottom: 1px solid #f2f5fa; }
+        body.jm-admin .jm-ev-table tr:last-child td,
+        body.jm-admin .jm-ad-table tr:last-child td { border-bottom: 0; }
+
+        /* Form controls keep a visible edge, just a softer one. */
+        body.jm-admin input:not([type=checkbox]):not([type=radio]):not([type=submit]),
+        body.jm-admin select,
+        body.jm-admin textarea {
+            border: 1px solid #dde5f1;
+            border-radius: 10px;
+            background: #fff;
+        }
+        body.jm-admin input:focus, body.jm-admin select:focus, body.jm-admin textarea:focus {
+            outline: 0; border-color: var(--admin-blue);
+            box-shadow: 0 0 0 3px rgba(6,64,163,.10);
+        }
+
+        /* Buttons and chips: the same corner language as the cards. */
+        body.jm-admin .rounded-lg { border-radius: 10px; }
+        body.jm-admin .rounded-xl { border-radius: var(--admin-radius); }
+
     </style>
     <?php require_once __DIR__ . '/stacktable.php'; ?>
 </head>

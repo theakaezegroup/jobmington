@@ -110,18 +110,18 @@ $pageTitle = 'Quiz Management - ' . SITE_NAME;
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="min-h-screen bg-slate-900">
+<div class="min-h-screen bg-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-                <a href="/jobmington/admin/" class="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest mb-2 inline-block transition">
+                <a href="/jobmington/admin/" class="text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest mb-2 inline-block transition">
                     <i class="fas fa-arrow-left mr-1"></i> Admin Dashboard
                 </a>
-                <h1 class="text-4xl font-heading font-black text-white">Quiz Management</h1>
+                <h1 class="text-4xl font-heading font-black text-slate-900">Quiz Management</h1>
             </div>
             <?php if ($action !== 'list'): ?>
-            <a href="?action=list" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition">
+            <a href="?action=list" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition">
                 <i class="fas fa-list mr-2"></i> All Quizzes
             </a>
             <?php endif; ?>
@@ -138,14 +138,14 @@ require_once __DIR__ . '/../includes/header.php';
         <?php if ($action === 'list'): ?>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Create Quiz Form -->
-            <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 class="text-lg font-bold text-white mb-4">Create New Quiz</h3>
+            <div class="bg-white rounded-xl p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Create New Quiz</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="create_quiz">
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Course</label>
-                        <select name="course_id" required class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Course</label>
+                        <select name="course_id" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                             <option value="">Select Course...</option>
                             <?php foreach ($courses as $c): ?>
                                 <option value="<?= $c['course_id'] ?>"><?= e($c['title']) ?></option>
@@ -154,23 +154,23 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Quiz Title</label>
-                        <input type="text" name="title" required class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Quiz Title</label>
+                        <input type="text" name="title" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
-                        <textarea name="description" rows="2" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
+                        <textarea name="description" rows="2" class="w-full rounded-lg px-4 py-3 text-slate-900"></textarea>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pass %</label>
-                            <input type="number" name="passing_score" value="70" min="0" max="100" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Pass %</label>
+                            <input type="number" name="passing_score" value="70" min="0" max="100" class="w-full rounded-lg px-4 py-3 text-slate-900">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Time (min)</label>
-                            <input type="number" name="time_limit" value="0" min="0" placeholder="0 = no limit" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Time (min)</label>
+                            <input type="number" name="time_limit" value="0" min="0" placeholder="0 = no limit" class="w-full rounded-lg px-4 py-3 text-slate-900">
                         </div>
                     </div>
                     
@@ -180,20 +180,20 @@ require_once __DIR__ . '/../includes/header.php';
             
             <!-- Quizzes List -->
             <div class="lg:col-span-2">
-                <h3 class="text-lg font-bold text-white mb-4">Existing Quizzes</h3>
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Existing Quizzes</h3>
                 <?php if (empty($quizzes)): ?>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-8 text-center">
+                    <div class="bg-white rounded-xl p-8 text-center">
                         <i class="fas fa-question-circle text-4xl text-slate-600 mb-4"></i>
-                        <p class="text-slate-400">No quizzes yet.</p>
+                        <p class="text-slate-500">No quizzes yet.</p>
                     </div>
                 <?php else: ?>
                     <div class="space-y-4">
                         <?php foreach ($quizzes as $qz): ?>
-                        <div class="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition">
+                        <div class="bg-white rounded-xl p-4 hover:bg-slate-50 transition">
                             <div class="flex items-center justify-between flex-wrap gap-2">
                                 <div>
-                                    <h4 class="font-bold text-white"><?= e($qz['title']) ?></h4>
-                                    <p class="text-xs text-slate-400"><?= e($qz['course_title']) ?></p>
+                                    <h4 class="font-bold text-slate-900"><?= e($qz['title']) ?></h4>
+                                    <p class="text-xs text-slate-500"><?= e($qz['course_title']) ?></p>
                                     <span class="text-xs text-blue-400">Pass: <?= $qz['passing_score'] ?>%</span>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -214,46 +214,46 @@ require_once __DIR__ . '/../includes/header.php';
         <?php elseif ($action === 'questions' && $quiz): ?>
         <!-- Questions Management -->
         <div class="mb-6">
-            <h2 class="text-xl font-bold text-white">Quiz: <?= e($quiz['title']) ?></h2>
-            <p class="text-slate-400">Course: <?= e($quiz['course_title']) ?> | Pass: <?= $quiz['passing_score'] ?>%</p>
+            <h2 class="text-xl font-bold text-slate-900">Quiz: <?= e($quiz['title']) ?></h2>
+            <p class="text-slate-500">Course: <?= e($quiz['course_title']) ?> | Pass: <?= $quiz['passing_score'] ?>%</p>
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Add Question Form -->
-            <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 class="text-lg font-bold text-white mb-4">Add Question</h3>
+            <div class="bg-white rounded-xl p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Add Question</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="add_question">
                     <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Question</label>
-                        <textarea name="question" rows="3" required class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Question</label>
+                        <textarea name="question" rows="3" required class="w-full rounded-lg px-4 py-3 text-slate-900"></textarea>
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Option A</label>
-                        <input type="text" name="option_a" required class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Option A</label>
+                        <input type="text" name="option_a" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Option B</label>
-                        <input type="text" name="option_b" required class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Option B</label>
+                        <input type="text" name="option_b" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Option C</label>
-                        <input type="text" name="option_c" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Option C</label>
+                        <input type="text" name="option_c" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Option D</label>
-                        <input type="text" name="option_d" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Option D</label>
+                        <input type="text" name="option_d" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Correct Answer</label>
-                        <select name="correct_option" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Correct Answer</label>
+                        <select name="correct_option" class="w-full rounded-lg px-4 py-3 text-slate-900">
                             <option value="A">A</option>
                             <option value="B">B</option>
                             <option value="C">C</option>
@@ -267,17 +267,17 @@ require_once __DIR__ . '/../includes/header.php';
             
             <!-- Questions List -->
             <div class="lg:col-span-2">
-                <h3 class="text-lg font-bold text-white mb-4">Questions (<?= count($questions) ?>)</h3>
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Questions (<?= count($questions) ?>)</h3>
                 <?php if (empty($questions)): ?>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-8 text-center">
-                        <p class="text-slate-400">No questions yet. Add your first question!</p>
+                    <div class="bg-white rounded-xl p-8 text-center">
+                        <p class="text-slate-500">No questions yet. Add your first question!</p>
                     </div>
                 <?php else: ?>
                     <div class="space-y-4">
                         <?php foreach ($questions as $i => $q): ?>
-                        <div class="bg-white/5 border border-white/10 rounded-xl p-4">
+                        <div class="bg-white rounded-xl p-4">
                             <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
-                                <span class="text-white font-bold"><?= $i + 1 ?>. <?= e($q['question']) ?></span>
+                                <span class="text-slate-900 font-bold"><?= $i + 1 ?>. <?= e($q['question']) ?></span>
                                 <form method="POST" class="inline" onsubmit="return confirm('Delete?')">
                                     <input type="hidden" name="action" value="delete_question">
                                     <input type="hidden" name="question_id" value="<?= $q['question_id'] ?>">
@@ -286,10 +286,10 @@ require_once __DIR__ . '/../includes/header.php';
                                 </form>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                                <span class="<?= $q['correct_option'] === 'A' ? 'text-emerald-400' : 'text-slate-400' ?>">A: <?= e($q['option_a']) ?></span>
-                                <span class="<?= $q['correct_option'] === 'B' ? 'text-emerald-400' : 'text-slate-400' ?>">B: <?= e($q['option_b']) ?></span>
-                                <?php if ($q['option_c']): ?><span class="<?= $q['correct_option'] === 'C' ? 'text-emerald-400' : 'text-slate-400' ?>">C: <?= e($q['option_c']) ?></span><?php endif; ?>
-                                <?php if ($q['option_d']): ?><span class="<?= $q['correct_option'] === 'D' ? 'text-emerald-400' : 'text-slate-400' ?>">D: <?= e($q['option_d']) ?></span><?php endif; ?>
+                                <span class="<?= $q['correct_option'] === 'A' ? 'text-emerald-400' : 'text-slate-500' ?>">A: <?= e($q['option_a']) ?></span>
+                                <span class="<?= $q['correct_option'] === 'B' ? 'text-emerald-400' : 'text-slate-500' ?>">B: <?= e($q['option_b']) ?></span>
+                                <?php if ($q['option_c']): ?><span class="<?= $q['correct_option'] === 'C' ? 'text-emerald-400' : 'text-slate-500' ?>">C: <?= e($q['option_c']) ?></span><?php endif; ?>
+                                <?php if ($q['option_d']): ?><span class="<?= $q['correct_option'] === 'D' ? 'text-emerald-400' : 'text-slate-500' ?>">D: <?= e($q['option_d']) ?></span><?php endif; ?>
                             </div>
                         </div>
                         <?php endforeach; ?>

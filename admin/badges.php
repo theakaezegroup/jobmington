@@ -220,7 +220,7 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <!-- Tabs -->
-        <div class="flex gap-2 mb-8 border-b border-white/10 pb-4">
+        <div class="flex gap-2 mb-8 border-b border-slate-200 pb-4">
             <a href="?tab=badges" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'badges' ? 'bg-blue-700 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' ?> transition"><i class="fas fa-medal mr-2"></i> Badges</a>
             <a href="?tab=distribute" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'distribute' ? 'bg-blue-700 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' ?> transition"><i class="fas fa-seedling mr-2"></i> Distribute Seeds</a>
             <a href="?tab=rates" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'rates' ? 'bg-blue-700 text-white' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' ?> transition"><i class="fas fa-sliders-h mr-2"></i> Seed Rates</a>
@@ -229,22 +229,22 @@ require_once __DIR__ . '/../includes/header.php';
 
         <?php if ($activeTab === 'badges'): ?>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-white border border-white/10 rounded-xl p-6">
+            <div class="bg-white rounded-xl p-6">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Create New Badge</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="create_badge">
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Badge Name</label>
-                        <input type="text" name="badge_name" required class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <input type="text" name="badge_name" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
-                        <textarea name="badge_description" rows="2" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none"></textarea>
+                        <textarea name="badge_description" rows="2" class="w-full rounded-lg px-4 py-3 text-slate-900"></textarea>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Icon</label>
-                            <select name="badge_icon" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                            <select name="badge_icon" class="w-full rounded-lg px-4 py-3 text-slate-900">
                                 <option value="fa-medal">Medal</option>
                                 <option value="fa-trophy">Trophy</option>
                                 <option value="fa-star">Star</option>
@@ -254,12 +254,12 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Color</label>
-                            <input type="color" name="badge_color" value="#fbbf24" class="w-full h-12 bg-white border border-white/10 rounded-lg cursor-pointer">
+                            <input type="color" name="badge_color" value="#fbbf24" class="w-full h-12 rounded-lg cursor-pointer">
                         </div>
                     </div>
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Seed Reward</label>
-                        <input type="number" name="seed_reward" value="50" min="0" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <input type="number" name="seed_reward" value="50" min="0" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 rounded-lg transition">Create Badge</button>
                 </form>
@@ -268,14 +268,14 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="lg:col-span-2">
                 <h3 class="text-lg font-bold text-slate-900 mb-4">Existing Badges</h3>
                 <?php if (empty($badges)): ?>
-                    <div class="bg-white border border-white/10 rounded-xl p-8 text-center">
+                    <div class="bg-white  rounded-xl p-8 text-center">
                         <i class="fas fa-medal text-4xl text-slate-600 mb-4"></i>
                         <p class="text-slate-500">No badges created yet.</p>
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <?php foreach ($badges as $badge): ?>
-                        <div class="bg-white border border-white/10 rounded-xl p-4 hover:border-white/20 transition">
+                        <div class="bg-white  rounded-xl p-4 hover:bg-slate-50 transition">
                             <div class="flex items-center gap-4">
                                 <?php $badgeColor = $badge['color'] ?? '#fbbf24'; ?>
                                 <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: <?= e($badgeColor) ?>20; color: <?= e($badgeColor) ?>">
@@ -299,13 +299,13 @@ require_once __DIR__ . '/../includes/header.php';
 
         <?php if ($activeTab === 'distribute'): ?>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white border border-white/10 rounded-xl p-6">
+            <div class="bg-white rounded-xl p-6">
                 <h3 class="text-lg font-bold text-slate-900 mb-4"><i class="fas fa-user mr-2"></i> Distribute to User</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="distribute_seeds">
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Select User</label>
-                        <select name="user_id" required class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <select name="user_id" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                             <option value="">Choose a user...</option>
                             <?php foreach ($users as $user): ?>
                                 <option value="<?= $user['user_id'] ?>"><?= e($user['first_name'] . ' ' . $user['last_name']) ?> (<?= e($user['email']) ?>)</option>
@@ -314,23 +314,23 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Seeds Amount</label>
-                        <input type="number" name="amount" required min="1" max="10000" placeholder="100" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <input type="number" name="amount" required min="1" max="10000" placeholder="100" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
-                        <input type="text" name="description" value="Admin Bonus" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <input type="text" name="description" value="Admin Bonus" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 rounded-lg transition"><i class="fas fa-seedling mr-2"></i> Award Seeds</button>
                 </form>
             </div>
             
-            <div class="bg-white border border-white/10 rounded-xl p-6">
+            <div class="bg-white rounded-xl p-6">
                 <h3 class="text-lg font-bold text-slate-900 mb-4"><i class="fas fa-users mr-2"></i> Bulk Distribution</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="bulk_distribute">
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">User Type</label>
-                        <select name="user_type" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <select name="user_type" class="w-full rounded-lg px-4 py-3 text-slate-900">
                             <option value="all">All Users</option>
                             <option value="seeker">Job Seekers Only</option>
                             <option value="employer">Employers Only</option>
@@ -338,11 +338,11 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Seeds Amount (Per User)</label>
-                        <input type="number" name="bulk_amount" required min="1" max="1000" placeholder="50" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <input type="number" name="bulk_amount" required min="1" max="1000" placeholder="50" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     <div class="mb-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
-                        <input type="text" name="bulk_description" value="Promotional Bonus" class="w-full bg-white border border-white/10 rounded-lg px-4 py-3 text-slate-900 focus:border-amber-500 focus:outline-none">
+                        <input type="text" name="bulk_description" value="Promotional Bonus" class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     <button type="submit" class="w-full bg-blue-500 hover:bg-blue-400 text-white font-bold py-3 rounded-lg transition" onclick="return confirm('This will award seeds to all selected users. Continue?')"><i class="fas fa-paper-plane mr-2"></i> Distribute to All</button>
                 </form>
@@ -351,14 +351,14 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <?php if ($activeTab === 'rates'): ?>
-        <div class="bg-white border border-white/10 rounded-xl p-6">
+        <div class="bg-white rounded-xl p-6">
             <h3 class="text-lg font-bold text-slate-900 mb-4">Configure Seed Rates</h3>
             <?php if (empty($seedRates)): ?>
                 <p class="text-slate-500 text-center py-8">No seed rates configured.</p>
             <?php else: ?>
                 <div class="overflow-x-auto">
                     <table class="w-full jm-stacktable">
-                        <thead><tr class="border-b border-white/10"><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Action</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Type</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Seeds</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Status</th></tr></thead>
+                        <thead><tr class="border-b border-slate-200"><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Action</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Type</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Seeds</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Status</th></tr></thead>
                         <tbody>
                             <?php foreach ($seedRates as $rate): ?>
                             <tr class="border-b border-white/5 hover:bg-white">
@@ -376,14 +376,14 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <?php if ($activeTab === 'transactions'): ?>
-        <div class="bg-white border border-white/10 rounded-xl p-6">
+        <div class="bg-white rounded-xl p-6">
             <h3 class="text-lg font-bold text-slate-900 mb-4">Recent Transactions</h3>
             <?php if (empty($recentTransactions)): ?>
                 <p class="text-slate-500 text-center py-8">No transactions recorded yet.</p>
             <?php else: ?>
                 <div class="overflow-x-auto">
                     <table class="w-full jm-stacktable">
-                        <thead><tr class="border-b border-white/10"><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">User</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Type</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Amount</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Source</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Date</th></tr></thead>
+                        <thead><tr class="border-b border-slate-200"><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">User</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Type</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Amount</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Source</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Date</th></tr></thead>
                         <tbody>
                             <?php foreach ($recentTransactions as $tx): ?>
                             <tr class="border-b border-white/5 hover:bg-white">

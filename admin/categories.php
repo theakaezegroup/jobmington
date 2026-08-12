@@ -84,16 +84,16 @@ $pageTitle = 'Categories Management - ' . SITE_NAME;
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div class="min-h-screen bg-slate-900">
+<div class="min-h-screen bg-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-                <a href="/jobmington/admin/" class="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-widest mb-2 inline-block transition">
+                <a href="/jobmington/admin/" class="text-slate-500 hover:text-slate-900 text-xs font-bold uppercase tracking-widest mb-2 inline-block transition">
                     <i class="fas fa-arrow-left mr-1"></i> Admin Dashboard
                 </a>
-                <h1 class="text-4xl font-heading font-black text-white">Categories</h1>
-                <p class="text-slate-400 mt-2">Manage job and course categories</p>
+                <h1 class="text-4xl font-heading font-black text-slate-900">Categories</h1>
+                <p class="text-slate-500 mt-2">Manage job and course categories</p>
             </div>
         </div>
 
@@ -106,26 +106,26 @@ require_once __DIR__ . '/../includes/header.php';
         <?php endif; ?>
 
         <!-- Tabs -->
-        <div class="flex gap-2 mb-8 border-b border-white/10 pb-4">
-            <a href="?tab=job" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'job' ? 'bg-blue-500 text-white' : 'bg-white/5 text-white hover:bg-white/10' ?> transition"><i class="fas fa-briefcase mr-2"></i> Job Categories</a>
-            <a href="?tab=course" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'course' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-white hover:bg-white/10' ?> transition"><i class="fas fa-graduation-cap mr-2"></i> Course Categories</a>
+        <div class="flex gap-2 mb-8 border-b border-slate-200 pb-4">
+            <a href="?tab=job" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'job' ? 'bg-blue-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-50' ?> transition"><i class="fas fa-briefcase mr-2"></i> Job Categories</a>
+            <a href="?tab=course" class="px-4 py-2 rounded-lg text-sm font-bold <?= $activeTab === 'course' ? 'bg-emerald-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-50' ?> transition"><i class="fas fa-graduation-cap mr-2"></i> Course Categories</a>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Create Form -->
-            <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-                <h3 class="text-lg font-bold text-white mb-4">Create <?= $activeTab === 'job' ? 'Job' : 'Course' ?> Category</h3>
+            <div class="bg-white rounded-xl p-6">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Create <?= $activeTab === 'job' ? 'Job' : 'Course' ?> Category</h3>
                 <form method="POST">
                     <input type="hidden" name="action" value="create_<?= $activeTab ?>_category">
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Name</label>
-                        <input type="text" name="name" required class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Name</label>
+                        <input type="text" name="name" required class="w-full rounded-lg px-4 py-3 text-slate-900">
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Icon</label>
-                        <select name="icon" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Icon</label>
+                        <select name="icon" class="w-full rounded-lg px-4 py-3 text-slate-900">
                             <option value="fa-briefcase">Briefcase</option>
                             <option value="fa-code">Code</option>
                             <option value="fa-chart-line">Chart</option>
@@ -140,8 +140,8 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
-                        <textarea name="description" rows="2" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-amber-500 focus:outline-none"></textarea>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Description</label>
+                        <textarea name="description" rows="2" class="w-full rounded-lg px-4 py-3 text-slate-900"></textarea>
                     </div>
                     
                     <button type="submit" class="w-full bg-<?= $activeTab === 'job' ? 'blue' : 'emerald' ?>-500 hover:bg-<?= $activeTab === 'job' ? 'blue' : 'emerald' ?>-400 text-white font-bold py-3 rounded-lg transition">Create Category</button>
@@ -150,27 +150,27 @@ require_once __DIR__ . '/../includes/header.php';
             
             <!-- Existing Categories -->
             <div class="lg:col-span-2">
-                <h3 class="text-lg font-bold text-white mb-4"><?= $activeTab === 'job' ? 'Job' : 'Course' ?> Categories</h3>
+                <h3 class="text-lg font-bold text-slate-900 mb-4"><?= $activeTab === 'job' ? 'Job' : 'Course' ?> Categories</h3>
                 <?php 
                 $categories = $activeTab === 'job' ? $jobCategories : $courseCategories;
                 $idField = $activeTab === 'job' ? 'category_id' : 'id';
                 ?>
                 <?php if (empty($categories)): ?>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-8 text-center">
+                    <div class="bg-white rounded-xl p-8 text-center">
                         <i class="fas fa-layer-group text-4xl text-slate-600 mb-4"></i>
-                        <p class="text-slate-400">No categories yet.</p>
+                        <p class="text-slate-500">No categories yet.</p>
                     </div>
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <?php foreach ($categories as $cat): ?>
-                        <div class="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition flex items-center justify-between flex-wrap gap-2">
+                        <div class="bg-white rounded-xl p-4 hover:bg-slate-50 transition flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 bg-<?= $activeTab === 'job' ? 'blue' : 'emerald' ?>-500/20 rounded-lg flex items-center justify-center text-<?= $activeTab === 'job' ? 'blue' : 'emerald' ?>-400">
                                     <i class="fas <?= e($cat['icon'] ?? 'fa-folder') ?>"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-white"><?= e($cat['name']) ?></h4>
-                                    <p class="text-xs text-slate-400"><?= e($cat['description'] ?? 'No description') ?></p>
+                                    <h4 class="font-bold text-slate-900"><?= e($cat['name']) ?></h4>
+                                    <p class="text-xs text-slate-500"><?= e($cat['description'] ?? 'No description') ?></p>
                                 </div>
                             </div>
                             <form method="POST" onsubmit="return confirm('Delete this category?')">
