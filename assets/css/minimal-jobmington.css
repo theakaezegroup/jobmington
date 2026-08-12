@@ -2710,6 +2710,10 @@ body.jm-home-page {
     z-index: 1;
 }
 
+/* The header sits directly under the ad bar, so the shell gives up its top
+   padding rather than the header reaching up over it. */
+.jm-home-page .jm-shell { padding-top: 0; }
+
 .jm-home-page .jm-header {
     align-items: center;
     margin-bottom: 26px;
@@ -2721,9 +2725,6 @@ body.jm-home-page {
     /* No z-index here. The base rule sets 900, and overriding it with 2 put the
        header underneath the hero cards and the ticker fades, which are 10. */
 
-    /* The ad bar is a sibling above the shell, and the shell's own top padding
-       was showing between the two as a band of page. Pulled up to meet it. */
-    margin-top: -24px;
 }
 
 .jm-home-page .jm-logo {
@@ -4165,7 +4166,7 @@ body.jm-home-page {
         gap: 18px;
     }
 
-    .jm-home-page .jm-header { margin-top: -20px; }   /* shell padding is 20px here */
+        .jm-home-page .jm-shell { padding-top: 0; }
 
     /* ── Phone: brand blue at all times ───────────────────────────────
        Not frosted-then-blue like the desktop. A frosted white bar on a
