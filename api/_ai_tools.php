@@ -122,23 +122,17 @@ function jm_ai_candidate_profile(PDO $pdo, int $userId, int $cvId = 0): array {
         error_log('jm_ai_candidate_profile cv error: ' . $e->getMessage());
     }
 
-    // 2. Fall back to the users row for anything still missing.
+    // 2. Fall back to the users row for the name. Only the name: headline is a
+    //    cv_profiles column and step 1 above is the only place it comes from.
+    //    This used to ask users for it, fail, and retry without it on every
+    //    single call.
     if ($out['name'] === '') {
         try {
-            $stmt = $pdo->prepare("SELECT full_name, headline FROM users WHERE user_id = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
             $stmt->execute([$userId]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
-            if ($out['name'] === '')     $out['name']     = trim((string) ($user['full_name'] ?? ''));
-            if ($out['headline'] === '') $out['headline'] = trim((string) ($user['headline'] ?? ''));
+            $out['name'] = trim((string) ($stmt->fetchColumn() ?: ''));
         } catch (Throwable $e) {
-            // users.headline may not exist on every schema; ignore.
-            try {
-                $stmt = $pdo->prepare("SELECT full_name FROM users WHERE user_id = ? LIMIT 1");
-                $stmt->execute([$userId]);
-                $out['name'] = trim((string) ($stmt->fetchColumn() ?: ''));
-            } catch (Throwable $e2) {
-                error_log('jm_ai_candidate_profile users error: ' . $e2->getMessage());
-            }
+            error_log('jm_ai_candidate_profile users error: ' . $e->getMessage());
         }
     }
 

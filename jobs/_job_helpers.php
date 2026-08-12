@@ -266,7 +266,7 @@ function jm_job_cv_snapshot(PDO $pdo, ?int $userId): array {
     }
 
     try {
-        $stmt = $pdo->prepare("SELECT user_id, country_id, city FROM users WHERE user_id = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT user_id, country_id FROM users WHERE user_id = ? LIMIT 1");
         $stmt->execute([$userId]);
         $user = $stmt->fetch() ?: [];
     } catch (Throwable $e) {
@@ -289,7 +289,7 @@ function jm_job_cv_snapshot(PDO $pdo, ?int $userId): array {
 
     if (!$cv) {
         $empty['country_id'] = $user['country_id'] ?? null;
-        $empty['city'] = $user['city'] ?? '';
+        $empty['city'] = '';   // only cv_profiles carries a location
         return $empty;
     }
 
@@ -354,7 +354,7 @@ function jm_job_cv_snapshot(PDO $pdo, ?int $userId): array {
         'title' => (string) ($cv['title'] ?? ''),
         'headline' => (string) ($cv['headline'] ?? ''),
         'summary' => (string) ($cv['summary'] ?? ''),
-        'city' => (string) (($cv['city'] ?? '') ?: ($user['city'] ?? '')),
+        'city' => (string) ($cv['location'] ?? ''),
         'country_id' => $user['country_id'] ?? null,
         'skills' => $skills,
         'experience' => $experienceRows,
