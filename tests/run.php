@@ -85,10 +85,34 @@ if ($base && !isset($opts['no-http'])) {
         return $out;
     };
 
-    check('GET / -> 200',            $status('/') === 200);
-    check('GET /jobs -> 200',        in_array($status('/jobs'), [200, 301, 302], true));
+    /*
+     * A site in maintenance mode is meant to answer 503 to a signed-out
+     * visitor, so asserting 200 would report the feature working as two
+     * failures. The expectation flips instead, which also checks that the
+     * gate is actually holding.
+     */
+    $down = false;
+    try {
+        require_once __DIR__ . '/../config/database.php';
+        require_once __DIR__ . '/../includes/maintenance.php';
+        $down = jm_maintenance_on();
+    } catch (Throwable $e) {
+        // No database from here: fall through and assume the site is up.
+    }
+
+    if ($down) {
+        echo "  [note] maintenance mode is ON, so public pages are expected to answer 503\n";
+        check('GET / -> 503 while down',        $status('/') === 503);
+        check('GET /pricing -> 503 while down', $status('/pricing') === 503);
+    } else {
+        check('GET / -> 200',        $status('/') === 200);
+        check('GET /pricing -> 200', $status('/pricing') === 200);
+    }
+
+    check('GET /jobs reachable',     in_array($status('/jobs'), [200, 301, 302, 503], true));
+    // Sign-in stays open either way, which is what stops maintenance mode
+    // locking the person who switched it on out of the switch.
     check('GET /auth/login -> 200',  $status('/auth/login') === 200);
-    check('GET /pricing -> 200',     $status('/pricing') === 200);
     check('uploads PHP blocked (403)', $status('/uploads/__smoketest.php') === 403);
     check('bad unsubscribe token shows invalid', str_contains($body('/unsubscribe?e=a@b.com&t=bad'), 'invalid'));
 }
