@@ -95,6 +95,7 @@ if ($base && !isset($opts['no-http'])) {
 
 // Tool registry audit. No database needed: it reads the files.
 require_once __DIR__ . '/../includes/tools.php';
+require_once __DIR__ . '/../includes/monetization.php';
 require_once __DIR__ . '/tools_audit.php';
 
 $toolProblems = jm_tools_audit(dirname(__DIR__));

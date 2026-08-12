@@ -197,6 +197,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <td><span class="jm-ev-pill <?= $ev['is_published'] ? 'on' : 'off' ?>"><?= $ev['is_published'] ? 'Live' : 'Hidden' ?></span></td>
                     <td>
                         <div class="jm-ev-actions">
+                            <a href="/jobmington/admin/event-registrants.php?event_id=<?= (int)$ev['event_id'] ?>">Registrants</a>
                             <a href="/jobmington/admin/events.php?edit=<?= (int)$ev['event_id'] ?>">Edit</a>
                             <form method="post" style="display:inline;"><?= Security::csrfField() ?><input type="hidden" name="action" value="toggle"><input type="hidden" name="event_id" value="<?= (int)$ev['event_id'] ?>"><button type="submit"><?= $ev['is_published'] ? 'Hide' : 'Show' ?></button></form>
                             <form method="post" onsubmit="return confirm('Delete this event?');" style="display:inline;"><?= Security::csrfField() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="event_id" value="<?= (int)$ev['event_id'] ?>"><button type="submit" style="color:#b42318;">Delete</button></form>

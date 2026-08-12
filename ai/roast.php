@@ -12,7 +12,7 @@ require_once __DIR__ . '/../includes/tools.php';
 
 Session::start();
 Session::requireLogin('Sign in or create a free account to roast your CV. We will bring you straight back here.');
-jm_require_tool('cv_roast');
+jm_require_tool('cv_optimizer');
 
 $pdo         = db();
 $userId      = (int) Session::userId();

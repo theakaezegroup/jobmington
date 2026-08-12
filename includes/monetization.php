@@ -186,72 +186,52 @@ function jm_bundles(): array {
 //  AI TOOLS CATALOGUE
 // ═══════════════════════════════════════════════════════════════════
 
+/**
+ * The priced view of the tool registry.
+ *
+ * This used to be a second hand-written catalogue, and it had already drifted
+ * from the one in includes/tools.php: the same resume optimizer was
+ * 'cv_optimizer' here and 'cv_roast' there, and four tools were listed for
+ * sale that were never built. The registry is now the only list; this shapes
+ * it for the pricing pages and the paywall, which expect 'id' and 'ngn_price'.
+ */
 function jm_ai_tools(): array {
-    return [
-        'cv_optimizer' => [
-            'id'           => 'cv_optimizer',
-            'name'         => 'CV Optimiser',
-            'credit_cost'  => TOOL_COST_CV_OPTIMIZER,
-            'ngn_price'    => PRICE_CREDITS_SINGLE * TOOL_COST_CV_OPTIMIZER,
-            'free_preview' => true,  // shows score only for free
-            'description'  => 'Get a detailed ATS score and actionable improvement tips.',
-            'is_free'      => false,
-        ],
-        'cover_letter' => [
-            'id'           => 'cover_letter',
-            'name'         => 'Cover Letter Generator',
-            'credit_cost'  => TOOL_COST_COVER_LETTER,
-            'ngn_price'    => PRICE_CREDITS_SINGLE * TOOL_COST_COVER_LETTER,
-            'free_preview' => false,
-            'description'  => 'AI-written cover letter tailored to the job description.',
-            'is_free'      => false,
-        ],
-        'cold_pitch' => [
-            'id'           => 'cold_pitch',
-            'name'         => 'Cold Pitch AI',
-            'credit_cost'  => TOOL_COST_COLD_PITCH,
-            'ngn_price'    => PRICE_CREDITS_SINGLE * TOOL_COST_COLD_PITCH,
-            'free_preview' => false,
-            'description'  => 'Human, specific cold pitches that earn the micro-yes — email, DM, or LinkedIn.',
-            'is_free'      => false,
-        ],
-        'interview_prep' => [
-            'id'           => 'interview_prep',
-            'name'         => 'Interview Prep',
-            'credit_cost'  => TOOL_COST_INTERVIEW_PREP,
-            'ngn_price'    => PRICE_CREDITS_SINGLE * TOOL_COST_INTERVIEW_PREP,
-            'free_preview' => false,
-            'description'  => '5 likely questions + model answers for your target role.',
-            'is_free'      => false,
-        ],
-        'skills_gap' => [
-            'id'           => 'skills_gap',
-            'name'         => 'Skills Gap Analyser',
-            'credit_cost'  => TOOL_COST_SKILLS_GAP_REPORT,
-            'ngn_price'    => PRICE_CREDITS_SINGLE * TOOL_COST_SKILLS_GAP_REPORT,
-            'free_preview' => true,  // free scan, paid for full report
-            'description'  => 'See the gap between your profile and your target role, with resource links.',
-            'is_free'      => false,
-        ],
-        'salary_analyzer' => [
-            'id'           => 'salary_analyzer',
-            'name'         => 'Salary Analyser',
-            'credit_cost'  => 0,
-            'ngn_price'    => 0,
-            'free_preview' => false,
-            'description'  => 'Market salary ranges for your role and location.',
-            'is_free'      => true,
-        ],
-        'tax_calculator' => [
-            'id'           => 'tax_calculator',
-            'name'         => 'Tax Calculator',
-            'credit_cost'  => 0,
-            'ngn_price'    => 0,
-            'free_preview' => false,
-            'description'  => 'Estimate your take-home pay after Nigerian income tax.',
-            'is_free'      => true,
-        ],
-    ];
+    require_once __DIR__ . '/tools.php';
+
+    $out = [];
+    foreach (jm_tools() as $key => $tool) {
+        $out[$key] = [
+            'id'           => $key,
+            'name'         => $tool['name'],
+            'credit_cost'  => $tool['credit_cost'],
+            'ngn_price'    => PRICE_CREDITS_SINGLE * $tool['credit_cost'],
+            'free_preview' => $tool['free_preview'],
+            'description'  => $tool['description'],
+            'is_free'      => $tool['is_free'],
+        ];
+    }
+
+    return $out;
+}
+
+/**
+ * The tools a customer can actually buy right now: built, switched on, and not
+ * free. A tool in beta is deliberately absent, because a beta invite does not
+ * charge. Use this for price lists, not jm_ai_tools().
+ */
+function jm_ai_tools_purchasable(): array {
+    require_once __DIR__ . '/tools.php';
+
+    $out = [];
+    foreach (jm_ai_tools() as $key => $tool) {
+        $registry = jm_tool($key);
+        if (empty($registry['built']) || jm_tool_status($key) !== 'on') {
+            continue;
+        }
+        $out[$key] = $tool;
+    }
+
+    return $out;
 }
 
 function jm_ai_tool(string $toolId): array {

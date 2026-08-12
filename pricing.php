@@ -574,7 +574,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 </tr>
             </thead>
             <tbody>
-                <?php foreach (jm_ai_tools() as $tool): ?>
+                <?php foreach (jm_ai_tools_purchasable() as $tool): ?>
                 <tr>
                     <td><strong><?= e($tool['name']) ?></strong><br><span style="font-size:12px;color:var(--jm-muted);"><?= e($tool['description']) ?></span></td>
                     <td class="tone-green">✓ Included</td>

@@ -348,7 +348,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
             <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--jm-muted);">What credits buy</span>
             <h3 style="font-size:18px;margin:8px 0 0;color:var(--jm-ink);">Tool cost guide</h3>
             <ul class="jm-cr-tool-list">
-                <?php foreach (jm_ai_tools() as $tool): ?>
+                <?php foreach (jm_ai_tools_purchasable() as $tool): ?>
                 <li>
                     <span class="jm-cr-tool-name"><?= e($tool['name']) ?></span>
                     <?php if ($tool['is_free']): ?>

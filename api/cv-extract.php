@@ -20,7 +20,7 @@ if (!Session::isLoggedIn()) {
     jsonError('Please log in.', 401);
 }
 // Both the builder and the optimizer extract CVs; either one is enough.
-jm_require_tool_api('cv_builder', 'cv_roast');
+jm_require_tool_api('cv_builder', 'cv_optimizer');
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('POST required.', 405);
 }

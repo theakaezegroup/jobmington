@@ -21,7 +21,21 @@ function jm_tools_audit(string $root): array
     $problems = [];
     $tools = jm_tools();
 
-    // 1. Every card on the Tools page names a key the registry knows.
+    // 0. The priced view still covers the whole registry. These were two
+    //    hand-written lists that had already drifted apart on one key.
+    foreach (array_keys(jm_ai_tools()) as $key) {
+        if (!isset($tools[$key])) {
+            $problems[] = "jm_ai_tools() prices '{$key}', which is not in the registry";
+        }
+    }
+    foreach ($tools as $key => $tool) {
+        if (!array_key_exists('credit_cost', $tool) || !array_key_exists('is_free', $tool)) {
+            $problems[] = "registry entry '{$key}' has no price, so the paywall cannot read it";
+        }
+    }
+
+    // 1. Every card on the Tools page names a key the registry knows, and
+    //    every built tool has a card. Unbuilt ones have no page to link to.
     $page = (string) @file_get_contents($root . '/tools/index.php');
     preg_match_all("/'key'\s*=>\s*'([a-z_]+)'/", $page, $m);
     $cardKeys = $m[1];
@@ -31,9 +45,12 @@ function jm_tools_audit(string $root): array
             $problems[] = "tools/index.php offers a card for '{$key}', which is not in the registry";
         }
     }
-    foreach (array_keys($tools) as $key) {
-        if (!in_array($key, $cardKeys, true)) {
+    foreach ($tools as $key => $tool) {
+        if (!empty($tool['built']) && !in_array($key, $cardKeys, true)) {
             $problems[] = "registry has '{$key}' but no card on tools/index.php names it";
+        }
+        if (empty($tool['built']) && in_array($key, $cardKeys, true)) {
+            $problems[] = "tools/index.php shows '{$key}', which is not built yet";
         }
     }
 
@@ -56,6 +73,9 @@ function jm_tools_audit(string $root): array
 
     // 3. Every tool page named by the registry gates on its own key.
     foreach ($tools as $key => $tool) {
+        if (empty($tool['built'])) {
+            continue;   // priced, but there is no page to gate yet
+        }
         $url = ltrim($tool['url'], '/');
         $path = $root . '/' . (substr($url, -1) === '/' ? $url . 'index.php' : $url);
 

@@ -3,6 +3,9 @@ if (!defined('JOBMINGTON')) {
     die('Direct access not permitted');
 }
 
+// The paywall steps aside for beta invites, so it needs the access layer.
+require_once __DIR__ . '/tools.php';
+
 /**
  * Returns the active seeker subscription row, or null.
  */
@@ -38,6 +41,9 @@ function jm_seeker_credit_balance(PDO $pdo, int $userId): int {
  * True if the user can use a given tool (premium OR has enough credits).
  */
 function jm_seeker_can_use_tool(PDO $pdo, int $userId, string $toolId): bool {
+    if (jm_tool_beta_pass($toolId, $userId)) {
+        return true;
+    }
     if (jm_seeker_is_premium($pdo, $userId)) {
         return true;
     }
@@ -62,7 +68,11 @@ function jm_seeker_spend_credit(PDO $pdo, int $userId, string $toolId): bool {
     $cost      = (int) ($tool['credit_cost'] ?? 1);
     $source    = 'credit';
 
-    if ($isPremium) {
+    if (jm_tool_beta_pass($toolId, $userId)) {
+        // Testing it, not buying it. Still logged, so beta usage is visible.
+        $source = 'free';
+        $cost   = 0;
+    } elseif ($isPremium) {
         $source = 'premium';
         $cost   = 0;
     } elseif ($tool['is_free'] ?? false) {
@@ -134,6 +144,9 @@ function jm_activate_seeker_subscription(
  * Returns true if the user is allowed through, false if blocked.
  */
 function jm_tool_paywall_check(PDO $pdo, int $userId, string $toolId, bool $redirect = true): bool {
+    if (jm_tool_beta_pass($toolId, $userId)) {
+        return true;
+    }
     $tool = jm_ai_tool($toolId);
     if (empty($tool) || ($tool['is_free'] ?? false)) {
         return true;

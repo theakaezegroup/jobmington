@@ -21,67 +21,169 @@ if (!defined('JOBMINGTON')) {
 }
 
 /**
- * Every gateable tool. `api` lists the endpoints that do the actual work, so
- * gating the page cannot be sidestepped by posting straight to the API.
+ * Every tool, described once.
+ *
+ * Access and price are separate questions but they belong to the same tool, so
+ * they live in the same entry. There used to be a second catalogue in
+ * monetization.php, and the two had already drifted: the resume optimizer was
+ * 'cv_roast' to the gate and 'cv_optimizer' to the paywall.
+ *
+ *   api           the endpoints that do the real work. Gating only the page
+ *                 would be theatre, so these are gated too.
+ *   credit_cost   what a run costs. 0 with is_free means it never charges.
+ *   built         false for a tool that has no page yet. It seeds as off, so
+ *                 it is not advertised as purchasable before it exists.
  */
 function jm_tools(): array
 {
     return [
         'cv_builder' => [
-            'key'   => 'cv_builder',
-            'name'  => 'Resume Builder',
-            'url'   => '/cv-builder/',
-            'group' => 'CV',
-            'api'   => ['api/cv-extract.php'],
+            'key'          => 'cv_builder',
+            'name'         => 'Resume Builder',
+            'url'          => '/cv-builder/',
+            'group'        => 'CV',
+            'api'          => ['api/cv-extract.php'],
+            'built'        => true,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'Build an ATS-friendly resume from polished templates.',
         ],
-        'cv_roast' => [
-            'key'   => 'cv_roast',
-            'name'  => 'Resume Optimizer',
-            'url'   => '/ai/roast.php',
-            'group' => 'AI',
-            'api'   => ['api/cv-roast.php', 'api/cv-extract.php'],
+        'cv_optimizer' => [
+            'key'          => 'cv_optimizer',
+            'name'         => 'Resume Optimizer',
+            'url'          => '/ai/roast.php',
+            'group'        => 'AI',
+            'api'          => ['api/cv-roast.php', 'api/cv-extract.php'],
+            'built'        => true,
+            'is_free'      => false,
+            'credit_cost'  => TOOL_COST_CV_OPTIMIZER,
+            'free_preview' => true,   // score shows free, the fixes are paid
+            'description'  => 'Get a detailed ATS score and actionable improvement tips.',
         ],
         'cover_letter' => [
-            'key'   => 'cover_letter',
-            'name'  => 'Cover Letter AI',
-            'url'   => '/ai/cover-letter.php',
-            'group' => 'AI',
-            'api'   => ['api/cover-letter.php'],
+            'key'          => 'cover_letter',
+            'name'         => 'Cover Letter AI',
+            'url'          => '/ai/cover-letter.php',
+            'group'        => 'AI',
+            'api'          => ['api/cover-letter.php'],
+            'built'        => true,
+            'is_free'      => false,
+            'credit_cost'  => TOOL_COST_COVER_LETTER,
+            'free_preview' => false,
+            'description'  => 'AI-written cover letter tailored to the job description.',
         ],
         'cold_pitch' => [
-            'key'   => 'cold_pitch',
-            'name'  => 'Cold Pitch AI',
-            'url'   => '/ai/cold-pitch.php',
-            'group' => 'AI',
-            'api'   => ['api/cold-pitch.php'],
+            'key'          => 'cold_pitch',
+            'name'         => 'Cold Pitch AI',
+            'url'          => '/ai/cold-pitch.php',
+            'group'        => 'AI',
+            'api'          => ['api/cold-pitch.php'],
+            'built'        => true,
+            'is_free'      => false,
+            'credit_cost'  => TOOL_COST_COLD_PITCH,
+            'free_preview' => false,
+            'description'  => 'Human, specific cold pitches that earn the micro-yes.',
         ],
         'andika' => [
-            'key'   => 'andika',
-            'name'  => 'Andika AI',
-            'url'   => '/ai/andika.php',
-            'group' => 'AI',
-            'api'   => ['api/andika.php'],
+            'key'          => 'andika',
+            'name'         => 'Andika AI',
+            'url'          => '/ai/andika.php',
+            'group'        => 'AI',
+            'api'          => ['api/andika.php'],
+            'built'        => true,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'Your career assistant: ask it anything about work.',
         ],
         'job_match' => [
-            'key'   => 'job_match',
-            'name'  => 'Job Matches',
-            'url'   => '/jobs/search.php',
-            'group' => 'Jobs',
-            'api'   => ['api/job-matches.php'],
+            'key'          => 'job_match',
+            'name'         => 'Job Matches',
+            'url'          => '/jobs/search.php',
+            'group'        => 'Jobs',
+            'api'          => ['api/job-matches.php'],
+            'built'        => true,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'Roles matched to your profile, ranked by fit.',
         ],
         'passport' => [
-            'key'   => 'passport',
-            'name'  => 'Talent Passport',
-            'url'   => '/wallet/passport/',
-            'group' => 'Profile',
-            'api'   => [],
+            'key'          => 'passport',
+            'name'         => 'Talent Passport',
+            'url'          => '/wallet/passport/',
+            'group'        => 'Profile',
+            'api'          => [],
+            'built'        => true,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'A verifiable profile you can share with employers.',
         ],
         'certificates' => [
-            'key'   => 'certificates',
-            'name'  => 'Certificates',
-            'url'   => '/certificates/',
-            'group' => 'Learn',
-            'api'   => ['api/certificates.php'],
+            'key'          => 'certificates',
+            'name'         => 'Certificates',
+            'url'          => '/certificates/',
+            'group'        => 'Learn',
+            'api'          => ['api/certificates.php'],
+            'built'        => true,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'Certificates for the courses you have finished.',
+        ],
+
+        // Priced and listed, but never built. They were on the pricing page as
+        // things people could buy. They seed as off, so they stay off it until
+        // there is something to sell.
+        'interview_prep' => [
+            'key'          => 'interview_prep',
+            'name'         => 'Interview Prep',
+            'url'          => '',
+            'group'        => 'AI',
+            'api'          => [],
+            'built'        => false,
+            'is_free'      => false,
+            'credit_cost'  => TOOL_COST_INTERVIEW_PREP,
+            'free_preview' => false,
+            'description'  => '5 likely questions and model answers for your target role.',
+        ],
+        'skills_gap' => [
+            'key'          => 'skills_gap',
+            'name'         => 'Skills Gap Analyser',
+            'url'          => '',
+            'group'        => 'AI',
+            'api'          => [],
+            'built'        => false,
+            'is_free'      => false,
+            'credit_cost'  => TOOL_COST_SKILLS_GAP_REPORT,
+            'free_preview' => true,
+            'description'  => 'See the gap between your profile and your target role.',
+        ],
+        'salary_analyzer' => [
+            'key'          => 'salary_analyzer',
+            'name'         => 'Salary Analyser',
+            'url'          => '',
+            'group'        => 'AI',
+            'api'          => [],
+            'built'        => false,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'Market salary ranges for your role and location.',
+        ],
+        'tax_calculator' => [
+            'key'          => 'tax_calculator',
+            'name'         => 'Tax Calculator',
+            'url'          => '',
+            'group'        => 'AI',
+            'api'          => [],
+            'built'        => false,
+            'is_free'      => true,
+            'credit_cost'  => 0,
+            'free_preview' => false,
+            'description'  => 'Estimate your take-home pay after Nigerian income tax.',
         ],
     ];
 }
@@ -167,6 +269,28 @@ function jm_tool_available(string $key, ?int $userId = null): bool
         default:
             return false;
     }
+}
+
+/**
+ * True when this person is testing the tool rather than buying it.
+ *
+ * Somebody invited into a beta is doing you a favour on software you have
+ * labelled unreliable. Charging them is the worst of both worlds: the revenue
+ * is negligible and you have taken money for something you warned them about.
+ * So a beta invite is also a free pass, and the paywall steps aside.
+ */
+function jm_tool_beta_pass(string $key, ?int $userId = null): bool
+{
+    if (jm_tool_status($key) !== 'beta') {
+        return false;
+    }
+    if (Session::isLoggedIn() && Session::isAdmin()) {
+        return true;
+    }
+    if ($userId === null) {
+        $userId = Session::isLoggedIn() ? Session::userId() : null;
+    }
+    return in_array($key, jm_tool_grants_for($userId), true);
 }
 
 /**

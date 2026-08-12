@@ -21,7 +21,7 @@ Session::start();
 if (!Session::isLoggedIn()) {
     jsonError('Please log in to roast or optimize a CV.', 401);
 }
-jm_require_tool_api('cv_roast');
+jm_require_tool_api('cv_optimizer');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonError('Invalid request method.', 405);
