@@ -907,6 +907,7 @@ if (!function_exists('jm_minimal_footer')) {
         })();
         </script>
         <?php
+        require_once __DIR__ . '/feedback.php';
     }
 }
 
