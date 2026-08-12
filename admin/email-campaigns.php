@@ -38,6 +38,21 @@ if (!is_writable($posterUploadDir)) {
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
 function ec_segment_label(string $seg): string {
+    // Registrants of one particular event, as "event:12".
+    if (str_starts_with($seg, 'event:')) {
+        try {
+            $stmt = db()->prepare("SELECT title FROM events WHERE event_id = ? LIMIT 1");
+            $stmt->execute([(int) substr($seg, 6)]);
+            $title = $stmt->fetchColumn();
+            if ($title) {
+                return 'Registered: ' . $title;
+            }
+        } catch (Throwable $e) {
+            error_log('ec_segment_label: ' . $e->getMessage());
+        }
+        return 'Registered for an event';
+    }
+
     return [
         'all'        => 'All verified users',
         'seekers'    => 'Job seekers only',
@@ -45,10 +60,50 @@ function ec_segment_label(string $seg): string {
         'unverified' => 'Unverified accounts',
         'new7'       => 'Joined last 7 days',
         'new30'      => 'Joined last 30 days',
+        'events'     => 'Everyone who registered for any event',
     ][$seg] ?? ucfirst($seg);
 }
 
 function ec_segment_query(PDO $pdo, string $seg): array {
+    /*
+     * Event registrants are not necessarily users: someone can register with
+     * just a name and an email and never open an account, so this reads
+     * event_registrations rather than users and keeps those people.
+     *
+     * Unsubscribes are honoured here rather than left to the send loop. A
+     * registrant gave their address to attend a webinar, not to be marketed
+     * at, so an opt-out has to hold from the moment the list is counted.
+     */
+    $isEvent = ($seg === 'events' || str_starts_with($seg, 'event:'));
+
+    if ($isEvent) {
+        $sql = "
+            SELECT MAX(r.user_id) AS user_id,
+                   MAX(COALESCE(NULLIF(r.name, ''), u.full_name, 'there')) AS full_name,
+                   r.email
+            FROM event_registrations r
+            LEFT JOIN users u ON u.user_id = r.user_id
+            WHERE r.email IS NOT NULL AND r.email != ''
+              AND NOT EXISTS (SELECT 1 FROM email_unsubscribes e WHERE e.email = r.email)
+        ";
+        $args = [];
+        if (str_starts_with($seg, 'event:')) {
+            $sql .= " AND r.event_id = ?";
+            $args[] = (int) substr($seg, 6);
+        }
+        // One row per person: the same address may have registered for several.
+        $sql .= " GROUP BY r.email ORDER BY full_name";
+
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($args);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable $e) {
+            error_log('ec_segment_query(' . $seg . '): ' . $e->getMessage());
+            return [];
+        }
+    }
+
     $base  = 'SELECT user_id, full_name, email FROM users WHERE is_active = 1 AND email IS NOT NULL AND email != \'\'';
     $sql   = match ($seg) {
         'seekers'    => $base . " AND user_type = 'seeker'   AND is_verified = 1",
@@ -301,7 +356,25 @@ if ($editId > 0 && $view === 'compose') {
     }
 }
 
-$segments = ['all', 'seekers', 'employers', 'unverified', 'new7', 'new30'];
+$segments = ['all', 'seekers', 'employers', 'unverified', 'new7', 'new30', 'events'];
+
+// One entry per event that anyone has registered for, newest first, so you can
+// write to the people who signed up for a particular webinar.
+try {
+    $withRegistrants = db()->query("
+        SELECT e.event_id, e.title, COUNT(r.registration_id) AS regs
+        FROM events e
+        JOIN event_registrations r ON r.event_id = e.event_id
+        GROUP BY e.event_id, e.title
+        ORDER BY e.starts_at DESC
+        LIMIT 40
+    ");
+    foreach ($withRegistrants as $row) {
+        $segments[] = 'event:' . (int) $row['event_id'];
+    }
+} catch (Throwable $e) {
+    error_log('email-campaigns event segments: ' . $e->getMessage());
+}
 
 $pageTitle = 'Email Outreach | ' . SITE_NAME;
 require_once __DIR__ . '/../includes/header.php';
@@ -770,7 +843,6 @@ function livePreview() {
     const frame = document.getElementById('ec-preview-frame');
     if (!body || !frame) return;
 
-    const logo = 'https://jobmington.com/assets/images/badge.png';
     const ff   = "font-family:'Futura Cyrillic Book','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
     const ffd  = "font-family:'Futura Cyrillic Demi','Century Gothic','Trebuchet MS',Helvetica,Arial,sans-serif;";
 
@@ -786,24 +858,53 @@ function livePreview() {
         posterHtml = `<tr><td style="padding:0;"><img src="${posterSrc}" alt="Poster" style="width:100%;display:block;"></td></tr>`;
     }
 
+    /* This mirrors Mailer::buildTemplate exactly, because that is what
+       actually wraps the body when the campaign sends. The preview used to
+       show a white header with a 32px badge while the delivered email had the
+       brand-blue one with the 56px mark, so you were approving a design that
+       was never sent. Change one and change the other. */
+    const mark = '/jobmington/assets/images/badge-mark.png?v=logo-7';
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f4f4f4;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:24px 16px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f4;padding:48px 16px;">
 <tr><td align="center">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;">
-    <tr><td style="background:#fff;padding:20px 28px;">
-      <table cellpadding="0" cellspacing="0"><tr>
-        <td style="padding-right:10px;vertical-align:middle;"><img src="${logo}" width="32" height="32"></td>
-        <td style="vertical-align:middle;"><span style="${ffd}font-size:18px;font-weight:700;color:#06142a;">Jobmington</span><br>
-          <span style="${ff}font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;">Simple hiring for African talent</span></td>
-      </tr></table>
-    </td></tr>
-    <tr><td style="height:3px;background:#f59f22;"></td></tr>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#ffffff;border-radius:0;">
+
+    <tr>
+      <td style="background:#0640a3;padding:24px 28px;">
+        <table cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="padding-right:12px;vertical-align:middle;" width="68">
+              <img src="${mark}" alt="Jobmington" width="56" height="56" style="display:block;border:0;">
+            </td>
+            <td style="vertical-align:middle;">
+              <span style="${ffd}font-size:18px;font-weight:700;color:#ffffff;letter-spacing:-0.01em;white-space:nowrap;">Jobmington</span><br>
+              <span style="${ff}font-size:10px;color:#d6e4fa;letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;">Simple hiring for African talent</span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td style="height:4px;background:#f59f22;font-size:0;line-height:0;">&zwnj;</td></tr>
+
     ${posterHtml}
-    <tr><td style="${ff}padding:28px;font-size:14px;line-height:1.8;color:#374151;">${body.value || '<p style="color:#94a3b8;">Start typing your email body...</p>'}</td></tr>
-    <tr><td style="padding:16px 28px;text-align:center;background:#f7f9fc;font-size:11px;color:#9ca3af;${ff}">
-      &copy; ${new Date().getFullYear()} Jobmington &middot; <a href="#" style="color:#9ca3af;">Unsubscribe</a>
-    </td></tr>
+
+    <tr><td style="padding:44px 40px 36px;${ff}font-size:15px;line-height:1.8;color:#374151;">${body.value || '<p style="color:#94a3b8;">Start typing your email body...</p>'}</td></tr>
+
+    <tr><td style="padding:0 40px;"><div style="height:1px;background:#e5e7eb;font-size:0;">&zwnj;</div></td></tr>
+
+    <tr>
+      <td style="padding:22px 40px;text-align:center;background:#f7f9fc;">
+        <p style="margin:0 0 6px;${ff}font-size:12px;color:#9ca3af;">
+          <a href="#" style="color:#0640a3;text-decoration:none;font-weight:600;">jobmington.com</a>
+          &nbsp;&middot;&nbsp;<a href="#" style="color:#9ca3af;text-decoration:none;">Privacy</a>
+          &nbsp;&middot;&nbsp;<a href="#" style="color:#9ca3af;text-decoration:none;">Terms</a>
+        </p>
+        <p style="margin:0;${ff}font-size:11px;color:#c9d0da;">&copy; ${new Date().getFullYear()} Jobmington. Simple hiring for African talent.</p>
+      </td>
+    </tr>
+
   </table>
 </td></tr></table>
 </body></html>`;
