@@ -261,7 +261,7 @@ function jm_ad_field(string $key, array $def, ?array $row): void {
             <?php if (!$ads): ?>
                 <p class="px-6 py-10 text-center text-sm text-slate-400">No ads yet. Create one above.</p>
             <?php else: ?>
-                <div class="jm-tablewrap"><table class="w-full text-sm">
+                <div class="jm-tablewrap"><table class="w-full text-sm jm-stacktable">
                     <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                         <tr><th class="px-6 py-3">Banner</th><th class="px-4 py-3">Schedule</th><th class="px-4 py-3">Views</th><th class="px-4 py-3">Clicks</th><th class="px-4 py-3">CTR</th><th class="px-4 py-3"></th></tr>
                     </thead>

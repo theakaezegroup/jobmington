@@ -604,7 +604,7 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     <?php else: ?>
         <div class="jm-tablewrap">
-        <table class="ec-table">
+        <table class="ec-table jm-stacktable">
             <thead>
                 <tr>
                     <th>Campaign</th>

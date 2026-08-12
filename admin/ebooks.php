@@ -177,7 +177,7 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 
     <div>
-        <div class="jm-tablewrap"><table class="jm-eb-table">
+        <div class="jm-tablewrap"><table class="jm-eb-table jm-stacktable">
             <thead><tr><th>Title</th><th>Category</th><th>Price</th><th>Downloads</th><th>Status</th><th></th></tr></thead>
             <tbody>
             <?php if (empty($ebooks)): ?>

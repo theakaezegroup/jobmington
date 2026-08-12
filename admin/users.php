@@ -523,7 +523,7 @@ require_once __DIR__ . '/../includes/header.php';
 </form>
 
 <section class="admin-users-table">
-    <table>
+    <table class="jm-stacktable">
         <thead>
             <tr>
                 <th>User</th>

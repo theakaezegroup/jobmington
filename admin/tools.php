@@ -172,7 +172,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php if (!$list): ?>
                         <p class="text-sm text-slate-500">Nobody invited yet. While this tool is in beta, only you can reach it.</p>
                     <?php else: ?>
-                        <div class="jm-tablewrap"><table class="w-full text-sm">
+                        <div class="jm-tablewrap"><table class="w-full text-sm jm-stacktable">
                             <thead class="bg-white text-slate-500 uppercase text-xs">
                                 <tr>
                                     <th class="text-left px-3 py-2">Name</th>

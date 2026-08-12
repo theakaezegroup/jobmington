@@ -357,7 +357,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <p class="text-slate-500 text-center py-8">No seed rates configured.</p>
             <?php else: ?>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full jm-stacktable">
                         <thead><tr class="border-b border-white/10"><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Action</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Type</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Seeds</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Status</th></tr></thead>
                         <tbody>
                             <?php foreach ($seedRates as $rate): ?>
@@ -382,7 +382,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <p class="text-slate-500 text-center py-8">No transactions recorded yet.</p>
             <?php else: ?>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full jm-stacktable">
                         <thead><tr class="border-b border-white/10"><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">User</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Type</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Amount</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Source</th><th class="text-left py-3 px-4 text-slate-500 text-xs font-bold uppercase">Date</th></tr></thead>
                         <tbody>
                             <?php foreach ($recentTransactions as $tx): ?>

@@ -604,7 +604,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
                         <span>Share of used VPS disk: <?= e((string) $trackedShareOfUsed) ?>%</span>
                         <span>Scanned: <?= e($storageScannedAt ? date('M d, Y h:i A', $storageScannedAt) : 'Just now') ?><?= !empty($storageFootprints['from_cache']) ? ' (cached)' : '' ?></span>
                     </div>
-                    <table class="jm-backup-table" style="margin-top:12px;">
+                    <table class="jm-backup-table jm-stacktable" style="margin-top:12px;">
                         <thead>
                             <tr>
                                 <th>App / folder</th>
@@ -656,7 +656,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
                         <span>Visible DB total: <?= e(jm_backup_format_bytes($visibleDatabaseBytes)) ?></span>
                         <span>Current Jobmington DB: <?= e(jm_backup_format_bytes($backupStatus['database_size'])) ?></span>
                     </div>
-                    <table class="jm-backup-table" style="margin-top:12px; min-width:520px;">
+                    <table class="jm-backup-table jm-stacktable" style="margin-top:12px; min-width:520px;">
                         <thead>
                             <tr>
                                 <th>Schema</th>
@@ -701,7 +701,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
 
             <div class="jm-panel" style="margin-top:16px; overflow-x:auto;">
                 <h2>Available backups</h2>
-                <table class="jm-backup-table">
+                <table class="jm-backup-table jm-stacktable">
                     <thead>
                         <tr>
                             <th>Created</th>

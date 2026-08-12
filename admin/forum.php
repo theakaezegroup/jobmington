@@ -162,7 +162,7 @@ require_once __DIR__ . '/../includes/header.php';
             </aside>
 
             <main class="lg:col-span-2 bg-white border border-slate-200 rounded-xl overflow-hidden">
-                <div class="jm-tablewrap"><table class="w-full text-sm">
+                <div class="jm-tablewrap"><table class="w-full text-sm jm-stacktable">
                     <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
                         <tr>
                             <th class="text-left p-4">Topic</th>
