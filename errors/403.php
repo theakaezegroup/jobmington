@@ -51,6 +51,8 @@ $pageTitle = 'Access Restricted | ' . SITE_NAME;
                 'actions' => $actions,
             ]) ?>
         </section>
+
+        <?php jm_minimal_footer(); ?>
     </div>
 </body>
 </html>

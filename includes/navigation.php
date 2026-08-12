@@ -42,7 +42,7 @@ final class Navigation {
             ['url' => '/jobmington/learn/', 'label' => 'Learn', 'icon' => 'graduation', 'compact' => true],
             ['url' => '/jobmington/ai/andika.php', 'label' => 'Andika AI', 'icon' => 'sparkles', 'compact' => false],
             ['url' => '/jobmington/employer/post-job.php', 'label' => 'Post a Job', 'icon' => 'plus', 'compact' => false],
-            ['url' => '/jobmington/employer/dashboard.php', 'label' => 'Employers', 'icon' => 'users', 'compact' => true],
+            ['url' => '/jobmington/employer/', 'label' => 'Employers', 'icon' => 'users', 'compact' => true],   // the landing page, not the dashboard: it forwards employers on, and does not 403 a seeker
             ['url' => '/jobmington/pricing.php', 'label' => 'Pricing', 'icon' => 'briefcase', 'compact' => false],
         ];
     }
