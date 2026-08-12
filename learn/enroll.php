@@ -65,6 +65,13 @@ try {
 
     try {
         Security::logActivity($userId, 'course_enroll', 'Enrolled in: ' . $course['title']);
+        sendNotification(
+            (int) $userId,
+            'course',
+            'You are enrolled in ' . $course['title'],
+            'Pick up where you left off any time from your courses.',
+            '/learn/course.php?id=' . (int) $course['course_id']
+        );
     } catch (Throwable $e) {
         error_log($e->getMessage());
     }

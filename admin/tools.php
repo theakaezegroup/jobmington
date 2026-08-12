@@ -65,6 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ")->execute([$key, (int) $user['user_id'], $adminId, Security::clean($_POST['grant_note'] ?? '') ?: null]);
 
                 jm_log_activity($adminId, 'admin_tool_grant', "{$tools[$key]['name']} to {$email}");
+                sendNotification(
+                    (int) $user['user_id'],
+                    'tool_access',
+                    $tools[$key]['name'] . ' is open to you',
+                    'You have early access while it is in beta. It is free to use for now.',
+                    $tools[$key]['url'] ?: '/tools/'
+                );
                 $msg = $user['full_name'] . ' can now use ' . $tools[$key]['name'] . '.';
             }
         } elseif ($action === 'revoke') {

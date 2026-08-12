@@ -1,6 +1,6 @@
     </main>
 
-    <div class="jm-ai-toast-stack" id="jm-toast-container" aria-live="polite"></div>
+    <?php require_once __DIR__ . '/feedback.php'; ?>
 
     <script>
     (() => {
@@ -30,21 +30,8 @@
             });
         }
 
-        window.JM = window.JM || {};
-        window.JM.toast = (message, type = 'info', title = '') => {
-            const stack = document.getElementById('jm-toast-container');
-            if (!stack) return;
-
-            const toast = document.createElement('div');
-            toast.className = `jm-ai-toast ${type}`;
-            toast.innerHTML = `${title ? `<strong>${title}</strong>` : ''}<span>${message}</span>`;
-            stack.appendChild(toast);
-            window.setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-8px)';
-                window.setTimeout(() => toast.remove(), 220);
-            }, 4200);
-        };
+        // Toast lives in includes/feedback.php now. This file used to define
+        // a second one over the top of the first.
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

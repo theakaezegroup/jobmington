@@ -1,8 +1,11 @@
 <?php
 /**
- * Reusable notification bell for members. Self-contained (own styles + JS +
- * Web-Audio chime). Call jm_notification_bell() inside any site header's
- * right-hand area. Renders nothing for guests. Safe to include once per page.
+ * Reusable notification bell for members. Call jm_notification_bell() inside
+ * any site header's right-hand area. Renders nothing for guests, and only once
+ * per page however many times it is called.
+ *
+ * Sound comes from includes/feedback.php rather than from here, so the chime,
+ * the save cue and the toast sounds are one system with one mute switch.
  */
 if (!defined('JOBMINGTON')) { exit; }
 
@@ -21,7 +24,13 @@ function jm_notification_bell(): void {
             <span id="jm-bell-badge" class="jm-bell-badge">0</span>
         </button>
         <div id="jm-bell-panel" class="jm-bell-panel" hidden>
-            <div class="jm-bell-head"><span>Notifications</span><button type="button" id="jm-bell-readall">Mark all read</button></div>
+            <div class="jm-bell-head">
+                <span>Notifications</span>
+                <span class="jm-bell-head-acts">
+                    <button type="button" id="jm-bell-sound" class="jm-bell-sound" title="Notification sound" aria-pressed="true" aria-label="Toggle notification sound"></button>
+                    <button type="button" id="jm-bell-readall">Mark all read</button>
+                </span>
+            </div>
             <div id="jm-bell-list" class="jm-bell-list"><div class="jm-bell-empty">Loading&hellip;</div></div>
             <a class="jm-bell-foot" href="/jobmington/seeker/notifications.php">View all notifications</a>
         </div>
@@ -39,6 +48,11 @@ function jm_notification_bell(): void {
         .jm-bell-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid #f0f4f9; }
         .jm-bell-head span { font-size:13px; font-weight:800; color:#101828; text-transform:uppercase; letter-spacing:.05em; }
         .jm-bell-head button { background:none; border:0; color:#0640a3; font-size:12px; font-weight:700; cursor:pointer; }
+        .jm-bell-head-acts { display:inline-flex; align-items:center; gap:10px; }
+        .jm-bell-sound { width:22px; height:22px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; color:#0640a3; }
+        .jm-bell-sound:hover { background:#eef4ff; }
+        .jm-bell-sound[aria-pressed="false"] { color:#b3becd; }
+        .jm-bell-sound svg { width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
         .jm-bell-list { max-height:380px; overflow-y:auto; }
         .jm-bell-item { display:flex; gap:11px; padding:13px 16px; border-bottom:1px solid #f5f8fc; text-decoration:none; transition:background .12s; cursor:pointer; }
         .jm-bell-item:hover { background:#f8fbff; }
@@ -63,24 +77,11 @@ function jm_notification_bell(): void {
         if (!btn || !panel || btn.dataset.init) return;
         btn.dataset.init = '1';
         var base = <?= json_encode($base) ?>;
-        var lastUnread = parseInt(localStorage.getItem('jm_notif_seen') || '0', 10) || 0;
-        var actx = null;
-
-        function chime() {
-            try {
-                actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-                var now = actx.currentTime;
-                [[880, 0], [1174.66, 0.11]].forEach(function (n) {
-                    var o = actx.createOscillator(), g = actx.createGain();
-                    o.type = 'sine'; o.frequency.value = n[0]; o.connect(g); g.connect(actx.destination);
-                    var t = now + n[1];
-                    g.gain.setValueAtTime(0, t);
-                    g.gain.linearRampToValueAtTime(0.14, t + 0.02);
-                    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
-                    o.start(t); o.stop(t + 0.55);
-                });
-            } catch (e) {}
-        }
+        /* Detection is by newest id, not by unread count. A count only tells
+           you the number changed: read two and receive two and it has not
+           moved, so the arrival was silent. An id only ever goes up. */
+        var seenId = parseInt(localStorage.getItem('jm_notif_seen_id') || '0', 10) || 0;
+        var primed = seenId > 0;
         function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
         function setBadge(n) { if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.add('show'); } else { badge.classList.remove('show'); } }
         function render(items) {
@@ -105,9 +106,24 @@ function jm_notification_bell(): void {
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (d) {
                     if (!d || !d.success) return;
-                    var u = d.data.unread || 0; setBadge(u);
-                    if (u > lastUnread) { btn.classList.add('jm-bell-ring'); setTimeout(function () { btn.classList.remove('jm-bell-ring'); }, 1000); chime(); }
-                    lastUnread = u; localStorage.setItem('jm_notif_seen', u);
+                    var u = d.data.unread || 0;
+                    var latest = d.data.latest || 0;
+                    setBadge(u);
+
+                    /* Only ring for something that arrived after we started
+                       watching. On a browser that has never seen this account,
+                       every existing notification would otherwise be announced
+                       as new the moment the page loads. */
+                    if (primed && latest > seenId) {
+                        btn.classList.add('jm-bell-ring');
+                        setTimeout(function () { btn.classList.remove('jm-bell-ring'); }, 1000);
+                        if (window.JM && JM.sound) { JM.sound('notify'); }
+                    }
+                    if (latest > seenId) {
+                        seenId = latest;
+                        localStorage.setItem('jm_notif_seen_id', String(seenId));
+                    }
+                    primed = true;
                     if (open) render(d.data.items || []);
                 }).catch(function () {});
         }
@@ -117,14 +133,45 @@ function jm_notification_bell(): void {
             else { panel.setAttribute('hidden', ''); }
         });
         document.addEventListener('click', function (e) { if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) panel.setAttribute('hidden', ''); });
+        var soundBtn = document.getElementById('jm-bell-sound');
+        var ON  = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+        var OFF = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>';
+        function paintSound() {
+            if (!soundBtn || !window.JM || !JM.soundOn) { return; }
+            var on = JM.soundOn();
+            soundBtn.innerHTML = on ? ON : OFF;
+            soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            soundBtn.title = on ? 'Sound on' : 'Sound off';
+        }
+        if (soundBtn) {
+            paintSound();
+            soundBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (window.JM && JM.setSound) { JM.setSound(!JM.soundOn()); paintSound(); }
+            });
+        }
+
         if (readAll) readAll.addEventListener('click', function () {
             fetch(base + '/api/notifications.php?action=read_all', { method: 'POST' }).then(function () {
-                setBadge(0); lastUnread = 0; localStorage.setItem('jm_notif_seen', '0');
+                setBadge(0);
                 list.querySelectorAll('.jm-bell-item').forEach(function (i) { i.classList.remove('unread'); });
             });
         });
         load(false);
-        setInterval(function () { load(false); }, 45000);
+        /* Polling pauses with the tab. Every signed-in member on every open
+           page was hitting the endpoint every 45 seconds whether or not
+           anybody was there to see it. It catches up on the way back. */
+        var timer = null;
+        function startPolling() {
+            if (timer) { return; }
+            timer = setInterval(function () { load(false); }, 45000);
+        }
+        function stopPolling() { clearInterval(timer); timer = null; }
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) { stopPolling(); }
+            else { load(false); startPolling(); }
+        });
+        if (!document.hidden) { startPolling(); }
     })();
     </script>
     <?php

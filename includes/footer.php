@@ -48,7 +48,7 @@ if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
 </main>
 
 <!-- Global Toast Container -->
-<div class="toast-container" id="jm-toast-container"></div>
+<?php require_once __DIR__ . '/feedback.php'; ?>
 
 <!-- Global Modal Overlay -->
 <div class="jm-modal-overlay" id="jm-modal-overlay">
@@ -209,40 +209,8 @@ if ('serviceWorker' in navigator) {
 <script>
 window.JM = window.JM || {};
 
-// Toast Notifications
-JM.toast = function(message, type = 'info', title = null) {
-    const container = document.getElementById('jm-toast-container');
-    if (!container) return;
-    
-    const icons = {
-        success: '<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-        error: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
-        warning: '<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-        info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>'
-    };
-    const titles = { success: 'Success', error: 'Error', warning: 'Warning', info: 'Info' };
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-        <div class="toast-icon">${icons[type]}</div>
-        <div class="toast-content">
-            <div class="toast-title">${title || titles[type]}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 250);">
-            <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-        <div class="toast-progress" style="animation-duration: 4s;"></div>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('hiding');
-        setTimeout(() => toast.remove(), 250);
-    }, 4000);
-};
+// Toasts and sound now live in includes/feedback.php, so the public site,
+// the AI pages and the admin panel all get the same one.
 
 // Confirm Dialog
 JM.confirm = function(options) {

@@ -218,7 +218,14 @@ jm_jobs_header($pageTitle, 'jobs');
                     btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
                     btn.setAttribute('aria-label', saved ? 'Unsave job' : 'Save job');
                     btn.title = saved ? 'Unsave' : 'Save job';
+                    if (window.JM && JM.toast) { JM.toast(d.message, 'success'); }
+                    if (window.JM && JM.sound) { JM.sound('save'); }
+                } else if (window.JM && JM.toast) {
+                    JM.toast(d.message || 'That did not save.', 'error');
                 }
+            })
+            .catch(function () {
+                if (window.JM && JM.toast) { JM.toast('Check your connection and try again.', 'error'); }
             })
             .finally(function () { btn.disabled = false; });
         });

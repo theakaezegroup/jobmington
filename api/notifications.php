@@ -49,9 +49,20 @@ try {
             ];
         }, $rows);
 
-        $unread = (int) $pdo->query("SELECT COUNT(*) FROM notifications WHERE user_id = $userId AND is_read = 0")->fetchColumn();
+        // Prepared like every other statement here. It was interpolating the
+        // user id straight into the string.
+        $count = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+        $count->execute([$userId]);
+        $unread = (int) $count->fetchColumn();
 
-        jsonSuccess(['items' => $items, 'unread' => $unread]);
+        // The highest id this person has. The bell needs it to tell a genuinely
+        // new notification from a count that merely went up, which is not the
+        // same thing once reads and arrivals overlap.
+        $newest = $pdo->prepare("SELECT COALESCE(MAX(notification_id), 0) FROM notifications WHERE user_id = ?");
+        $newest->execute([$userId]);
+        $latest = (int) $newest->fetchColumn();
+
+        jsonSuccess(['items' => $items, 'unread' => $unread, 'latest' => $latest]);
     }
 
     if ($action === 'read') {
