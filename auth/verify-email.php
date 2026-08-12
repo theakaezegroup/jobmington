@@ -86,9 +86,9 @@ if ($token !== '') {
      * fails for the same reason the last one did.
      */
     $stmt = $pdo->prepare("
-        SELECT user_id, full_name, email, is_active
+        SELECT user_id, full_name, email, is_active, is_verified
         FROM users
-        WHERE activation_token = ? AND is_verified = 0
+        WHERE activation_token = ?
         LIMIT 1
     ");
     $stmt->execute([$token]);
@@ -100,38 +100,50 @@ if ($token !== '') {
     }
 
     if ($user) {
-        $pdo->prepare("
-            UPDATE users SET is_verified = 1, activation_token = NULL WHERE user_id = ?
-        ")->execute([$user['user_id']]);
+        $alreadyDone = (int) $user['is_verified'] === 1;
+
+        if (!$alreadyDone) {
+            // The token is deliberately kept. Clearing it is what made the
+            // second visit indistinguishable from a forged one.
+            $pdo->prepare("
+                UPDATE users SET is_verified = 1 WHERE user_id = ?
+            ")->execute([$user['user_id']]);
+        }
 
         /* update session if this is the same user */
         if (Session::isLoggedIn() && Session::userId() === (int) $user['user_id']) {
             $_SESSION['is_verified'] = true;
         }
 
-        sendNotification(
-            (int) $user['user_id'],
-            'account',
-            'Your email is verified',
-            'Everything on Jobmington is open to you now.',
-            '/seeker/dashboard.php'
-        );
-
-        // Reward email verification with Seeds (once — awardEmailVerificationBonus
-        // is safe to call, but guard against repeat verifies via the token reset).
-        try {
-            require_once __DIR__ . '/../includes/seeds.php';
-            awardEmailVerificationBonus((int) $user['user_id']);
-        } catch (Throwable $e) {
-            error_log('Email-verify seed bonus failed: ' . $e->getMessage());
+        if (!$alreadyDone) {
+            sendNotification(
+                (int) $user['user_id'],
+                'account',
+                'Your email is verified',
+                'Everything on Jobmington is open to you now.',
+                '/seeker/dashboard.php'
+            );
         }
 
-        // Award the Verified badge.
-        try {
-            require_once __DIR__ . '/../includes/badges.php';
-            awardBadge((int) $user['user_id'], 'verified-email');
-        } catch (Throwable $e) {
-            error_log('Email-verify badge failed: ' . $e->getMessage());
+        // Seeds and the badge are first-time only. They used to rely on the
+        // token being wiped to stop them repeating; the token now survives, so
+        // the condition is stated rather than implied.
+        if (!$alreadyDone) {
+            try {
+                require_once __DIR__ . '/../includes/seeds.php';
+                awardEmailVerificationBonus((int) $user['user_id']);
+            } catch (Throwable $e) {
+                error_log('Email-verify seed bonus failed: ' . $e->getMessage());
+            }
+        }
+
+        if (!$alreadyDone) {
+            try {
+                require_once __DIR__ . '/../includes/badges.php';
+                awardBadge((int) $user['user_id'], 'verified-email');
+            } catch (Throwable $e) {
+                error_log('Email-verify badge failed: ' . $e->getMessage());
+            }
         }
 
         $verified = true;
