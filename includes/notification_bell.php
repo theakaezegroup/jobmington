@@ -206,10 +206,20 @@ function jm_notification_bell(): void {
             if (!header) { return; }
 
             if (drawer.matches) {
-                if (bellWrap.parentElement !== header) {
-                    // Before the hamburger, so the order reads bell then menu.
-                    var toggle = header.querySelector('.jm-mobile-nav-toggle');
-                    header.insertBefore(bellWrap, toggle || null);
+                /* Check the position, not just the parent.
+                   On pages where the hamburger is injected by the footer
+                   script, that script runs after this one: the toggle did not
+                   exist yet, the bell was appended to the end of the header,
+                   and the hamburger then landed in front of it. The old test
+                   only asked whether the bell was in the header, which by then
+                   it was, so the swap was never corrected. */
+                var toggle = header.querySelector('.jm-mobile-nav-toggle');
+                if (toggle) {
+                    if (bellWrap.nextElementSibling !== toggle) {
+                        header.insertBefore(bellWrap, toggle);   // bell, then menu
+                    }
+                } else if (bellWrap.parentElement !== header) {
+                    header.appendChild(bellWrap);
                 }
             } else if (bellWrap.parentElement !== homeNav) {
                 homeNav.insertBefore(bellWrap, homeNext);
