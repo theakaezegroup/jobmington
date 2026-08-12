@@ -41,7 +41,7 @@ function jm_notification_bell(): void {
            Borrowed from the chat launcher: a second shape pushed mostly outside
            a parent that hides its overflow, so what is left is a corner of
            colour rather than a decoration sitting on top of the button. */
-        .jm-bell-btn::before { content:''; position:absolute; width:30px; height:30px; border-radius:50%; background:#f59f22; right:-19px; bottom:-19px; }
+        .jm-bell-btn::before { content:''; position:absolute; width:30px; height:30px; border-radius:50%; background:#f59f22; left:-19px; bottom:-19px; }
         .jm-bell-btn svg { position:relative; z-index:1; }
         .jm-bell-btn:hover { background:#f6f8fb; }
         /* On the brand-blue mobile bar the bell sits plainly on the blue, like
