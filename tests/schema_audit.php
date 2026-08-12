@@ -72,6 +72,33 @@ function jm_schema_audit(PDO $pdo, string $root): array
             }
         }
 
+        // SELECT a, b, c FROM <table>
+        //
+        // Only the simple shape: no join, no alias, no expression, no star. A
+        // bad column in a SELECT is just as fatal as in an INSERT, and twice it
+        // has shipped as a live 500, but anything more ambitious than this
+        // starts inventing problems that are not there.
+        if (preg_match_all('/SELECT\s+([a-z0-9_,\s]+?)\s+FROM\s+`?([a-z_]+)`?\s*(?:WHERE|ORDER|GROUP|LIMIT|\)|;|$)/is', $src, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $hit) {
+                $table = $hit[2];
+                if (!isset($schema[$table]) || stripos($hit[0], ' JOIN ') !== false) {
+                    continue;
+                }
+                foreach (explode(',', $hit[1]) as $raw) {
+                    $col = trim($raw);
+                    if ($col === '' || !preg_match('/^[a-z_][a-z0-9_]*$/i', $col)) {
+                        continue;
+                    }
+                    if (in_array(strtoupper($col), ['DISTINCT', 'SELECT', 'FROM', 'AS'], true)) {
+                        continue;
+                    }
+                    if (!in_array($col, $schema[$table], true)) {
+                        $record($rel, 'SELECT', $table, $col);
+                    }
+                }
+            }
+        }
+
         // INSERT INTO <table> (a, b, c)
         if (preg_match_all('/INSERT\s+(?:IGNORE\s+)?INTO\s+`?([a-z_]+)`?\s*\(([^)]*)\)/is', $src, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $hit) {

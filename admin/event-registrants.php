@@ -25,7 +25,7 @@ $q       = trim((string) get('q', ''));
 $page    = max(1, (int) get('p', 1));
 $perPage = 100;
 
-$ev = $pdo->prepare("SELECT event_id, title, slug, starts_at, poster FROM events WHERE event_id = ? LIMIT 1");
+$ev = $pdo->prepare("SELECT event_id, title, slug, starts_at FROM events WHERE event_id = ? LIMIT 1");
 $ev->execute([$eventId]);
 $event = $ev->fetch(PDO::FETCH_ASSOC);
 
