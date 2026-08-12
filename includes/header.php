@@ -1292,6 +1292,89 @@ ob_start();
                 color: #ffffff !important;
             }
         }
+
+        /* ── DESKTOP: brand blue once you start reading ────────────────
+           The bar stays frosted at rest, because the blur is doing real
+           work: content passing under it reads as depth, and a solid
+           colour throws that away. Once you scroll it becomes brand blue,
+           so the header asserts itself where it is actually being seen
+           against content rather than against the top of the page.
+
+           Translucent, not solid, so the blur survives the change.
+
+           Everything in the bar is restyled with it. The right-hand
+           cluster carries inline styles, so these need !important to win,
+           and the icons set their own background on hover in inline JS,
+           which an important rule still beats. Leaving any of it would put
+           white tiles on blue: the mismatched square already taken off the
+           logo and the hamburger.
+
+           Desktop only. Below 1024px the bar is already blue at all times
+           and has its own rules. */
+        @media (min-width: 1024px) {
+            .island-nav.scrolled {
+                background: rgba(6, 64, 163, 0.94) !important;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.16) !important;
+                box-shadow: 0 2px 14px rgba(6, 64, 163, 0.20) !important;
+                color: #ffffff !important;
+            }
+            .island-nav.scrolled .jm-brand-text,
+            .island-nav.scrolled .jm-region-label,
+            .island-nav.scrolled .jm-region-code,
+            .island-nav.scrolled .nav-pill,
+            .island-nav.scrolled .jm-auth-link {
+                color: #ffffff !important;
+                opacity: .92;
+            }
+            .island-nav.scrolled .nav-pill:hover,
+            .island-nav.scrolled .jm-auth-link:hover { opacity: 1; }
+            /* The active pill was pale mint with green ink, which does not
+               survive the change of ground. */
+            .island-nav.scrolled .nav-pill.active {
+                color: #ffffff !important;
+                background: rgba(255, 255, 255, 0.16) !important;
+                opacity: 1;
+            }
+
+            /* Icon buttons sit plainly on the blue, like the mobile ones. */
+            .island-nav.scrolled .jm-nav-icon,
+            .island-nav.scrolled .jm-menu-button,
+            .island-nav.scrolled .jm-bell-btn {
+                background: transparent !important;
+                border-color: rgba(255, 255, 255, 0.30) !important;
+                color: #ffffff !important;
+            }
+            .island-nav.scrolled .jm-nav-icon:hover,
+            .island-nav.scrolled .jm-menu-button:hover,
+            .island-nav.scrolled .jm-bell-btn:hover {
+                background: rgba(255, 255, 255, 0.14) !important;
+            }
+            /* The badge ring was white to lift it off a white bar. */
+            .island-nav.scrolled .jm-bell-badge { box-shadow: 0 0 0 2px #0640a3 !important; }
+
+            /* The call to action was dark green, which fights blue. Brand
+               yellow with dark ink is the pairing already used on the
+               buttons in the transactional email. */
+            .island-nav.scrolled .jm-auth-cta {
+                background: #f59f22 !important;
+                color: #061426 !important;
+            }
+
+            /* The avatar ring is an inline border, and there is no class on
+               the image to hang this on, so it is matched by its shape. */
+            .island-nav.scrolled img[class*="rounded-md"],
+            .island-nav.scrolled .jm-profile-chip {
+                border-color: rgba(255, 255, 255, 0.42) !important;
+            }
+        }
+
+        /* Brand blue hairline at rest, rather than the grey one: it signs the
+           header without adding weight to it. */
+        @media (min-width: 1024px) {
+            .island-nav:not(.scrolled) {
+                border-bottom: 1px solid rgba(6, 64, 163, 0.28) !important;
+            }
+        }
     </style>
 </head>
 <body class="antialiased" style="background: var(--color-canvas); color: var(--color-ink);">
