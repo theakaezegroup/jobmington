@@ -365,6 +365,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
+    <?php require_once __DIR__ . '/../includes/stacktable.php'; ?>
     <style>
         .jm-backup-grid {
             display: grid;
@@ -407,6 +408,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
             min-width: 820px;
             width: 100%;
         }
+        .jm-backup-table--narrow { min-width: 520px; }
         .jm-backup-table th,
         .jm-backup-table td {
             border-bottom: 1px solid var(--jm-line);
@@ -656,7 +658,7 @@ $pageTitle = 'Operations | ' . SITE_NAME;
                         <span>Visible DB total: <?= e(jm_backup_format_bytes($visibleDatabaseBytes)) ?></span>
                         <span>Current Jobmington DB: <?= e(jm_backup_format_bytes($backupStatus['database_size'])) ?></span>
                     </div>
-                    <table class="jm-backup-table jm-stacktable" style="margin-top:12px; min-width:520px;">
+                    <table class="jm-backup-table jm-backup-table--narrow jm-stacktable" style="margin-top:12px;">
                         <thead>
                             <tr>
                                 <th>Schema</th>

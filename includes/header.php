@@ -488,54 +488,6 @@ if ($isAdminArea) {
             .jm-tablewrap th, .jm-tablewrap td { white-space: nowrap; }
         }
 
-        /* Opt-in: a table that becomes one card per row on a phone instead of
-           scrolling sideways. Add class="jm-stacktable" to the table and
-           data-label="Header" to each cell that needs its column name back.
-           Must come after the rule above so it can undo the nowrap. */
-        /* A data table becomes one card per row on a phone rather than scrolling
-           sideways. Add class="jm-stacktable" to any table with a thead; the
-           column names are copied onto the cells at load, so there is nothing
-           to keep in sync by hand.
-
-           Selectors carry body.jm-admin so they outrank both the nowrap rule
-           above and the Tailwind utility classes some of these tables use. */
-        @media (max-width: 768px) {
-            body.jm-admin .jm-tablewrap > table.jm-stacktable { min-width: 0; }
-            body.jm-admin .jm-stacktable,
-            body.jm-admin .jm-stacktable tbody,
-            body.jm-admin .jm-stacktable tr,
-            body.jm-admin .jm-stacktable td {
-                display: block; width: 100%; box-sizing: border-box;
-            }
-            body.jm-admin .jm-stacktable { border: 0; background: transparent; }
-            body.jm-admin .jm-stacktable thead { display: none; }
-            body.jm-admin .jm-stacktable tr {
-                background: #fff; border: 1px solid #e4eaf3; border-radius: 12px;
-                margin-bottom: 10px; padding: 14px;
-            }
-            body.jm-admin .jm-stacktable td {
-                border: 0; padding: 0;
-                white-space: normal; overflow-wrap: anywhere;
-            }
-            body.jm-admin .jm-stacktable td[data-label] {
-                display: flex; align-items: baseline; justify-content: space-between;
-                gap: 14px; padding: 8px 0; border-top: 1px solid #f0f4f9;
-            }
-            body.jm-admin .jm-stacktable td[data-label]::before {
-                content: attr(data-label);
-                flex: none; font-size: 11px; font-weight: 700;
-                text-transform: uppercase; letter-spacing: .06em; color: #5b6b82;
-            }
-            /* A trailing actions cell has no column name, so it gets its own rule. */
-            body.jm-admin .jm-stacktable td:last-child:not([data-label]) {
-                padding-top: 12px; border-top: 1px solid #f0f4f9;
-            }
-            body.jm-admin .jm-stacktable td:first-child { padding-bottom: 2px; }
-            /* An empty-state cell spans the card rather than becoming a row. */
-            body.jm-admin .jm-stacktable td[colspan] { padding: 10px 0; text-align: center; }
-            /* Images in a stacked cell must not push the card wide. */
-            body.jm-admin .jm-stacktable td img { max-width: 100%; height: auto; }
-        }
 
         @media (max-width: 1024px) {
             .jm-admin-sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(11,27,51,.18); }
@@ -649,35 +601,7 @@ ob_start();
         }
     </script>
 
-    <script nonce="<?= $cspNonce ?>">
-        /* Copy each column name onto its cells so a stacked table still says
-           what it is showing. Done here rather than by hand in the markup:
-           there are seventeen of these tables, and a label typed into the row
-           is one more thing that can disagree with its own header. */
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('table.jm-stacktable').forEach(function (table) {
-                var heads = Array.prototype.map.call(
-                    table.querySelectorAll('thead th'),
-                    function (th) { return th.textContent.trim(); }
-                );
-                if (!heads.length) { return; }
-
-                table.querySelectorAll('tbody tr').forEach(function (row) {
-                    Array.prototype.forEach.call(row.children, function (cell, i) {
-                        // The first column is the row's own name, an empty-state
-                        // cell spans the card, and anything already labelled by
-                        // hand was labelled deliberately.
-                        if (i === 0 || cell.hasAttribute('data-label') || cell.hasAttribute('colspan')) {
-                            return;
-                        }
-                        if (heads[i]) {
-                            cell.setAttribute('data-label', heads[i]);
-                        }
-                    });
-                });
-            });
-        });
-    </script>
+    <?php require_once __DIR__ . '/stacktable.php'; ?>
 
     <style nonce="<?= $cspNonce ?>">
         .hide-scrollbar::-webkit-scrollbar { display: none; }
