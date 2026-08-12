@@ -56,11 +56,13 @@ function jm_event_intent_audit(PDO $pdo): array
     /** Make a throwaway account, optionally with an event intent parked on it. */
     $makeUser = function (?int $pendingEventId) use ($pdo, $stamp, &$userIds): int {
         $email = $stamp . '-' . bin2hex(random_bytes(3)) . '@example.invalid';
+        // The constant, not a literal: user_type is an enum on the server and a
+        // guessed value fails the whole audit at the first fixture.
         $pdo->prepare("
             INSERT INTO users (first_name, last_name, full_name, email, password_hash,
                                user_type, is_active, is_verified, pending_event_id, created_at)
-            VALUES ('Audit', 'Fixture', 'Audit Fixture', ?, 'x', 'job_seeker', 1, 1, ?, NOW())
-        ")->execute([$email, $pendingEventId]);
+            VALUES ('Audit', 'Fixture', 'Audit Fixture', ?, 'x', ?, 1, 1, ?, NOW())
+        ")->execute([$email, USER_TYPE_SEEKER, $pendingEventId]);
         $id = (int) $pdo->lastInsertId();
         $userIds[] = $id;
         return $id;
