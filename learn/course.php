@@ -25,6 +25,8 @@ $stmt->execute([$courseId]);
 $course = $stmt->fetch();
 if (!$course) redirect('/jobmington/learn/');
 
+jm_record_view('course', $courseId);
+
 $modules = $pdo->prepare("SELECT * FROM course_modules WHERE course_id = ? ORDER BY sort_order ASC, module_id ASC");
 $modules->execute([$courseId]);
 $modules = $modules->fetchAll();

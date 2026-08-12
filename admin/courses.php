@@ -212,7 +212,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <td><strong><?= e($c['title']) ?></strong><div style="font-size:11px;color:#94a3b8;"><?= e(ucfirst($c['difficulty'])) ?><?= $c['is_external'] ? ' · External' : '' ?></div></td>
                     <td><?= e($c['category_name'] ?: '—') ?></td>
                     <td><?= (int)$c['module_count'] ?></td>
-                    <td><?= (int)$c['enrollments'] ?></td>
+                    <td><a href="/jobmington/admin/audience.php?type=course&id=<?= (int) $c['course_id'] ?>&action=enrolled" style="color:#0640a3;font-weight:700;"><?= (int)$c['enrollments'] ?></a></td>
                     <td><span class="jm-ad-pill <?= $c['is_published'] ? 'on' : 'off' ?>"><?= $c['is_published'] ? 'Live' : 'Hidden' ?></span></td>
                     <td>
                         <div class="jm-ad-actions">

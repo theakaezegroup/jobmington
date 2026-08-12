@@ -22,6 +22,10 @@ if ($slug !== '') {
     $ebook = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
 }
 
+if ($ebook) {
+    jm_record_view('ebook', (int) $ebook['ebook_id']);
+}
+
 // ── Premium unlock (Seeds / Credits) ──────────────────────────────────────────
 $ebMsg = '';
 if ($ebook && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['unlock_ebook'])) {

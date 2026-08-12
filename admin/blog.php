@@ -228,7 +228,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <td><?php if (!empty($p['featured_image'])): ?><img src="<?= e($p['featured_image']) ?>" class="jm-ad-thumb"><?php else: ?><div class="jm-ad-thumb"></div><?php endif; ?></td>
                     <td><strong><?= e($p['title']) ?></strong><div style="font-size:11px;color:#94a3b8;"><?= e($p['full_name'] ?: 'Admin') ?></div></td>
                     <td><?= e($p['cat_name'] ?: '—') ?></td>
-                    <td><?= (int)$p['views'] ?></td>
+                    <td><a href="/jobmington/admin/audience.php?type=blog_post&id=<?= (int) $p['post_id'] ?>&action=viewed" style="color:#0640a3;font-weight:700;"><?= (int)$p['views'] ?></a></td>
                     <td><span class="jm-ad-pill <?= $p['is_published'] ? 'on' : 'off' ?>"><?= $p['is_published'] ? 'Live' : 'Draft' ?></span></td>
                     <td>
                         <div class="jm-ad-actions">

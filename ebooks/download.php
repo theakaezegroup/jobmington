@@ -43,10 +43,32 @@ if (!is_file($diskPath)) {
     redirect('/jobmington/ebooks/view.php?slug=' . $ebook['slug']);
 }
 
-// Count the download.
+// Count the download, and record who. The counter alone told you a book had
+// been taken 40 times and nothing about by whom, and ebook_purchases had never
+// been written to by anything, so the table sat empty while the number climbed.
 try {
     $pdo->prepare("UPDATE ebooks SET download_count = download_count + 1 WHERE ebook_id = ?")->execute([(int) $ebook['ebook_id']]);
-} catch (Throwable $e) {}
+} catch (Throwable $e) {
+    error_log('ebook download count: ' . $e->getMessage());
+}
+
+try {
+    $pdo->prepare("
+        INSERT INTO ebook_purchases (user_id, ebook_id, method, amount, created_at)
+        VALUES (?, ?, ?, ?, NOW())
+    ")->execute([
+        (int) Session::userId(),
+        (int) $ebook['ebook_id'],
+        ((int) $ebook['is_free'] === 1) ? 'free' : 'paid',
+        // amount is an INT column and sql_mode is strict, so a decimal price
+        // has to be rounded here rather than left to MySQL.
+        (int) round((float) ($ebook['price'] ?? 0)),
+    ]);
+} catch (Throwable $e) {
+    error_log('ebook download record: ' . $e->getMessage());
+}
+
+jm_log_activity((int) Session::userId(), 'ebook_download', $ebook['title']);
 
 $ext = strtolower(pathinfo($diskPath, PATHINFO_EXTENSION));
 $mime = ['pdf' => 'application/pdf', 'epub' => 'application/epub+zip', 'zip' => 'application/zip'][$ext] ?? 'application/octet-stream';

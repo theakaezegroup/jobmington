@@ -920,5 +920,47 @@ if (!function_exists('jm_log_activity')) {
     }
 }
 
+/**
+ * Record that someone looked at a piece of content.
+ *
+ * Deduplicated per person per item per hour, so a reader who refreshes or
+ * comes back to a half-finished article does not appear thirty times. Signed
+ * out readers are deduplicated on IP for the same reason.
+ *
+ * Never throws: a page must not fail because its analytics did.
+ */
+if (!function_exists('jm_record_view')) {
+    function jm_record_view(string $contentType, int $contentId): void {
+        if ($contentId <= 0) {
+            return;
+        }
+
+        try {
+            $pdo = db();
+            $userId = Session::isLoggedIn() ? (int) Session::userId() : null;
+            $ip = Security::getClientIP();
+
+            $recent = $pdo->prepare("
+                SELECT view_id FROM content_views
+                WHERE content_type = ? AND content_id = ?
+                  AND (" . ($userId ? "user_id = ?" : "user_id IS NULL AND ip_address = ?") . ")
+                  AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)
+                LIMIT 1
+            ");
+            $recent->execute([$contentType, $contentId, $userId ?: $ip]);
+            if ($recent->fetchColumn()) {
+                return;
+            }
+
+            $pdo->prepare("
+                INSERT INTO content_views (content_type, content_id, user_id, ip_address, created_at)
+                VALUES (?, ?, ?, ?, NOW())
+            ")->execute([$contentType, $contentId, $userId, $ip]);
+        } catch (Throwable $e) {
+            error_log('jm_record_view(' . $contentType . '): ' . $e->getMessage());
+        }
+    }
+}
+
 require_once __DIR__ . '/illustration-states.php';
 ?>

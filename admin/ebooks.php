@@ -187,7 +187,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <td><strong><?= e($b['title']) ?></strong><?php if ($b['author']): ?><div style="font-size:11px;color:#94a3b8;"><?= e($b['author']) ?></div><?php endif; ?></td>
                     <td><?= e($b['category'] ?: '—') ?></td>
                     <td><?= $b['is_free'] ? 'Free' : '₦' . number_format((float)$b['price']) ?></td>
-                    <td><?= (int) $b['download_count'] ?></td>
+                    <td><a href="/jobmington/admin/audience.php?type=ebook&id=<?= (int) $b['ebook_id'] ?>&action=downloaded" style="color:#0640a3;font-weight:700;"><?= (int) $b['download_count'] ?></a></td>
                     <td><span class="jm-eb-pill <?= $b['is_published'] ? 'on' : 'off' ?>"><?= $b['is_published'] ? 'Live' : 'Hidden' ?></span></td>
                     <td>
                         <div class="jm-eb-actions">

@@ -35,7 +35,8 @@ if (!$post) {
     exit;
 }
 
-try { $pdo->prepare("UPDATE blog_posts SET views = views + 1 WHERE post_id = ?")->execute([$post['post_id']]); } catch (Throwable $e) {}
+try { $pdo->prepare("UPDATE blog_posts SET views = views + 1 WHERE post_id = ?")->execute([$post['post_id']]); } catch (Throwable $e) { error_log($e->getMessage()); }
+jm_record_view('blog_post', (int) $post['post_id']);
 
 // More posts
 $more = [];

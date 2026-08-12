@@ -43,6 +43,7 @@ if (!$topic) {
 
 // Increment Views
 $pdo->prepare("UPDATE forum_topics SET views = views + 1 WHERE topic_id = ?")->execute([$topicId]);
+jm_record_view('forum_topic', $topicId);
 
 // React. Runs before the reply handler, which would otherwise treat this
 // submission as an empty reply. Redirect after so a refresh does not re-toggle.

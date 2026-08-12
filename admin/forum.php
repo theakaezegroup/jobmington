@@ -184,7 +184,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     </td>
                                     <td class="p-4 text-slate-700"><?= e($topic['category_name'] ?? 'Uncategorized') ?></td>
                                     <td class="p-4 text-slate-700"><?= number_format((int) $topic['reply_count']) ?></td>
-                                    <td class="p-4 text-slate-700"><?= number_format((int) $topic['views']) ?></td>
+                                    <td class="p-4 text-slate-700"><a href="/jobmington/admin/audience.php?type=forum_topic&id=<?= (int) $topic['topic_id'] ?>&action=viewed" style="color:#0640a3;font-weight:700;"><?= number_format((int) $topic['views']) ?></a></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
