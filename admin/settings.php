@@ -97,26 +97,26 @@ require_once __DIR__ . '/../includes/header.php';
             
             <!-- System Health Cards -->
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                     <h3 class="font-bold text-slate-900">System Status</h3>
                     <span class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">
                         <i class="fas fa-check-circle"></i> Healthy
                     </span>
                 </div>
                 <div class="space-y-3 text-sm">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between flex-wrap gap-2">
                         <span class="text-slate-600">PHP Version</span>
                         <span class="font-mono text-slate-900"><?= htmlspecialchars($systemHealth['php_version']) ?></span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between flex-wrap gap-2">
                         <span class="text-slate-600">Memory Usage</span>
                         <span class="font-mono text-slate-900"><?= htmlspecialchars($systemHealth['memory_usage']) ?></span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between flex-wrap gap-2">
                         <span class="text-slate-600">Database</span>
                         <span class="font-mono text-green-600"><?= $systemHealth['database_connected'] ? 'Connected' : 'Disconnected' ?></span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between flex-wrap gap-2">
                         <span class="text-slate-600">Upload Writable</span>
                         <span class="font-mono text-green-600"><?= $systemHealth['uploads_writable'] ? 'Yes' : 'No' ?></span>
                     </div>
@@ -127,15 +127,15 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="font-bold text-slate-900 mb-4">Database Statistics</h3>
                 <div class="space-y-3 text-sm">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
                         <span class="text-slate-600">Total Users</span>
                         <span class="text-2xl font-bold text-blue-600"><?= number_format($systemHealth['total_users'] ?? 0) ?></span>
                     </div>
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
                         <span class="text-slate-600">Active Jobs</span>
                         <span class="text-2xl font-bold text-green-600"><?= number_format($systemHealth['total_jobs'] ?? 0) ?></span>
                     </div>
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center flex-wrap gap-2">
                         <span class="text-slate-600">Published Courses</span>
                         <span class="text-2xl font-bold text-cyan-600"><?= number_format($systemHealth['total_courses'] ?? 0) ?></span>
                     </div>

@@ -163,7 +163,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php else: ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <?php foreach ($categories as $cat): ?>
-                        <div class="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition flex items-center justify-between">
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-4">
                                 <div class="w-10 h-10 bg-<?= $activeTab === 'job' ? 'blue' : 'emerald' ?>-500/20 rounded-lg flex items-center justify-center text-<?= $activeTab === 'job' ? 'blue' : 'emerald' ?>-400">
                                     <i class="fas <?= e($cat['icon'] ?? 'fa-folder') ?>"></i>

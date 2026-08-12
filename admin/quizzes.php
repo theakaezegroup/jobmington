@@ -190,7 +190,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <div class="space-y-4">
                         <?php foreach ($quizzes as $qz): ?>
                         <div class="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition">
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
                                 <div>
                                     <h4 class="font-bold text-white"><?= e($qz['title']) ?></h4>
                                     <p class="text-xs text-slate-400"><?= e($qz['course_title']) ?></p>
@@ -276,7 +276,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <div class="space-y-4">
                         <?php foreach ($questions as $i => $q): ?>
                         <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                            <div class="flex justify-between items-start mb-3">
+                            <div class="flex justify-between items-start mb-3 flex-wrap gap-2">
                                 <span class="text-white font-bold"><?= $i + 1 ?>. <?= e($q['question']) ?></span>
                                 <form method="POST" class="inline" onsubmit="return confirm('Delete?')">
                                     <input type="hidden" name="action" value="delete_question">

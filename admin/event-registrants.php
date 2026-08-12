@@ -203,7 +203,7 @@ require_once __DIR__ . '/../includes/header.php';
             </table></div>
 
             <?php if ($pages > 1): ?>
-            <div class="flex items-center justify-between px-4 py-3 border-t border-slate-200 text-sm">
+            <div class="flex items-center justify-between px-4 py-3 border-t border-slate-200 text-sm flex-wrap gap-3">
                 <span class="text-slate-500"><?= number_format($total) ?> people, page <?= $page ?> of <?= $pages ?></span>
                 <div class="flex gap-2">
                     <?php if ($page > 1): ?>
