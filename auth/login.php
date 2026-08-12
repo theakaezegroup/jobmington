@@ -121,10 +121,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             if ($user) {
                 $attempts = ($user['failed_login_attempts'] ?? 0) + 1;
-                $lockout = $attempts >= 5 ? date('Y-m-d H:i:s', strtotime('+15 minutes')) : null;
+                // Admin-configurable, was the literal 5 in three places below.
+                require_once __DIR__ . '/../includes/maintenance.php';
+                $maxAttempts = max(3, min(20, (int) jm_setting('max_login_attempts', 5)));
+                $lockout = $attempts >= $maxAttempts ? date('Y-m-d H:i:s', strtotime('+15 minutes')) : null;
                 $pdo->prepare("UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE user_id = ?")->execute([$attempts, $lockout, $user['user_id']]);
-                $error = $attempts >= 5 ? 'Too many failed attempts. Account locked for 15 minutes.' : 'Invalid credentials. Please try again.';
-                jm_log_activity((int) $user['user_id'], $attempts >= 5 ? 'login_locked' : 'login_failed', 'attempt ' . $attempts);
+                $error = $attempts >= $maxAttempts ? 'Too many failed attempts. Account locked for 15 minutes.' : 'Invalid credentials. Please try again.';
+                jm_log_activity((int) $user['user_id'], $attempts >= $maxAttempts ? 'login_locked' : 'login_failed', 'attempt ' . $attempts);
             } else {
                 usleep(random_int(100000, 300000));
                 $error = 'Invalid credentials. Please try again.';

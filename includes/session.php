@@ -50,7 +50,17 @@ class Session {
         ini_set('session.cookie_samesite', 'Lax');
         ini_set('session.use_strict_mode', 1);
         ini_set('session.use_only_cookies', 1);
-        ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+        // Admin-configurable, falling back to the constant when the settings
+        // layer is not available yet (this runs before the session exists).
+        $lifetime = SESSION_LIFETIME;
+        if (function_exists('db') && is_file(__DIR__ . '/maintenance.php')) {
+            require_once __DIR__ . '/maintenance.php';
+            $minutes = (int) jm_setting('session_timeout', 0);
+            if ($minutes >= 10 && $minutes <= 1440) {
+                $lifetime = $minutes * 60;
+            }
+        }
+        ini_set('session.gc_maxlifetime', $lifetime);
 
         // Enable secure cookies only in production
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
@@ -83,6 +93,32 @@ class Session {
 
         // Suspending an account must end sessions that are already running.
         self::enforceActive();
+
+        // Maintenance mode. Last, because it has to know who is asking: admins
+        // and the sign-in page carry on, everyone else gets the holding page.
+        // This is the one call every page makes before emitting anything.
+        self::maintenanceGate();
+    }
+
+    /**
+     * Show the holding page when maintenance mode is on.
+     *
+     * Kept out of the main flow when the settings layer is not loaded, so a
+     * page that only pulls in the session does not fatal on a missing function.
+     */
+    private static function maintenanceGate(): void
+    {
+        if (!function_exists('db')) {
+            return;
+        }
+        if (!function_exists('jm_maintenance_guard')) {
+            $file = __DIR__ . '/maintenance.php';
+            if (!is_file($file)) {
+                return;
+            }
+            require_once $file;
+        }
+        jm_maintenance_guard();
     }
 
     /**
