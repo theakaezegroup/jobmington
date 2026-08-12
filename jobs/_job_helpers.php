@@ -724,22 +724,7 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs', array $meta 
                     <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                     <span>Jobmington</span>
                 </a>
-                <nav class="jm-nav" aria-label="Main navigation">
-                    <a class="<?= $active === 'jobs' ? 'active' : '' ?>" href="/jobmington/jobs/">Find jobs</a>
-                    <a href="/jobmington/cv-builder/">CV Builder</a>
-                    <a class="<?= $active === 'tools' ? 'active' : '' ?>" href="/jobmington/tools/">Tools</a>
-                    <a href="/jobmington/ai/andika.php">Andika AI</a>
-                    <a href="/jobmington/employer/">Employers</a>
-                    <a href="/jobmington/pricing.php">Pricing</a>
-                    <?php if ($isLoggedIn): ?>
-                        <a href="<?= e($dashboardUrl) ?>">Dashboard</a>
-                        <?php require_once __DIR__ . '/../includes/notification_bell.php'; jm_notification_bell(); ?>
-                        <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
-                    <?php else: ?>
-                        <a href="/jobmington/auth/login.php">Sign in</a>
-                        <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
-                    <?php endif; ?>
-                </nav>
+            <?php require_once __DIR__ . '/../includes/navigation.php'; jm_site_nav('/jobs'); ?>
             </header>
     <?php
 }

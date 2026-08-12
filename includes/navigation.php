@@ -103,3 +103,66 @@ if (!function_exists('jm_site_nav')) {
         <?php
     }
 }
+
+/**
+ * The nav for a workspace: the seeker area, the employer area, checkout.
+ *
+ * These legitimately differ from the marketing nav. Somebody managing
+ * applications wants Applications and Saved jobs, not Pricing and Andika AI,
+ * and flattening that would be consistency at the user's expense.
+ *
+ * What they must not each decide for themselves is who is signed in. That was
+ * hardcoded in twelve separate files, and one of them got it wrong: Post a Job
+ * offered a signed-in seeker an account they already had.
+ *
+ * @param array $links [key => [href, label]] for this workspace.
+ */
+if (!function_exists('jm_workspace_nav')) {
+    function jm_workspace_nav(array $links, string $active = '', string $ariaLabel = 'Main navigation'): void {
+        $loggedIn = class_exists('Session') && Session::isLoggedIn();
+        ?>
+        <nav class="jm-nav" aria-label="<?= e($ariaLabel) ?>">
+            <a href="/jobmington/jobs/">Find Jobs</a>
+            <?php foreach ($links as $key => [$href, $label]): ?>
+                <a class="<?= $active === $key ? 'active' : '' ?>" href="<?= e($href) ?>"><?= e($label) ?></a>
+            <?php endforeach; ?>
+
+            <?php if ($loggedIn): ?>
+                <?php
+                if (is_file(__DIR__ . '/notification_bell.php')) {
+                    require_once __DIR__ . '/notification_bell.php';
+                    jm_notification_bell();
+                }
+                ?>
+                <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
+            <?php else: ?>
+                <a href="/jobmington/auth/login.php">Sign in</a>
+                <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
+            <?php endif; ?>
+        </nav>
+        <?php
+    }
+}
+
+/**
+ * The nav for the sign-in, sign-up and password pages.
+ *
+ * Deliberately short. Someone here is trying to get into an account, and nine
+ * competing links beside the form is not consistency, it is noise. They get a
+ * way back to the site and the one action they might have meant instead.
+ */
+if (!function_exists('jm_auth_nav')) {
+    function jm_auth_nav(string $opposite = 'register'): void {
+        ?>
+        <nav class="jm-nav" aria-label="Main navigation">
+            <a href="/jobmington/jobs/">Find Jobs</a>
+            <a href="/jobmington/employer/">Employers</a>
+            <?php if ($opposite === 'login'): ?>
+                <a class="jm-button secondary" href="/jobmington/auth/login.php">Sign in</a>
+            <?php else: ?>
+                <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
+            <?php endif; ?>
+        </nav>
+        <?php
+    }
+}

@@ -166,14 +166,7 @@ $pageTitle = 'Company Profile | ' . SITE_NAME;
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-            <nav class="jm-nav" aria-label="Employer navigation">
-                <a href="/jobmington/employer/dashboard.php">Dashboard</a>
-                <a href="/jobmington/employer/company-profile.php">Company</a>
-                <a href="/jobmington/employer/manage-jobs.php">Jobs</a>
-                <a href="/jobmington/employer/applications.php">Applications</a>
-                <a href="/jobmington/employer/talent-pool.php">Talent</a>
-                <a class="jm-button secondary" href="/jobmington/employer/post-job.php">Post a job</a>
-            </nav>
+            <?php require_once __DIR__ . '/../includes/navigation.php'; jm_workspace_nav(['dashboard' => ['/jobmington/employer/dashboard.php', 'Dashboard'], 'company' => ['/jobmington/employer/company-profile.php', 'Company'], 'jobs' => ['/jobmington/employer/manage-jobs.php', 'Jobs'], 'applications' => ['/jobmington/employer/applications.php', 'Applications'], 'talent' => ['/jobmington/employer/talent-pool.php', 'Talent'], 'pricing' => ['/jobmington/pricing.php', 'Pricing']], 'company'); ?>
         </header>
 
         <section class="jm-section" style="padding-top:0;">

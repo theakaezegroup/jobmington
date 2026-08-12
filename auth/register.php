@@ -135,12 +135,7 @@ $pageTitle = 'Create Account | ' . SITE_NAME;
     <div class="jm-shell">
         <header class="jm-header">
             <a class="jm-logo" href="/jobmington/"><img src="/jobmington/assets/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-            <nav class="jm-nav" aria-label="Main navigation">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/cv-builder/">CV Builder</a>
-                <a href="/jobmington/employer/">Employers</a>
-                <a class="jm-button secondary" href="/jobmington/auth/login.php<?= $hasSafeRedirect ? '?redirect=' . urlencode($redirectTo) : '' ?>">Sign in</a>
-            </nav>
+            <?php require_once __DIR__ . '/../includes/navigation.php'; jm_auth_nav('login'); ?>
         </header>
 
         <section class="jm-hero">

@@ -989,23 +989,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
             <button class="jm-mobile-nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="jm-home-nav">
                 <span></span>
             </button>
-            <nav class="jm-nav" id="jm-home-nav" aria-label="Main navigation">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/cv-builder/">CV Builder</a>
-                <a href="/jobmington/tools/">Tools</a>
-                <a href="/jobmington/learn/">Learn</a>
-                <a href="/jobmington/ai/andika.php">Andika AI</a>
-                <a href="/jobmington/employer/">Employers</a>
-                <a href="/jobmington/pricing.php">Pricing</a>
-                <?php if ($isLoggedIn): ?>
-                    <a href="<?= e($dashboardUrl) ?>">Dashboard</a>
-                    <?php require_once __DIR__ . '/includes/notification_bell.php'; jm_notification_bell(); ?>
-                    <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
-                <?php else: ?>
-                    <a href="/jobmington/auth/login.php">Sign in</a>
-                    <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
-                <?php endif; ?>
-            </nav>
+            <?php require_once __DIR__ . '/includes/navigation.php'; jm_site_nav('/'); ?>
         </header>
 
         <!-- ── Hero ──────────────────────────────────────────────────── -->

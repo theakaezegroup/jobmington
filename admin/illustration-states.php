@@ -12,16 +12,11 @@ Session::requireAdmin();
 
 $states = jm_illustration_states();
 $pageTitle = 'State Icons | ' . SITE_NAME;
+require_once __DIR__ . '/../includes/header.php';
 ?>
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= e($pageTitle) ?></title>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
+<!-- Was another page building its own document with its own five-link
+     nav. Uses the shared admin chrome now, like the rest. -->
+<link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-15">
     <style>
         body.jm-minimal {
             background: #f6f9fd;
@@ -76,22 +71,7 @@ $pageTitle = 'State Icons | ' . SITE_NAME;
             }
         }
     </style>
-</head>
-<body class="jm-minimal">
-    <div class="jm-shell">
-        <header class="jm-header">
-            <a class="jm-logo" href="/jobmington/admin/">
-                <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
-                <span>Jobmington Admin</span>
-            </a>
-            <nav class="jm-nav" aria-label="Admin navigation">
-                <a href="/jobmington/admin/">Dashboard</a>
-                <a href="/jobmington/admin/operations.php">Operations</a>
-                <a href="/jobmington/admin/jobs.php">Jobs</a>
-                <a href="/jobmington/admin/users.php">Users</a>
-                <a class="jm-button secondary" href="/jobmington/">View site</a>
-            </nav>
-        </header>
+<div class="jm-shell">
 
         <main class="jm-section" style="padding-top:0;">
             <div class="state-preview-header">
@@ -119,5 +99,5 @@ $pageTitle = 'State Icons | ' . SITE_NAME;
             </div>
         </main>
     </div>
-</body>
-</html>
+    </div>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

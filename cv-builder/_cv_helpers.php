@@ -62,17 +62,7 @@ function jm_cv_header(string $pageTitle, string $active = 'cv'): void {
                     <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                     <span>Jobmington</span>
                 </a>
-                <nav class="jm-nav" aria-label="Main navigation">
-                    <a href="/jobmington/jobs/">Find jobs</a>
-                    <a class="<?= $active === 'cv' ? 'active' : '' ?>" href="/jobmington/cv-builder/">CV Builder</a>
-                    <?php if ($isLoggedIn): ?>
-                        <a href="<?= e($dashboardUrl) ?>">Dashboard</a>
-                        <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
-                    <?php else: ?>
-                        <a href="/jobmington/auth/login.php">Sign in</a>
-                        <a class="jm-button secondary" href="/jobmington/auth/register.php">Create account</a>
-                    <?php endif; ?>
-                </nav>
+            <?php require_once __DIR__ . '/../includes/navigation.php'; jm_site_nav('/cv-builder'); ?>
             </header>
     <?php
 }

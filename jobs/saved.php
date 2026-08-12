@@ -90,13 +90,7 @@ $pageTitle = 'Saved Jobs | ' . SITE_NAME;
                 <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                 <span>Jobmington</span>
             </a>
-            <nav class="jm-nav" aria-label="Main navigation">
-                <a href="/jobmington/jobs/">Find jobs</a>
-                <a href="/jobmington/cv-builder/">CV Builder</a>
-                <a href="/jobmington/employer/">Employers</a>
-                <a href="/jobmington/seeker/dashboard.php">Dashboard</a>
-                <a class="jm-button secondary" href="/jobmington/auth/logout.php">Sign out</a>
-            </nav>
+            <?php require_once __DIR__ . '/../includes/navigation.php'; jm_workspace_nav(['dashboard' => ['/jobmington/seeker/dashboard.php', 'Dashboard'], 'applications' => ['/jobmington/seeker/applications.php', 'Applications'], 'saved' => ['/jobmington/jobs/saved.php', 'Saved jobs'], 'profile' => ['/jobmington/seeker/profile.php', 'Profile']], 'saved'); ?>
         </header>
 
         <section class="jm-section" style="padding-top:0;">

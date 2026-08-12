@@ -71,6 +71,7 @@ function jm_employer_header(string $pageTitle, string $active = ''): void {
         'applications' => ['/jobmington/employer/applications.php', 'Applications'],
         'talent' => ['/jobmington/employer/talent-pool.php', 'Talent'],
         'pricing' => ['/jobmington/pricing.php', 'Pricing'],
+        'post' => ['/jobmington/employer/post-job.php', 'Post a job'],
     ];
     ?>
     <!doctype html>
@@ -90,12 +91,7 @@ function jm_employer_header(string $pageTitle, string $active = ''): void {
                     <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="">
                     <span>Jobmington</span>
                 </a>
-                <nav class="jm-nav" aria-label="Employer navigation">
-                    <?php foreach ($links as $key => [$href, $label]): ?>
-                        <a class="<?= $active === $key ? 'active' : '' ?>" href="<?= e($href) ?>"><?= e($label) ?></a>
-                    <?php endforeach; ?>
-                    <a class="jm-button secondary" href="/jobmington/employer/post-job.php">Post a job</a>
-                </nav>
+                <?php require_once __DIR__ . '/../includes/navigation.php'; jm_workspace_nav($links, $active, 'Employer navigation'); ?>
             </header>
     <?php
 }

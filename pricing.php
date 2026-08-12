@@ -395,16 +395,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     <!-- Header -->
     <header class="jm-header">
         <a class="jm-logo" href="<?= SITE_URL ?>/"><img src="<?= ASSETS_URL ?>/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>
-        <nav class="jm-nav">
-            <a href="<?= SITE_URL ?>/jobs/">Find jobs</a>
-            <a href="<?= SITE_URL ?>/cv-builder/">CV Builder</a>
-            <?php if ($isLoggedIn): ?>
-                <a class="jm-button secondary" href="<?= SITE_URL ?>/<?= $isEmployer ? 'employer' : 'seeker' ?>/dashboard.php">Dashboard</a>
-            <?php else: ?>
-                <a href="<?= SITE_URL ?>/auth/login.php">Sign in</a>
-                <a class="jm-button secondary" href="<?= SITE_URL ?>/employer/post-job.php">Post a job</a>
-            <?php endif; ?>
-        </nav>
+            <?php require_once __DIR__ . '/includes/navigation.php'; jm_site_nav('/pricing'); ?>
     </header>
 
     <!-- Hero -->
