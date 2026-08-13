@@ -1255,8 +1255,6 @@ ob_start();
 </head>
 <body class="antialiased" style="background: var(--color-canvas); color: var(--color-ink);">
 
-    <?php jm_boot_screen(); ?>
-
     <header id="main-header" class="island-nav h-[80px] flex items-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
             

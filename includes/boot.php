@@ -1,41 +1,29 @@
 <?php
 /**
- * The boot screen: what an installed app shows between the tap and the paint.
+ * The blue ground for launch.
  *
- * Two pieces, because they belong in different parts of the document and only
- * work if they are in the right one:
+ * There is no splash screen of ours any more, and that is deliberate. Android
+ * draws its own for an installed app, from the manifest, and it cannot be
+ * suppressed: there is no field, meta tag or API for it, and on Android 12 and
+ * later the system draws it before Chrome even holds the page. So anything we
+ * painted after it was always a second screen following the real one, which is
+ * what put two logos on screen a beat apart.
  *
- *   jm_boot_ground()  goes in <head>. It paints the document's ground brand
- *                     blue before anything else renders. Without it the native
- *                     splash hands over to a page whose default canvas is
- *                     white, and that white gets one frame on screen at the
- *                     moment the app opens. The curtain itself cannot prevent
- *                     that: it lives in the body, so it is painted a beat too
- *                     late to cover the very first frame.
+ * What is left is the one part that was never a splash. The system's splash is
+ * brand blue, but the document underneath it defaults to white, and that white
+ * gets a frame on screen at the moment the app opens. This paints the ground
+ * blue for exactly that frame, then hands back as soon as the page has drawn
+ * its own.
  *
- *   jm_boot_screen()  goes immediately after <body>. The mark and the hairline.
- *
- * It lives in one file because 43 pages carry their own <body>, and the one
- * that matters most is index.php. That is the manifest's start_url, so it is
- * what an installed app actually opens, and it does not use header.php. A copy
- * in each place would drift apart the way the tool catalogue drifted from the
- * paywall.
+ * Include in <head>, before the stylesheets: its whole job is to be the colour
+ * of the first frame, and a rule arriving after the first frame has missed the
+ * only moment it mattered.
  */
 
 if (!defined('JOBMINGTON')) {
     die('Direct access not permitted');
 }
 
-/**
- * The blue ground, for <head>.
- *
- * The class is added by script rather than sitting on the markup, and that is
- * deliberate: the same script that turns the ground blue is the one that turns
- * it back, so a browser with no script never gets a ground it cannot clear.
- * The animation is a second belt for the case where script starts and then
- * dies: transparent restores the canvas to whatever the page itself declares,
- * which is the honest way to undo this rather than guessing at white.
- */
 function jm_boot_ground(): void
 {
     static $done = false;
@@ -46,237 +34,60 @@ function jm_boot_ground(): void
     ?>
     <style>
         /*
-         * The body has to be painted too, not just the root.
-         *
-         * A root background alone leaves the strip at the foot of a phone
-         * white, because the body carries its own background and paints it
-         * over the root's within its own box, and on Android the colour Chrome
-         * gives the gesture bar is read off the body. So both, and !important,
-         * because one of these bodies declares its background inline and an
-         * inline style beats a stylesheet every time.
+         * The body is painted too, not just the root. A root background alone
+         * leaves the strip at the foot of a phone white, because the body
+         * carries its own background and paints it over the root's within its
+         * own box, and on Android the colour Chrome gives the gesture bar is
+         * read off the body. !important because one of these bodies declares
+         * its background inline, and an inline style beats a stylesheet.
          */
         html.jm-booting,
         html.jm-booting body {
             background: #0640a3 !important;
-            animation: jm-ground-out 0.01s linear 5.2s forwards;
+            /* Belt for a script that starts and then dies. transparent puts
+               the canvas back to whatever the page declares, rather than
+               guessing at a colour on its behalf. */
+            animation: jm-ground-out 0.01s linear 4s forwards;
         }
+
         @keyframes jm-ground-out {
             to { background: transparent !important; }
         }
     </style>
-    <script>document.documentElement.classList.add('jm-booting');</script>
-    <?php
-}
-
-/**
- * The curtain itself, for immediately after <body>.
- */
-function jm_boot_screen(): void
-{
-    static $done = false;
-    if ($done) {
-        return;
-    }
-    $done = true;
-    ?>
-    <style>
-        /*
-         * The field is the same blue the manifest paints for the native
-         * splash, so one hands over to the other with no change of colour in
-         * between, and the mark carries that blue baked in, which is why it
-         * sits on the field with no edge showing.
-         *
-         * The rest is restraint. One mark, one hairline, no wordmark, no
-         * percentage. We do not know a percentage, and a number invented to be
-         * watched only makes people wait for work that has already finished.
-         */
-        #jm-boot {
-            position: fixed;
-            inset: 0;
-            /* inset alone leaves a phone's bottom strip uncovered when the
-               viewport reported to CSS is shorter than the glass. dvh is the
-               height that accounts for the browser's own chrome; vh is the
-               fallback for engines that do not know dvh yet. */
-            width: 100%;
-            height: 100vh;
-            height: 100dvh;
-            z-index: 99999;
-            background: #0640a3;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            /* Close enough that the line reads as belonging to the mark rather
-               than floating on its own beneath it. */
-            gap: 14px;
-            /* The failsafe. If the script never runs, the screen still leaves
-               on its own, so a broken load can never strand anyone on a blue
-               rectangle with no way forward. */
-            animation: jm-boot-out 0.45s ease 5s forwards;
-        }
-
-        /* Higher specificity than the rule above, so dismissing wins over the
-           failsafe rather than racing it. */
-        #jm-boot.is-done {
-            animation: jm-boot-out 0.45s ease forwards;
-        }
-
-        @keyframes jm-boot-out {
-            to { opacity: 0; visibility: hidden; }
-        }
-
-        .jm-boot-mark {
-            width: 48px;
-            height: 48px;
-            object-fit: contain;
-        }
-
-        /*
-         * The mark and the line arrive together, on the same animation with
-         * the same timing. They used not to: the mark faded in over 600ms
-         * while the line painted at once, so for the first half second there
-         * was a loader on screen with nothing above it, which is why the
-         * loader read as a thing of its own rather than part of the logo.
-         */
-        .jm-boot-mark,
-        .jm-boot-line {
-            animation: jm-boot-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        @keyframes jm-boot-in {
-            from { opacity: 0; transform: scale(0.94); }
-            to   { opacity: 1; transform: scale(1); }
-        }
-
-        /* A hairline that reports work is happening, and reports nothing else. */
-        .jm-boot-line {
-            width: 80px;
-            height: 2px;
-            border-radius: 2px;
-            background: rgba(255, 255, 255, 0.22);
-            overflow: hidden;
-        }
-
-        .jm-boot-line::after {
-            content: '';
-            display: block;
-            width: 40%;
-            height: 100%;
-            border-radius: 2px;
-            background: #ffffff;
-            animation: jm-boot-sweep 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-        }
-
-        @keyframes jm-boot-sweep {
-            0%   { transform: translateX(-100%); }
-            100% { transform: translateX(350%); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .jm-boot-mark,
-            .jm-boot-line { animation: none; }
-            .jm-boot-line::after { animation: none; width: 100%; opacity: 0.55; }
-        }
-    </style>
-
-    <div id="jm-boot" role="status" aria-label="Loading Jobmington">
-        <img src="/jobmington/assets/images/pwa-icon-192.png?v=brand-29" alt="" class="jm-boot-mark">
-        <span class="jm-boot-line"></span>
-    </div>
-
     <script>
-        /*
-         * Dismissing the boot screen.
-         *
-         * An installed app shows it on every launch, because every launch has a
-         * gap to cover. A browser tab shows it once and then never again, so a
-         * returning visitor is not made to sit through a curtain they have
-         * already seen.
-         *
-         * It leaves when the page is actually ready. The screen this replaces
-         * advanced a bar by a random amount every 120ms and then held on
-         * "READY!" for another half second, which came to roughly two seconds
-         * of watching a progress bar report work that had finished before the
-         * bar started drawing.
-         */
         (function () {
-            var boot = document.getElementById('jm-boot');
-            if (!boot) { return; }
-
             var root = document.documentElement;
+            root.classList.add('jm-booting');
 
-            function get(store, key) {
-                try { return window[store].getItem(key) === 'true'; } catch (e) { return false; }
-            }
-            function set(store, key) {
-                try { window[store].setItem(key, 'true'); } catch (e) {}
-            }
-
-            // The ground goes back to the page's own colour whenever the
-            // curtain goes, by either route. Leaving it blue would tint every
-            // overscroll and every gap the page does not paint itself.
-            function clearGround() {
+            function clear() {
                 root.classList.remove('jm-booting');
             }
 
-            var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
-                          || window.navigator.standalone === true;
-
-            function skip() {
-                boot.style.display = 'none';
-                clearGround();
-            }
-
             /*
-             * Which storage answers "has this been shown" decides everything,
-             * because this is a multi-page app: inside an installed app every
-             * link is a full page load, so a naive check would repaint the
-             * curtain on every tap.
+             * Cleared once the document has been parsed and had a frame to
+             * paint, not on load. Waiting for load would wait for every image
+             * on the page, and holding the ground blue that long would show as
+             * a blue page rather than a blue first frame.
              *
-             * sessionStorage is the one that means "this launch". It survives
-             * navigation within the app and dies when the app closes, which is
-             * exactly the boundary we want. localStorage means "ever", and
-             * that is the right answer for a browser tab, where the screen is
-             * a first impression and not something to re-serve.
-             *
-             * The launch flag is written now rather than on dismiss, so a page
-             * that fails halfway still counts as launched and the next tap
-             * does not bring the curtain back.
+             * The class is added by script and removed by script on purpose:
+             * a browser with no script never receives a ground it has no way
+             * to clear.
              */
-            if (standalone) {
-                if (get('sessionStorage', 'jm_boot_launch')) { skip(); return; }
-                set('sessionStorage', 'jm_boot_launch');
-            } else if (get('localStorage', 'jm_boot_seen')) {
-                skip();
-                return;
+            function armed() {
+                if (window.requestAnimationFrame) {
+                    requestAnimationFrame(clear);
+                } else {
+                    clear();
+                }
             }
 
-            var shownAt = Date.now();
-            var MIN_MS  = 340;   // below this it reads as a flicker, worse than no screen at all
-            var done    = false;
-
-            function dismiss() {
-                if (done) { return; }
-                done = true;
-                set('localStorage', 'jm_boot_seen');
-                setTimeout(function () {
-                    boot.classList.add('is-done');
-                    setTimeout(function () {
-                        boot.style.display = 'none';
-                        clearGround();
-                    }, 450);
-                }, Math.max(0, MIN_MS - (Date.now() - shownAt)));
-            }
-
-            if (document.readyState === 'complete') {
-                dismiss();
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', armed);
             } else {
-                window.addEventListener('load', dismiss);
+                armed();
             }
 
-            // Ahead of the CSS failsafe at 5s, so the tidy path normally wins
-            // and the stylesheet only ever catches a page where script died.
-            setTimeout(dismiss, 4000);
+            setTimeout(clear, 3000);
         })();
     </script>
     <?php
