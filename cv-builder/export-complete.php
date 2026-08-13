@@ -511,7 +511,22 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             border-bottom-width: 4px;
         }
 
-        [data-template="obsidian"] .cv-header::before,
+        /*
+         * Executive has no wedge.
+         *
+         * A 180px diagonal gradient across the top-right corner, at 8% on a
+         * white header, does not read as a tint. It reads as a chipped corner:
+         * too faint to be a deliberate shape, too visible to ignore, and the
+         * diagonal edge looks like damage rather than design.
+         *
+         * This is the template sold as refined, single-column, boardroom. A
+         * clean white header with the accent rule beneath it is that. The
+         * decoration was working against the only thing this template is for.
+         */
+        [data-template="obsidian"] .cv-header::before {
+            display: none;
+        }
+
         [data-template="blueprint"] .cv-header::before {
             width: 180px;
             background: linear-gradient(135deg, transparent 30%, var(--cv-accent) 100%);
