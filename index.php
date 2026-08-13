@@ -1164,9 +1164,14 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
                     <div class="jm-hero2-ticker-fade-r"></div>
                     <div class="jm-hero2-ticker-track">
                         <?php foreach ([1,2] as $pass): ?>
-                        <div class="jm-hero2-ticker-set" <?= $pass === 2 ? 'aria-hidden="true"' : '' ?>>
+                        <?php /* The second set is the same logos again, there only so the
+                                 marquee can loop without a seam. It is hidden from assistive
+                                 tech, and anything hidden from assistive tech must also be
+                                 unreachable by keyboard: a link a screen reader cannot name
+                                 but a Tab key can still land on is a trap. */ ?>
+                        <div class="jm-hero2-ticker-set" <?= $pass === 2 ? 'aria-hidden="true" data-duplicate="1"' : '' ?>>
                             <?php foreach ($tickerSponsors as $sp): ?>
-                                <a href="/jobmington/jobs/search.php?q=<?= urlencode($sp['name']) ?>" class="jm-ticker-logo-wrap" title="<?= e($sp['name']) ?>">
+                                <a href="/jobmington/jobs/search.php?q=<?= urlencode($sp['name']) ?>" class="jm-ticker-logo-wrap" title="<?= e($sp['name']) ?>"<?= $pass === 2 ? ' tabindex="-1"' : '' ?>>
                                     <img src="/jobmington/assets/images/sponsors/<?= e($sp['logo']) ?>"
                                          alt="<?= e($sp['name']) ?>" class="jm-ticker-logo">
                                 </a>
