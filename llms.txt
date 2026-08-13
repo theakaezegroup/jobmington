@@ -1,0 +1,39 @@
+# Jobmington
+
+> Africa's career platform: remote roles that pay in dollars, local jobs across the continent, and AI tools built to get African professionals hired.
+
+Jobmington lists remote and on-site vacancies across African markets, including Nigeria, Kenya, Ghana and South Africa, and provides free and paid career tools alongside them. Job listings come from direct employer postings and from partner feeds, and are filterable by country, category, employment type, and by whether the work is remote or on-site.
+
+Prices are quoted in US dollars everywhere, with the visitor's local currency shown beside them at live exchange rates. The platform is continental rather than single-country, so no one market's currency leads.
+
+The word used throughout for the application document is CV, which is what the markets served here call it.
+
+## Jobs
+
+- [Job listings](https://jobmington.com/jobs/): Every live vacancy, filterable by country, category, employment type and remote or on-site.
+- [Job search](https://jobmington.com/jobs/search?q=developer): Keyword search across job titles, descriptions, requirements and company names.
+- [Post a job](https://jobmington.com/employer/post-job): Where employers publish a vacancy.
+- [For employers](https://jobmington.com/employer/): How hiring on Jobmington works.
+
+## Career tools
+
+- [Career tools](https://jobmington.com/tools/): The full catalogue, including the CV Builder, the CV Optimizer which scores a CV against ATS criteria, Cover Letter AI, Interview Prep, a salary analyser and a tax calculator. Some are free, some cost credits. The tools themselves require an account, so this page is the public description of them.
+
+## Learning and community
+
+- [Learning Academy](https://jobmington.com/learn/): Courses on career skills, business and design.
+- [Events](https://jobmington.com/events/): Webinars and workshops, with registration.
+- [Community](https://jobmington.com/community/): Discussion between members.
+- [Blog](https://jobmington.com/blog/): Articles on job searching, remote work and careers in Africa.
+- [Ebooks](https://jobmington.com/ebooks/): Downloadable guides.
+
+## Pricing
+
+- [Pricing](https://jobmington.com/pricing): Plans for job seekers and for employers, in US dollars with local equivalents.
+
+## Optional
+
+- [FAQ](https://jobmington.com/faq): Common questions about accounts, applications and payment.
+- [Contact](https://jobmington.com/contact): How to reach the team.
+- [Terms of service](https://jobmington.com/terms-of-service)
+- [Privacy policy](https://jobmington.com/privacy-policy)
