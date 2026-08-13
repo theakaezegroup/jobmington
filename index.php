@@ -1068,7 +1068,14 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
                 <div class="jm-hero2-right">
                     <div class="jm-hc-wrap">
                         <div class="jm-hc-main">
-                            <img src="/jobmington/assets/images/hero2.jpg" alt="Professional working on career">
+                            <?php /* The largest thing on the page, so the browser is told to
+                                     treat it that way. width and height are the file's real
+                                     dimensions: they reserve the space before it arrives, so
+                                     the text beside it does not jump when it does. */ ?>
+                            <img src="/jobmington/assets/images/hero2.jpg?v=brand-29"
+                                 alt="Professional working on career"
+                                 width="1200" height="801"
+                                 fetchpriority="high" decoding="async">
                         </div>
                         <div class="jm-hc-tl">
                             <img src="https://images.unsplash.com/photo-1739300293504-234817eead52?auto=format&fit=crop&crop=faces&w=320&q=80" alt="Professional reviewing documents">
