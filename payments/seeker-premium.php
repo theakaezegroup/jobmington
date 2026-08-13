@@ -69,7 +69,7 @@ $pageTitle = 'Upgrade to Premium | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/minimal-jobmington.css?v=brand-25">
+    <link rel="stylesheet" href="<?= ASSETS_URL ?>/css/minimal-jobmington.css?v=brand-26">
     <style>
     @keyframes fadeUp { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
