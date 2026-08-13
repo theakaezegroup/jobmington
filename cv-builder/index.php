@@ -690,7 +690,7 @@ function importDocument(input) {
     title.textContent = 'Importing...';
     card.style.pointerEvents = 'none';
 
-    fetch('/jobmington/cv-builder/import.php', { method: 'POST', body: formData })
+    fetch('import.php', { method: 'POST', body: formData })
         .then(async response => {
             const text = await response.text();
             let data = {};
@@ -743,7 +743,7 @@ function closeDeleteModal() {
 }
 
 function deleteCV(cvId) {
-    fetch('/jobmington/cv-builder/delete.php', {
+    fetch('delete.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cv_id: cvId })

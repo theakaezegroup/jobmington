@@ -237,7 +237,7 @@ function jmSelectPackage(plan, amount, credits){
             var dir = b.getAttribute('data-dir');
             var credits = Math.max(1, Math.min(100, parseInt(amt.value||'1',10)));
             b.disabled = true; msg.style.color='#7c8aa0'; msg.textContent='Processing…';
-            fetch('/jobmington/api/redeem-seeds.php', { method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}, body: JSON.stringify({ direction: dir, credits: credits }) })
+            fetch('../api/redeem-seeds.php', { method:'POST', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}, body: JSON.stringify({ direction: dir, credits: credits }) })
                 .then(function(r){ return r.json(); }).then(function(d){
                     b.disabled = false;
                     if (d && d.success){ msg.style.color='#0a6454'; msg.textContent = d.message || 'Done.'; setTimeout(function(){ location.reload(); }, 800); }

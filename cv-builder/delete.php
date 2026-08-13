@@ -49,21 +49,48 @@ if (!$stmt->fetch()) {
 
 try {
     $pdo->beginTransaction();
-    
-    // Delete related data first
-    $pdo->prepare("DELETE FROM cv_experience WHERE cv_id = ?")->execute([$cvId]);
-    $pdo->prepare("DELETE FROM cv_education WHERE cv_id = ?")->execute([$cvId]);
-    $pdo->prepare("DELETE FROM cv_skills WHERE cv_id = ?")->execute([$cvId]);
-    
-    // Delete CV profile
+
+    /*
+     * Every child table, not the three this knew about when it was written.
+     *
+     * The CV builder gained projects, certifications, languages, awards,
+     * volunteering and references later, and nothing taught this about them, so
+     * deleting a CV left six tables of rows pointing at a cv_id that no longer
+     * existed. Nobody saw it because those rows are only ever read by cv_id,
+     * so they simply became invisible and permanent.
+     *
+     * Guarded by a table check, because a database that has not run the CV
+     * migration yet should still be able to delete a CV.
+     */
+    $children = [
+        'cv_experience', 'cv_education', 'cv_skills',
+        'cv_projects', 'cv_certifications', 'cv_languages',
+        'cv_awards', 'cv_volunteer', 'cv_references',
+    ];
+
+    foreach ($children as $table) {
+        $exists = $pdo->prepare('SELECT COUNT(*) FROM information_schema.TABLES
+                                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?');
+        $exists->execute([$table]);
+        if ((int) $exists->fetchColumn() === 0) {
+            continue;
+        }
+        $pdo->prepare("DELETE FROM `{$table}` WHERE cv_id = ?")->execute([$cvId]);
+    }
+
     $stmt = $pdo->prepare("DELETE FROM cv_profiles WHERE cv_id = ? AND user_id = ?");
     $stmt->execute([$cvId, $userId]);
-    
+
     $pdo->commit();
-    
+
     echo json_encode(['success' => true, 'message' => 'CV deleted successfully']);
-} catch (Exception $e) {
-    $pdo->rollBack();
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    // The message goes to the log, not to the browser: a database error text
+    // tells a stranger about the schema and helps the person reading it not at all.
+    error_log('CV delete failed for cv ' . $cvId . ': ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'We could not delete that CV. Please try again.']);
 }
