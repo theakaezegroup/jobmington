@@ -214,7 +214,25 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
-        <?php /* Loaded here as well as being @imported by the stylesheet below.
+        <?php /* The hero sits 43KB into the markup, so the parser reaches it late.
+             This starts it at byte zero instead, alongside the stylesheet.
+
+             Only above 960px, and that limit is the point. There the hero sits
+             beside the headline and is the Largest Contentful Paint element,
+             so fetching it early is the whole game. Below 960px the grid
+             stacks and the hero drops under the headline, off the first
+             screen, and the largest visible thing becomes the headline itself.
+             Preloading a below-the-fold image at high priority on a phone
+             would take bandwidth from the text that is actually being measured
+             and make the number worse.
+
+             type is what makes naming only the webp safe: a browser that
+             cannot decode webp ignores the line and takes the jpeg from the
+             <picture> below, so nothing is fetched twice and nothing is
+             fetched that cannot be used. */ ?>
+    <link rel="preload" as="image" type="image/webp" media="(min-width: 960px)"
+          href="/jobmington/assets/images/hero2-800.webp?v=brand-30" fetchpriority="high">
+    <?php /* Loaded here as well as being @imported by the stylesheet below.
              An @import is serialised: the browser cannot discover it until the
              parent has downloaded and parsed, so it costs a whole round-trip for
              529 bytes, which is cheap on a desk and expensive on a phone. Fetching
