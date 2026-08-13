@@ -16,9 +16,15 @@
  * "Worldwide", "EMEA" and "Australia, Canada, France" are all real answers of
  * "not one country", and pretending otherwise is what caused this.
  *
- *   php cron/backfill_job_countries.php              # say what would change
- *   php cron/backfill_job_countries.php --apply      # change it
+ *   php cron/backfill_job_countries.php                    # say what would change
+ *   php cron/backfill_job_countries.php --apply            # change it
  *   php cron/backfill_job_countries.php --apply --limit=500
+ *
+ * --create-countries adds a country the listings clearly name but the table
+ * does not have. Off by default, because adding a country puts it in the public
+ * filter, which is a visible change and should be a decision rather than a side
+ * effect of a data fix. The scraper creates countries on this same path, so
+ * anything skipped here appears on the next run anyway.
  */
 
 define('JOBMINGTON', true);
@@ -28,8 +34,9 @@ require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/job_locations.php';
 
-$options = getopt('', ['apply', 'limit::']);
+$options = getopt('', ['apply', 'limit::', 'create-countries']);
 $apply   = isset($options['apply']);
+$create  = isset($options['create-countries']);
 $limit   = isset($options['limit']) ? max(1, (int) $options['limit']) : 0;
 $pdo     = db();
 
@@ -38,9 +45,9 @@ function jm_backfill_log(string $line): void
     echo $line . PHP_EOL;
 }
 
-/* Country ids, resolved once. The scraper creates a missing country as it
-   goes; here a country that is not in the table yet simply has no rows to
-   claim, so nothing is created and nothing is guessed. */
+/* Country ids, resolved once, and added to as --create-countries creates any.
+   Without that flag a country the table does not have simply cannot claim its
+   rows, and they are reported rather than moved somewhere approximate. */
 $byIso = [];
 $byName = [];
 foreach ($pdo->query('SELECT country_id, name, iso_code FROM countries') as $row) {
@@ -63,6 +70,7 @@ $changed = 0;
 $cleared = 0;
 $unchanged = 0;
 $missingCountry = [];
+$created = [];
 $moves = [];
 
 foreach ($pdo->query($sql, PDO::FETCH_ASSOC) as $job) {
@@ -87,8 +95,21 @@ foreach ($pdo->query($sql, PDO::FETCH_ASSOC) as $job) {
         if ($wanted === null) {
             // Recognised the place, but this database has no row for it.
             $missingCountry[$country[0]] = ($missingCountry[$country[0]] ?? 0) + 1;
-            $unchanged++;
-            continue;
+
+            if (!$create || !$apply) {
+                $unchanged++;
+                continue;
+            }
+
+            $insert = $pdo->prepare('INSERT INTO countries (name, iso_code, currency_code, currency_symbol, is_active)
+                                     VALUES (?, ?, ?, ?, 1)');
+            $insert->execute([$country[0], $country[1], $country[2], $country[3]]);
+            $wanted = (int) $pdo->lastInsertId();
+
+            // Remember it, or the next row for the same country inserts again.
+            $byIso[$iso] = $wanted;
+            $byName[$name] = $wanted;
+            $created[$country[0]] = $wanted;
         }
     }
 
@@ -143,13 +164,21 @@ if ($moves) {
     }
 }
 
-if ($missingCountry) {
+if ($created) {
+    jm_backfill_log('');
+    jm_backfill_log('  countries added to the table:');
+    foreach ($created as $name => $id) {
+        jm_backfill_log(sprintf('    %-22s #%d', $name, $id));
+    }
+}
+
+if ($missingCountry && !$created) {
     jm_backfill_log('');
     jm_backfill_log('  recognised but not in the countries table, so left alone:');
     foreach ($missingCountry as $name => $count) {
         jm_backfill_log(sprintf('    %-22s %s job(s)', $name, number_format($count)));
     }
-    jm_backfill_log('    Add these to the countries table and run again to place them.');
+    jm_backfill_log('    Re-run with --create-countries to add them and place these jobs.');
 }
 
 jm_backfill_log('');
