@@ -814,14 +814,15 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             gap: 5px;
             position: relative;
             overflow: hidden;
-            /* Quiet. This is a CV: the document belongs to the person applying,
-               and a solid blue block in uppercase competes with their name for
-               the first thing an employer notices. A hairline chip says the
-               same thing and waits to be looked at. */
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            color: #64748b;
-            padding: 3px 9px 3px 8px;
+            /* Brand blue, quietly.
+               The loudness was never the colour, it was the setting: capitals,
+               letter-spaced, semibold, at a size that made a footer note look
+               like a stamp. Same blue, set as a small sentence, so it is found
+               rather than announced on a document that belongs to the person
+               applying. */
+            background: #0640a3;
+            color: #ffffff;
+            padding: 3px 9px;
             border-radius: 4px;
             font-size: 6.5pt;
             font-weight: 500;
@@ -849,12 +850,10 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             z-index: 1;
         }
 
-        /* The tick keeps the brand blue. On a white chip it is the one mark
-           that has to be legible at 6.5pt, and grey would lose it. */
         .cv-footer-verify svg {
             width: 10px;
             height: 10px;
-            color: #0640a3;
+            color: #ffffff;
         }
         
         .cv-footer-date {
@@ -869,27 +868,20 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                 print-color-adjust: exact !important;
             }
             
-            /* The same quiet chip on paper, not the template's accent. This
-               mark says where the document came from, so it looks the same
-               whichever of the three templates the CV is wearing. Only the arc
-               and the tick need forcing: a printer drops backgrounds by
-               default and those two carry the whole thing. */
+            /* Brand blue on paper too, not the template's accent. This mark
+               says where the document came from, so it looks the same whichever
+               of the three templates the CV is wearing. Forced, because a
+               printer drops backgrounds by default and a white tick on a
+               dropped blue would vanish into the page. */
             .cv-footer-verify {
-                background: #ffffff !important;
-                border-color: #e2e8f0 !important;
-                color: #64748b !important;
+                background: #0640a3 !important;
+                color: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
             .cv-footer-verify::before {
                 background: #f59f22 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .cv-footer-verify svg {
-                color: #0640a3 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
