@@ -34,15 +34,19 @@ function jm_boot_ground(): void
     ?>
     <style>
         /*
-         * The body is painted too, not just the root. A root background alone
-         * leaves the strip at the foot of a phone white, because the body
-         * carries its own background and paints it over the root's within its
-         * own box, and on Android the colour Chrome gives the gesture bar is
-         * read off the body. !important because one of these bodies declares
-         * its background inline, and an inline style beats a stylesheet.
+         * The root only, never the body.
+         *
+         * Painting the body blue as well made sense while a curtain covered
+         * it. With the curtain gone there is nothing over it, so the page's
+         * own text lands on the blue instead of on the surface it was designed
+         * for, and dark type on brand blue is the result.
+         *
+         * The root is the right place regardless: the canvas takes its colour
+         * from here, which is what gets painted in the frame before the body
+         * has been laid out. Once the body has a box it paints its own
+         * background over this, which is exactly the handover we want.
          */
-        html.jm-booting,
-        html.jm-booting body {
+        html.jm-booting {
             background: #0640a3 !important;
             /* Belt for a script that starts and then dies. transparent puts
                the canvas back to whatever the page declares, rather than
