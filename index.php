@@ -214,6 +214,12 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
+        <?php /* Loaded here as well as being @imported by the stylesheet below.
+             An @import is serialised: the browser cannot discover it until the
+             parent has downloaded and parsed, so it costs a whole round-trip for
+             529 bytes, which is cheap on a desk and expensive on a phone. Fetching
+             it in parallel means the import resolves from cache. */ ?>
+    <link rel="stylesheet" href="/jobmington/assets/css/brand-platform.css?v=brand-30">
     <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     <style>
     /* ── Homepage overrides ───────────────────────────────────────── */
@@ -1069,13 +1075,22 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
                     <div class="jm-hc-wrap">
                         <div class="jm-hc-main">
                             <?php /* The largest thing on the page, so the browser is told to
-                                     treat it that way. width and height are the file's real
-                                     dimensions: they reserve the space before it arrives, so
-                                     the text beside it does not jump when it does. */ ?>
-                            <img src="/jobmington/assets/images/hero2.jpg?v=brand-29"
-                                 alt="Professional working on career"
-                                 width="1200" height="801"
-                                 fetchpriority="high" decoding="async">
+                                     treat it that way.
+
+                                     800px is not a guess. This box is 280x340 above 960px and
+                                     about 342x260 below it, so even at a 2x screen it never
+                                     needs 700. The file that was here shipped 1200, and before
+                                     that 6016.
+
+                                     webp first, jpeg behind it. A browser takes the first
+                                     format it understands and never fetches the other. */ ?>
+                            <picture>
+                                <source type="image/webp" srcset="/jobmington/assets/images/hero2-800.webp?v=brand-30">
+                                <img src="/jobmington/assets/images/hero2-800.jpg?v=brand-30"
+                                     alt="Professional working on career"
+                                     width="800" height="534"
+                                     fetchpriority="high" decoding="async">
+                            </picture>
                         </div>
                         <div class="jm-hc-tl">
                             <img src="https://images.unsplash.com/photo-1739300293504-234817eead52?auto=format&fit=crop&crop=faces&w=320&q=80" alt="Professional reviewing documents">
