@@ -9,6 +9,9 @@
 define('JOBMINGTON', true);
 require_once __DIR__ . '/../config/env.php';
 require_once __DIR__ . '/../config/database.php';
+// Location to country. Shared with the backfill, which has to reach the same
+// verdict on rows already in the table.
+require_once __DIR__ . '/../includes/job_locations.php';
 
 date_default_timezone_set(getenv('APP_TIMEZONE') ?: 'Africa/Lagos');
 
@@ -84,34 +87,13 @@ function jm_scraper_owner_user_id(PDO $pdo): int {
     return max(1, (int) $stmt->fetchColumn());
 }
 
-function jm_scraper_country_id(PDO $pdo, string $location): int {
-    $locationLower = strtolower($location);
-    $countryName = 'United States';
-    $isoCode = 'US';
-    $currencyCode = 'USD';
-    $currencySymbol = '$';
-
-    if (str_contains($locationLower, 'nigeria') || str_contains($locationLower, 'lagos') || str_contains($locationLower, 'abuja') || str_contains($locationLower, 'africa')) {
-        $countryName = 'Nigeria';
-        $isoCode = 'NG';
-        $currencyCode = 'NGN';
-        $currencySymbol = 'NGN';
-    } elseif (str_contains($locationLower, 'ghana')) {
-        $countryName = 'Ghana';
-        $isoCode = 'GH';
-        $currencyCode = 'GHS';
-        $currencySymbol = 'GHS';
-    } elseif (str_contains($locationLower, 'kenya')) {
-        $countryName = 'Kenya';
-        $isoCode = 'KE';
-        $currencyCode = 'KES';
-        $currencySymbol = 'KES';
-    } elseif (str_contains($locationLower, 'south africa')) {
-        $countryName = 'South Africa';
-        $isoCode = 'ZA';
-        $currencyCode = 'ZAR';
-        $currencySymbol = 'ZAR';
+/** The country row id for a location, or null when the location names none. */
+function jm_scraper_country_id(PDO $pdo, string $location): ?int {
+    $country = jm_scraper_country_of($location);
+    if ($country === null) {
+        return null;
     }
+    [$countryName, $isoCode, $currencyCode, $currencySymbol] = $country;
 
     $stmt = $pdo->prepare('SELECT country_id FROM countries WHERE iso_code = ? OR name = ? LIMIT 1');
     $stmt->execute([$isoCode, $countryName]);
