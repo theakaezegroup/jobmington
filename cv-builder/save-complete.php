@@ -132,6 +132,24 @@ try {
             $updateValues[] = $personal[$formKey];
         }
     }
+
+    /*
+     * The CV's own name, which had nowhere to be changed.
+     *
+     * It could only be set once, on the create form, and the editor showed it
+     * as a plain heading. A builder whose whole point is keeping several CVs
+     * for several kinds of role, where none of them can ever be renamed, makes
+     * the list unreadable the moment there are three.
+     */
+    if (isset($data['title']) && in_array('title', $profileColumns, true)) {
+        $title = trim((string) $data['title']);
+        $updateFields[] = 'title = ?';
+        // Not mb_strimwidth: no mbstring on this server. The /u regex counts
+        // characters without it and will not cut through a multi-byte one.
+        $updateValues[] = $title !== ''
+            ? (preg_replace('/^(.{0,100}).*$/us', '$1', $title) ?? substr($title, 0, 100))
+            : 'Untitled CV';
+    }
     
     if (!empty($updateFields)) {
         $updateValues[] = $cvId;

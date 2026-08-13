@@ -440,10 +440,17 @@ $activeCompletion = $activeCv ? ($completionMap[$activeId] ?? 0) : 0;
             <p>Create multiple versions, track completion, and export when the profile is ready to carry an application.</p>
         </div>
         <div class="jm-cvb-hero-actions">
-            <a class="jm-button" href="/jobmington/cv-builder/create.php">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                New CV
-            </a>
+            <?php /* One click into an empty CV. It used to open a form asking
+                     for a title and a template, which is two decisions before
+                     any writing, and the template one is offered next door. */ ?>
+            <form method="post" action="/jobmington/cv-builder/create.php" style="display:inline;">
+                <?= Security::csrfField() ?>
+                <input type="hidden" name="quick" value="1">
+                <button class="jm-button" type="submit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    New CV
+                </button>
+            </form>
             <a class="jm-button secondary" href="/jobmington/cv-builder/templates.php">Templates</a>
         </div>
     </div>
@@ -575,7 +582,7 @@ $activeCompletion = $activeCv ? ($completionMap[$activeId] ?? 0) : 0;
         <h2>No CVs yet</h2>
         <p>Build your first CV from scratch, or import an existing PDF or DOCX to start with what you already have.</p>
         <div class="jm-cvb-empty-actions">
-            <a class="jm-button" href="/jobmington/cv-builder/create.php">Create from scratch</a>
+            <form method="post" action="/jobmington/cv-builder/create.php" style="display:inline;"><?= Security::csrfField() ?><input type="hidden" name="quick" value="1"><button class="jm-button" type="submit">Create from scratch</button></form>
                 <a class="jm-button secondary" href="/jobmington/cv-builder/templates.php">Browse templates</a>
             <label class="jm-button secondary" for="importFile" style="cursor:pointer;">
                 Import existing CV

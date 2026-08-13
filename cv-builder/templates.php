@@ -45,7 +45,7 @@ jm_cv_header($pageTitle, 'cv');
             <h1>Pick the structure before you write.</h1>
             <p>These templates are already wired into the export flow, so the selected style follows your CV through editing and download.</p>
         </div>
-        <a class="jm-button secondary" href="/jobmington/cv-builder/create.php">Create from scratch</a>
+        <form method="post" action="/jobmington/cv-builder/create.php" style="display:inline;"><?= Security::csrfField() ?><input type="hidden" name="quick" value="1"><button class="jm-button secondary" type="submit">Create from scratch</button></form>
     </div>
 
     <div class="jm-cv-template-grid feature">

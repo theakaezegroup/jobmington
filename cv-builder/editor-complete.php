@@ -473,6 +473,32 @@ body.jm-minimal {
     background: linear-gradient(180deg, #ffffff 0%, #f7fbff 44%, #f3f8ff 100%);
 }
 
+/* The CV's name, editable in place.
+   It reads as the heading it replaced until you touch it, because it is still
+   the title of the page. The only new thing is that it can be corrected, which
+   it could not be anywhere before: a builder for keeping several CVs, none of
+   which could be renamed after the moment they were made. */
+.editor-title-input {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    display: block;
+    font: inherit;
+    font-size: clamp(22px, 3vw, 30px);
+    font-weight: 800;
+    letter-spacing: -.01em;
+    margin: 0 0 4px -10px;
+    max-width: 100%;
+    padding: 4px 10px;
+    width: 22ch;
+}
+.editor-title-input:hover { border-color: var(--jm-line); }
+.editor-title-input:focus {
+    background: #ffffff;
+    border-color: var(--jm-blue);
+    outline: none;
+}
+
 .editor-wrapper {
     max-width: 1180px;
     margin: 0 auto;
@@ -999,7 +1025,9 @@ body.jm-minimal {
                 [$cv['title'] ?: 'Untitled CV'],
             ]);
             ?>
-            <h1 class="editor-title"><?= e($cv['title'] ?: 'Edit your CV') ?></h1>
+            <input class="editor-title editor-title-input" id="cvTitle" name="cv_title"
+                   value="<?= e($cv['title'] ?: 'Untitled CV') ?>"
+                   maxlength="100" aria-label="CV name" placeholder="Name this CV">
             <p class="editor-subtitle">Keep the details sharp, choose a template from the builder, then export a polished CV when you are ready.</p>
         </div>
         <div class="editor-actions">
@@ -1620,6 +1648,8 @@ async function saveCV() {
     // Collect all data
     const data = {
         cv_id: form.querySelector('[name="cv_id"]').value,
+        // The CV's own name, which used to be fixed at creation.
+        title: (document.getElementById('cvTitle') || {}).value || '',
         personal: {
             full_name: form.querySelector('[name="full_name"]').value,
             headline: form.querySelector('[name="headline"]').value,

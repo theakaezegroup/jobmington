@@ -21,6 +21,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Security::verifyCSRF()) {
         $error = 'Your session expired. Please try again.';
     } else {
+        /*
+         * A blank start means blank: no form, no decisions.
+         *
+         * This page used to ask for a title and then show the same three
+         * templates the Templates page shows, so "Create from scratch" and
+         * "Browse templates" were two routes to the same screen, and the one
+         * named for starting fresh was the one that made you choose a look
+         * before you had written anything.
+         *
+         * Now it takes a sensible default for both and drops you in the
+         * editor, where the name is editable and the template can be changed
+         * whenever you like. Anyone who wants to choose first still can: that
+         * is what the Templates page is for.
+         */
+        $quick = isset($_POST['quick']);
         $title = trim(Security::clean($_POST['title'] ?? ''));
         $templateId = strtolower(trim(Security::clean($_POST['template'] ?? 'obsidian')));
 
