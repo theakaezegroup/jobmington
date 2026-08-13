@@ -45,12 +45,23 @@ function jm_boot_ground(): void
     $done = true;
     ?>
     <style>
-        html.jm-booting {
-            background: #0640a3;
+        /*
+         * The body has to be painted too, not just the root.
+         *
+         * A root background alone leaves the strip at the foot of a phone
+         * white, because the body carries its own background and paints it
+         * over the root's within its own box, and on Android the colour Chrome
+         * gives the gesture bar is read off the body. So both, and !important,
+         * because one of these bodies declares its background inline and an
+         * inline style beats a stylesheet every time.
+         */
+        html.jm-booting,
+        html.jm-booting body {
+            background: #0640a3 !important;
             animation: jm-ground-out 0.01s linear 5.2s forwards;
         }
         @keyframes jm-ground-out {
-            to { background: transparent; }
+            to { background: transparent !important; }
         }
     </style>
     <script>document.documentElement.classList.add('jm-booting');</script>
@@ -82,13 +93,20 @@ function jm_boot_screen(): void
         #jm-boot {
             position: fixed;
             inset: 0;
+            /* inset alone leaves a phone's bottom strip uncovered when the
+               viewport reported to CSS is shorter than the glass. dvh is the
+               height that accounts for the browser's own chrome; vh is the
+               fallback for engines that do not know dvh yet. */
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
             z-index: 99999;
             background: #0640a3;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 20px;
             /* The failsafe. If the script never runs, the screen still leaves
                on its own, so a broken load can never strand anyone on a blue
                rectangle with no way forward. */
@@ -106,8 +124,8 @@ function jm_boot_screen(): void
         }
 
         .jm-boot-mark {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             object-fit: contain;
             animation: jm-boot-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
@@ -119,7 +137,7 @@ function jm_boot_screen(): void
 
         /* A hairline that reports work is happening, and reports nothing else. */
         .jm-boot-line {
-            width: 92px;
+            width: 80px;
             height: 2px;
             border-radius: 2px;
             background: rgba(255, 255, 255, 0.22);
