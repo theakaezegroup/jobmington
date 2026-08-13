@@ -699,10 +699,90 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                 display: none !important;
             }
             
+            /*
+             * A strip reserved at the foot of every sheet.
+             *
+             * The page margin is what shrinks the text area on each page; a
+             * padding on the container would only reserve space once, at the
+             * very end, and the running line would print over the body copy on
+             * every page before that.
+             */
             @page {
-                margin: 0;
+                margin: 0 0 11mm 0;
                 size: A4;
             }
+
+            /* Fixed elements repeat on every printed page, and position against
+               the sheet rather than the text area, so this sits in the strip the
+               page margin just cleared. */
+            .cv-running {
+                display: flex !important;
+                position: fixed;
+                bottom: 3.5mm;
+                left: 52px;
+                right: 52px;
+                align-items: baseline;
+                gap: 5px;
+                font-size: 6.5pt;
+                color: #94a3b8;
+                letter-spacing: 0.1px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .cv-running-sep { color: #cbd5e1; }
+
+            /* The brand mark ends the document rather than repeating, so it must
+               never be orphaned onto a sheet of its own with nothing above it. */
+            .cv-footer {
+                break-before: avoid;
+                page-break-before: avoid;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* On screen the document scrolls as one page, so a line pinned to the
+           window bottom would simply cover the content. It is print furniture. */
+        .cv-running { display: none; }
+
+        /*
+         * Where the paper is allowed to break.
+         *
+         * There was one rule for this in the whole stylesheet, so a two-page CV
+         * broke wherever the text happened to run out. A role could split with
+         * the employer on one sheet and the dates on the next, and a section
+         * heading could land as the final line of a page with nothing under it,
+         * which reads as though the section is empty.
+         *
+         * These apply on screen as well as print. The screen preview is meant to
+         * show what will come out of the printer, and a preview that paginates
+         * differently is a preview of nothing.
+         */
+        .entry,
+        .skill-pill,
+        .cv-footer-brand {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        /* A heading stays with what it introduces. */
+        .section-title {
+            break-after: avoid;
+            page-break-after: avoid;
+        }
+
+        /* And a section never starts on the last line of a sheet. */
+        .cv-section {
+            break-inside: auto;
+            page-break-inside: auto;
+        }
+
+        /* Never one line of a paragraph alone at a page edge. */
+        .entry-description,
+        .cv-summary {
+            orphans: 3;
+            widows: 3;
         }
         
         /* Screen preview padding */
@@ -1150,6 +1230,30 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         </div>
         <span class="cv-footer-date">Generated <?= date('M Y') ?></span>
     </footer>
+
+    <?php
+    /*
+     * The running line, on every printed page.
+     *
+     * Not our mark repeated. Recruiters print CVs and the pages get separated
+     * on a desk, and a page two that does not say whose it is gets binned. So
+     * what repeats is the candidate's name, which serves them, rather than the
+     * Jobmington chip, which would only serve us and three times over.
+     *
+     * Screen-hidden: on screen the whole document scrolls as one and a line
+     * pinned to the window bottom would just sit on top of the content.
+     */
+    $runningName = trim((string) ($cv['full_name'] ?? ''));
+    if ($runningName !== ''):
+    ?>
+    <div class="cv-running" aria-hidden="true">
+        <span><?= e($runningName) ?></span>
+        <?php if (!empty($cv['headline'])): ?>
+            <span class="cv-running-sep">&middot;</span>
+            <span><?= e($cv['headline']) ?></span>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
     <!-- JOBMINGTON_CV_BUILDER_EXPORT cv_id:<?= $cvId ?> user:<?= $userId ?> generated:<?= date('Y-m-d') ?> -->
     
 </div>
