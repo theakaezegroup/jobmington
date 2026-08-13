@@ -141,7 +141,7 @@ $pageTitle = 'Settings | ' . SITE_NAME;
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-27">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
     <style>
         .jm-settings-grid { display:grid; grid-template-columns:220px minmax(0,1fr); gap:36px; }
         .jm-settings-nav { display:grid; gap:10px; align-content:start; }

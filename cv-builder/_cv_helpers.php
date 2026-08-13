@@ -39,6 +39,38 @@ function jm_cv_template(string $templateId): array {
     return $templates[$key] ?? $templates['obsidian'];
 }
 
+/**
+ * The trail back out of the CV builder.
+ *
+ * Building a CV is four pages deep and every one of them is a place you can
+ * get stuck: pick a template, name it, fill it in, export it. Until now the
+ * only way back was the browser button or the logo, which throws away where
+ * you were rather than stepping out of it.
+ *
+ * Rendered from the page rather than guessed from the URL, because the CV a
+ * crumb should name is the one being edited, and no URL says its title.
+ *
+ * @param array<int, array{0:string,1:string}|array{0:string}> $trail [label] or [label, href]
+ */
+function jm_cv_breadcrumb(array $trail): void {
+    if (!$trail) {
+        return;
+    }
+    ?>
+    <nav class="jm-crumbs" aria-label="Breadcrumb">
+        <a href="/jobmington/cv-builder/">CV Builder</a>
+        <?php foreach ($trail as $step): ?>
+            <span class="jm-crumbs-sep" aria-hidden="true">/</span>
+            <?php if (isset($step[1]) && $step[1] !== ''): ?>
+                <a href="<?= e($step[1]) ?>"><?= e($step[0]) ?></a>
+            <?php else: ?>
+                <span aria-current="page"><?= e($step[0]) ?></span>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </nav>
+    <?php
+}
+
 function jm_cv_header(string $pageTitle, string $active = 'cv'): void {
     $isLoggedIn = Session::isLoggedIn();
     $dashboardUrl = Session::isAdmin()
@@ -53,7 +85,7 @@ function jm_cv_header(string $pageTitle, string $active = 'cv'): void {
         <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-        <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-27">
+        <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
     </head>
     <body class="jm-minimal">
         <div class="jm-shell">

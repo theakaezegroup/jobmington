@@ -987,7 +987,16 @@ body.jm-minimal {
     
     <div class="editor-header">
         <div>
-            <a href="<?= SITE_URL ?>/cv-builder/" class="editor-eyebrow">Back to CV Builder</a>
+            <?php
+            /* A trail rather than a single Back link. This is the deepest page
+               in the module and the one people sit on longest, so it should say
+               where they are, not only offer one step out of it. The CV is
+               named because "Edit" alone tells you nothing when you keep three. */
+            jm_cv_breadcrumb([
+                ['Templates', SITE_URL . '/cv-builder/templates.php?cv_id=' . (int) $cvId],
+                [$cv['title'] ?: 'Untitled CV'],
+            ]);
+            ?>
             <h1 class="editor-title"><?= e($cv['title'] ?: 'Edit your CV') ?></h1>
             <p class="editor-subtitle">Keep the details sharp, choose a template from the builder, then export a polished CV when you are ready.</p>
         </div>

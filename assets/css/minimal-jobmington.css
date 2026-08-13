@@ -5002,3 +5002,28 @@ body.jm-home-page {
     outline: 2px solid var(--jm-blue);
     outline-offset: 2px;
 }
+
+/* ── Breadcrumbs ───────────────────────────────────────────────────────
+   For the CV builder, which is four pages deep and had no way back out
+   except the browser button. Quiet: a trail is for orientation, and the
+   moment it competes with the page heading it has stopped helping. */
+.jm-crumbs {
+    align-items: center;
+    color: var(--jm-muted);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 13px;
+    gap: 8px;
+    margin: 0 0 18px;
+}
+.jm-crumbs a {
+    color: var(--jm-muted);
+    text-decoration: none;
+}
+.jm-crumbs a:hover,
+.jm-crumbs a:focus-visible { color: var(--jm-blue); }
+.jm-crumbs [aria-current="page"] {
+    color: var(--jm-ink);
+    font-weight: 700;
+}
+.jm-crumbs-sep { color: var(--jm-line); }

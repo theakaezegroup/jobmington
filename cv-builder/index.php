@@ -576,6 +576,7 @@ $activeCompletion = $activeCv ? ($completionMap[$activeId] ?? 0) : 0;
         <p>Build your first CV from scratch, or import an existing PDF or DOCX to start with what you already have.</p>
         <div class="jm-cvb-empty-actions">
             <a class="jm-button" href="/jobmington/cv-builder/create.php">Create from scratch</a>
+                <a class="jm-button secondary" href="/jobmington/cv-builder/templates.php">Browse templates</a>
             <label class="jm-button secondary" for="importFile" style="cursor:pointer;">
                 Import existing CV
                 <input id="importFile" type="file" accept=".pdf,.docx" hidden onchange="importDocument(this)">

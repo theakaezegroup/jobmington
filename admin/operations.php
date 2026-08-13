@@ -363,7 +363,7 @@ require_once __DIR__ . '/../includes/header.php';
      markup below depends on its section and panel classes; its global
      rules are scoped to body.jm-minimal, which this page no longer is, so
      they cannot fight the admin shell. -->
-<link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-27">
+<link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
     <style>
         .jm-backup-grid {
             display: grid;

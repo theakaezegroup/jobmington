@@ -50,6 +50,7 @@ jm_cv_header($pageTitle, 'cv');
 ?>
 
 <section class="jm-section jm-cv-page" style="padding-top:0;">
+    <?php jm_cv_breadcrumb([['Templates', '/jobmington/cv-builder/templates.php'], ['New CV']]); ?>
     <div class="jm-cv-hero">
         <div>
             <p class="jm-kicker">CV Builder</p>
