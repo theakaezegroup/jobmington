@@ -19,6 +19,7 @@ function jm_employer_single_post_package(): array {
         'id'            => 'single_post',
         'name'          => 'Single Job Post',
         'price'         => PRICE_EMPLOYER_SINGLE_POST,
+        'usd'           => USD_PRICE_EMPLOYER_SINGLE_POST,
         'duration_days' => 30,
         'featured'      => false,
         'badge'         => '',
@@ -34,6 +35,7 @@ function jm_employer_plans(): array {
             'id'             => 'basic',
             'name'           => 'Basic',
             'price_monthly'  => PRICE_EMPLOYER_BASIC_MONTHLY,
+            'usd_monthly'    => USD_PRICE_EMPLOYER_BASIC_MONTHLY,
             'post_limit'     => EMPLOYER_BASIC_POST_LIMIT,
             'badge'          => 'Good for occasional hiring',
             'description'    => 'For companies that hire a few times a year.',
@@ -50,6 +52,7 @@ function jm_employer_plans(): array {
             'id'             => 'pro',
             'name'           => 'Pro',
             'price_monthly'  => PRICE_EMPLOYER_PRO_MONTHLY,
+            'usd_monthly'    => USD_PRICE_EMPLOYER_PRO_MONTHLY,
             'post_limit'     => 0, // unlimited
             'badge'          => 'Most popular',
             'description'    => 'For teams that hire continuously.',
@@ -75,6 +78,7 @@ function jm_featured_addon(): array {
         'id'          => 'featured_addon',
         'name'        => 'Featured Job Boost',
         'price'       => PRICE_EMPLOYER_FEATURED_ADDON,
+        'usd'         => USD_PRICE_EMPLOYER_FEATURED_ADDON,
         'description' => 'Pin your listing at the top of search results with a Featured badge.',
     ];
 }
@@ -89,6 +93,7 @@ function jm_seeker_plans(): array {
             'id'          => 'monthly',
             'name'        => 'Premium Monthly',
             'price'       => PRICE_SEEKER_PREMIUM_MONTHLY,
+            'usd'         => USD_PRICE_SEEKER_PREMIUM_MONTHLY,
             'interval'    => 'monthly',
             'badge'       => 'Flexible',
             'description' => 'Full access to all AI tools and premium perks. Cancel any time.',
@@ -109,12 +114,13 @@ function jm_seeker_plans(): array {
             'id'          => 'annual',
             'name'        => 'Premium Annual',
             'price'       => PRICE_SEEKER_PREMIUM_ANNUAL,
+            'usd'         => USD_PRICE_SEEKER_PREMIUM_ANNUAL,
             'interval'    => 'annually',
             'badge'       => '2 months free',
             'description' => 'All Premium features, billed once a year. Best value.',
             'features'    => [
                 'Everything in Premium Monthly',
-                'Save ' . jm_format_ngn(PRICE_SEEKER_PREMIUM_MONTHLY * 12 - PRICE_SEEKER_PREMIUM_ANNUAL) . ' vs monthly',
+                'Save ' . jm_price_text(PRICE_SEEKER_PREMIUM_MONTHLY * 12 - PRICE_SEEKER_PREMIUM_ANNUAL) . ' vs monthly',
             ],
             'paystack_plan_code' => getenv('PAYSTACK_PLAN_SEEKER_ANNUAL') ?: '',
             'type'        => 'subscription',
@@ -137,6 +143,7 @@ function jm_credit_packs(): array {
             'name'        => '1 Credit',
             'credits'     => 1,
             'price'       => PRICE_CREDITS_SINGLE,
+            'usd'         => USD_PRICE_CREDITS_SINGLE,
             'badge'       => '',
             'description' => 'Unlock one AI tool use.',
             'savings'     => 0,
@@ -146,6 +153,7 @@ function jm_credit_packs(): array {
             'name'        => '5 Credits',
             'credits'     => 5,
             'price'       => PRICE_CREDITS_PACK_5,
+            'usd'         => USD_PRICE_CREDITS_PACK_5,
             'badge'       => 'Popular',
             'description' => 'Best for a focused job search sprint.',
             'savings'     => (PRICE_CREDITS_SINGLE * 5) - PRICE_CREDITS_PACK_5,
@@ -155,6 +163,7 @@ function jm_credit_packs(): array {
             'name'        => '10 Credits',
             'credits'     => 10,
             'price'       => PRICE_CREDITS_PACK_10,
+            'usd'         => USD_PRICE_CREDITS_PACK_10,
             'badge'       => 'Best value',
             'description' => 'Stock up and use tools whenever you need.',
             'savings'     => (PRICE_CREDITS_SINGLE * 10) - PRICE_CREDITS_PACK_10,
@@ -176,8 +185,9 @@ function jm_bundles(): array {
             'id'          => 'job_toolkit',
             'name'        => 'Job Application Toolkit',
             'price'       => PRICE_BUNDLE_JOB_TOOLKIT,
+            'usd'         => USD_PRICE_BUNDLE_JOB_TOOLKIT,
             'credits'     => 4, // covers cv + cover letter + interview prep (2 credits)
-            'badge'       => 'Save ' . jm_format_ngn(
+            'badge'       => 'Save ' . jm_price_text(
                 PRICE_CREDITS_SINGLE
                 + PRICE_CREDITS_SINGLE
                 + (PRICE_CREDITS_SINGLE * 2)
@@ -278,6 +288,7 @@ function jm_job_posting_packages(): array {
             'id'            => 'starter',
             'name'          => 'Standard Post',
             'price'         => PRICE_EMPLOYER_SINGLE_POST,
+        'usd'           => USD_PRICE_EMPLOYER_SINGLE_POST,
             'duration_days' => 30,
             'featured'      => false,
             'badge'         => '',

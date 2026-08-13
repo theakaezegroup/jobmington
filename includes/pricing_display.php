@@ -241,6 +241,19 @@ function jm_price_parts(float $ngn, string $suffix = '', ?float $usd = null): ar
     ];
 }
 
+/**
+ * The leading figure alone, as plain text.
+ *
+ * For the places a price is a label rather than markup: a plan feature reading
+ * "Save $4 vs monthly", a badge, an email subject. Those strings get escaped by
+ * whatever renders them, so they cannot carry the spans jm_price() returns, and
+ * a saving is not worth a second currency beside it anyway.
+ */
+function jm_price_text(float $ngn, ?float $usd = null): string
+{
+    return jm_usd_text($ngn, $usd);
+}
+
 /** The same thing as one string, for the many places that just need a price. */
 function jm_price(float $ngn, string $suffix = '', ?float $usd = null): string
 {
@@ -266,9 +279,12 @@ function jm_currency_footnote(): string
     $currency = jm_visitor_currency();
 
     if ($currency !== null && $currency['code'] === 'NGN') {
-        return 'Prices are shown in US dollars with the Naira amount you will be charged beside them.';
+        return 'Prices in US dollars, with the Naira you will be charged beside them.';
     }
 
-    return 'Local amounts are approximate, for reference only. Payments are processed in Naira '
-         . 'at the equivalent amount, and international cards are accepted.';
+    if ($currency !== null && $currency['code'] !== 'USD') {
+        return 'Prices in US dollars. Local amounts are approximate; payment is taken in Naira.';
+    }
+
+    return 'Prices in US dollars. Payment is taken in Naira, and international cards are accepted.';
 }

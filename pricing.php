@@ -409,7 +409,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     <div class="jm-p-proof">
         <div class="jm-p-proof-item"><strong><?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY, '', USD_PRICE_SEEKER_PREMIUM_MONTHLY) ?></strong>/mo for seekers</div>
         <div class="jm-p-proof-sep"></div>
-        <div class="jm-p-proof-item"><strong>₦30,000</strong> per job post</div>
+        <div class="jm-p-proof-item"><strong><?= jm_price(PRICE_EMPLOYER_SINGLE_POST, '', USD_PRICE_EMPLOYER_SINGLE_POST) ?></strong> per job post</div>
         <div class="jm-p-proof-sep"></div>
         <div class="jm-p-proof-item">Credits <strong>never expire</strong></div>
         <div class="jm-p-proof-sep"></div>
@@ -443,7 +443,6 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             </div>
             <div class="jm-p-solo-price">
                 <strong><?= jm_price(PRICE_EMPLOYER_SINGLE_POST, '', USD_PRICE_EMPLOYER_SINGLE_POST) ?></strong>
-                <small>≈ <?= jm_ngn_to_usd(PRICE_EMPLOYER_SINGLE_POST) ?> USD</small>
                 <div style="margin-top:14px;">
                     <a class="jm-button" href="<?= SITE_URL ?>/employer/post-job.php">Post a job</a>
                 </div>
@@ -471,10 +470,9 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 <?php if ($plan['badge']): ?><span class="jm-p-badge"><?= e($plan['badge']) ?></span><?php endif; ?>
                 <p class="jm-p-plan-name"><?= e($plan['name']) ?></p>
                 <div class="jm-p-amount">
-                    <strong><?= jm_price((float) $plan['price_monthly']) ?></strong>
+                    <strong><?= jm_price((float) $plan['price_monthly'], '', (float) ($plan['usd_monthly'] ?? 0)) ?></strong>
                     <span>/month</span>
                 </div>
-                <span class="jm-p-usd">≈ <?= jm_ngn_to_usd($plan['price_monthly']) ?> USD</span>
                 <p class="jm-p-desc"><?= e($plan['description']) ?></p>
                 <ul class="jm-p-feats">
                     <?php foreach ($plan['features'] as $feat): ?>
@@ -496,7 +494,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
 
         <div class="jm-p-faq">
             <h3>Employer FAQ</h3>
-            <details><summary>Can I pay in USD?</summary><p>Yes. Paystack accepts international cards. Prices shown in Naira — USD equivalent at checkout: Single post ≈ <?= jm_ngn_to_usd(PRICE_EMPLOYER_SINGLE_POST) ?>, Basic ≈ <?= jm_ngn_to_usd(PRICE_EMPLOYER_BASIC_MONTHLY) ?>/mo, Pro ≈ <?= jm_ngn_to_usd(PRICE_EMPLOYER_PRO_MONTHLY) ?>/mo.</p></details>
+            <details><summary>Which currency am I charged in?</summary><p>Plans are priced in US dollars, and any local figure beside a price is an approximate guide. The payment itself is taken in Naira at the equivalent amount, through Paystack, which accepts international cards. You will see the exact amount before you confirm.</p></details>
             <details><summary>What does Featured mean?</summary><p>Featured jobs are pinned at the top of search results and displayed in dedicated "Featured" sections across the site, giving your listing significantly more impressions.</p></details>
             <details><summary>Can I cancel a monthly plan?</summary><p>Yes, cancel any time. Your active listings stay live until the end of the billing cycle.</p></details>
             <details><summary>How many applications can I receive?</summary><p>Unlimited on all plans.</p></details>
@@ -516,7 +514,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             <!-- Free -->
             <div class="jm-p-card jm-p-reveal jm-p-reveal-1">
                 <p class="jm-p-plan-name">Free</p>
-                <div class="jm-p-amount"><strong>₦0</strong><span>forever</span></div>
+                <div class="jm-p-amount"><strong>Free</strong><span>forever</span></div>
                 <span class="jm-p-usd">&nbsp;</span>
                 <p class="jm-p-desc">Everything you need to start your job search.</p>
                 <ul class="jm-p-feats">
@@ -535,10 +533,10 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 <?php if ($plan['badge']): ?><span class="jm-p-badge <?= $isAnnual ? 'tone-orange' : '' ?>"><?= e($plan['badge']) ?></span><?php endif; ?>
                 <p class="jm-p-plan-name"><?= e($plan['name']) ?></p>
                 <div class="jm-p-amount">
-                    <strong><?= jm_format_ngn($plan['price']) ?></strong>
+                    <strong><?= jm_price((float) $plan['price'], '', (float) ($plan['usd'] ?? 0)) ?></strong>
                     <span>/<?= $isAnnual ? 'year' : 'month' ?></span>
                 </div>
-                <?php if ($isAnnual): ?><span class="jm-p-usd" style="color:var(--jm-green);font-weight:700;">= <?= jm_format_ngn(PRICE_SEEKER_PREMIUM_MONTHLY) ?>/mo — 2 months free</span><?php else: ?><span class="jm-p-usd"><?= jm_format_ngn_with_usd($plan['price']) ?></span><?php endif; ?>
+                <?php if ($isAnnual): ?><span class="jm-p-usd" style="color:var(--jm-green);font-weight:700;">Two months free</span><?php else: ?><span class="jm-p-usd">&nbsp;</span><?php endif; ?>
                 <p class="jm-p-desc"><?= e($plan['description']) ?></p>
                 <ul class="jm-p-feats">
                     <?php foreach ($plan['features'] as $feat): ?>
@@ -555,7 +553,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
         <!-- Tool table -->
         <span class="jm-p-section-label" style="margin-top:16px;">AI tools</span>
         <h2 class="jm-p-section-h">What does each tool cost?</h2>
-        <p class="jm-p-section-sub">Premium includes everything. Credits let you pay per use — they never expire.</p>
+        <p class="jm-p-section-sub">Premium includes everything. Credits let you pay per use, and they never expire.</p>
 
         <table class="jm-p-tool-table">
             <thead>
@@ -583,7 +581,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                         } elseif ($tool['is_free']) {
                             echo '<span class="tone-free">Free</span>';
                         } else {
-                            echo e(jm_format_ngn($tool['ngn_price'])) . ' (' . $tool['credit_cost'] . ' credit' . ($tool['credit_cost'] > 1 ? 's' : '') . ')';
+                            echo jm_price((float) $tool['ngn_price']) . ' <span class="jm-p-credits">(' . (int) $tool['credit_cost'] . ' credit' . ($tool['credit_cost'] > 1 ? 's' : '') . ')</span>';
                         }
                     ?></td>
                 </tr>
@@ -603,7 +601,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 <strong><?= e($pack['name']) ?></strong>
                 <div class="jm-p-pack-price"><?= jm_price((float) $pack['price']) ?></div>
                 <div class="jm-p-pack-credits"><?= $pack['credits'] ?> credit<?= $pack['credits'] > 1 ? 's' : '' ?></div>
-                <?php if ($pack['savings'] > 0): ?><span class="jm-p-pack-save">Save <?= jm_format_ngn($pack['savings']) ?></span><?php endif; ?>
+                <?php if ($pack['savings'] > 0): ?><span class="jm-p-pack-save">Save <?= jm_price((float) $pack['savings']) ?></span><?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>
@@ -640,7 +638,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             <details><summary>Do credits expire?</summary><p>No. Credits never expire. Buy them at any time and use them whenever you need.</p></details>
             <details><summary>Can I cancel Premium?</summary><p>Yes. Cancel before your next billing date and you won't be charged again. You keep Premium access until the end of the period you paid for.</p></details>
             <details><summary>What is priority application?</summary><p>Premium members' applications appear higher in employer dashboards, giving you more visibility especially for competitive roles.</p></details>
-            <details><summary>What are early job alerts?</summary><p>Premium members receive new job notifications 24 hours before they're visible to free users — giving you a head start on every application.</p></details>
+            <details><summary>What are early job alerts?</summary><p>Premium members receive new job notifications 24 hours before they are visible to free users, giving you a head start on every application.</p></details>
         </div>
     </div>
 
