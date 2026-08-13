@@ -367,6 +367,9 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
         font-size:14px; font-weight:600; color:var(--jm-muted);
     }
     .jm-p-proof-item strong { color:var(--jm-ink); font-size:16px; font-weight:800; }
+    /* The label half. On a wide screen it sits beside the value and reads as a
+       sentence; the phone layout turns the same two elements into a tile. */
+    .jm-p-proof-item span { color:var(--jm-muted); }
     .jm-p-proof-sep { width:1px; height:28px; background:var(--jm-line); }
 
     /* ── Balance badge ───────────────────────────────────────────── */
@@ -397,30 +400,65 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     /* ── Mobile ──────────────────────────────────────────────────── */
     @media (max-width:640px) {
         .jm-p-solo { grid-template-columns:1fr; }
-        .jm-p-solo-price { text-align:center; }
         .jm-p-bundle { flex-direction:column; align-items:flex-start; }
 
-        /* The proof strip.
-           It was a wrapping flex row, and each item is itself a flex row, so
-           on a narrow screen every item broke in half: the figure on one line
-           and what it refers to on the next, which reads as eight fragments
-           rather than four facts. One item per line instead, each held
-           together, which is what the strip is for. */
+        /* The proof strip becomes four tiles.
+           As a wrapping row it broke every item in half, and stacked as four
+           sentences it was legible but dull. Two by two, value over label, it
+           is something you take in at a glance, which is the only reason a
+           strip like this is above the fold at all. */
         .jm-p-proof {
-            flex-direction:column;
-            align-items:center;
-            gap:11px;
-            padding:16px 14px;
-            margin-bottom:36px;
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:1px;
+            padding:1px;
+            background:var(--jm-line);
+            margin-bottom:32px;
+            overflow:hidden;
         }
         .jm-p-proof-item {
-            flex-wrap:nowrap;
-            white-space:nowrap;
-            font-size:13px;
-            gap:6px;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:2px;
+            background:var(--jm-soft);
+            padding:14px 8px;
+            text-align:center;
         }
-        .jm-p-proof-item strong { font-size:15px; }
+        .jm-p-proof-item strong { font-size:19px; line-height:1.1; }
+        .jm-p-proof-item span { font-size:11px; line-height:1.3; }
         .jm-p-proof-sep { display:none; }
+
+        /* The tab pair is the page's main control, so it gets the full width
+           and a thumb-sized target rather than two small pills in the middle. */
+        .jm-p-tabs { margin-bottom:32px; }
+        .jm-p-tab-wrap { width:100%; }
+        .jm-p-tab { flex:1; padding:12px 8px; min-height:46px; font-size:13.5px; }
+
+        /* Touch has no hover. On iOS the lifted state latches after a tap and
+           stays until you touch something else, so a card you pressed sits
+           raised and shadowed for no reason. Give the movement to mice only. */
+        @media (hover:none) {
+            .jm-p-card:hover, .jm-p-solo:hover, .jm-p-pack:hover {
+                transform:none;
+                box-shadow:none;
+                border-color:var(--jm-line);
+            }
+            .jm-p-card.featured:hover { border-color:var(--jm-blue); }
+        }
+
+        /* Stacked cards need room for the badge that sits above each one. */
+        .jm-p-grid { grid-template-columns:1fr; gap:26px; }
+        .jm-p-packs { grid-template-columns:1fr; }
+        .jm-p-card { padding:26px 22px; }
+
+        /* A single-column card puts its action at the bottom, where a thumb
+           already is, and full width so it cannot be missed or mis-tapped. */
+        .jm-p-solo { padding:22px; gap:18px; }
+        .jm-p-solo-price { text-align:left; }
+        .jm-p-solo-price .jm-button { width:100%; justify-content:center; min-height:48px; }
+        .jm-p-addon { padding:16px; gap:10px; }
+        .jm-p-addon-price { width:100%; }
 
         /* The tool table.
            Three columns of prose will not fit a phone, and with no scroll
@@ -459,13 +497,9 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             text-transform:uppercase;
         }
 
-        /* Cards and packs get their own row rather than two cramped columns. */
-        .jm-p-grid { grid-template-columns:1fr; }
-        .jm-p-packs { grid-template-columns:1fr; }
-        .jm-p-card { padding:26px 22px; }
-        .jm-p-hero { padding:36px 0 30px; }
-        .jm-p-tabs { margin-bottom:36px; }
-        .jm-p-tab { padding:10px 20px; }
+        .jm-p-hero { padding:34px 0 26px; }
+        .jm-p-hero h1 { font-size:30px; }
+        .jm-p-hero p { font-size:14.5px; line-height:1.6; }
     }
     </style>
 </head>
@@ -488,13 +522,24 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
 
     <!-- Social proof -->
     <div class="jm-p-proof">
-        <div class="jm-p-proof-item"><strong><?= e(jm_price_text(PRICE_SEEKER_PREMIUM_MONTHLY, USD_PRICE_SEEKER_PREMIUM_MONTHLY)) ?></strong>/mo for seekers</div>
-        <div class="jm-p-proof-sep"></div>
-        <div class="jm-p-proof-item"><strong><?= e(jm_price_text(PRICE_EMPLOYER_SINGLE_POST, USD_PRICE_EMPLOYER_SINGLE_POST)) ?></strong> per job post</div>
-        <div class="jm-p-proof-sep"></div>
-        <div class="jm-p-proof-item">Credits <strong>never expire</strong></div>
-        <div class="jm-p-proof-sep"></div>
-        <div class="jm-p-proof-item">Powered by <strong>Paystack</strong></div>
+        <?php
+        /* One shape for all four, value then label, so the strip can be a row
+           on a wide screen and a grid of tiles on a phone without the layout
+           having to know which of them leads with a number. Before this, two
+           read "value label" and two read "label value", which is why they
+           could only ever be a sentence. */
+        $proof = [
+            [jm_price_text(PRICE_SEEKER_PREMIUM_MONTHLY, USD_PRICE_SEEKER_PREMIUM_MONTHLY), 'a month, seekers'],
+            [jm_price_text(PRICE_EMPLOYER_SINGLE_POST, USD_PRICE_EMPLOYER_SINGLE_POST),     'per job post'],
+            ['No expiry',                                                                    'on credits'],
+            ['Paystack',                                                                    'secure payments'],
+        ];
+        foreach ($proof as $i => [$value, $label]):
+            if ($i > 0): ?><div class="jm-p-proof-sep"></div><?php endif; ?>
+            <div class="jm-p-proof-item">
+                <strong><?= e($value) ?></strong><span><?= e($label) ?></span>
+            </div>
+        <?php endforeach; ?>
     </div>
 
     <!-- Tabs -->
