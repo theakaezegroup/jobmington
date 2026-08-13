@@ -3,6 +3,13 @@ if (!defined('JOBMINGTON')) {
     die('Direct access not permitted');
 }
 
+/*
+ * What a visitor sees a price in. Loaded here rather than page by page,
+ * because every page that shows a price already loads this file and none of
+ * them should be able to render a price without the currency rules attached.
+ */
+require_once __DIR__ . '/pricing_display.php';
+
 // ═══════════════════════════════════════════════════════════════════
 //  EMPLOYER PLANS
 // ═══════════════════════════════════════════════════════════════════

@@ -1257,15 +1257,15 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
                     <div style="display:grid;gap:10px;margin-bottom:18px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;font-size:14px;">
                             <span style="color:var(--jm-muted);">Single post</span>
-                            <strong><?= jm_format_ngn(PRICE_EMPLOYER_SINGLE_POST) ?></strong>
+                            <strong><?= jm_price(PRICE_EMPLOYER_SINGLE_POST) ?></strong>
                         </div>
                         <div style="display:flex;align-items:center;justify-content:space-between;font-size:14px;">
                             <span style="color:var(--jm-muted);">Basic plan</span>
-                            <strong><?= jm_format_ngn(PRICE_EMPLOYER_BASIC_MONTHLY) ?>/mo</strong>
+                            <strong><?= jm_price(PRICE_EMPLOYER_BASIC_MONTHLY, '/mo') ?></strong>
                         </div>
                         <div style="display:flex;align-items:center;justify-content:space-between;font-size:14px;">
                             <span style="color:var(--jm-muted);">Pro plan</span>
-                            <strong><?= jm_format_ngn(PRICE_EMPLOYER_PRO_MONTHLY) ?>/mo</strong>
+                            <strong><?= jm_price(PRICE_EMPLOYER_PRO_MONTHLY, '/mo') ?></strong>
                         </div>
                     </div>
                     <a class="jm-button" href="/jobmington/employer/post-job.php" style="width:100%;justify-content:center;">Post a job</a>
@@ -1417,7 +1417,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
                 <div>
                     <h2>Unlock the AI tools.<br>Stand out from the first application.</h2>
                     <p>CV optimisation, cover letter generation, interview prep, and job matching — all in one Premium membership.</p>
-                    <span class="jm-premium-strip-price">From <?= jm_format_ngn(PRICE_SEEKER_PREMIUM_MONTHLY) ?>/month · Credits from <?= jm_format_ngn(PRICE_CREDITS_SINGLE) ?></span>
+                    <span class="jm-premium-strip-price">From <?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY, '/month') ?> · Credits from <?= jm_price(PRICE_CREDITS_SINGLE) ?></span>
                 </div>
                 <div class="jm-premium-strip-actions">
                     <a class="jm-button" href="/jobmington/payments/seeker-premium.php">Go Premium</a>

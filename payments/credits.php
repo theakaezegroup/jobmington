@@ -267,7 +267,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
     <div style="max-width:960px;margin:0 auto 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border:1px solid var(--jm-line);border-radius:10px;padding:18px 24px;background:#ffffff;">
         <div>
             <strong style="display:block;font-size:15px;color:var(--jm-ink);margin-bottom:3px;">Want unlimited access?</strong>
-            <span style="font-size:13px;color:var(--jm-muted);">Premium gives you unlimited AI tools for just <?= jm_format_ngn(PRICE_SEEKER_PREMIUM_MONTHLY) ?>/month.</span>
+            <span style="font-size:13px;color:var(--jm-muted);">Premium gives you unlimited AI tools for just <?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY, '/month') ?>.</span>
         </div>
         <a class="jm-button" href="<?= SITE_URL ?>/payments/seeker-premium.php">Go Premium →</a>
     </div>
@@ -293,7 +293,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
                         <?php if ($pack['badge']): ?><span class="jm-cr-pack-badge"><?= e($pack['badge']) ?></span><?php endif; ?>
                         <div class="jm-cr-pack-check"></div>
                         <div class="jm-cr-pack-name"><?= e($pack['name']) ?></div>
-                        <div class="jm-cr-pack-price"><?= jm_format_ngn($pack['price']) ?></div>
+                        <div class="jm-cr-pack-price"><?= jm_price((float) $pack['price']) ?></div>
                         <div class="jm-cr-pack-credits"><?= $pack['credits'] ?> credit<?= $pack['credits'] > 1 ? 's' : '' ?></div>
                         <?php if ($pack['savings'] > 0): ?>
                             <span class="jm-cr-pack-save">Save <?= jm_format_ngn($pack['savings']) ?></span>
@@ -328,7 +328,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
                             </div>
                         </div>
                         <div class="jm-cr-bundle-price">
-                            <strong><?= jm_format_ngn($bundle['price']) ?></strong>
+                            <strong><?= jm_price((float) $bundle['price']) ?></strong>
                             <small>one-off</small>
                             <div style="margin-top:12px;">
                                 <button class="jm-button" type="submit">Buy bundle</button>

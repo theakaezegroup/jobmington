@@ -4928,3 +4928,22 @@ body.jm-home-page {
         padding: 10px 14px;
     }
 }
+
+/* ── The approximate figure that sits beside a price ───────────────────
+   Prices are charged in Naira. A visitor outside Nigeria leads with a
+   dollar figure so they can size it, and this carries the qualifier and
+   the Naira amount they will actually be charged.
+
+   Inline and quiet on purpose. It appears on every price on the site, so
+   as its own line it would add height to a dozen cards, including on a
+   phone. New class, so no existing rule changes and no media query needs
+   to answer for it. */
+.jm-price-note {
+    color: var(--jm-muted);
+    display: inline;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0;
+    margin-left: 6px;
+    white-space: nowrap;
+}

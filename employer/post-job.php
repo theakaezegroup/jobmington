@@ -309,7 +309,7 @@ $pageTitle = 'Post a Job | ' . SITE_NAME;
                                             <strong><?= e($option['name']) ?></strong>
                                             <em><?= e($option['badge']) ?></em>
                                         </span>
-                                        <b><?= e(jm_money_ngn((float) $option['price'])) ?></b>
+                                        <b><?= jm_price((float) $option['price']) ?></b>
                                         <small><?= e($option['description']) ?></small>
                                         <ul class="jm-package-feature-list">
                                             <?php foreach ($option['features'] as $feature): ?>

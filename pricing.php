@@ -402,12 +402,21 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     <div class="jm-p-hero">
         <p class="jm-kicker">Pricing</p>
         <h1>Transparent, Africa&#8209;first pricing.</h1>
-        <p>All prices in Naira (₦). International cards also accepted.</p>
+        <p>
+            <?php if (jm_shows_naira_first()): ?>
+                All prices in Naira (&#8358;), with an approximate US dollar figure beside them.
+                International cards also accepted.
+            <?php else: ?>
+                Dollar figures are approximate and shown so you can size the price.
+                Every payment is charged in Naira (&#8358;) at the amount listed beside it,
+                and international cards are accepted.
+            <?php endif; ?>
+        </p>
     </div>
 
     <!-- Social proof -->
     <div class="jm-p-proof">
-        <div class="jm-p-proof-item"><strong><?= jm_format_ngn(PRICE_SEEKER_PREMIUM_MONTHLY) ?></strong>/mo for seekers</div>
+        <div class="jm-p-proof-item"><strong><?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY) ?></strong>/mo for seekers</div>
         <div class="jm-p-proof-sep"></div>
         <div class="jm-p-proof-item"><strong>₦30,000</strong> per job post</div>
         <div class="jm-p-proof-sep"></div>
@@ -442,7 +451,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 </div>
             </div>
             <div class="jm-p-solo-price">
-                <strong><?= jm_format_ngn(PRICE_EMPLOYER_SINGLE_POST) ?></strong>
+                <strong><?= jm_price(PRICE_EMPLOYER_SINGLE_POST) ?></strong>
                 <small>≈ <?= jm_ngn_to_usd(PRICE_EMPLOYER_SINGLE_POST) ?> USD</small>
                 <div style="margin-top:14px;">
                     <a class="jm-button" href="<?= SITE_URL ?>/employer/post-job.php">Post a job</a>
@@ -457,7 +466,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 <strong>Featured Job Boost</strong>
                 <span>Pin your listing at the top of search results with a Featured badge. Add to any post or plan.</span>
             </div>
-            <div class="jm-p-addon-price"><?= jm_format_ngn(PRICE_EMPLOYER_FEATURED_ADDON) ?> <span style="font-size:13px;font-weight:400;color:#9a5a00;">/ job</span></div>
+            <div class="jm-p-addon-price"><?= jm_price(PRICE_EMPLOYER_FEATURED_ADDON) ?> <span style="font-size:13px;font-weight:400;color:#9a5a00;">/ job</span></div>
         </div>
 
         <!-- Plans -->
@@ -471,7 +480,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                 <?php if ($plan['badge']): ?><span class="jm-p-badge"><?= e($plan['badge']) ?></span><?php endif; ?>
                 <p class="jm-p-plan-name"><?= e($plan['name']) ?></p>
                 <div class="jm-p-amount">
-                    <strong><?= jm_format_ngn($plan['price_monthly']) ?></strong>
+                    <strong><?= jm_price((float) $plan['price_monthly']) ?></strong>
                     <span>/month</span>
                 </div>
                 <span class="jm-p-usd">≈ <?= jm_ngn_to_usd($plan['price_monthly']) ?> USD</span>
@@ -601,7 +610,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             <div class="jm-p-pack <?= $pack['id'] === 'pack_5' ? 'best' : '' ?> jm-p-reveal">
                 <?php if ($pack['badge']): ?><span class="jm-p-badge" style="top:-11px;"><?= e($pack['badge']) ?></span><?php endif; ?>
                 <strong><?= e($pack['name']) ?></strong>
-                <div class="jm-p-pack-price"><?= jm_format_ngn($pack['price']) ?></div>
+                <div class="jm-p-pack-price"><?= jm_price((float) $pack['price']) ?></div>
                 <div class="jm-p-pack-credits"><?= $pack['credits'] ?> credit<?= $pack['credits'] > 1 ? 's' : '' ?></div>
                 <?php if ($pack['savings'] > 0): ?><span class="jm-p-pack-save">Save <?= jm_format_ngn($pack['savings']) ?></span><?php endif; ?>
             </div>
@@ -625,7 +634,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                     </div>
                 </div>
                 <div class="jm-p-bundle-price">
-                    <strong><?= jm_format_ngn($bundle['price']) ?></strong>
+                    <strong><?= jm_price((float) $bundle['price']) ?></strong>
                     <small>one-off payment</small>
                     <div style="margin-top:14px;">
                         <a class="jm-button" href="<?= SITE_URL ?>/payments/credits.php?bundle=job_toolkit">Buy bundle</a>
