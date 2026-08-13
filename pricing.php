@@ -399,8 +399,73 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
         .jm-p-solo { grid-template-columns:1fr; }
         .jm-p-solo-price { text-align:center; }
         .jm-p-bundle { flex-direction:column; align-items:flex-start; }
-        .jm-p-proof { gap:18px; }
+
+        /* The proof strip.
+           It was a wrapping flex row, and each item is itself a flex row, so
+           on a narrow screen every item broke in half: the figure on one line
+           and what it refers to on the next, which reads as eight fragments
+           rather than four facts. One item per line instead, each held
+           together, which is what the strip is for. */
+        .jm-p-proof {
+            flex-direction:column;
+            align-items:center;
+            gap:11px;
+            padding:16px 14px;
+            margin-bottom:36px;
+        }
+        .jm-p-proof-item {
+            flex-wrap:nowrap;
+            white-space:nowrap;
+            font-size:13px;
+            gap:6px;
+        }
+        .jm-p-proof-item strong { font-size:15px; }
         .jm-p-proof-sep { display:none; }
+
+        /* The tool table.
+           Three columns of prose will not fit a phone, and with no scroll
+           container it was widening the page and taking every other section
+           sideways with it. Each row becomes its own block, and the two price
+           cells carry the heading they lost. */
+        .jm-p-tool-table thead { display:none; }
+        .jm-p-tool-table,
+        .jm-p-tool-table tbody,
+        .jm-p-tool-table tr,
+        .jm-p-tool-table td { display:block; width:100%; }
+        .jm-p-tool-table tr {
+            border:1px solid var(--jm-line);
+            border-radius:10px;
+            margin-bottom:12px;
+            padding:14px 16px;
+        }
+        .jm-p-tool-table tbody tr:hover { background:transparent; }
+        .jm-p-tool-table td { padding:0; }
+        .jm-p-tool-table td + td {
+            display:flex;
+            align-items:baseline;
+            justify-content:space-between;
+            gap:12px;
+            margin-top:8px;
+            padding-top:8px;
+            border-top:1px dashed var(--jm-line);
+            font-size:13px;
+        }
+        .jm-p-tool-table td[data-label]::before {
+            content:attr(data-label);
+            color:var(--jm-muted);
+            font-size:11px;
+            font-weight:800;
+            letter-spacing:.06em;
+            text-transform:uppercase;
+        }
+
+        /* Cards and packs get their own row rather than two cramped columns. */
+        .jm-p-grid { grid-template-columns:1fr; }
+        .jm-p-packs { grid-template-columns:1fr; }
+        .jm-p-card { padding:26px 22px; }
+        .jm-p-hero { padding:36px 0 30px; }
+        .jm-p-tabs { margin-bottom:36px; }
+        .jm-p-tab { padding:10px 20px; }
     }
     </style>
 </head>
@@ -423,9 +488,9 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
 
     <!-- Social proof -->
     <div class="jm-p-proof">
-        <div class="jm-p-proof-item"><strong><?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY, '', USD_PRICE_SEEKER_PREMIUM_MONTHLY) ?></strong>/mo for seekers</div>
+        <div class="jm-p-proof-item"><strong><?= e(jm_price_text(PRICE_SEEKER_PREMIUM_MONTHLY, USD_PRICE_SEEKER_PREMIUM_MONTHLY)) ?></strong>/mo for seekers</div>
         <div class="jm-p-proof-sep"></div>
-        <div class="jm-p-proof-item"><strong><?= jm_price(PRICE_EMPLOYER_SINGLE_POST, '', USD_PRICE_EMPLOYER_SINGLE_POST) ?></strong> per job post</div>
+        <div class="jm-p-proof-item"><strong><?= e(jm_price_text(PRICE_EMPLOYER_SINGLE_POST, USD_PRICE_EMPLOYER_SINGLE_POST)) ?></strong> per job post</div>
         <div class="jm-p-proof-sep"></div>
         <div class="jm-p-proof-item">Credits <strong>never expire</strong></div>
         <div class="jm-p-proof-sep"></div>
@@ -595,8 +660,8 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                         <?php if ($isBeta): ?><span class="jm-p-beta">Beta</span><?php endif; ?>
                         <br><span style="font-size:12px;color:var(--jm-muted);"><?= e($tool['description']) ?></span>
                     </td>
-                    <td class="tone-green">✓ Included</td>
-                    <td><?php
+                    <td class="tone-green" data-label="With Premium">✓ Included</td>
+                    <td data-label="Pay-per-use"><?php
                         // A tool in beta is free to the people invited into it, so
                         // quoting a price here would be asking for money we do not
                         // take yet.
