@@ -103,7 +103,8 @@ function jm_cv_footer(): void {
     ?>
             <?php jm_minimal_footer(); ?>
         </div>
-    </body>
+    <?php require_once __DIR__ . '/../includes/andika_widget.php'; jm_andika_launcher(); ?>
+</body>
     </html>
     <?php
 }

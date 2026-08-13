@@ -42,5 +42,6 @@
         }
     })();
     </script>
+<?php require_once __DIR__ . '/andika_widget.php'; jm_andika_launcher(); ?>
 </body>
 </html>
