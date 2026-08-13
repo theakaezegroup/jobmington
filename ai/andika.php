@@ -3430,6 +3430,46 @@ require_once __DIR__ . '/../includes/ai-header.php';
         transform: translateY(-1px);
     }
 
+    
+    /*
+     * Fill the viewport, without guessing at the header's height.
+     *
+     * The workspace was sized calc(100dvh - 82px), a number that has to match
+     * the header exactly or it either overflows or, as here, stops short and
+     * leaves a strip of page showing beneath the composer. The header is not
+     * 82px on a desktop, so the surface ended above the bottom of the screen.
+     *
+     * Nothing needs to know the header's height. The body becomes a column the
+     * height of the viewport, the header takes what it needs, and the
+     * workspace takes the rest. min-height: 0 is the part that is easy to miss:
+     * without it a flex child refuses to shrink below its content and the
+     * thread stops scrolling inside its own box.
+     */
+    @media (min-width: 1025px) {
+        body.jm-ai-page {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        body.jm-ai-page > .jm-header { flex: 0 0 auto; }
+
+        body.jm-ai-page > .jm-ai-main {
+            flex: 1 1 auto;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        #app-workspace {
+            height: auto !important;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+    }
+
     </style>
 
 <!-- Noise Texture Overlay -->
