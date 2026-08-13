@@ -5,11 +5,13 @@ require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/tools.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/_cv_helpers.php';
 
 Session::start();
 Session::requireLogin();
+jm_require_tool('cv_builder');
 
 $pdo = db();
 $templates = jm_cv_templates();

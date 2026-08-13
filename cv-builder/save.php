@@ -10,6 +10,7 @@ require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/tools.php';
 
 // JSON Response Helper
 function jsonResponse($success, $message, $data = []) {
@@ -20,6 +21,10 @@ function jsonResponse($success, $message, $data = []) {
 
 Session::start();
 if (!Session::isLoggedIn()) jsonResponse(false, 'Session expired. Please sign in again.');
+
+// The tool gate, after the sign-in check: a signed-out caller should be told
+// they are signed out, not that a tool they cannot even see is locked.
+jm_require_tool_api('cv_builder');
 
 // Only accept POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') jsonResponse(false, 'Invalid Signal Type');

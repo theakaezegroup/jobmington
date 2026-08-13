@@ -18,6 +18,7 @@ require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/session.php';
+require_once __DIR__ . '/../includes/tools.php';
 
 Session::start();
 
@@ -25,6 +26,10 @@ if (!Session::isLoggedIn()) {
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit;
 }
+
+// The tool gate, after the sign-in check: a signed-out caller should be told
+// they are signed out, not that a tool they cannot even see is locked.
+jm_require_tool_api('cv_builder');
 
 $userId = Session::userId();
 
