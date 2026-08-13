@@ -84,7 +84,7 @@ $totalJobs = (int) $countStmt->fetchColumn();
 $pagination = paginate($totalJobs, $perPage, $page);
 
 $stmt = $pdo->prepare("
-    SELECT j.*, co.name AS company_name, co.logo AS company_logo,
+    SELECT STRAIGHT_JOIN j.*, co.name AS company_name, co.logo AS company_logo,
            c.name AS country_name, c.currency_symbol, jc.name AS category_name
     FROM jobs j
     JOIN companies co ON j.company_id = co.company_id

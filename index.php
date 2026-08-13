@@ -30,7 +30,7 @@ try {
 $featuredJobs = [];
 try {
     $stmt = $pdo->query("
-        SELECT j.*, co.name AS company_name, c.name AS country_name, c.currency_symbol, jc.name AS category_name
+        SELECT STRAIGHT_JOIN j.*, co.name AS company_name, c.name AS country_name, c.currency_symbol, jc.name AS category_name
         FROM jobs j
         JOIN companies co ON j.company_id = co.company_id
         LEFT JOIN countries c ON j.country_id = c.country_id
