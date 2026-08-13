@@ -98,7 +98,14 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($cv['full_name'] ?? 'My CV') ?> - Resume</title>
+    <?php
+    /*
+     * This is the name the browser suggests when someone saves the print as a
+     * PDF, so it is the name that lands in a recruiter's folder: "Ada Obi -
+     * CV.pdf". CV, not Resume: the ad they are answering asked for a CV.
+     */
+    ?>
+    <title><?= e($cv['full_name'] ?? 'My CV') ?> - CV</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {

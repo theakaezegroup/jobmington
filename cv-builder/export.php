@@ -32,7 +32,7 @@ $pdo = db();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= Security::escape($cv['full_name'] ?? 'My CV') ?> - Resume</title>
+    <title><?= Security::escape($cv['full_name'] ?? 'My CV') ?> - CV</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         @page { 

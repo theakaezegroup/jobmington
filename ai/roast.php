@@ -600,7 +600,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
 
 <div class="jm-roast-wrap">
 
-    <?= jm_breadcrumbs([['label' => 'Tools', 'url' => '/jobmington/tools/'], ['label' => 'Resume Optimizer']]) ?>
+    <?= jm_breadcrumbs([['label' => 'Tools', 'url' => '/jobmington/tools/'], ['label' => 'CV Optimizer']]) ?>
 
     <!-- Hero -->
     <div class="jm-roast-hero">

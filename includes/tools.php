@@ -30,8 +30,16 @@ require_once __DIR__ . '/../config/database.php';
  *
  * Access and price are separate questions but they belong to the same tool, so
  * they live in the same entry. There used to be a second catalogue in
- * monetization.php, and the two had already drifted: the resume optimizer was
+ * monetization.php, and the two had already drifted: the CV optimizer was
  * 'cv_roast' to the gate and 'cv_optimizer' to the paywall.
+ *
+ * The word is CV, not resume. They name the same document, but resume is the
+ * American half of the pair and everyone we build for says CV: Nigeria, Kenya,
+ * Ghana, South Africa, and the British-descended usage across the continent.
+ * These names are what people read on the tools page and the dashboard, so
+ * they say CV. Keep resume out of the interface; it belongs only in the AI
+ * prompts, which need both words to recognise an uploaded file, and in search
+ * tags, where an American reader has to be able to find us.
  *
  *   api           the endpoints that do the real work. Gating only the page
  *                 would be theatre, so these are gated too.
@@ -44,7 +52,7 @@ function jm_tools(): array
     return [
         'cv_builder' => [
             'key'          => 'cv_builder',
-            'name'         => 'Resume Builder',
+            'name'         => 'CV Builder',
             'url'          => '/cv-builder/',
             'group'        => 'CV',
             'api'          => ['api/cv-extract.php'],
@@ -52,11 +60,11 @@ function jm_tools(): array
             'is_free'      => true,
             'credit_cost'  => 0,
             'free_preview' => false,
-            'description'  => 'Build an ATS-friendly resume from polished templates.',
+            'description'  => 'Build an ATS-friendly CV from polished templates.',
         ],
         'cv_optimizer' => [
             'key'          => 'cv_optimizer',
-            'name'         => 'Resume Optimizer',
+            'name'         => 'CV Optimizer',
             'url'          => '/ai/roast.php',
             'group'        => 'AI',
             'api'          => ['api/cv-roast.php', 'api/cv-extract.php'],
