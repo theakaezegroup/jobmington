@@ -106,7 +106,9 @@ function jm_boot_screen(): void
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            /* Close enough that the line reads as belonging to the mark rather
+               than floating on its own beneath it. */
+            gap: 14px;
             /* The failsafe. If the script never runs, the screen still leaves
                on its own, so a broken load can never strand anyone on a blue
                rectangle with no way forward. */
@@ -127,7 +129,18 @@ function jm_boot_screen(): void
             width: 48px;
             height: 48px;
             object-fit: contain;
-            animation: jm-boot-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        /*
+         * The mark and the line arrive together, on the same animation with
+         * the same timing. They used not to: the mark faded in over 600ms
+         * while the line painted at once, so for the first half second there
+         * was a loader on screen with nothing above it, which is why the
+         * loader read as a thing of its own rather than part of the logo.
+         */
+        .jm-boot-mark,
+        .jm-boot-line {
+            animation: jm-boot-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         @keyframes jm-boot-in {
@@ -159,35 +172,9 @@ function jm_boot_screen(): void
             100% { transform: translateX(350%); }
         }
 
-        /*
-         * Installed, the system has already drawn the mark: larger, centred,
-         * a moment earlier. Drawing our own underneath it is what produced two
-         * logos at two sizes a beat apart, and no amount of resizing fixes
-         * that, because the problem is that there are two of them.
-         *
-         * So installed, there is no second mark. The hairline stays and moves
-         * to sit below the middle of the screen, which is where the system
-         * puts its icon, so it reads as a loader under the main logo rather
-         * than a loader belonging to a smaller one of our own.
-         *
-         * In a browser tab none of this applies: nothing drew a mark before
-         * us, so ours is the only one and it keeps its place above the line.
-         */
-        @media (display-mode: standalone) {
-            .jm-boot-mark {
-                display: none;
-            }
-
-            .jm-boot-line {
-                position: absolute;
-                top: 58%;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .jm-boot-mark { animation: none; }
+            .jm-boot-mark,
+            .jm-boot-line { animation: none; }
             .jm-boot-line::after { animation: none; width: 100%; opacity: 0.55; }
         }
     </style>
