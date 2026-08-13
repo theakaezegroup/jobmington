@@ -127,18 +127,41 @@ define('JM_BOOT_RENDERED', true);
             var boot = document.getElementById('jm-boot');
             if (!boot) { return; }
 
-            function seen(key) {
-                try { return localStorage.getItem(key) === 'true'; } catch (e) { return false; }
+            function get(store, key) {
+                try { return window[store].getItem(key) === 'true'; } catch (e) { return false; }
             }
-            function remember(key) {
-                try { localStorage.setItem(key, 'true'); } catch (e) {}
+            function set(store, key) {
+                try { window[store].setItem(key, 'true'); } catch (e) {}
             }
 
             var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
                           || window.navigator.standalone === true;
 
-            if (!standalone && seen('jm_boot_seen')) {
+            function skip() {
                 boot.style.display = 'none';
+            }
+
+            /*
+             * Which storage answers "has this been shown" decides everything,
+             * because this is a multi-page app: inside an installed app every
+             * link is a full page load, so a naive check would repaint the
+             * curtain on every tap.
+             *
+             * sessionStorage is the one that means "this launch". It survives
+             * navigation within the app and dies when the app closes, which is
+             * exactly the boundary we want. localStorage means "ever", and
+             * that is the right answer for a browser tab, where the screen is
+             * a first-impression and not something to re-serve.
+             *
+             * The launch flag is written now rather than on dismiss, so a page
+             * that fails halfway still counts as launched and the next tap
+             * does not bring the curtain back.
+             */
+            if (standalone) {
+                if (get('sessionStorage', 'jm_boot_launch')) { skip(); return; }
+                set('sessionStorage', 'jm_boot_launch');
+            } else if (get('localStorage', 'jm_boot_seen')) {
+                skip();
                 return;
             }
 
@@ -149,7 +172,7 @@ define('JM_BOOT_RENDERED', true);
             function dismiss() {
                 if (done) { return; }
                 done = true;
-                remember('jm_boot_seen');
+                set('localStorage', 'jm_boot_seen');
                 setTimeout(function () {
                     boot.classList.add('is-done');
                     setTimeout(function () { boot.style.display = 'none'; }, 450);
