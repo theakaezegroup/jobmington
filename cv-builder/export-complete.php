@@ -275,10 +275,30 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         }
         
         /* Main Content */
+        /*
+         * The body's table wrapper, switched off. It earns its keep only in
+         * the print block, where a table footer group is what repeats and
+         * reserves the running strip on every sheet. Here it is flattened to
+         * blocks so the preview lays out as if the table were not there.
+         */
+        .cv-sheet,
+        .cv-sheet > tbody,
+        .cv-sheet > tbody > tr,
+        .cv-sheet > tbody > tr > td {
+            display: block;
+            width: auto;
+            padding: 0;
+            border: 0;
+        }
+
+        .cv-sheet-foot {
+            display: none;
+        }
+
         .cv-body {
             padding: 35px 50px;
         }
-        
+
         /* Blueprint: add subtle grid background */
         [data-template="blueprint"] .cv-body {
             background-image: 
@@ -700,12 +720,10 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             }
             
             /*
-             * A strip reserved at the foot of every sheet.
-             *
-             * The page margin is what shrinks the text area on each page; a
-             * padding on the container would only reserve space once, at the
-             * very end, and the running line would print over the body copy on
-             * every page before that.
+             * No page margin, on purpose. The margin is the only place a
+             * browser can draw its own header and footer, so a page with none
+             * cannot be given the document URL and the date. Reserving the
+             * running strip is the table's job instead, below.
              */
             @page {
                 margin: 0;
@@ -728,12 +746,45 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                 print-color-adjust: exact;
             }
 
-            /* Room for it at the end of the document. The page box has no
-               margin, on purpose: a margin is the only place the browser can
-               draw its own header and footer, and giving it one is what put
-               the page URL on the print. */
-            .cv-body {
-                padding-bottom: 20mm;
+            /*
+             * On paper the wrapper becomes a real table again, because a
+             * table footer group is the one box a browser repeats at the foot
+             * of every sheet and reserves height for. The strip is empty: it
+             * exists to keep the body copy from running underneath the fixed
+             * footer that gets painted into it. 16mm clears the 7mm offset
+             * and the line itself with room to spare.
+             */
+            .cv-sheet {
+                display: table;
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            .cv-sheet > tbody {
+                display: table-row-group;
+            }
+
+            .cv-sheet > tbody > tr {
+                display: table-row;
+            }
+
+            .cv-sheet > tbody > tr > td {
+                display: table-cell;
+                padding: 0;
+                border: 0;
+            }
+
+            .cv-sheet-foot {
+                display: table-footer-group;
+            }
+
+            .cv-sheet-foot td {
+                padding: 0;
+                border: 0;
+            }
+
+            .cv-foot-space {
+                height: 16mm;
             }
         }
 
@@ -1001,8 +1052,26 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         </div>
     </header>
     
+    <?php
+    /*
+     * The body is wrapped in a table for one reason: a table footer group is
+     * the only thing a browser repeats at the foot of every printed sheet AND
+     * reserves room for, and room is what the running strip needs.
+     *
+     * The obvious way to reserve it would be a bottom page margin, but the
+     * page margin is the one place a browser draws its own header and footer,
+     * so giving the page a margin puts the document URL back on the paper.
+     * That is the whole reason for the table: it buys a per-page strip
+     * without buying the URL along with it.
+     *
+     * The table exists only on paper. On screen every part of it is set back
+     * to display: block, so the preview is laid out exactly as it was.
+     */
+    ?>
+    <table class="cv-sheet">
+    <tbody><tr><td>
     <main class="cv-body">
-        
+
         <!-- Summary -->
         <?php if (!empty($cv['summary'])): ?>
         <section class="cv-section">
@@ -1140,7 +1209,11 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         <?php endif; ?>
         
     </main>
-    
+    </td></tr></tbody>
+    <?php /* The reserved strip. Empty: the visible footer is painted into it. */ ?>
+    <tfoot class="cv-sheet-foot"><tr><td><div class="cv-foot-space"></div></td></tr></tfoot>
+    </table>
+
     <!-- Jobmington Branding Footer -->
     <?php
     /*
