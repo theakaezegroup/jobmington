@@ -124,7 +124,11 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             --cv-accent: #e88712;
             --cv-accent-light: rgba(232, 135, 18, 0.12);
             --cv-section-title: #061426;
-            --cv-section-border: #e88712;
+            /* A tint, not the accent. A rule under every section title is
+               structure, and structure should recede; the accent stays on the
+               dot beside the title, where one spot of colour reads as a
+               choice instead of a stripe. */
+            --cv-section-border: #f3d4a3;
             --cv-company: #0640a3;
             --cv-skill-bg: #fff8ec;
             --cv-skill-border: #f3d4a3;
@@ -142,7 +146,9 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             --cv-accent: #5eead4;
             --cv-accent-light: rgba(94, 234, 212, 0.13);
             --cv-section-title: #0640a3;
-            --cv-section-border: #0f766e;
+            /* Same reasoning as executive: a tint of the family, not the
+               full-strength teal that also colours the company names. */
+            --cv-section-border: #bde9df;
             --cv-company: #0f766e;
             --cv-skill-bg: #ecfdf8;
             --cv-skill-border: #bde9df;
@@ -298,6 +304,7 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             border: 0;
         }
 
+        .cv-sheet-head,
         .cv-sheet-foot {
             display: none;
         }
@@ -781,17 +788,41 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                 border: 0;
             }
 
+            .cv-sheet-head {
+                display: table-header-group;
+            }
+
             .cv-sheet-foot {
                 display: table-footer-group;
             }
 
+            .cv-sheet-head td,
             .cv-sheet-foot td {
                 padding: 0;
                 border: 0;
             }
 
+            /*
+             * 14mm at the top, 16mm at the bottom. Slightly more at the foot
+             * because a page with equal margins reads as bottom-heavy, and
+             * because the running line lives down there.
+             */
+            .cv-head-space {
+                height: 14mm;
+            }
+
             .cv-foot-space {
                 height: 16mm;
+            }
+
+            /*
+             * The body's own top padding has to go, or page one would carry it
+             * on top of the reserved strip while later pages carry only the
+             * strip. Moving that space into the header group is what makes
+             * every page start at the same height.
+             */
+            .cv-body {
+                padding-top: 0;
             }
         }
 
@@ -1076,6 +1107,10 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
      */
     ?>
     <table class="cv-sheet">
+    <?php /* The reserved top margin. Same trick as the foot: a header group
+             repeats on every sheet and holds height, which is what stops page
+             two from starting hard against the paper edge. */ ?>
+    <thead class="cv-sheet-head"><tr><td><div class="cv-head-space"></div></td></tr></thead>
     <tbody><tr><td>
     <main class="cv-body">
 
