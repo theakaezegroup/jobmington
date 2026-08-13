@@ -66,7 +66,14 @@ function jm_scraper_city_of(string $location): ?string
         }
     }
 
-    return mb_substr($first, 0, 100);
+    /*
+     * Not mb_substr: the server has no mbstring, and this file has to run
+     * there. A plain substr would cut through a multi-byte character and leave
+     * a broken byte in the column, which matters here because the French and
+     * Moroccan listings carry accents. The /u flag counts characters without
+     * needing the extension.
+     */
+    return preg_replace('/^(.{0,100}).*$/us', '$1', $first) ?? substr($first, 0, 100);
 }
 
 /**
