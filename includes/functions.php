@@ -921,7 +921,7 @@ if (!function_exists('jm_minimal_footer')) {
             if (!document.querySelector('link[rel="manifest"]')) {
                 const manifest = document.createElement('link');
                 manifest.rel = 'manifest';
-                manifest.href = `${pathBase}/manifest.json?v=brand-10`;
+                manifest.href = `${pathBase}/manifest.json?v=brand-29`;
                 document.head.appendChild(manifest);
             }
 

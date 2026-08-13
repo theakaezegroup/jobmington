@@ -202,7 +202,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     <meta name="twitter:description" content="<?= e($pageDescription) ?>">
     <meta name="twitter:image" content="<?= e($shareImage) ?>">
     <meta name="twitter:image:alt" content="<?= e($shareImageAlt) ?>">
-    <link rel="manifest" href="/jobmington/manifest.json?v=clean-urls">
+    <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
@@ -975,6 +975,10 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     </style>
 </head>
 <body class="jm-minimal jm-home-page">
+<?php /* First thing in the body: this page is the manifest's start_url, so it
+         is what an installed app opens to, and the curtain has to be painted
+         before anything it is covering. */ ?>
+<?php require_once __DIR__ . '/includes/boot.php'; ?>
 <?php jm_country_preview_banner(); ?>
 <?php /* Set before the header is parsed. Without this the ≤900px rules stack
          .jm-header into a column until the footer script adds the class, so the

@@ -46,7 +46,7 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0640a3">
-    <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= e($aiPageTitle) ?></title>
     <meta name="description" content="<?= e($jmShareDesc) ?>">

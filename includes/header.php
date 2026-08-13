@@ -155,7 +155,7 @@ if ($isAdminArea) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0640a3">
-    <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
@@ -631,7 +631,7 @@ ob_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#030303">
-    <link rel="manifest" href="/jobmington/manifest.json?v=brand-10">
+    <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
@@ -1013,133 +1013,6 @@ ob_start();
         body.menu-open .mobile-panel { transform: translateX(0); }
         body.menu-open .mobile-backdrop { opacity: 1; pointer-events: auto; }
 
-        /* --- PRELOADER --- */
-        #preloader {
-            position: fixed; inset: 0; z-index: 99999; 
-            background: #0f172a;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: 'Futura Cyrillic Demi';
-            transition: opacity 0.6s ease-out, visibility 0.6s;
-            overflow: hidden;
-        }
-        /* Dynamic background orbs */
-        #preloader::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -25%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(71, 85, 105, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: orb-float-1 8s ease-in-out infinite;
-        }
-        #preloader::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            right: -20%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: orb-float-2 10s ease-in-out infinite;
-        }
-        @keyframes orb-float-1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(50px, 30px) scale(1.1); }
-        }
-        @keyframes orb-float-2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-40px, -20px) scale(1.15); }
-        }
-        .preloader-content { 
-            position: relative; 
-            z-index: 10; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center;
-        }
-        .preloader-brand { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 14px; 
-            margin-bottom: 24px; 
-        }
-        .preloader-badge { 
-            width: 52px; 
-            height: 52px; 
-            object-fit: contain; 
-            animation: badge-float 3s ease-in-out infinite;
-            filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.3));
-        }
-        @keyframes badge-float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(3deg); }
-        }
-        .preloader-name { 
-            font-size: 2rem; 
-            font-weight: 900; 
-            letter-spacing: -0.04em; 
-            color: #ffffff; 
-            font-family: 'Futura Cyrillic Demi';
-            text-shadow: 0 2px 20px rgba(255,255,255,0.1);
-        }
-        
-        /* Loading Bar */
-        .loader-bar-track { 
-            width: 240px; 
-            height: 4px; 
-            background: rgba(255,255,255,0.08); 
-            border-radius: 4px; 
-            overflow: hidden;
-            position: relative;
-        }
-        .loader-bar-track::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        .loader-bar-fill { 
-            width: 0%; 
-            height: 100%; 
-            background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b); 
-            background-size: 200% 100%;
-            animation: gradient-flow 1.5s ease infinite;
-            border-radius: 4px; 
-            transition: width 0.15s ease-out;
-            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5), 0 0 40px rgba(245, 158, 11, 0.2);
-        }
-        @keyframes gradient-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .loader-percent {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #f59e0b;
-            margin-top: 12px;
-            font-family: 'Futura Cyrillic Demi';
-            letter-spacing: 0.05em;
-        }
-        .loader-text { 
-            font-size: 0.625rem; 
-            letter-spacing: 0.15em; 
-            color: #64748b; 
-            text-transform: uppercase; 
-            margin-top: 8px; 
-            font-weight: 600;
-        }
-
         /* --- FLAT NAVIGATION REFRESH --- */
         .island-nav {
             background: rgba(255,255,255,0.92) !important;
@@ -1207,9 +1080,6 @@ ob_start();
         .jm-profile-chip span,
         .jm-profile-chip i {
             color: #101828 !important;
-        }
-        #preloader {
-            display: none !important;
         }
         .flag-orb {
             box-shadow: none !important;
@@ -1379,104 +1249,7 @@ ob_start();
 </head>
 <body class="antialiased" style="background: var(--color-canvas); color: var(--color-ink);">
 
-    <!-- PRELOADER -->
-    <div id="preloader">
-        <div class="preloader-content">
-            <div class="preloader-brand">
-                <img src="/jobmington/assets/images/badge.png?v=logo-8" alt="Badge" class="preloader-badge">
-                <span class="preloader-name">JOBMINGTON</span>
-            </div>
-            <div class="loader-bar-track">
-                <div class="loader-bar-fill" id="load-bar"></div>
-            </div>
-            <div class="loader-percent" id="load-percent">0%</div>
-            <div class="loader-text" id="load-status">INITIALIZING...</div>
-        </div>
-    </div>
-
-    <script>
-        // Dynamic Preloader - Only on first visit
-        const App = {
-            hasSeenPreloader: function() {
-                return localStorage.getItem('jm_preloader_seen') === 'true';
-            },
-            markPreloaderSeen: function() {
-                localStorage.setItem('jm_preloader_seen', 'true');
-            },
-            hidePreloaderInstantly: function() {
-                const pre = document.getElementById('preloader');
-                if (pre) {
-                    pre.style.display = 'none';
-                }
-            },
-            runPreloader: function() {
-                // Skip preloader if already seen
-                if (this.hasSeenPreloader()) {
-                    this.hidePreloaderInstantly();
-                    return;
-                }
-                
-                const bar = document.getElementById('load-bar');
-                const txt = document.getElementById('load-status');
-                const pre = document.getElementById('preloader');
-                const percentEl = document.getElementById('load-percent');
-                let width = 0;
-                
-                const messages = [
-                    "INITIALIZING...",
-                    "LOADING ASSETS...",
-                    "SYNCING DATA...",
-                    "PREPARING INTERFACE...",
-                    "ALMOST THERE..."
-                ];
-                
-                const interval = setInterval(() => {
-                    width += Math.random() * 12 + 2;
-                    if (width > 100) width = 100;
-                    
-                    if (bar) bar.style.width = width + '%';
-                    if (percentEl) percentEl.innerText = Math.floor(width) + '%';
-                    
-                    // Update status text based on progress
-                    const msgIndex = Math.floor((width / 100) * (messages.length - 1));
-                    if (txt) txt.innerText = messages[Math.min(msgIndex, messages.length - 1)];
-                    
-                    if (width >= 100) {
-                        clearInterval(interval);
-                        if (txt) txt.innerText = "READY!";
-                        if (percentEl) percentEl.innerText = "100%";
-                        this.markPreloaderSeen(); // Mark as seen
-                        setTimeout(() => { 
-                            if (pre) { 
-                                pre.style.opacity = '0'; 
-                                pre.style.visibility = 'hidden'; 
-                            } 
-                        }, 500);
-                    }
-                }, 120);
-            }
-        };
-        
-        // Check immediately if preloader should be hidden
-        if (App.hasSeenPreloader()) {
-            document.getElementById('preloader')?.style && (document.getElementById('preloader').style.display = 'none');
-        }
-        
-        // Start preloader when page loads
-        window.addEventListener('load', function() {
-            App.runPreloader();
-        });
-        
-        // Fallback: start preloader on DOM ready if taking too long
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                const pre = document.getElementById('preloader');
-                if (pre && pre.style.visibility !== 'hidden' && pre.style.display !== 'none') {
-                    App.runPreloader();
-                }
-            }, 100);
-        });
-    </script>
+    <?php require_once __DIR__ . '/boot.php'; ?>
 
     <header id="main-header" class="island-nav h-[80px] flex items-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
