@@ -3297,6 +3297,150 @@ require_once __DIR__ . '/../includes/ai-header.php';
         .composer-dock { padding: 12px 14px 14px; }
     }
 
+    
+    /*
+     * Desktop: surfaces run the full width, content sits in a readable column.
+     *
+     * The chat view was capped at 1120px while carrying its own solid fill, so
+     * the surface simply stopped partway across the screen with a different
+     * colour either side. Either the fill runs edge to edge or it is not there
+     * at all; a solid panel that ends in the middle of a wide monitor is the
+     * one thing it cannot be.
+     *
+     * So the view goes transparent and full width, and the things inside it
+     * that need to stay readable, the thread and the composer, carry their own
+     * max-width and centre themselves. Full-bleed surfaces, centred content.
+     */
+    @media (min-width: 1025px) {
+        #main-chat-view {
+            max-width: none;
+            width: 100%;
+            margin: 0;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        #app-workspace {
+            justify-content: flex-start;
+            padding: 0;
+            gap: 0;
+        }
+
+        #chat-header > .ai-greeting,
+        #chat-thread,
+        .composer-dock .main-input-area {
+            max-width: 860px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        /* The dock keeps its full-width bar; only what is written in it is
+           constrained, so the rule under the thread reaches both edges. */
+        .composer-dock {
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+    }
+
+    /*
+     * History and New, properly built.
+     *
+     * Labelled rather than mute icons, because two unlabelled glyphs in a
+     * corner are a guess, and these are the only controls on the page that
+     * destroy or replace what you are looking at.
+     */
+    .mobile-header-actions {
+        display: flex !important;
+        position: absolute;
+        top: 14px;
+        right: 18px;
+        left: auto;
+        gap: 8px;
+        z-index: 12;
+    }
+
+    .mobile-action-btn {
+        width: auto !important;
+        height: 34px !important;
+        aspect-ratio: auto !important;
+        padding: 0 12px !important;
+        border-radius: 10px !important;
+        background: var(--color-surface) !important;
+        border: 1px solid var(--line-soft) !important;
+        color: var(--text-secondary) !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0;
+        box-shadow: none !important;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+
+    .mobile-action-btn::after {
+        content: attr(data-label);
+        white-space: nowrap;
+    }
+
+    .mobile-action-btn:hover {
+        background: var(--color-canvas) !important;
+        color: var(--color-ink) !important;
+        border-color: var(--line-soft-strong) !important;
+        transform: none !important;
+    }
+
+    .mobile-action-btn .icon svg { width: 15px; height: 15px; }
+
+    .mobile-action-btn .badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        min-width: 17px;
+        height: 17px;
+        border-radius: 9px;
+        background: var(--color-primary);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        padding: 0 4px;
+        border: 2px solid var(--color-surface);
+    }
+
+    /* On a phone the labels would crowd the greeting, so the icons stand alone. */
+    @media (max-width: 640px) {
+        .mobile-header-actions { top: 12px; right: 12px; gap: 6px; }
+        .mobile-action-btn { width: 36px !important; padding: 0 !important; }
+        .mobile-action-btn::after { content: none; }
+    }
+
+    /* The one suggestion, offered where there is nothing else to read. */
+    .starter {
+        margin-top: 14px;
+        border: 1px solid var(--line-soft);
+        background: var(--color-surface);
+        color: var(--color-ink);
+        border-radius: 11px;
+        padding: 9px 15px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color .15s, background .15s, transform .12s;
+    }
+
+    .starter:hover {
+        border-color: var(--line-soft-strong);
+        background: var(--color-canvas);
+        transform: translateY(-1px);
+    }
+
     </style>
 
 <!-- Noise Texture Overlay -->
@@ -3383,11 +3527,11 @@ require_once __DIR__ . '/../includes/ai-header.php';
         <div id="chat-header">
             <!-- Mobile Actions -->
             <div class="mobile-header-actions">
-                <button class="mobile-action-btn" onclick="Andika.openDrawer()" title="Chat History" style="position: relative;">
+                <button class="mobile-action-btn" onclick="Andika.openDrawer()" title="Chat history" data-label="History" style="position: relative;">
                     <span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
                     <span class="badge" id="history-badge" style="display: none;">0</span>
                 </button>
-                <button class="mobile-action-btn" onclick="Andika.newChat()" title="New Chat">
+                <button class="mobile-action-btn" onclick="Andika.newChat()" title="New chat" data-label="New">
                     <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
                 </button>
             </div>
@@ -3415,6 +3559,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
                         <div class="chat-placeholder" id="chat-placeholder">
                             <span class="icon icon-lg" style="opacity: 0.5;"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span>
                             <span>Your conversation will appear here</span>
+                            <button type="button" class="starter" onclick="Andika.send('Start Interview Prep')">Practise an interview</button>
                         </div>
                         <div class="chat-messages" id="chat-messages"></div>
                     </div>
@@ -3463,12 +3608,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
                         </div>
                     </div>
                     
-                    <div class="powered-by">
-                        <div class="ai-icon-sphere sm" style="transform: scale(0.6); margin-right: -8px;">
-                            <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
-                        </div>
-                        <span>Powered by Andika AI</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -3495,9 +3634,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
                 <p class="input-hint">Try: "Rewrite my CV summary for a product role" or "What remote jobs suit my skills?"</p>
             </div>
             
-            <div class="quick-chips">
-                <button class="chip" onclick="Andika.send('Start Interview Prep')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Interview prep</button>
-            </div>
     </div>
     </section>
 
