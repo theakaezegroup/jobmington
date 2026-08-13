@@ -205,8 +205,12 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
-    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
+    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-29">
     <meta name="theme-color" content="#0640a3">
+    <?php /* Before the stylesheets below, because its whole job is to be the
+             colour of the first frame, and a rule that arrives after the first
+             frame has missed the only moment it mattered. */ ?>
+    <?php require_once __DIR__ . '/includes/boot.php'; jm_boot_ground(); ?>
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
@@ -978,7 +982,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
 <?php /* First thing in the body: this page is the manifest's start_url, so it
          is what an installed app opens to, and the curtain has to be painted
          before anything it is covering. */ ?>
-<?php require_once __DIR__ . '/includes/boot.php'; ?>
+<?php jm_boot_screen(); ?>
 <?php jm_country_preview_banner(); ?>
 <?php /* Set before the header is parsed. Without this the ≤900px rules stack
          .jm-header into a column until the footer script adds the class, so the

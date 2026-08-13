@@ -158,7 +158,13 @@ if ($isAdminArea) {
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
-    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
+    <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-29">
+    <?php /* Before the stylesheets below, because its whole job is to be the
+             colour of the first frame. Only on this head, not the admin one:
+             the ground is cleared by the curtain's script, and admin never
+             renders the curtain, so a ground there would have nothing to
+             switch it back. */ ?>
+    <?php require_once __DIR__ . '/boot.php'; jm_boot_ground(); ?>
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
@@ -1249,7 +1255,7 @@ ob_start();
 </head>
 <body class="antialiased" style="background: var(--color-canvas); color: var(--color-ink);">
 
-    <?php require_once __DIR__ . '/boot.php'; ?>
+    <?php jm_boot_screen(); ?>
 
     <header id="main-header" class="island-nav h-[80px] flex items-center">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
