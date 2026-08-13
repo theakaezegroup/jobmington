@@ -272,7 +272,22 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     }
     .jm-p-pack strong { display:block; font-size:15px; color:var(--jm-ink); margin-bottom:6px; }
     .jm-p-pack-price { font-size:24px; font-weight:800; color:var(--jm-blue); }
+    .jm-p-pack-local { font-size:12px; color:var(--jm-muted); margin-top:3px; }
     .jm-p-pack-credits { font-size:13px; color:var(--jm-muted); margin-top:4px; }
+
+    /* ── The local-currency figure ────────────────────────────────────
+       Every price on this page leads in dollars and carries the visitor's
+       own currency underneath. It sits in its own slot rather than inline,
+       because inline in a plan card it landed between the price and the
+       interval, so the row read as price, local amount, then "/month".
+
+       The default .jm-price-note is built for compact rows elsewhere on the
+       site. Here there is room, so it gets its own line and a readable size. */
+    .jm-p-usd { min-height:18px; }
+    .jm-p-saving { color:var(--jm-green); font-weight:700; }
+    .jm-p-solo-price small { display:block; margin-top:6px; }
+    .jm-p-credits { color:var(--jm-muted); font-size:12px; white-space:nowrap; }
+    .jm-p-proof-item .jm-price-note { font-size:12px; font-weight:600; }
     .jm-p-pack-save {
         display:inline-block; margin-top:8px;
         background:#dcfce7; color:#166534;
@@ -441,8 +456,10 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
                     <?php endforeach; ?>
                 </div>
             </div>
+            <?php $solo = jm_price_parts(PRICE_EMPLOYER_SINGLE_POST, '', USD_PRICE_EMPLOYER_SINGLE_POST); ?>
             <div class="jm-p-solo-price">
-                <strong><?= jm_price(PRICE_EMPLOYER_SINGLE_POST, '', USD_PRICE_EMPLOYER_SINGLE_POST) ?></strong>
+                <strong><?= e($solo['lead']) ?></strong>
+                <?php if ($solo['note'] !== ''): ?><small><?= e($solo['note']) ?></small><?php endif; ?>
                 <div style="margin-top:14px;">
                     <a class="jm-button" href="<?= SITE_URL ?>/employer/post-job.php">Post a job</a>
                 </div>
@@ -469,10 +486,12 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             <div class="jm-p-card <?= $isFeatured ? 'featured' : '' ?> jm-p-reveal jm-p-reveal-<?= $i + 2 ?>">
                 <?php if ($plan['badge']): ?><span class="jm-p-badge"><?= e($plan['badge']) ?></span><?php endif; ?>
                 <p class="jm-p-plan-name"><?= e($plan['name']) ?></p>
+                <?php $price = jm_price_parts((float) $plan['price_monthly'], '', (float) ($plan['usd_monthly'] ?? 0)); ?>
                 <div class="jm-p-amount">
-                    <strong><?= jm_price((float) $plan['price_monthly'], '', (float) ($plan['usd_monthly'] ?? 0)) ?></strong>
+                    <strong><?= e($price['lead']) ?></strong>
                     <span>/month</span>
                 </div>
+                <span class="jm-p-usd"><?= $price['note'] !== '' ? e($price['note']) : '&nbsp;' ?></span>
                 <p class="jm-p-desc"><?= e($plan['description']) ?></p>
                 <ul class="jm-p-feats">
                     <?php foreach ($plan['features'] as $feat): ?>
@@ -532,11 +551,15 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             <div class="jm-p-card featured jm-p-reveal jm-p-reveal-<?= $isAnnual ? 3 : 2 ?>">
                 <?php if ($plan['badge']): ?><span class="jm-p-badge <?= $isAnnual ? 'tone-orange' : '' ?>"><?= e($plan['badge']) ?></span><?php endif; ?>
                 <p class="jm-p-plan-name"><?= e($plan['name']) ?></p>
+                <?php $price = jm_price_parts((float) $plan['price'], '', (float) ($plan['usd'] ?? 0)); ?>
                 <div class="jm-p-amount">
-                    <strong><?= jm_price((float) $plan['price'], '', (float) ($plan['usd'] ?? 0)) ?></strong>
+                    <strong><?= e($price['lead']) ?></strong>
                     <span>/<?= $isAnnual ? 'year' : 'month' ?></span>
                 </div>
-                <?php if ($isAnnual): ?><span class="jm-p-usd" style="color:var(--jm-green);font-weight:700;">Two months free</span><?php else: ?><span class="jm-p-usd">&nbsp;</span><?php endif; ?>
+                <span class="jm-p-usd">
+                    <?= $price['note'] !== '' ? e($price['note']) : '&nbsp;' ?>
+                    <?php if ($isAnnual): ?><b class="jm-p-saving">Two months free</b><?php endif; ?>
+                </span>
                 <p class="jm-p-desc"><?= e($plan['description']) ?></p>
                 <ul class="jm-p-feats">
                     <?php foreach ($plan['features'] as $feat): ?>
@@ -599,9 +622,11 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
             <div class="jm-p-pack <?= $pack['id'] === 'pack_5' ? 'best' : '' ?> jm-p-reveal">
                 <?php if ($pack['badge']): ?><span class="jm-p-badge" style="top:-11px;"><?= e($pack['badge']) ?></span><?php endif; ?>
                 <strong><?= e($pack['name']) ?></strong>
-                <div class="jm-p-pack-price"><?= jm_price((float) $pack['price']) ?></div>
+                <?php $packPrice = jm_price_parts((float) $pack['price'], '', (float) ($pack['usd'] ?? 0)); ?>
+                <div class="jm-p-pack-price"><?= e($packPrice['lead']) ?></div>
+                <?php if ($packPrice['note'] !== ''): ?><div class="jm-p-pack-local"><?= e($packPrice['note']) ?></div><?php endif; ?>
                 <div class="jm-p-pack-credits"><?= $pack['credits'] ?> credit<?= $pack['credits'] > 1 ? 's' : '' ?></div>
-                <?php if ($pack['savings'] > 0): ?><span class="jm-p-pack-save">Save <?= jm_price((float) $pack['savings']) ?></span><?php endif; ?>
+                <?php if ($pack['savings'] > 0): ?><span class="jm-p-pack-save">Save <?= (int) round($pack['savings'] / max(1, $pack['price'] + $pack['savings']) * 100) ?>%</span><?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>

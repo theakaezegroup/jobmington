@@ -120,7 +120,7 @@ function jm_seeker_plans(): array {
             'description' => 'All Premium features, billed once a year. Best value.',
             'features'    => [
                 'Everything in Premium Monthly',
-                'Save ' . jm_price_text(PRICE_SEEKER_PREMIUM_MONTHLY * 12 - PRICE_SEEKER_PREMIUM_ANNUAL) . ' vs monthly',
+                'Save ' . (int) round((PRICE_SEEKER_PREMIUM_MONTHLY * 12 - PRICE_SEEKER_PREMIUM_ANNUAL) / (PRICE_SEEKER_PREMIUM_MONTHLY * 12) * 100) . '% against paying monthly',
             ],
             'paystack_plan_code' => getenv('PAYSTACK_PLAN_SEEKER_ANNUAL') ?: '',
             'type'        => 'subscription',
@@ -187,12 +187,7 @@ function jm_bundles(): array {
             'price'       => PRICE_BUNDLE_JOB_TOOLKIT,
             'usd'         => USD_PRICE_BUNDLE_JOB_TOOLKIT,
             'credits'     => 4, // covers cv + cover letter + interview prep (2 credits)
-            'badge'       => 'Save ' . jm_price_text(
-                PRICE_CREDITS_SINGLE
-                + PRICE_CREDITS_SINGLE
-                + (PRICE_CREDITS_SINGLE * 2)
-                - PRICE_BUNDLE_JOB_TOOLKIT
-            ),
+            'badge'       => 'Save ' . (int) round(((PRICE_CREDITS_SINGLE * 4) - PRICE_BUNDLE_JOB_TOOLKIT) / (PRICE_CREDITS_SINGLE * 4) * 100) . '%',
             'description' => 'Everything you need for one strong application.',
             'includes'    => ['1 CV optimisation', '1 Cover letter', '1 Interview prep session'],
         ],
