@@ -18,6 +18,18 @@ $q = trim(Security::clean(get('q', '')));
 $category = trim(Security::clean(get('category', '')));
 $countryId = (int) get('country_id', 0);
 $type = trim(Security::clean(get('type', '')));
+/*
+ * Remote or on-site, which the type dropdown could not express.
+ *
+ * job_type carries both things at once: full-time, part-time and contract are
+ * employment terms, while remote is where the work happens. That let someone
+ * ask for remote roles and gave them no way at all to ask for the opposite,
+ * which is what most people on an African job board are actually looking for.
+ * Rather than resplit the column under 32,000 rows, this reads the same field
+ * from the other side.
+ */
+$work = trim(Security::clean(get('work', '')));
+$work = in_array($work, ['remote', 'onsite'], true) ? $work : '';
 $page = max(1, (int) get('page', 1));
 $perPage = JOBS_PER_PAGE;
 
@@ -48,6 +60,14 @@ if ($countryId > 0) {
 if ($type !== '' && in_array($type, JOB_TYPES, true)) {
     $where[] = "j.job_type = ?";
     $params[] = $type;
+}
+
+if ($work === 'remote') {
+    $where[] = "j.job_type = 'remote'";
+} elseif ($work === 'onsite') {
+    // Everything that is not remote is somewhere. A row with no job_type at
+    // all is unknown rather than on-site, so it is not claimed here.
+    $where[] = "j.job_type IS NOT NULL AND j.job_type <> '' AND j.job_type <> 'remote'";
 }
 
 $whereSql = implode(' AND ', $where);
@@ -130,6 +150,25 @@ jm_jobs_header($pageTitle, 'jobs');
                     <option value="<?= (int) $country['country_id'] ?>" <?= $countryId === (int) $country['country_id'] ? 'selected' : '' ?>><?= e($country['name']) ?></option>
                 <?php endforeach; ?>
             </select>
+        </div>
+        <div class="jm-field">
+            <label>Where</label>
+            <?php
+            /* Buttons rather than a fourth dropdown. This is the question most
+               people arrive with, and it has three answers, so making them open
+               a select to find it puts the most-used filter behind the most
+               clicks. Radios styled as a segment: no JavaScript, works with the
+               keyboard, and submits with the rest of the form. */
+            $workOptions = ['' => 'Any', 'remote' => 'Remote', 'onsite' => 'On-site'];
+            ?>
+            <div class="jm-worktoggle">
+                <?php foreach ($workOptions as $value => $label): ?>
+                    <label>
+                        <input type="radio" name="work" value="<?= e($value) ?>" <?= $work === $value ? 'checked' : '' ?>>
+                        <span><?= e($label) ?></span>
+                    </label>
+                <?php endforeach; ?>
+            </div>
         </div>
         <div class="jm-field">
             <label for="type">Type</label>

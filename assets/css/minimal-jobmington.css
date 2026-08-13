@@ -1103,7 +1103,7 @@ body.jm-nav-open {
 }
 
 .jm-filter-grid {
-    grid-template-columns: minmax(0, 1fr) 190px 160px 160px auto;
+    grid-template-columns: minmax(0, 1fr) 170px 150px 186px 140px auto;
     align-items: end;
     padding-bottom: 28px;
     margin-bottom: 30px;
@@ -4946,4 +4946,59 @@ body.jm-home-page {
     letter-spacing: 0;
     margin-left: 6px;
     white-space: nowrap;
+}
+
+/* ── Remote or on-site ─────────────────────────────────────────────────
+   A segment of three, not a fourth dropdown. On an African job board this
+   is the question most people arrive with, and burying the most-used
+   filter inside a select puts it behind the most clicks.
+
+   Radios rather than buttons and script: it submits with the form, works
+   from the keyboard, survives with JavaScript off, and the browser
+   remembers the choice on a back navigation. */
+.jm-worktoggle {
+    background: #f0f4fb;
+    border: 1px solid var(--jm-line);
+    border-radius: 10px;
+    display: grid;
+    gap: 4px;
+    grid-template-columns: repeat(3, 1fr);
+    min-height: 46px;
+    padding: 4px;
+}
+.jm-worktoggle label {
+    display: block;
+    margin: 0;
+}
+/* Off-screen rather than display:none, so it keeps its place in the tab
+   order and screen readers still announce the group. */
+.jm-worktoggle input {
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 1px;
+}
+.jm-worktoggle span {
+    align-items: center;
+    border-radius: 7px;
+    color: var(--jm-muted);
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    height: 100%;
+    justify-content: center;
+    transition: background .18s ease, color .18s ease;
+    user-select: none;
+}
+.jm-worktoggle span:hover { color: var(--jm-ink); }
+.jm-worktoggle input:checked + span {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(6, 20, 38, .12);
+    color: var(--jm-ink);
+}
+.jm-worktoggle input:focus-visible + span {
+    outline: 2px solid var(--jm-blue);
+    outline-offset: 2px;
 }

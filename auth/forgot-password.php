@@ -52,7 +52,7 @@ $pageTitle = 'Forgot Password | ' . SITE_NAME;
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
     <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-26">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-27">
 </head>
 <body class="jm-minimal">
     <div class="jm-shell">
