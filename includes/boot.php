@@ -159,6 +159,33 @@ function jm_boot_screen(): void
             100% { transform: translateX(350%); }
         }
 
+        /*
+         * Installed, the system has already drawn the mark: larger, centred,
+         * a moment earlier. Drawing our own underneath it is what produced two
+         * logos at two sizes a beat apart, and no amount of resizing fixes
+         * that, because the problem is that there are two of them.
+         *
+         * So installed, there is no second mark. The hairline stays and moves
+         * to sit below the middle of the screen, which is where the system
+         * puts its icon, so it reads as a loader under the main logo rather
+         * than a loader belonging to a smaller one of our own.
+         *
+         * In a browser tab none of this applies: nothing drew a mark before
+         * us, so ours is the only one and it keeps its place above the line.
+         */
+        @media (display-mode: standalone) {
+            .jm-boot-mark {
+                display: none;
+            }
+
+            .jm-boot-line {
+                position: absolute;
+                top: 58%;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .jm-boot-mark { animation: none; }
             .jm-boot-line::after { animation: none; width: 100%; opacity: 0.55; }
