@@ -137,7 +137,7 @@ class Session {
             if (!$row || (int) $row['is_active'] !== 1) {
                 if (function_exists('jm_forget_visitor')) { jm_forget_visitor(); }
                 self::destroy();
-                header('Location: /jobmington/auth/login.php?error=account_disabled');
+                header('Location: ' . SITE_URL . '/auth/login.php?error=account_disabled');
                 exit;
             }
 
@@ -184,7 +184,7 @@ class Session {
         $currentAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         if (isset($_SESSION['_user_agent']) && $_SESSION['_user_agent'] !== $currentAgent) {
             self::destroy();
-            header('Location: /jobmington/auth/login.php?error=session_invalid');
+            header('Location: ' . SITE_URL . '/auth/login.php?error=session_invalid');
             exit;
         }
 
@@ -362,7 +362,7 @@ class Session {
                 $_SESSION['auth_context_for'] = $target;
             }
             $redirect = urlencode($target);
-            header("Location: /jobmington/auth/login.php?redirect={$redirect}");
+            header('Location: ' . SITE_URL . "/auth/login.php?redirect={$redirect}");
             exit;
         }
     }
@@ -381,7 +381,7 @@ class Session {
         }
 
         if ($userType !== $role) {
-            header('Location: /jobmington/errors/403.php');
+            header('Location: ' . SITE_URL . '/errors/403.php');
             exit;
         }
     }
@@ -407,7 +407,7 @@ class Session {
         }
 
         if (self::userType() !== USER_TYPE_ADMIN) {
-            header('Location: /jobmington/errors/403.php');
+            header('Location: ' . SITE_URL . '/errors/403.php');
             exit;
         }
     }
@@ -446,7 +446,7 @@ class Session {
     public static function requireVerified(): void {
         self::requireLogin();
         if (!self::isVerified() && self::userType() !== USER_TYPE_ADMIN) {
-            header('Location: /jobmington/auth/verify-email.php');
+            header('Location: ' . SITE_URL . '/auth/verify-email.php');
             exit;
         }
     }
