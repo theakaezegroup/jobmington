@@ -1,8 +1,9 @@
-@import url("./brand-platform.css?v=brand-10");
+@import url("./brand-platform.css?v=brand-30");
 
 @font-face {
     font-family: "Futura Cyrillic Demi";
-    src: url("../fonts/FuturaCyrillicDemi.ttf") format("truetype"),
+    src: url("../fonts/FuturaCyrillicDemi.woff2") format("woff2"),
+         url("../fonts/FuturaCyrillicDemi.ttf") format("truetype"),
          local("Futura Cyrillic Demi"),
          local("FuturaCyrillicDemi");
     font-display: swap;
@@ -10,7 +11,8 @@
 
 @font-face {
     font-family: "Futura Cyrillic Book";
-    src: url("../fonts/FuturaCyrillicBook.ttf") format("truetype"),
+    src: url("../fonts/FuturaCyrillicBook.woff2") format("woff2"),
+         url("../fonts/FuturaCyrillicBook.ttf") format("truetype"),
          local("Futura Cyrillic Book"),
          local("FuturaCyrillicBook");
     font-display: swap;

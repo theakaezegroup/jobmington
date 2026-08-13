@@ -69,9 +69,9 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <meta name="twitter:description" content="<?= e($jmShareDesc) ?>">
     <meta name="twitter:image" content="<?= e($jmShareImage) ?>">
 
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     <script>
         window.tailwind = window.tailwind || {};
         window.tailwind.config = {

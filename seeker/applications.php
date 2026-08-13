@@ -60,9 +60,9 @@ $pageTitle = 'Applications | ' . SITE_NAME;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     <style>
         .jm-tabs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px; }
         .jm-tabs a { border:1px solid var(--jm-line); color:var(--jm-ink); padding:8px 12px; text-decoration:none; font-size:14px; font-weight:600; }

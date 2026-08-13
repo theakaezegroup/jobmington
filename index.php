@@ -212,9 +212,9 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
              frame has missed the only moment it mattered. */ ?>
     <?php require_once __DIR__ . '/includes/boot.php'; jm_boot_ground(); ?>
     <title><?= e($pageTitle) ?></title>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     <style>
     /* ── Homepage overrides ───────────────────────────────────────── */
     @keyframes jmFadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }

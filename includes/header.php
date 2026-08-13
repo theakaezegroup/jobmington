@@ -166,9 +166,9 @@ if ($isAdminArea) {
              switch it back. */ ?>
     <?php require_once __DIR__ . '/boot.php'; jm_boot_ground(); ?>
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -646,7 +646,7 @@ ob_start();
     <!-- Premium Design System -->
     <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css?v=brand-10">
     <script src="/jobmington/assets/js/jm-image-compress.js?v=brand-15" defer></script>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     
     <script src="https://cdn.tailwindcss.com" nonce="<?= $cspNonce ?>"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">

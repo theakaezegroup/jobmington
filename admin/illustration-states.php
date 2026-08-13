@@ -16,7 +16,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 <!-- Was another page building its own document with its own five-link
      nav. Uses the shared admin chrome now, like the rest. -->
-<link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+<link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
     <style>
         body.jm-minimal {
             background: #f6f9fd;

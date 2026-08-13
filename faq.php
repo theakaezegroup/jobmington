@@ -37,9 +37,9 @@ $faqs = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ | Jobmington</title>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicDemi.ttf" crossorigin>
-    <link rel="preload" as="font" type="font/ttf" href="/jobmington/assets/fonts/FuturaCyrillicBook.ttf" crossorigin>
-    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-28">
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
+    <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">
 </head>
 <body class="jm-minimal">
     <div class="jm-shell">
