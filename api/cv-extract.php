@@ -297,9 +297,13 @@ function jm_shell_available(): bool {
 function jm_detect_jobmington(string $text, string $path, bool $isPdf): bool {
     // Check extracted text
     if (stripos($text, 'JOBMINGTON_CV_BUILDER_EXPORT') !== false) return true;
+    // The address is what the footer prints today, so this is the line that
+    // catches a current export. The three below it catch older ones, whose
+    // footers said other things. Keep them: people upload CVs they made
+    // months ago.
     if (stripos($text, 'jobmington.com') !== false) return true;
-    if (stripos($text, 'Created with Jobmington') !== false) return true;   // older exports
-    if (stripos($text, 'Built on Jobmington') !== false) return true;       // what the footer says now
+    if (stripos($text, 'Created with Jobmington') !== false) return true;
+    if (stripos($text, 'Built on Jobmington') !== false) return true;
     if (stripos($text, 'Jobmington CV Builder') !== false) return true;
 
     // Check raw bytes too (catches HTML comments in PDF)
