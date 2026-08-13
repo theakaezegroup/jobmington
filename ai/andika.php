@@ -3346,78 +3346,67 @@ require_once __DIR__ . '/../includes/ai-header.php';
     }
 
     /*
-     * History and New, properly built.
+     * History and New: the panel's header buttons, to the pixel.
      *
-     * Labelled rather than mute icons, because two unlabelled glyphs in a
-     * corner are a guess, and these are the only controls on the page that
-     * destroy or replace what you are looking at.
+     * No border and no label. They are secondary to the conversation, so they
+     * recede until reached for, and the panel already proved that shape works.
      */
     .mobile-header-actions {
         display: flex !important;
         position: absolute;
         top: 14px;
-        right: 18px;
+        right: 16px;
         left: auto;
-        gap: 8px;
+        gap: 2px;
         z-index: 12;
     }
 
     .mobile-action-btn {
-        width: auto !important;
-        height: 34px !important;
+        width: 32px !important;
+        height: 32px !important;
         aspect-ratio: auto !important;
-        padding: 0 12px !important;
-        border-radius: 10px !important;
-        background: var(--color-surface) !important;
-        border: 1px solid var(--line-soft) !important;
-        color: var(--text-secondary) !important;
+        padding: 0 !important;
+        border-radius: 9px !important;
+        background: transparent !important;
+        border: 0 !important;
+        color: var(--text-tertiary) !important;
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        font-size: 12.5px;
-        font-weight: 600;
-        letter-spacing: 0;
         box-shadow: none !important;
-        transition: background .15s, color .15s, border-color .15s;
+        transition: background .15s, color .15s;
     }
 
-    .mobile-action-btn::after {
-        content: attr(data-label);
-        white-space: nowrap;
-    }
+    .mobile-action-btn::after { content: none; }
 
     .mobile-action-btn:hover {
         background: var(--color-canvas) !important;
         color: var(--color-ink) !important;
-        border-color: var(--line-soft-strong) !important;
         transform: none !important;
     }
 
-    .mobile-action-btn .icon svg { width: 15px; height: 15px; }
+    .mobile-action-btn .icon svg { width: 16px; height: 16px; }
 
     .mobile-action-btn .badge {
         position: absolute;
-        top: -6px;
-        right: -6px;
-        min-width: 17px;
-        height: 17px;
-        border-radius: 9px;
+        top: -2px;
+        right: -2px;
+        min-width: 15px;
+        height: 15px;
+        border-radius: 8px;
         background: var(--color-primary);
         color: #fff;
-        font-size: 10px;
+        font-size: 9.5px;
         font-weight: 700;
         display: grid;
         place-items: center;
-        padding: 0 4px;
+        padding: 0 3px;
         border: 2px solid var(--color-surface);
     }
 
     /* On a phone the labels would crowd the greeting, so the icons stand alone. */
     @media (max-width: 640px) {
         .mobile-header-actions { top: 12px; right: 12px; gap: 6px; }
-        .mobile-action-btn { width: 36px !important; padding: 0 !important; }
-        .mobile-action-btn::after { content: none; }
     }
 
     /* The one suggestion, offered where there is nothing else to read. */
@@ -3537,9 +3526,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
             </div>
             
             <div class="ai-greeting">
-                <div class="ai-icon-sphere">
-                    <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
-                </div>
                 <div class="greeting-content">
                     <h1 class="greeting-text">Hi, I'm Andika <span class="wave"></span></h1>
                     <p class="greeting-sub">Your AI career assistant <span class="by-brand">by Jobmington</span></p>
