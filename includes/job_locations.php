@@ -34,6 +34,37 @@ function jm_scraper_is_remote_location(string $location): bool
 }
 
 /**
+ * Is this job remote, reading the title as well as the location?
+ *
+ * Local boards advertise remote roles with a country in the location field and
+ * the word Remote in the title, because the country is who may apply rather
+ * than where the desk is. Reading only the location filed "Outreach Agent,
+ * Remote" and "Music Audio Specialist, Fully Remote" as on-site work in
+ * Nigeria, which is exactly the mistake that makes an on-site filter useless.
+ *
+ * The title is only trusted for the positive case. A title with no mention of
+ * remote proves nothing, so the location still decides those.
+ */
+function jm_scraper_is_remote_job(string $location, string $title = ''): bool
+{
+    if (jm_scraper_is_remote_location($location)) {
+        return true;
+    }
+
+    $needle = strtolower($title);
+    foreach ([
+        'remote', 'work from home', 'wfh', 'telecommute',
+        'work from anywhere', 'fully virtual',
+    ] as $token) {
+        // Word-bounded, or "remotely" is fine but "premote" would also match.
+        if (preg_match('/(?<![a-z])' . preg_quote($token, '/') . '/', $needle)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
  * The city named in a location, if it names one.
  *
  * The scraper wrote the literal string 'Remote' into every job's city column,

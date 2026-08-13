@@ -1,6 +1,6 @@
 <?php
 /**
- * JOBMINGTON - re-derive every job's country from the location it states.
+ * JOBMINGTON - re-derive a job's country and work style from what it states.
  *
  * The scraper filed listings under a default of United States and matched
  * "africa" before "south africa", so 25,451 of 31,752 rows with a stated
@@ -15,6 +15,11 @@
  * A job whose location names no single country gets no country. "Remote",
  * "Worldwide", "EMEA" and "Australia, Canada, France" are all real answers of
  * "not one country", and pretending otherwise is what caused this.
+ *
+ * It also settles remote against on-site. A local board advertises a remote
+ * role with a country in the location field and the word Remote only in the
+ * title, so reading the location alone filed "Outreach Agent, Remote" as
+ * on-site work in Nigeria, which makes an on-site filter worse than useless.
  *
  *   php cron/backfill_job_countries.php                    # say what would change
  *   php cron/backfill_job_countries.php --apply            # change it
@@ -58,7 +63,7 @@ foreach ($pdo->query('SELECT country_id, name, iso_code FROM countries') as $row
 jm_backfill_log('Re-deriving job countries' . ($apply ? '' : ' (dry run, nothing will change)'));
 jm_backfill_log(sprintf('  %d countries in the table', count($byIso)));
 
-$sql = 'SELECT job_id, country_id, original_location, city FROM jobs ORDER BY job_id';
+$sql = 'SELECT job_id, country_id, original_location, city, title, job_type FROM jobs ORDER BY job_id';
 if ($limit > 0) {
     $sql .= ' LIMIT ' . $limit;
 }
@@ -68,6 +73,7 @@ $update = $pdo->prepare('UPDATE jobs SET country_id = ? WHERE job_id = ?');
 $seen = 0;
 $changed = 0;
 $cleared = 0;
+$retyped = 0;
 $unchanged = 0;
 $missingCountry = [];
 $created = [];
@@ -82,6 +88,29 @@ foreach ($pdo->query($sql, PDO::FETCH_ASSOC) as $job) {
     $stated = trim((string) ($job['original_location'] ?? ''));
     if ($stated === '') {
         $stated = trim((string) ($job['city'] ?? ''));
+    }
+
+    /*
+     * Remote or on-site, re-read from the title as well as the location.
+     *
+     * Above the country work on purpose: a row whose country is not in the
+     * table skips the rest of this loop, and its work style still needs
+     * settling. The two questions are independent.
+     *
+     * Only the one-way correction is made. The 32,000 rows from the remote
+     * boards were written when job_type was the literal string 'Remote' for
+     * everything, and they are genuinely remote, so rewriting them would be
+     * churn. What this catches is the opposite mistake: a remote role filed as
+     * on-site because only its title said so, which is what a local board does
+     * when it puts the country in the location field.
+     */
+    if (strtolower((string) $job['job_type']) !== 'remote'
+        && jm_scraper_is_remote_job($stated, (string) ($job['title'] ?? ''))) {
+        $retyped++;
+        if ($apply) {
+            $pdo->prepare('UPDATE jobs SET job_type = ? WHERE job_id = ?')
+                ->execute(['remote', (int) $job['job_id']]);
+        }
     }
 
     $country = jm_scraper_country_of($stated);
@@ -148,6 +177,7 @@ jm_backfill_log(sprintf('  %-28s %s', 'jobs examined', number_format($seen)));
 jm_backfill_log(sprintf('  %-28s %s', 'already correct', number_format($unchanged)));
 jm_backfill_log(sprintf('  %-28s %s', 'moved to a real country', number_format($changed)));
 jm_backfill_log(sprintf('  %-28s %s', 'country removed', number_format($cleared)));
+jm_backfill_log(sprintf('  %-28s %s', 're-marked as remote', number_format($retyped)));
 
 if ($moves) {
     arsort($moves);

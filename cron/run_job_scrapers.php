@@ -258,7 +258,7 @@ function jm_scraper_insert_job(PDO $pdo, array $job, int $ownerUserId): string {
          */
         'city' => jm_scraper_city_of((string) ($job['location'] ?? '')),
         'country_id' => $countryId,
-        'job_type' => jm_scraper_is_remote_location((string) ($job['location'] ?? '')) ? 'remote' : 'full-time',
+        'job_type' => jm_scraper_is_remote_job((string) ($job['location'] ?? ''), (string) ($job['title'] ?? '')) ? 'remote' : 'full-time',
         'experience_level' => $job['experience_level'] ?? 'Mid',
         'salary_min' => $salaryMin,
         'salary_max' => $salaryMax,
