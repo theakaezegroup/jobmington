@@ -405,6 +405,7 @@ $pageTitle = 'Pricing | ' . SITE_NAME;
     </style>
 </head>
 <body class="jm-minimal">
+<?php jm_country_preview_banner(); ?>
 <div class="jm-shell">
 
     <!-- Header -->

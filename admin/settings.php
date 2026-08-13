@@ -297,6 +297,29 @@ require_once __DIR__ . '/../includes/header.php';
                         </p>
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">See the site as somewhere else</label>
+                        <div class="border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-sm mb-4">
+                            <p class="text-slate-500 text-xs mb-3">
+                                Opens the pricing page as a visitor in that country. Cloudflare
+                                overwrites the country a browser claims, so this is the only way to
+                                check it without being there. An orange bar shows while it is on.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <?php foreach (['NG' => 'Nigeria', 'KE' => 'Kenya', 'GH' => 'Ghana',
+                                                'ZA' => 'South Africa', 'EG' => 'Egypt', 'GB' => 'UK',
+                                                'US' => 'United States'] as $iso => $label): ?>
+                                    <a href="/jobmington/pricing.php?as=<?= e($iso) ?>" target="_blank" rel="noopener"
+                                       class="inline-block border border-slate-300 rounded-md px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-white hover:border-blue-400">
+                                        <?= e($label) ?>
+                                    </a>
+                                <?php endforeach; ?>
+                                <a href="/jobmington/pricing.php?as=off" target="_blank" rel="noopener"
+                                   class="inline-block border border-slate-300 rounded-md px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-white">
+                                    Stop previewing
+                                </a>
+                            </div>
+                        </div>
+
                         <label class="block text-sm font-medium text-slate-700 mb-2">A single job post, as each market sees it</label>
                         <div class="border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-sm space-y-2">
                             <?php foreach ($samples as $iso => $label): ?>

@@ -232,6 +232,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
     </style>
 </head>
 <body class="jm-minimal">
+<?php jm_country_preview_banner(); ?>
 <div class="jm-shell">
     <header class="jm-header">
         <a class="jm-logo" href="<?= SITE_URL ?>/"><img src="<?= ASSETS_URL ?>/images/badge.png?v=logo-8" alt=""><span>Jobmington</span></a>

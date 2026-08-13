@@ -975,6 +975,7 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
     </style>
 </head>
 <body class="jm-minimal jm-home-page">
+<?php jm_country_preview_banner(); ?>
 <?php /* Set before the header is parsed. Without this the ≤900px rules stack
          .jm-header into a column until the footer script adds the class, so the
          logo and nav paint in the wrong layout and then snap into place. */ ?>

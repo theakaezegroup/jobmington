@@ -43,6 +43,21 @@ function jm_visitor_country(): string
         return $country;
     }
 
+    /*
+     * An admin can look at the site as somewhere else, because otherwise the
+     * only way to check what a Kenyan sees is to be in Kenya. Cloudflare
+     * overwrites any CF-IPCountry a browser sends, so this cannot be done from
+     * the front end at all without a deliberate override here.
+     *
+     * Admins only, and it sets a visible banner wherever it is in effect. A
+     * preview that looks exactly like the real thing is how someone ends up
+     * reporting a bug against a page they were pretending to load from Ghana.
+     */
+    $preview = jm_country_preview();
+    if ($preview !== '') {
+        return $country = $preview;
+    }
+
     $raw = strtoupper(trim((string) ($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '')));
 
     // XX is an address Cloudflare cannot place, T1 is Tor.
@@ -50,6 +65,77 @@ function jm_visitor_country(): string
         return $country = '';
     }
     return $country = $raw;
+}
+
+/**
+ * The country an admin is currently previewing as, or '' for nobody.
+ *
+ * Set with ?as=KE and cleared with ?as=off. Kept in the session so the whole
+ * site can be walked through as that country rather than one page at a time.
+ */
+function jm_country_preview(): string
+{
+    static $preview = null;
+    if ($preview !== null) {
+        return $preview;
+    }
+
+    if (!class_exists('Session') || session_status() !== PHP_SESSION_ACTIVE || !Session::isAdmin()) {
+        return $preview = '';
+    }
+
+    if (isset($_GET['as'])) {
+        $wanted = strtoupper(trim((string) $_GET['as']));
+
+        if ($wanted === '' || $wanted === 'OFF' || $wanted === 'ME') {
+            unset($_SESSION['jm_preview_country']);
+            return $preview = '';
+        }
+        if (preg_match('/^[A-Z]{2}$/', $wanted)) {
+            $_SESSION['jm_preview_country'] = $wanted;
+        }
+    }
+
+    return $preview = (string) ($_SESSION['jm_preview_country'] ?? '');
+}
+
+/**
+ * The bar that says a preview is running.
+ *
+ * Deliberately hard to miss and always carries the way out of it, because the
+ * failure mode of this feature is forgetting it is on.
+ */
+function jm_country_preview_banner(): void
+{
+    $preview = jm_country_preview();
+    if ($preview === '') {
+        return;
+    }
+
+    $name = $preview;
+    $currency = '';
+    try {
+        $stmt = db()->prepare('SELECT name, currency_code FROM countries WHERE iso_code = ? LIMIT 1');
+        $stmt->execute([$preview]);
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $name = (string) $row['name'];
+            $currency = strtoupper((string) $row['currency_code']);
+        }
+    } catch (Throwable $e) {
+        // The code alone is enough to say what is going on.
+    }
+
+    $path = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/'), '?');
+
+    echo '<div style="position:sticky;top:0;z-index:3000;background:#f59f22;color:#061426;'
+       . 'font:600 13px/1.4 system-ui,sans-serif;padding:9px 16px;display:flex;gap:12px;'
+       . 'align-items:center;justify-content:center;flex-wrap:wrap;">'
+       . '<span>Viewing as <strong>' . e($name) . '</strong>'
+       . ($currency !== '' && $currency !== 'USD' ? ' (' . e($currency) . ')' : '')
+       . '. This is a preview, not what you would normally see.</span>'
+       . '<a href="' . e($path) . '?as=off" style="color:#061426;font-weight:800;text-decoration:underline;">'
+       . 'Back to my own country</a>'
+       . '</div>';
 }
 
 /**
