@@ -120,15 +120,24 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .ai-icon-sphere {
         width: 42px;
         height: 42px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f59e0b 100%);
+        border-radius: 12px;
+        background: transparent;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--line-soft);
-        box-shadow: var(--lift-1);
+        border: 0;
+        box-shadow: none;
         flex-shrink: 0;
         position: relative;
+        overflow: hidden;
+    }
+
+    .ai-mark {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        border-radius: inherit;
     }
     .ai-icon-sphere svg {
         width: 22px;
@@ -3200,7 +3209,95 @@ require_once __DIR__ . '/../includes/ai-header.php';
             width: 100%;
         }
     }
-</style>
+
+    /*
+     * The composer dock.
+     *
+     * Pinned under the thread rather than floating in the header, which is
+     * where a chat composer belongs and where the panel puts it. flex-shrink: 0
+     * is what keeps it from being squeezed as the conversation grows.
+     */
+    .composer-dock {
+        flex-shrink: 0;
+        background: var(--color-surface);
+        border-top: 1px solid var(--line-soft);
+        padding: 14px 20px 16px;
+    }
+
+    .composer-dock .main-input-area { margin: 0; }
+
+    .composer-dock .quick-chips {
+        margin: 10px 0 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /*
+     * History and New.
+     *
+     * They were absolutely positioned over the top-left corner of the header
+     * and only on phones, so on a desktop there was no way to reach either
+     * without the drawer. They are a real pair of controls now, top right,
+     * on every size, shaped like the panel's header buttons.
+     */
+    .mobile-header-actions {
+        display: flex !important;
+        position: absolute;
+        top: 16px;
+        right: 18px;
+        left: auto;
+        gap: 6px;
+        z-index: 12;
+    }
+
+    .mobile-action-btn {
+        width: 36px !important;
+        height: 36px !important;
+        aspect-ratio: auto !important;
+        border-radius: 10px !important;
+        background: transparent !important;
+        border: 1px solid var(--line-soft) !important;
+        color: var(--text-secondary) !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none !important;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+
+    .mobile-action-btn:hover {
+        background: var(--color-canvas) !important;
+        color: var(--color-ink) !important;
+        border-color: var(--line-soft-strong) !important;
+        transform: none !important;
+    }
+
+    .mobile-action-btn .icon svg { width: 17px; height: 17px; }
+
+    .mobile-action-btn .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        min-width: 17px;
+        height: 17px;
+        border-radius: 9px;
+        background: var(--color-primary);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        padding: 0 4px;
+        border: 2px solid var(--color-surface);
+    }
+
+    @media (max-width: 640px) {
+        .mobile-header-actions { top: 12px; right: 12px; }
+        .composer-dock { padding: 12px 14px 14px; }
+    }
+
+    </style>
 
 <!-- Noise Texture Overlay -->
 <div class="noise-overlay"></div>
@@ -3268,10 +3365,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         <div class="panel-header">Platform</div>
         <a href="<?= SITE_URL ?>/ai/andika.php" class="nav-item active">
             <div class="ai-icon-sphere sm">
-                <svg viewBox="0 0 24 24" fill="white">
-                    <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                    <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                </svg>
+                <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
             </div>
             <span>Andika AI</span>
         </a>
@@ -3300,10 +3394,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
             
             <div class="ai-greeting">
                 <div class="ai-icon-sphere">
-                    <svg viewBox="0 0 24 24" fill="white">
-                        <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                        <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                    </svg>
+                    <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
                 </div>
                 <div class="greeting-content">
                     <h1 class="greeting-text">Hi, I'm Andika <span class="wave"></span></h1>
@@ -3312,27 +3403,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
                 </div>
             </div>
             
-            <div class="main-input-area">
-                <div class="input-wrapper">
-                    <input type="file" id="file-upload" style="display:none" onchange="Andika.handleFileSelect(this)">
-                    <button class="input-action" title="Upload CV" onclick="document.getElementById('file-upload').click()">
-                        <span class="icon"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>
-                    </button>
-                    <input type="text" id="chat-input" placeholder="Ask me anything about jobs, CVs, careers..." autocomplete="off">
-                    <button id="mic-btn" class="input-action" title="Voice" onclick="Andika.toggleVoice()">
-                        <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span>
-                    </button>
-                    <button id="send-btn" onclick="Andika.handleSendClick()" class="send-action" title="Send">
-                        <span class="icon send-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span>
-                        <span class="icon stop-icon" style="display:none"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="white"/></svg></span>
-                    </button>
-                </div>
-                <p class="input-hint">Try: "Rewrite my CV summary for a product role" or "What remote jobs suit my skills?"</p>
-            </div>
-            
-            <div class="quick-chips">
-                <button class="chip" onclick="Andika.send('Start Interview Prep')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Interview prep</button>
-            </div>
         </div>
         
         <!-- SCROLLABLE CONTENT -->
@@ -3395,26 +3465,47 @@ require_once __DIR__ . '/../includes/ai-header.php';
                     
                     <div class="powered-by">
                         <div class="ai-icon-sphere sm" style="transform: scale(0.6); margin-right: -8px;">
-                            <svg viewBox="0 0 24 24" fill="white">
-                                <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                                <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                            </svg>
+                            <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
                         </div>
                         <span>Powered by Andika AI</span>
                     </div>
                 </div>
             </div>
         </div>
+    <?php /* The composer sits under the thread, where a chat composer
+             belongs and where the panel puts it. It used to live inside the
+             header, above the conversation, so the newest message was the
+             furthest thing from the box you answer it in. */ ?>
+    <div class="composer-dock">
+            <div class="main-input-area">
+                <div class="input-wrapper">
+                    <input type="file" id="file-upload" style="display:none" onchange="Andika.handleFileSelect(this)">
+                    <button class="input-action" title="Upload CV" onclick="document.getElementById('file-upload').click()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>
+                    </button>
+                    <input type="text" id="chat-input" placeholder="Ask me anything about jobs, CVs, careers..." autocomplete="off">
+                    <button id="mic-btn" class="input-action" title="Voice" onclick="Andika.toggleVoice()">
+                        <span class="icon"><svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></span>
+                    </button>
+                    <button id="send-btn" onclick="Andika.handleSendClick()" class="send-action" title="Send">
+                        <span class="icon send-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span>
+                        <span class="icon stop-icon" style="display:none"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="white"/></svg></span>
+                    </button>
+                </div>
+                <p class="input-hint">Try: "Rewrite my CV summary for a product role" or "What remote jobs suit my skills?"</p>
+            </div>
+            
+            <div class="quick-chips">
+                <button class="chip" onclick="Andika.send('Start Interview Prep')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Interview prep</button>
+            </div>
+    </div>
     </section>
 
     <aside class="glass-panel right-panel">
         <div class="panel-header">My Stash</div>
         <p class="sidebar-subtext" style="display: flex; align-items: center; gap: 8px;">
             <div class="ai-icon-sphere sm" style="transform: scale(0.6); margin: -4px -8px -4px -8px;">
-                <svg viewBox="0 0 24 24" fill="white">
-                    <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                    <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                </svg>
+                <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
             </div>
             Today's snapshot powered by Andika AI.
         </p>
@@ -3614,10 +3705,7 @@ const Andika = {
         chats.slice(0, 10).forEach(chat => {
             const itemHTML = `
                 <div class="ai-icon-sphere sm" style="margin-right: -4px; transform: scale(0.85);">
-                    <svg viewBox="0 0 24 24" fill="white">
-                        <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                        <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                    </svg>
+                    <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
                 </div>
                 <div class="history-content">
                     <p class="history-title">${this.escapeHtml(chat.title)}</p>
@@ -4070,10 +4158,7 @@ const Andika = {
         typingDiv.className = 'msg-ai';
         typingDiv.innerHTML = `
             <div class="ai-icon-sphere sm">
-                <svg viewBox="0 0 24 24" fill="white">
-                    <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                    <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                </svg>
+                <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
             </div>
             <div class="ai-text"><span class="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>
         `;
@@ -4118,10 +4203,7 @@ const Andika = {
             const uniqueId = 'msg-' + Date.now();
             msgDiv.innerHTML = `
                 <div class="ai-icon-sphere sm">
-                    <svg viewBox="0 0 24 24" fill="white">
-                        <circle cx="8" cy="12" r="5.5" opacity="1"/>
-                        <circle cx="16" cy="12" r="5.5" opacity="0.7"/>
-                    </svg>
+                    <img src="<?= SITE_URL ?>/assets/images/pwa-icon-192.png?v=brand-30" alt="" class="ai-mark">
                 </div>
                 <div class="ai-text" id="${uniqueId}">
                     <div class="ai-content">${formattedText}</div>
