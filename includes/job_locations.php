@@ -16,6 +16,60 @@ if (!defined('JOBMINGTON')) {
 }
 
 /**
+ * Does this location describe remote work?
+ *
+ * "Berlin (Remote)" is both: a remote role attached to Berlin. So this answers
+ * only the remote question, and the city and country are read separately from
+ * the same string rather than being decided by it.
+ */
+function jm_scraper_is_remote_location(string $location): bool
+{
+    $needle = strtolower($location);
+    foreach (['remote', 'anywhere', 'worldwide', 'work from home', 'distributed', 'wfh'] as $token) {
+        if (str_contains($needle, $token)) {
+            return true;
+        }
+    }
+    return trim($needle) === '';
+}
+
+/**
+ * The city named in a location, if it names one.
+ *
+ * The scraper wrote the literal string 'Remote' into every job's city column,
+ * so no listing in the database has ever had one and no city filter could ever
+ * have worked. This reads the real thing.
+ *
+ * A location that is only a country ("Nigeria") has no city, and neither does
+ * one that is only a state or a region: those are stored on the country, and
+ * inventing a city from them is how "Gauteng" ends up looking like a town.
+ */
+function jm_scraper_city_of(string $location): ?string
+{
+    $clean = trim(preg_replace('/\((?:remote|hybrid|on-?site|onsite)\)/i', '', $location));
+    $clean = trim($clean, " \t\n\r,-");
+
+    if ($clean === '' || jm_scraper_is_remote_location($clean)) {
+        return null;
+    }
+
+    // "Lagos, Nigeria" and "Berlin, Berlin, Germany" both lead with the city.
+    $first = trim(explode(',', $clean)[0]);
+    if ($first === '') {
+        return null;
+    }
+
+    // If that leading part is itself a country, there is no city here.
+    foreach (jm_scraper_gazetteer() as $country) {
+        if (strcasecmp($first, $country[0]) === 0) {
+            return null;
+        }
+    }
+
+    return mb_substr($first, 0, 100);
+}
+
+/**
  * The gazetteer behind jm_scraper_country_of().
  *
  * Country names and the cities that actually appear in the feeds, which is why

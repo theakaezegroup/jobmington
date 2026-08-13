@@ -249,9 +249,16 @@ function jm_scraper_insert_job(PDO $pdo, array $job, int $ownerUserId): string {
         'description' => $description,
         'apply_link' => $job['apply_link'],
         'original_location' => $job['location'] ?? 'Remote',
-        'city' => 'Remote',
+        /*
+         * Both of these used to be the literal string 'Remote' on every row.
+         * That is why 32,057 of 32,085 listings called themselves remote and no
+         * job in the database has ever had a city: neither field was ever read
+         * from the listing. A local job board cannot be built on top of two
+         * constants.
+         */
+        'city' => jm_scraper_city_of((string) ($job['location'] ?? '')),
         'country_id' => $countryId,
-        'job_type' => 'Remote',
+        'job_type' => jm_scraper_is_remote_location((string) ($job['location'] ?? '')) ? 'remote' : 'full-time',
         'experience_level' => $job['experience_level'] ?? 'Mid',
         'salary_min' => $salaryMin,
         'salary_max' => $salaryMax,
@@ -963,28 +970,76 @@ function jm_scraper_careerjet_jobs(int $limit): array {
         throw new RuntimeException('Careerjet affiliate id missing (set CAREERJET_AFFID).');
     }
 
-    $query = http_build_query(array_filter([
-        'affid' => $affid,
-        'keywords' => (string) (getenv('JOOBLE_KEYWORDS') ?: 'remote'),
-        'location' => (string) getenv('CAREERJET_LOCATION'),
-        'pagesize' => min(99, $limit),
-        'page' => 1,
-        'sort' => 'date',
-        'user_ip' => '127.0.0.1',
-        'user_agent' => getenv('JOB_SCRAPER_USER_AGENT') ?: 'JobmingtonBot/1.0',
-        'url' => 'https://jobmington.com',
-    ], static fn($v) => $v !== '' && $v !== null));
+    /*
+     * One request per country. This is the only source that carries locally
+     * advertised work, and Careerjet selects the market by `location`, so a
+     * single global call returns one country and the rest never arrive.
+     */
+    $locations = array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) (getenv('CAREERJET_LOCATIONS') ?: getenv('CAREERJET_LOCATION') ?: 'Nigeria,Kenya,Ghana,South Africa'))
+    )));
 
-    $body = jm_scraper_fetch('http://public.api.careerjet.net/search?' . $query, ['Accept: application/json']);
-    $data = json_decode($body, true);
-    if (!is_array($data) || empty($data['jobs'])) {
-        throw new RuntimeException('Could not parse Careerjet JSON.');
-    }
+    /*
+     * Its own keyword, and empty by default. This read JOOBLE_KEYWORDS, which
+     * is set to "remote", so the one source that has local jobs was being asked
+     * for remote ones: 6,543 Nigerian listings answered as 508.
+     */
+    $keywords = trim((string) getenv('CAREERJET_KEYWORDS'));
 
+    $perCountry = max(1, (int) ceil($limit / max(1, count($locations))));
     $jobs = [];
-    foreach ($data['jobs'] as $row) {
+
+    foreach ($locations as $location) {
         if (count($jobs) >= $limit) {
             break;
+        }
+
+        $query = http_build_query(array_filter([
+            'affid' => $affid,
+            'keywords' => $keywords,
+            'location' => $location,
+            'pagesize' => min(99, $perCountry),
+            'page' => 1,
+            'sort' => 'date',
+            // The caller's address, not a loopback one: Careerjet uses it to
+            // decide which market answers, and 127.0.0.1 tells it nothing.
+            'user_ip' => trim((string) getenv('JOB_SCRAPER_PUBLIC_IP')) ?: '139.162.182.253',
+            'user_agent' => getenv('JOB_SCRAPER_USER_AGENT') ?: 'JobmingtonBot/1.0',
+            'url' => 'https://jobmington.com',
+        ], static fn($v) => $v !== '' && $v !== null));
+
+        // Careerjet refuses a request with no Referer: "Undeclared referrer".
+        // Without this header the affiliate id makes no difference at all.
+        $body = jm_scraper_fetch('http://public.api.careerjet.net/search?' . $query, [
+            'Accept: application/json',
+            'Referer: https://jobmington.com/',
+        ]);
+        $data = json_decode($body, true);
+
+        if (!is_array($data) || empty($data['jobs'])) {
+            // One quiet market must not lose the others.
+            jm_scraper_log('  Careerjet returned nothing for ' . $location);
+            continue;
+        }
+
+        jm_scraper_careerjet_collect($data['jobs'], $jobs, $limit, $location);
+    }
+
+    return $jobs;
+}
+
+/**
+ * Map Careerjet rows onto the shape the importer expects.
+ *
+ * @param array<int, mixed> $rows
+ * @param array<int, array> $jobs collected so far, appended to in place
+ * @param string $fallback the country asked for, used when a row states no location
+ */
+function jm_scraper_careerjet_collect(array $rows, array &$jobs, int $limit, string $fallback): void {
+    foreach ($rows as $row) {
+        if (count($jobs) >= $limit) {
+            return;
         }
         $applyLink = (string) ($row['url'] ?? '');
         if (empty($row['title']) || $applyLink === '') {
@@ -1000,7 +1055,12 @@ function jm_scraper_careerjet_jobs(int $limit): array {
             'company' => (string) ($row['company'] ?? 'Hiring Company'),
             'title' => (string) $row['title'],
             'description' => (string) ($row['description'] ?? ''),
-            'location' => (string) ($row['locations'] ?? 'Remote'),
+            // Falls back to the country that was asked for, not to "Remote".
+            // These are locally advertised roles; calling an unlabelled one
+            // remote is the assumption this whole change exists to remove.
+            'location' => trim((string) ($row['locations'] ?? '')) !== ''
+                ? (string) $row['locations']
+                : $fallback,
             'apply_link' => $applyLink,
             'posted_at' => (string) ($row['date'] ?? 'now'),
             'salary_min' => $salaryMin,
@@ -1009,8 +1069,6 @@ function jm_scraper_careerjet_jobs(int $limit): array {
             'tags' => [],
         ];
     }
-
-    return $jobs;
 }
 
 $lockPath = sys_get_temp_dir() . '/jobmington-job-scraper.lock';
