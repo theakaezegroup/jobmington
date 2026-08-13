@@ -32,11 +32,29 @@ function jm_andika_launcher_applies(): bool
         return false;
     }
 
-    if (function_exists('jm_tool_available') && !jm_tool_available('andika')) {
-        return false;
+    /*
+     * The catalogue is loaded rather than tested for, and that is the whole
+     * point of this line.
+     *
+     * Checking function_exists made the answer depend on whether the page
+     * happened to have pulled in tools.php for its own reasons: the launcher
+     * appeared on the job pages, which do not, and vanished on the tools page,
+     * which does. Same visitor, same tool, different answer per page. Loading
+     * it makes the gate mean one thing everywhere.
+     *
+     * Andika is currently 'beta', so this hides the launcher from everyone
+     * without a grant. That is correct: offering a door to a tool someone
+     * cannot open is worse than not showing the door.
+     */
+    if (!function_exists('jm_tool_available')) {
+        $catalogue = __DIR__ . '/tools.php';
+        if (!is_file($catalogue)) {
+            return false;
+        }
+        require_once $catalogue;
     }
 
-    return true;
+    return jm_tool_available('andika');
 }
 
 function jm_andika_launcher(): void
