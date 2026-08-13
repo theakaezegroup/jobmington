@@ -172,6 +172,51 @@ function jm_boot_screen(): void
             100% { transform: translateX(350%); }
         }
 
+        @keyframes jm-boot-fade {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /*
+         * Installed, the system drew this mark already: centred, and at around
+         * 128dp, which is 128 CSS pixels here. Ours matches that size and does
+         * not animate in, because it is not arriving. It was on screen a
+         * moment ago and the point is that it appears never to have moved, so
+         * the launch reads as one logo picking up a loader rather than a
+         * second, smaller logo replacing the first.
+         *
+         * In a browser tab none of this applies. Nothing drew a mark before
+         * us, so ours stays small and keeps its entrance.
+         */
+        @media (display-mode: standalone) {
+            .jm-boot-mark {
+                width: 128px;
+                height: 128px;
+                animation: none;
+            }
+
+            /*
+             * Out of flow on purpose. Left in the flex column the line becomes
+             * the second item, so the column centres the pair and lifts the
+             * mark by half the line plus half the gap. That lift is precisely
+             * the jump we are here to avoid, and it is only about 11px, which
+             * is the size of shift the eye reads as a glitch rather than as
+             * movement. Absolute keeps the mark the only centred thing.
+             *
+             * It fades rather than sharing the mark's entrance, because that
+             * entrance animates transform, which would throw away the
+             * translate holding this centred.
+             */
+            .jm-boot-line {
+                position: absolute;
+                top: calc(50% + 88px);
+                left: 50%;
+                transform: translateX(-50%);
+                width: 104px;
+                animation: jm-boot-fade 0.4s ease both;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .jm-boot-mark,
             .jm-boot-line { animation: none; }
