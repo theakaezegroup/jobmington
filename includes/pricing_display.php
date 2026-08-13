@@ -2,25 +2,24 @@
 /**
  * JOBMINGTON - what price a visitor sees, and in which currency.
  *
- * Prices are set, stored, and charged in Naira. That does not change here and
- * must not: Paystack takes Naira, so Naira is the only number that is ever
- * true at the moment money moves.
+ * Jobmington is an African platform, not a Nigerian one. A page that opens in
+ * Naira tells a Kenyan otherwise before they have read a word, so the dollar
+ * leads everywhere and the visitor's own currency sits beside it. Naira is one
+ * of those currencies rather than the one the page is built around.
  *
- * What changes is the number a visitor reads first. Someone in Lagos thinks in
- * Naira and someone in Nairobi does not, and a page that opens with a figure
- * the reader cannot size is a page they leave. So the currency they think in
- * leads, and the Naira that will actually be charged is stated underneath.
+ * Two numbers are set and never move:
  *
- * Three rules hold this together, and breaking any one of them turns a helpful
- * conversion into a misleading price:
+ *   The dollar price, which is the plan. It is what the page leads with, and a
+ *   plan whose headline figure drifts with the currency market is not a plan.
  *
- *   1. The converted figure is always marked approximate. It is an indication,
- *      not an offer, because the rate is a number in a settings table and the
- *      real one moved this morning.
- *   2. The Naira amount is always shown alongside it. Nobody should reach
- *      Paystack and meet a number they have not already seen.
- *   3. Nothing here touches what is charged. jm_format_ngn() stays exactly what
- *      it was, and receipts and admin reporting keep using it.
+ *   The Naira price, which is what Paystack charges. Set separately and kept
+ *   round, so no Nigerian is ever repriced because a rate moved overnight.
+ *
+ * Everything else is derived from the daily rates and labelled approximate,
+ * because it is: an indication so a visitor can size the price, not an offer.
+ *
+ * jm_format_ngn() is untouched. Receipts and admin reporting read it and keep
+ * showing what was really charged.
  */
 
 if (!defined('JOBMINGTON')) {
@@ -33,11 +32,9 @@ require_once __DIR__ . '/../config/database.php';
 /**
  * The visitor's country, as a two-letter code, or '' when it is not known.
  *
- * Cloudflare sits in front of the site and adds CF-IPCountry to every request
- * it forwards, so the lookup is free, needs no third party, and cannot be a
- * page-load dependency that fails. Not knowing is a normal answer: a request
- * that reaches the origin directly has no header, and the caller falls back to
- * showing dollars rather than guessing.
+ * Cloudflare adds CF-IPCountry to every request it forwards, so the lookup is
+ * free and cannot fail as a page-load dependency. Not knowing is a normal
+ * answer, and the caller then shows dollars alone.
  */
 function jm_visitor_country(): string
 {
@@ -48,136 +45,206 @@ function jm_visitor_country(): string
 
     $raw = strtoupper(trim((string) ($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '')));
 
-    // Cloudflare sends XX for an address it cannot place, and T1 for Tor.
+    // XX is an address Cloudflare cannot place, T1 is Tor.
     if ($raw === '' || $raw === 'XX' || $raw === 'T1' || strlen($raw) !== 2) {
         return $country = '';
     }
     return $country = $raw;
 }
 
-/** Naira per US dollar. The settings row wins; the constant is the fallback. */
-function jm_usd_rate(): float
+/**
+ * The currency of the visitor's country, from the countries table.
+ *
+ * @return array{code:string, symbol:string}|null
+ */
+function jm_visitor_currency(): ?array
 {
-    static $rate = null;
-    if ($rate !== null) {
-        return $rate;
+    static $currency = false;
+    if ($currency !== false) {
+        return $currency;
     }
 
-    require_once __DIR__ . '/maintenance.php';
-    $stored = (float) jm_setting('ngn_usd_rate', 0);
-
-    // A nonsense rate is worse than no conversion at all, so anything outside
-    // a plausible band is ignored in favour of the constant.
-    if ($stored >= 100 && $stored <= 100000) {
-        return $rate = $stored;
+    $code = jm_visitor_country();
+    if ($code === '') {
+        return $currency = null;
     }
-    return $rate = (float) (defined('NGN_USD_RATE') ? NGN_USD_RATE : 1600);
+
+    try {
+        $stmt = db()->prepare("SELECT currency_code, currency_symbol FROM countries
+                               WHERE iso_code = ? AND currency_code IS NOT NULL AND currency_code <> '' LIMIT 1");
+        $stmt->execute([$code]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (Throwable $e) {
+        error_log('jm_visitor_currency: ' . $e->getMessage());
+        return $currency = null;
+    }
+
+    if (!$row) {
+        return $currency = null;
+    }
+
+    return $currency = [
+        'code'   => strtoupper((string) $row['currency_code']),
+        'symbol' => trim((string) $row['currency_symbol']) ?: strtoupper((string) $row['currency_code']),
+    ];
 }
 
-/** When the rate was last set, so the admin can see it going stale. */
-function jm_usd_rate_updated_at(): ?string
+/** The stored daily rates, keyed by currency, relative to one US dollar. */
+function jm_rates(): array
+{
+    static $rates = null;
+    if ($rates !== null) {
+        return $rates;
+    }
+
+    require_once __DIR__ . '/maintenance.php';
+    $stored = json_decode((string) jm_setting('exchange_rates', '{}'), true);
+
+    return $rates = is_array($stored) ? $stored : [];
+}
+
+/** When the rates were last fetched, so a stale set is visible in admin. */
+function jm_rates_fetched_at(): ?string
 {
     require_once __DIR__ . '/maintenance.php';
-    $stamp = (string) jm_setting('ngn_usd_rate_updated_at', '');
-    return $stamp !== '' ? $stamp : null;
+    $when = (string) jm_setting('exchange_rates_fetched_at', '');
+    return $when !== '' ? $when : null;
 }
 
 /**
- * Naira to dollars, rounded to something a person would say out loud.
+ * Round to something a person would say out loud.
  *
- * $18.99 is a real conversion and a terrible price. Under ten dollars keeps a
- * half so small amounts do not all collapse to the same figure; above it,
- * whole dollars.
+ * A converted figure of 2,455.37 is accurate and unreadable. Big numbers lose
+ * their tail entirely, because nobody reads the last two digits of a price in
+ * shillings and their presence only makes the figure look calculated.
  */
-function jm_usd_amount(float $ngn): float
+function jm_round_money(float $amount): float
 {
-    $usd = $ngn / jm_usd_rate();
-
-    if ($usd < 1) {
-        return round($usd, 2);
+    if ($amount >= 10000) {
+        return round($amount / 100) * 100;
     }
-    if ($usd < 10) {
-        return round($usd * 2) / 2;
+    if ($amount >= 1000) {
+        return round($amount / 10) * 10;
     }
-    return (float) round($usd);
+    if ($amount >= 100) {
+        return round($amount);
+    }
+    if ($amount >= 10) {
+        return round($amount * 2) / 2;
+    }
+    return round($amount, 2);
 }
 
-/** The dollar figure as text, without the approximation marker. */
-function jm_usd_text(float $ngn): string
+/** A money figure with its symbol, spaced only where the symbol needs it. */
+function jm_money(float $amount, string $symbol): string
 {
-    $usd = jm_usd_amount($ngn);
+    $rounded  = jm_round_money($amount);
+    $decimals = ($rounded < 100 && fmod($rounded, 1.0) !== 0.0) ? 2 : 0;
+    $figure   = number_format($rounded, $decimals);
 
-    if ($usd <= 0) {
+    /*
+     * A one-character symbol hugs the number; a short code like KSh needs air.
+     * Counted in characters, not bytes: the cedi sign is three bytes and would
+     * otherwise be treated as a word and printed as "₵ 255". No mbstring on
+     * the server, so the /u regex does the counting.
+     */
+    $length = preg_match_all('/./u', $symbol) ?: strlen($symbol);
+    return $length > 2 ? $symbol . ' ' . $figure : $symbol . $figure;
+}
+
+/**
+ * The plan price in dollars.
+ *
+ * Set explicitly per plan, so the headline figure is stable. Where a plan has
+ * no dollar price of its own it is derived from the Naira at the day's rate,
+ * which is correct but will drift, so anything customer-facing should be set.
+ */
+function jm_usd_price(float $ngn, ?float $usd = null): float
+{
+    if ($usd !== null && $usd > 0) {
+        return $usd;
+    }
+
+    $rate = (float) (jm_rates()['NGN'] ?? 0);
+    if ($rate <= 0) {
+        $rate = (float) (defined('NGN_USD_RATE') ? NGN_USD_RATE : 1600);
+    }
+    return jm_round_money($ngn / $rate);
+}
+
+/** The dollar figure as text. */
+function jm_usd_text(float $ngn, ?float $usd = null): string
+{
+    if ($ngn <= 0 && ($usd === null || $usd <= 0)) {
         return 'Free';
     }
-    if ($usd < 1) {
-        return 'under $1';
-    }
-
-    // Whole dollars lose the decimals; a half keeps both of them. Stripping
-    // trailing zeros generally gives "$4.5", which is not how money is written.
-    $withCents = number_format($usd, 2);
-    return '$' . (str_ends_with($withCents, '.00') ? number_format($usd, 0) : $withCents);
+    return jm_money(jm_usd_price($ngn, $usd), '$');
 }
 
-/** Should this visitor see Naira first? */
-function jm_shows_naira_first(): bool
+/**
+ * The visitor's own currency figure for a dollar price, or null.
+ *
+ * Null when we do not know where they are, when their currency is the dollar,
+ * or when today's rates do not carry it. In every one of those cases the
+ * dollar alone is the honest answer, and inventing a second figure would not
+ * help anybody.
+ */
+function jm_local_equivalent(float $ngn, ?float $usd = null): ?array
 {
-    // Nigeria only. Everywhere else, including a request we cannot place,
-    // leads with dollars, because dollars is the currency this audience
-    // already thinks in for remote work.
-    return jm_visitor_country() === 'NG';
+    $currency = jm_visitor_currency();
+    if ($currency === null || $currency['code'] === 'USD') {
+        return null;
+    }
+
+    /*
+     * Nigeria is the exception, and it is exact rather than approximate: the
+     * Naira price is set, not converted, because it is the amount Paystack
+     * will actually take. Quoting a Nigerian an approximation of the number
+     * they are about to be charged would be worse than quoting nothing.
+     */
+    if ($currency['code'] === 'NGN') {
+        return $ngn > 0 ? ['text' => jm_format_ngn($ngn), 'exact' => true] : null;
+    }
+
+    $rate = (float) (jm_rates()[$currency['code']] ?? 0);
+    if ($rate <= 0) {
+        return null;
+    }
+
+    return ['text' => jm_money(jm_usd_price($ngn, $usd) * $rate, $currency['symbol']), 'exact' => false];
 }
 
 /**
  * A price, ready to put on a page.
  *
- * Returns the leading figure and the line that goes under it, rather than
- * finished markup, so a card can lay them out however it already lays things
- * out and nothing here has to know about CSS.
- *
  * @param string $suffix something like '/mo', attached to the leading figure
- * @return array{lead:string, note:string, ngn:string, usd:string, naira_first:bool}
+ * @return array{lead:string, note:string}
  */
-function jm_price_parts(float $ngn, string $suffix = ''): array
+function jm_price_parts(float $ngn, string $suffix = '', ?float $usd = null): array
 {
-    $nairaText = jm_format_ngn($ngn);
-    $usdText   = jm_usd_text($ngn);
-    $free      = $ngn <= 0;
-
-    if ($free) {
-        return ['lead' => 'Free', 'note' => '', 'ngn' => 'Free', 'usd' => 'Free', 'naira_first' => true];
+    if ($ngn <= 0 && ($usd === null || $usd <= 0)) {
+        return ['lead' => 'Free', 'note' => ''];
     }
 
-    if (jm_shows_naira_first()) {
-        return [
-            'lead'        => $nairaText . $suffix,
-            'note'        => 'about ' . $usdText,
-            'ngn'         => $nairaText,
-            'usd'         => $usdText,
-            'naira_first' => true,
-        ];
+    $lead  = jm_usd_text($ngn, $usd) . $suffix;
+    $local = jm_local_equivalent($ngn, $usd);
+
+    if ($local === null) {
+        return ['lead' => $lead, 'note' => ''];
     }
 
     return [
-        'lead'        => $usdText . $suffix,
-        // Rule 2: the amount Paystack will actually take, before they get there.
-        'note'        => 'approx. Billed as ' . $nairaText,
-        'ngn'         => $nairaText,
-        'usd'         => $usdText,
-        'naira_first' => false,
+        'lead' => $lead,
+        // The literal character, not "\u{2248}": that escape is only read
+        // inside double quotes and would otherwise print as backslash-u.
+        'note' => $local['exact'] ? $local['text'] : '≈ ' . $local['text'],
     ];
 }
 
-/**
- * The same thing as one string, for the many places that just need a price.
- *
- * The note is a span so a card can style or hide it, and it is always present:
- * a converted figure with nothing qualifying it is the misleading version.
- */
-function jm_price(float $ngn, string $suffix = ''): string
+/** The same thing as one string, for the many places that just need a price. */
+function jm_price(float $ngn, string $suffix = '', ?float $usd = null): string
 {
-    $parts = jm_price_parts($ngn, $suffix);
+    $parts = jm_price_parts($ngn, $suffix, $usd);
 
     if ($parts['note'] === '') {
         return '<span class="jm-price-lead">' . $parts['lead'] . '</span>';
@@ -185,4 +252,23 @@ function jm_price(float $ngn, string $suffix = ''): string
 
     return '<span class="jm-price-lead">' . $parts['lead'] . '</span>'
          . '<span class="jm-price-note">' . e($parts['note']) . '</span>';
+}
+
+/**
+ * The one line a page says about currency, instead of repeating it per price.
+ *
+ * Payment is taken in Naira because that is what the gateway does, and nobody
+ * should discover that at the card form. Said once, quietly, rather than beside
+ * every figure, which would put Naira back at the centre of the page.
+ */
+function jm_currency_footnote(): string
+{
+    $currency = jm_visitor_currency();
+
+    if ($currency !== null && $currency['code'] === 'NGN') {
+        return 'Prices are shown in US dollars with the Naira amount you will be charged beside them.';
+    }
+
+    return 'Local amounts are approximate, for reference only. Payments are processed in Naira '
+         . 'at the equivalent amount, and international cards are accepted.';
 }

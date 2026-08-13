@@ -76,8 +76,27 @@ define('ANDIKA_MAX_TOKENS', 1024);
 define('DEFAULT_COUNTRY_CODE', 'ng');
 define('DEFAULT_COUNTRY_NAME', 'Nigeria');
 
-// ── Monetization: Employer ────────────────────────────────────────────────────
-// All amounts in NGN. Paystack receives values in kobo (×100).
+/*
+ * ── Monetization ──────────────────────────────────────────────────────────────
+ *
+ * Every plan has two set prices, and both of them are deliberate.
+ *
+ *   PRICE_*      Naira. What Paystack actually charges, because Paystack takes
+ *                Naira. Kept round so no Nigerian is ever repriced by a
+ *                currency market moving overnight.
+ *
+ *   USD_PRICE_*  Dollars. What the page leads with, everywhere, because
+ *                Jobmington is an African platform and a page that opens in
+ *                Naira says otherwise to a Kenyan before they read a word.
+ *
+ * They are set separately rather than one derived from the other, so neither
+ * drifts. Every other currency a visitor might see is converted from the
+ * dollar price at the day's rate and labelled approximate, which is what it is.
+ *
+ * Change one and consider the other: they are a pair, and at today's rate of
+ * about 1,360 they line up. They will drift apart as the Naira moves, which is
+ * a pricing decision for a person to make rather than something to automate.
+ */
 define('PRICE_EMPLOYER_SINGLE_POST',      (int)(getenv('PRICE_EMPLOYER_SINGLE_POST')      ?: 30000));  // ₦30,000
 define('PRICE_EMPLOYER_FEATURED_ADDON',   (int)(getenv('PRICE_EMPLOYER_FEATURED_ADDON')   ?: 3000));   // ₦3,000
 define('PRICE_EMPLOYER_BASIC_MONTHLY',    (int)(getenv('PRICE_EMPLOYER_BASIC_MONTHLY')    ?: 7500));   // ₦7,500/mo
@@ -92,6 +111,18 @@ define('PRICE_SEEKER_PREMIUM_ANNUAL',     (int)(getenv('PRICE_SEEKER_PREMIUM_ANN
 define('PRICE_CREDITS_SINGLE',            (int)(getenv('PRICE_CREDITS_SINGLE')            ?: 500));    // ₦500 × 1
 define('PRICE_CREDITS_PACK_5',            (int)(getenv('PRICE_CREDITS_PACK_5')            ?: 2000));   // ₦2,000 × 5
 define('PRICE_CREDITS_PACK_10',           (int)(getenv('PRICE_CREDITS_PACK_10')           ?: 3000));   // ₦3,000 × 10
+
+// ── The dollar price of each plan. This is the figure the page leads with. ────
+define('USD_PRICE_EMPLOYER_SINGLE_POST',    (float)(getenv('USD_PRICE_EMPLOYER_SINGLE_POST')    ?: 22));
+define('USD_PRICE_EMPLOYER_FEATURED_ADDON', (float)(getenv('USD_PRICE_EMPLOYER_FEATURED_ADDON') ?: 2));
+define('USD_PRICE_EMPLOYER_BASIC_MONTHLY',  (float)(getenv('USD_PRICE_EMPLOYER_BASIC_MONTHLY')  ?: 5.5));
+define('USD_PRICE_EMPLOYER_PRO_MONTHLY',    (float)(getenv('USD_PRICE_EMPLOYER_PRO_MONTHLY')    ?: 11));
+define('USD_PRICE_SEEKER_PREMIUM_MONTHLY',  (float)(getenv('USD_PRICE_SEEKER_PREMIUM_MONTHLY')  ?: 2));
+define('USD_PRICE_SEEKER_PREMIUM_ANNUAL',   (float)(getenv('USD_PRICE_SEEKER_PREMIUM_ANNUAL')   ?: 22));
+define('USD_PRICE_CREDITS_SINGLE',          (float)(getenv('USD_PRICE_CREDITS_SINGLE')          ?: 0.5));
+define('USD_PRICE_CREDITS_PACK_5',          (float)(getenv('USD_PRICE_CREDITS_PACK_5')          ?: 1.5));
+define('USD_PRICE_CREDITS_PACK_10',         (float)(getenv('USD_PRICE_CREDITS_PACK_10')         ?: 2));
+define('USD_PRICE_BUNDLE_JOB_TOOLKIT',      (float)(getenv('USD_PRICE_BUNDLE_JOB_TOOLKIT')      ?: 1));
 
 // ── Economy: Seeds <-> Credits bridge ─────────────────────────────────────────
 // Seeds are the free, earned engagement currency. Credits are the paid currency

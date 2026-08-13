@@ -38,19 +38,12 @@ $definitions = [
     'verification_required' => ['type' => 'bool', 'default' => '1'],
     'max_login_attempts'    => ['type' => 'int',  'default' => '5',  'min' => 3,  'max' => 20],
     'session_timeout'       => ['type' => 'int',  'default' => '30', 'min' => 10, 'max' => 1440],
-    // Naira per US dollar. Display only: every charge is still in Naira, and
-    // this decides nothing except the approximate figure a visitor outside
-    // Nigeria reads first. The band is wide but finite, because a rate of 3 or
-    // 3,000,000 would put nonsense on every price on the site.
-    'ngn_usd_rate'          => ['type' => 'int',  'default' => '1600', 'min' => 100, 'max' => 100000],
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && Security::clean(post('action', '')) === 'update_settings') {
     if (!Security::verifyCSRF()) {
         $error = 'Please refresh the page and try again.';
     } else {
-        // Read before writing, so the rate's age only moves when the rate does.
-        $rateBefore = (string) jm_setting('ngn_usd_rate', '');
         $saved = 0;
         foreach ($definitions as $key => $def) {
             if ($def['type'] === 'bool') {
@@ -69,15 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && Security::clean(post('action', ''))
         if ($saved === count($definitions)) {
             $wasOn = jm_maintenance_on();
 
-            /* The rate carries its own date, because a rate nobody has touched
-               for six months is the failure mode of setting it by hand, and the
-               only way to see that is to record when it last moved. */
-            $rateAfter = (string) min(100000, max(100, (int) ($_POST['ngn_usd_rate'] ?? 1600)));
-            if ($rateAfter !== $rateBefore) {
-                jm_setting_save('ngn_usd_rate_updated_at', date('Y-m-d H:i:s'));
-                jm_log_activity((int) Session::userId(), 'usd_rate_changed',
-                    'NGN per USD: ' . ($rateBefore ?: 'unset') . ' -> ' . $rateAfter);
-            }
 
             jm_log_activity((int) Session::userId(), 'admin_settings_saved',
                 'maintenance ' . (isset($_POST['maintenance_mode']) ? 'on' : 'off'));
@@ -266,53 +250,81 @@ require_once __DIR__ . '/../includes/header.php';
 
             <?php
             require_once __DIR__ . '/../includes/pricing_display.php';
-            $rateAge = jm_usd_rate_updated_at();
-            $ageDays = $rateAge ? (int) floor((time() - strtotime($rateAge)) / 86400) : null;
+            $ratesAt  = jm_rates_fetched_at();
+            $ratesAge = $ratesAt ? (int) floor((time() - strtotime($ratesAt)) / 86400) : null;
+            $rates    = jm_rates();
             $seenFrom = jm_visitor_country();
+            $samples  = ['NG' => 'Nigeria', 'KE' => 'Kenya', 'GH' => 'Ghana', 'ZA' => 'South Africa'];
             ?>
             <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
                 <h3 class="font-bold text-slate-900 mb-2">Prices shown to visitors</h3>
                 <p class="text-sm text-slate-500 mb-5">
-                    Every charge is in Naira and this does not change that. It only decides the
-                    approximate figure someone outside Nigeria reads first, so they can size the
-                    price without doing the maths.
+                    Prices lead in US dollars everywhere, with the visitor's own currency beside
+                    them. The dollar and Naira figures are both set in config/constants.php and do
+                    not move. Every other currency is converted from the dollar at the day's rate
+                    and marked approximate. Payment is still taken in Naira.
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Naira per US dollar</label>
-                        <input type="number" name="ngn_usd_rate" min="100" max="100000" value="<?= htmlspecialchars($settings['ngn_usd_rate']) ?>"
-                               class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs <?= ($ageDays !== null && $ageDays > 45) ? 'text-amber-600 font-semibold' : 'text-slate-400' ?> mt-1">
-                            <?php if ($rateAge === null): ?>
-                                Never set. The site is using the built-in fallback of <?= (int) NGN_USD_RATE ?>.
-                            <?php elseif ($ageDays > 45): ?>
-                                Last changed <?= $ageDays ?> days ago. Worth checking against the real rate.
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Exchange rates</label>
+                        <div class="border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-sm">
+                            <?php if ($ratesAt === null): ?>
+                                <p class="text-amber-700 font-semibold">Never fetched.</p>
+                                <p class="text-slate-500 text-xs mt-1">
+                                    Run <code>php cron/fetch_exchange_rates.php</code>. Until then only
+                                    dollars and Naira can be shown.
+                                </p>
                             <?php else: ?>
-                                Last changed <?= $ageDays === 0 ? 'today' : $ageDays . ' day' . ($ageDays === 1 ? '' : 's') . ' ago' ?>.
+                                <p class="font-bold text-slate-900"><?= count($rates) ?> currencies</p>
+                                <p class="text-slate-500 text-xs mt-1">
+                                    1 USD = <?= e(number_format((float) ($rates['NGN'] ?? 0), 2)) ?> NGN
+                                </p>
+                                <p class="text-xs mt-2 <?= ($ratesAge !== null && $ratesAge > 3) ? 'text-amber-600 font-semibold' : 'text-slate-400' ?>">
+                                    Fetched <?= $ratesAge === 0 ? 'today' : $ratesAge . ' day' . ($ratesAge === 1 ? '' : 's') . ' ago' ?>.
+                                    <?php if ($ratesAge > 3): ?> The daily cron may not be running.<?php endif; ?>
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                        <p class="text-xs mt-2 <?= $seenFrom === '' ? 'text-amber-600 font-semibold' : 'text-slate-400' ?>">
+                            <?php if ($seenFrom === ''): ?>
+                                Cloudflare is not saying where this request came from, so everyone sees
+                                dollars alone. Check that IP Geolocation is on in Cloudflare.
+                            <?php else: ?>
+                                Your own request is arriving from <strong><?= e($seenFrom) ?></strong>,
+                                so country detection is working.
                             <?php endif; ?>
                         </p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">What this looks like</label>
-                        <div class="border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-sm">
-                            <p class="text-slate-500 text-xs mb-1">In Nigeria</p>
-                            <p class="font-bold text-slate-900"><?= e(jm_format_ngn(PRICE_EMPLOYER_SINGLE_POST)) ?>
-                                <span class="font-normal text-slate-500">about <?= e(jm_usd_text(PRICE_EMPLOYER_SINGLE_POST)) ?></span></p>
-                            <p class="text-slate-500 text-xs mt-3 mb-1">Everywhere else</p>
-                            <p class="font-bold text-slate-900"><?= e(jm_usd_text(PRICE_EMPLOYER_SINGLE_POST)) ?>
-                                <span class="font-normal text-slate-500">approx. Billed as <?= e(jm_format_ngn(PRICE_EMPLOYER_SINGLE_POST)) ?></span></p>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">A single job post, as each market sees it</label>
+                        <div class="border border-slate-200 rounded-lg px-4 py-3 bg-slate-50 text-sm space-y-2">
+                            <?php foreach ($samples as $iso => $label): ?>
+                                <?php
+                                $row = $pdo->prepare('SELECT currency_code, currency_symbol FROM countries WHERE iso_code = ? LIMIT 1');
+                                $row->execute([$iso]);
+                                $cur  = $row->fetch(PDO::FETCH_ASSOC) ?: [];
+                                $code = strtoupper((string) ($cur['currency_code'] ?? ''));
+                                if ($code === 'NGN') {
+                                    $side = jm_format_ngn(PRICE_EMPLOYER_SINGLE_POST);
+                                } elseif (!empty($rates[$code])) {
+                                    $side = 'approx. ' . jm_money(USD_PRICE_EMPLOYER_SINGLE_POST * (float) $rates[$code], (string) ($cur['currency_symbol'] ?? $code));
+                                } else {
+                                    $side = '';
+                                }
+                                ?>
+                                <p class="flex items-baseline justify-between gap-3">
+                                    <span class="text-slate-500 text-xs"><?= e($label) ?></span>
+                                    <span class="font-bold text-slate-900">
+                                        <?= e(jm_money(USD_PRICE_EMPLOYER_SINGLE_POST, '$')) ?>
+                                        <span class="font-normal text-slate-500 text-xs"><?= e($side) ?></span>
+                                    </span>
+                                </p>
+                            <?php endforeach; ?>
                         </div>
-                        <p class="text-xs mt-2 <?= $seenFrom === '' ? 'text-amber-600 font-semibold' : 'text-slate-400' ?>">
-                            <?php if ($seenFrom === ''): ?>
-                                Cloudflare is not telling us where this request came from, so everyone
-                                is being shown dollars. Check that IP Geolocation is on in Cloudflare.
-                            <?php else: ?>
-                                Your own request is arriving from <strong><?= e($seenFrom) ?></strong>, so
-                                country detection is working.
-                            <?php endif; ?>
-                        </p>
                     </div>
+                </div>
+            </div>
                 </div>
             </div>
 

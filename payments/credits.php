@@ -267,7 +267,7 @@ $pageTitle = 'Buy Credits | ' . SITE_NAME;
     <div style="max-width:960px;margin:0 auto 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border:1px solid var(--jm-line);border-radius:10px;padding:18px 24px;background:#ffffff;">
         <div>
             <strong style="display:block;font-size:15px;color:var(--jm-ink);margin-bottom:3px;">Want unlimited access?</strong>
-            <span style="font-size:13px;color:var(--jm-muted);">Premium gives you unlimited AI tools for just <?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY, '/month') ?>.</span>
+            <span style="font-size:13px;color:var(--jm-muted);">Premium gives you unlimited AI tools for just <?= jm_price(PRICE_SEEKER_PREMIUM_MONTHLY, '/month', USD_PRICE_SEEKER_PREMIUM_MONTHLY) ?>.</span>
         </div>
         <a class="jm-button" href="<?= SITE_URL ?>/payments/seeker-premium.php">Go Premium →</a>
     </div>
