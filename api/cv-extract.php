@@ -298,7 +298,8 @@ function jm_detect_jobmington(string $text, string $path, bool $isPdf): bool {
     // Check extracted text
     if (stripos($text, 'JOBMINGTON_CV_BUILDER_EXPORT') !== false) return true;
     if (stripos($text, 'jobmington.com') !== false) return true;
-    if (stripos($text, 'Created with Jobmington') !== false) return true;
+    if (stripos($text, 'Created with Jobmington') !== false) return true;   // older exports
+    if (stripos($text, 'Built on Jobmington') !== false) return true;       // what the footer says now
     if (stripos($text, 'Jobmington CV Builder') !== false) return true;
 
     // Check raw bytes too (catches HTML comments in PDF)

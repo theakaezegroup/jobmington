@@ -792,20 +792,57 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             font-weight: 600;
         }
         
+        /*
+         * The verification mark.
+         *
+         * This was invisible on screen. Its background was a gradient built on
+         * var(--brand-blue), which is used here once and defined nowhere, and
+         * one undefined variable invalidates the whole declaration, so the
+         * background fell away and white text sat on the near-white footer. It
+         * only ever showed in print, where a separate rule set a real colour.
+         *
+         * Now it carries the brand's own device instead of a generic pill: a
+         * circle of Jobmington yellow positioned so only its arc survives the
+         * clip, the same treatment the event date chip uses. Solid brand blue
+         * rather than a gradient, because this has to reproduce on a printer
+         * and in a PDF viewer, and a flat colour is the one that always does.
+         */
         .cv-footer-verify {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(135deg, var(--brand-blue) 0%, #334155 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            background: #0640a3;
+            color: #ffffff;
+            padding: 5px 11px;
+            border-radius: 5px;
             font-size: 7pt;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
+        /* The arc: about 60% of the chip's height, offset so roughly a third
+           of the corner carries yellow. Proportion is the rule, not the pixels. */
+        .cv-footer-verify::before {
+            content: '';
+            position: absolute;
+            left: -13px;
+            bottom: -13px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #f59f22;
+        }
+
+        /* Above the arc, or the mark sits behind its own decoration. */
+        .cv-footer-verify svg,
+        .cv-footer-verify span {
+            position: relative;
+            z-index: 1;
+        }
+
         .cv-footer-verify svg {
             width: 12px;
             height: 12px;
@@ -824,8 +861,17 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                 print-color-adjust: exact !important;
             }
             
+            /* Brand blue on paper too, not the template's accent. This mark
+               says where the document came from, so it should look the same
+               whichever of the three templates the CV is wearing. */
             .cv-footer-verify {
-                background: var(--cv-accent) !important;
+                background: #0640a3 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .cv-footer-verify::before {
+                background: #f59f22 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -1058,15 +1104,24 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
     <footer class="cv-footer">
         <div class="cv-footer-brand">
             <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-8" alt="Jobmington" class="cv-footer-logo">
+            <?php /* The chip on the right now says where this came from, so
+                     repeating it here would be the same sentence twice across
+                     one footer. This side carries the address instead, which is
+                     the useful half: somewhere for a reader to actually go. */ ?>
             <span class="cv-footer-text">
-                Created with <a href="<?= SITE_URL ?>" target="_blank">Jobmington</a>
+                <a href="<?= SITE_URL ?>" target="_blank">jobmington.com</a>
             </span>
         </div>
         <div class="cv-footer-verify">
             <svg fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
-            Verified Profile
+            <?php /* "Verified Profile" was the wrong claim. Jobmington has not
+                     checked anybody's employment history, and a CV going to an
+                     employer must not imply that it has. What this mark can
+                     honestly attest is where the document was made, so that is
+                     what it says. The span exists so it can sit above the arc. */ ?>
+            <span>Built on Jobmington</span>
         </div>
         <span class="cv-footer-date">Generated <?= date('M Y') ?></span>
     </footer>
