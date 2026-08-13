@@ -1,0 +1,397 @@
+/*
+ * Andika panel.
+ *
+ * Fetched on first open, never on page load, because the full Andika page is
+ * 139KB and the homepage's entire critical path is 243KB. A launcher that
+ * dragged this onto every page would undo that.
+ *
+ * Every selector is prefixed jm-ak- so nothing here can reach the site around
+ * it, and nothing on the site can reach in. The panel sits above everything at
+ * a z-index chosen to clear the header, the mobile drawer and the cookie bar.
+ */
+
+.jm-ak-panel,
+.jm-ak-panel * {
+    box-sizing: border-box;
+}
+
+.jm-ak-panel {
+    /* Local tokens. Deliberately not var(--jm-*): the panel renders on top of
+       pages with different palettes and must look identical on all of them. */
+    --ak-blue: #0640a3;
+    --ak-blue-deep: #052f78;
+    --ak-amber: #f59f22;
+    --ak-ink: #0d1626;
+    --ak-ink-2: #53667f;
+    --ak-ink-3: #8496ad;
+    --ak-line: #e4eaf3;
+    --ak-surface: #f6f8fc;
+    --ak-white: #ffffff;
+    --ak-radius: 18px;
+    --ak-shadow: 0 24px 60px -12px rgba(6, 20, 38, .28), 0 6px 18px -6px rgba(6, 20, 38, .16);
+
+    position: fixed;
+    z-index: 2147483000;
+    right: 20px;
+    bottom: 20px;
+    width: 396px;
+    height: min(640px, calc(100dvh - 108px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--ak-white);
+    border: 1px solid var(--ak-line);
+    border-radius: var(--ak-radius);
+    box-shadow: var(--ak-shadow);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ak-ink);
+    font-size: 14px;
+    line-height: 1.55;
+    transform-origin: bottom right;
+    animation: jm-ak-in .34s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@keyframes jm-ak-in {
+    from { opacity: 0; transform: translateY(12px) scale(.97); }
+    to   { opacity: 1; transform: none; }
+}
+
+.jm-ak-panel.is-closing {
+    animation: jm-ak-out .18s ease-in both;
+    pointer-events: none;
+}
+
+@keyframes jm-ak-out {
+    to { opacity: 0; transform: translateY(8px) scale(.985); }
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.jm-ak-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 12px 13px 16px;
+    border-bottom: 1px solid var(--ak-line);
+    background: var(--ak-white);
+    flex-shrink: 0;
+}
+
+.jm-ak-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.jm-ak-titles { flex: 1; min-width: 0; }
+
+.jm-ak-name {
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -.01em;
+    line-height: 1.2;
+}
+
+.jm-ak-sub {
+    font-size: 11.5px;
+    color: var(--ak-ink-3);
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.jm-ak-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #16a34a;
+    flex-shrink: 0;
+}
+
+.jm-ak-hbtn {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ak-ink-3);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: background .15s, color .15s;
+}
+
+.jm-ak-hbtn:hover { background: var(--ak-surface); color: var(--ak-ink); }
+.jm-ak-hbtn:focus-visible { outline: 2px solid var(--ak-blue); outline-offset: 1px; }
+.jm-ak-hbtn svg { width: 17px; height: 17px; display: block; }
+
+/* ── Thread ─────────────────────────────────────────────────────── */
+
+.jm-ak-thread {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 18px 16px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #cfd8e6 transparent;
+}
+
+.jm-ak-thread::-webkit-scrollbar { width: 8px; }
+.jm-ak-thread::-webkit-scrollbar-thumb { background: #cfd8e6; border-radius: 8px; border: 2px solid var(--ak-white); }
+
+.jm-ak-msg {
+    max-width: 86%;
+    padding: 9px 13px;
+    border-radius: 15px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    animation: jm-ak-msg-in .26s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@keyframes jm-ak-msg-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.jm-ak-msg.user {
+    align-self: flex-end;
+    background: var(--ak-blue);
+    color: #fff;
+    border-bottom-right-radius: 5px;
+}
+
+.jm-ak-msg.ai {
+    align-self: flex-start;
+    background: var(--ak-surface);
+    border: 1px solid var(--ak-line);
+    border-bottom-left-radius: 5px;
+}
+
+.jm-ak-msg.err {
+    align-self: stretch;
+    max-width: 100%;
+    background: #fdf3e3;
+    border: 1px solid #f3d4a3;
+    color: #8a5200;
+    font-size: 13px;
+}
+
+.jm-ak-msg a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.jm-ak-msg.ai a { color: var(--ak-blue); }
+.jm-ak-msg strong { font-weight: 700; }
+
+/* ── Empty state ────────────────────────────────────────────────── */
+
+.jm-ak-empty {
+    margin: auto 0;
+    text-align: center;
+    padding: 8px 4px 16px;
+}
+
+.jm-ak-empty-mark {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    object-fit: contain;
+    margin: 0 auto 12px;
+    display: block;
+}
+
+.jm-ak-empty h3 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.015em;
+}
+
+.jm-ak-empty p {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: var(--ak-ink-2);
+    line-height: 1.5;
+}
+
+.jm-ak-seeds {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.jm-ak-seed {
+    border: 1px solid var(--ak-line);
+    background: var(--ak-white);
+    color: var(--ak-ink);
+    border-radius: 11px;
+    padding: 9px 13px;
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .12s;
+}
+
+.jm-ak-seed:hover {
+    border-color: #bfd0e5;
+    background: var(--ak-surface);
+    transform: translateY(-1px);
+}
+
+.jm-ak-seed:focus-visible { outline: 2px solid var(--ak-blue); outline-offset: 1px; }
+
+/* ── Typing ─────────────────────────────────────────────────────── */
+
+.jm-ak-typing {
+    align-self: flex-start;
+    display: flex;
+    gap: 4px;
+    padding: 13px;
+    background: var(--ak-surface);
+    border: 1px solid var(--ak-line);
+    border-radius: 15px;
+    border-bottom-left-radius: 5px;
+}
+
+.jm-ak-typing i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ak-ink-3);
+    animation: jm-ak-bounce 1.3s infinite ease-in-out;
+}
+
+.jm-ak-typing i:nth-child(2) { animation-delay: .16s; }
+.jm-ak-typing i:nth-child(3) { animation-delay: .32s; }
+
+@keyframes jm-ak-bounce {
+    0%, 60%, 100% { transform: none; opacity: .45; }
+    30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ── Composer ───────────────────────────────────────────────────── */
+
+.jm-ak-foot {
+    padding: 10px 12px 12px;
+    border-top: 1px solid var(--ak-line);
+    background: var(--ak-white);
+    flex-shrink: 0;
+}
+
+.jm-ak-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    border: 1px solid var(--ak-line);
+    border-radius: 14px;
+    padding: 6px 6px 6px 13px;
+    background: var(--ak-white);
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.jm-ak-form:focus-within {
+    border-color: #a9c2e6;
+    box-shadow: 0 0 0 3px rgba(6, 64, 163, .09);
+}
+
+.jm-ak-input {
+    flex: 1;
+    border: 0;
+    outline: 0;
+    resize: none;
+    font: inherit;
+    line-height: 1.5;
+    padding: 6px 0;
+    max-height: 120px;
+    background: transparent;
+    color: var(--ak-ink);
+}
+
+.jm-ak-input::placeholder { color: var(--ak-ink-3); }
+
+.jm-ak-send {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 0;
+    border-radius: 11px;
+    background: var(--ak-blue);
+    color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background .15s, opacity .15s, transform .12s;
+}
+
+.jm-ak-send:hover:not(:disabled) { background: var(--ak-blue-deep); }
+.jm-ak-send:active:not(:disabled) { transform: scale(.94); }
+.jm-ak-send:disabled { opacity: .32; cursor: default; }
+.jm-ak-send:focus-visible { outline: 2px solid var(--ak-blue); outline-offset: 2px; }
+.jm-ak-send svg { width: 16px; height: 16px; display: block; }
+
+.jm-ak-legal {
+    margin: 8px 2px 0;
+    font-size: 10.5px;
+    color: var(--ak-ink-3);
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* ── Phone: a sheet, not a floating card ────────────────────────── */
+
+@media (max-width: 560px) {
+    .jm-ak-panel {
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 88dvh;
+        border-radius: 20px 20px 0 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        transform-origin: bottom center;
+        animation-name: jm-ak-sheet-in;
+    }
+
+    @keyframes jm-ak-sheet-in {
+        from { transform: translateY(100%); }
+        to   { transform: none; }
+    }
+
+    .jm-ak-panel.is-closing { animation: jm-ak-sheet-out .2s ease-in both; }
+
+    @keyframes jm-ak-sheet-out {
+        to { transform: translateY(100%); }
+    }
+
+    /* The grab handle exists to say "this drags down", which is what a sheet
+       on a phone is expected to do. */
+    .jm-ak-head::before {
+        content: '';
+        position: absolute;
+        top: 7px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 36px;
+        height: 4px;
+        border-radius: 4px;
+        background: #d7dfeb;
+    }
+
+    .jm-ak-head { position: relative; padding-top: 18px; }
+    .jm-ak-msg { max-width: 92%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jm-ak-panel,
+    .jm-ak-panel.is-closing,
+    .jm-ak-msg { animation: none; }
+    .jm-ak-typing i { animation-duration: 2.4s; }
+    .jm-ak-seed:hover { transform: none; }
+}

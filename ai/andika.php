@@ -416,12 +416,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
     }
     .seeds-link:hover { color: var(--color-ink); }
     
-    .matches-new {
-        font-size: 0.6875rem;
-        color: var(--semantic-success);
-        margin: 2px 0 4px 0;
-        font-weight: 500;
-    }
 
     /* Widget Icons Pop */
     .hud-widget .icon {
@@ -899,14 +893,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
     }
     
     /* Matches Loading/List Styles */
-    .matches-loading {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 0;
-        font-size: 0.75rem;
-        color: var(--text-tertiary);
-    }
     .loader-spinner {
         width: 18px;
         height: 18px;
@@ -917,9 +903,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
     }
     @keyframes spin {
         to { transform: rotate(360deg); }
-    }
-    .matches-top-list {
-        margin: 8px 0;
     }
     .match-item {
         display: flex;
@@ -1838,37 +1821,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .strength-label span:last-child { color: var(--text-primary); font-weight: 600; }
     
     /* Job Matches */
-    .job-matches-widget {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-    .matches-count {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        line-height: 1;
-        letter-spacing: -0.02em;
-    }
-    .matches-info {
-        flex: 1;
-    }
-    .matches-info p {
-        font-size: 0.8125rem;
-        color: var(--text-secondary);
-        margin: 0 0 4px 0;
-    }
-    .matches-link {
-        font-size: 0.75rem;
-        color: var(--brand-primary);
-        text-decoration: none;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        transition: opacity 0.15s ease;
-    }
-    .matches-link:hover { opacity: 0.8; }
     
     /* Quick Actions */
     .quick-actions-grid {
@@ -3373,9 +3325,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
             </div>
             
             <div class="quick-chips">
-                <button class="chip chip-primary" onclick="Andika.loadJobMatches()" id="find-matches-chip"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M12 3l1.912 5.813a2 2 0 001.272 1.272L21 12l-5.813 1.912a2 2 0 00-1.272 1.272L12 21l-1.912-5.813a2 2 0 00-1.272-1.272L3 12l5.813-1.912a2 2 0 001.272-1.272L12 3z"/></svg></span> Find my matches</button>
-                <button class="chip" onclick="Andika.send('Find jobs near me')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></span> Find jobs</button>
-                <button class="chip" onclick="window.location.href='roast.php'"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg></span> Roast my CV</button>
                 <button class="chip" onclick="Andika.send('Start Interview Prep')"><span class="icon icon-sm"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span> Interview prep</button>
             </div>
         </div>
@@ -3481,33 +3430,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
                 </div>
             </div>
             
-            <!-- Job Matches (Dynamic) -->
-            <div class="hud-widget" id="job-matches-widget">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-bold opacity-60 tracking-wider">AI JOB MATCHES</span>
-                    <span class="icon" style="opacity: 0.5;"><svg viewBox="0 0 24 24"><path d="M12 3l1.912 5.813a2 2 0 001.272 1.272L21 12l-5.813 1.912a2 2 0 00-1.272 1.272L12 21l-1.912-5.813a2 2 0 00-1.272-1.272L3 12l5.813-1.912a2 2 0 001.272-1.272L12 3z"/></svg></span>
-                </div>
-                <div class="job-matches-widget" id="matches-container">
-                    <div class="matches-loading" id="matches-loading">
-                        <div class="loader-spinner"></div>
-                        <span>Finding matches...</span>
-                    </div>
-                    <div class="matches-content" id="matches-content" style="display: none;">
-                        <div class="matches-count" id="matches-count">0</div>
-                        <div class="matches-info">
-                            <p id="matches-message">Jobs match your profile</p>
-                            <div id="matches-top-list" class="matches-top-list"></div>
-                            <a href="#" onclick="Andika.loadJobMatches(); return false;" class="matches-link" id="matches-view-link">
-                                View matches <span class="icon icon-sm"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="matches-empty" id="matches-empty" style="display: none;">
-                        <p style="opacity: 0.7; font-size: 0.75rem;">Complete your CV to get job matches</p>
-                        <a href="<?= SITE_URL ?>/cv-builder/" class="matches-link">Build CV →</a>
-                    </div>
-                </div>
-            </div>
             
             <!-- Career Credits -->
             <div class="hud-widget">
@@ -4352,80 +4274,10 @@ const Andika = {
         });
     },
     
-    // === JOB MATCHES ===
-    
-    loadJobMatches: function() {
-        const loading = document.getElementById('matches-loading');
-        const content = document.getElementById('matches-content');
-        const empty = document.getElementById('matches-empty');
-        
-        if (loading) loading.style.display = 'flex';
-        if (content) content.style.display = 'none';
-        if (empty) empty.style.display = 'none';
-        
-        fetch(`${JOBMINGTON_SITE_URL}/api/job-matches.php?limit=5`)
-            .then(response => response.json())
-            .then(data => {
-                if (loading) loading.style.display = 'none';
-                const payload = data.data || data;
-                
-                if (data.success && payload.matches && payload.matches.length > 0) {
-                    this.displayMatches(payload.matches, payload.count);
-                } else if (data.success && (!payload.matches || payload.matches.length === 0)) {
-                    if (empty) {
-                        empty.style.display = 'block';
-                        if (payload.tip) {
-                            empty.querySelector('p').textContent = payload.tip;
-                        }
-                    }
-                } else {
-                    if (empty) empty.style.display = 'block';
-                }
-            })
-            .catch(err => {
-                console.error('Job matches error:', err);
-                if (loading) loading.style.display = 'none';
-                if (empty) empty.style.display = 'block';
-            });
-    },
-    
-    displayMatches: function(matches, totalCount) {
-        const content = document.getElementById('matches-content');
-        const countEl = document.getElementById('matches-count');
-        const messageEl = document.getElementById('matches-message');
-        const listEl = document.getElementById('matches-top-list');
-        
-        if (!content) return;
-        
-        content.style.display = 'block';
-        if (countEl) countEl.textContent = totalCount;
-        if (messageEl) messageEl.textContent = totalCount === 1 ? 'Job matches your profile' : 'Jobs match your profile';
-        
-        // Render top matches
-        if (listEl) {
-            listEl.innerHTML = matches.slice(0, 3).map(match => {
-                const scoreClass = match.score >= 70 ? 'high' : (match.score >= 50 ? 'medium' : 'low');
-                return `
-                    <a href="${JOBMINGTON_SITE_URL}/jobs/view.php?id=${match.job_id}" class="match-item" title="${this.escapeHtml(match.title)} at ${this.escapeHtml(match.company)}">
-                        <span class="match-title">${this.escapeHtml(match.title)}</span>
-                        <span class="match-score ${scoreClass}">${match.score}%</span>
-                    </a>
-                `;
-            }).join('');
-        }
-        
-        // Show toast with top match
-        if (matches.length > 0) {
-            const top = matches[0];
-            this.showToast('info', 'Matches Found', `Your best match: ${top.title} (${top.score}% fit)`);
-        }
-    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     Andika.init();
-    // Auto-load job matches
-    setTimeout(() => Andika.loadJobMatches(), 500);
 });
 </script>
 

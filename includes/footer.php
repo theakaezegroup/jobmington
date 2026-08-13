@@ -39,6 +39,7 @@ if (preg_match('~^/(?:jobmington/)?admin(?:/|$)~i', $footerPath)) {
         });
     }
     </script>
+<?php require_once __DIR__ . '/andika_widget.php'; jm_andika_launcher(); ?>
 </body>
 </html>
 <?php
@@ -257,5 +258,6 @@ JM.alert = function(message, type = 'info', title = null) {
 };
 </script>
 
+<?php require_once __DIR__ . '/andika_widget.php'; jm_andika_launcher(); ?>
 </body>
 </html>

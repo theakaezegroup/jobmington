@@ -152,7 +152,7 @@ $aiHighlights = [
         'label' => 'AI Matching',
         'title' => 'See the roles that fit your profile.',
         'description' => 'Jobmington compares your CV skills, headline, location, and experience against live roles.',
-        'href' => '/jobmington/ai/andika.php#job-matches-widget',
+        'href' => '/jobmington/jobs/search.php',
         'image' => '/jobmington/assets/images/features/job_matching.png',
         'tone' => 'green',
     ],
@@ -1800,5 +1800,6 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
 })();
 </script>
     </div>
+<?php require_once __DIR__ . '/includes/andika_widget.php'; jm_andika_launcher(); ?>
 </body>
 </html>
