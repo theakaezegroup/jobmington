@@ -708,43 +708,34 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
              * every page before that.
              */
             @page {
-                margin: 0 0 11mm 0;
+                margin: 0;
                 size: A4;
             }
 
-            /* Fixed elements repeat on every printed page, and position against
-               the sheet rather than the text area, so this sits in the strip the
-               page margin just cleared. */
-            .cv-running {
-                display: flex !important;
+            /*
+             * Fixed, which is what makes the print engine paint it once per
+             * sheet. It positions against the page rather than the text, so it
+             * holds the foot of every page instead of drifting up to wherever
+             * the writing stopped.
+             */
+            .cv-footer {
                 position: fixed;
-                bottom: 3.5mm;
-                left: 52px;
-                right: 52px;
-                align-items: baseline;
-                gap: 5px;
-                font-size: 6.5pt;
-                color: #94a3b8;
-                letter-spacing: 0.1px;
+                bottom: 7mm;
+                left: 0;
+                right: 0;
+                background: transparent;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
-            .cv-running-sep { color: #cbd5e1; }
-
-            /* The brand mark ends the document rather than repeating, so it must
-               never be orphaned onto a sheet of its own with nothing above it. */
-            .cv-footer {
-                break-before: avoid;
-                page-break-before: avoid;
-                break-inside: avoid;
-                page-break-inside: avoid;
+            /* Room for it at the end of the document. The page box has no
+               margin, on purpose: a margin is the only place the browser can
+               draw its own header and footer, and giving it one is what put
+               the page URL on the print. */
+            .cv-body {
+                padding-bottom: 20mm;
             }
         }
-
-        /* On screen the document scrolls as one page, so a line pinned to the
-           window bottom would simply cover the content. It is print furniture. */
-        .cv-running { display: none; }
 
         /*
          * Where the paper is allowed to break.
@@ -854,107 +845,56 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             }
         }
         
-        /* Jobmington Footer Branding */
+        /*
+         * The footer, on every printed sheet.
+         *
+         * Reduced to two things: whose CV this is, and where it came from. No
+         * panel, no rule above it, no chip, no date. Something that repeats on
+         * every page has to be quiet or it becomes the loudest element in a
+         * document that belongs to somebody else, which is exactly why the blue
+         * chip could not simply be duplicated.
+         *
+         * position: fixed is what makes it repeat: a fixed element is painted
+         * once per sheet by the print engine. The same property is why it stays
+         * at the foot of the page instead of drifting up to wherever the text
+         * happened to stop.
+         */
         .cv-footer {
-            background: #f8fafc;
-            border-top: 1px solid #e2e8f0;
-            padding: 12px 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 8pt;
-            color: #64748b;
+            gap: 16px;
+            padding: 0 50px;
+            font-size: 7pt;
+            color: #94a3b8;
+            background: transparent;
         }
-        
+
+        .cv-footer-who {
+            color: #94a3b8;
+            letter-spacing: 0.1px;
+        }
+
         .cv-footer-brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .cv-footer-logo {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-        }
-        
-        .cv-footer-text {
-            color: #475569;
-        }
-        
-        .cv-footer-text a {
-            color: var(--cv-company);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        /*
-         * The verification mark.
-         *
-         * This was invisible on screen. Its background was a gradient built on
-         * var(--brand-blue), which is used here once and defined nowhere, and
-         * one undefined variable invalidates the whole declaration, so the
-         * background fell away and white text sat on the near-white footer. It
-         * only ever showed in print, where a separate rule set a real colour.
-         *
-         * Now it carries the brand's own device instead of a generic pill: a
-         * circle of Jobmington yellow positioned so only its arc survives the
-         * clip, the same treatment the event date chip uses. Solid brand blue
-         * rather than a gradient, because this has to reproduce on a printer
-         * and in a PDF viewer, and a flat colour is the one that always does.
-         */
-        .cv-footer-verify {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 5px;
-            position: relative;
-            overflow: hidden;
-            /* Brand blue, quietly.
-               The loudness was never the colour, it was the setting: capitals,
-               letter-spaced, semibold, at a size that made a footer note look
-               like a stamp. Same blue, set as a small sentence, so it is found
-               rather than announced on a document that belongs to the person
-               applying. */
-            background: #0640a3;
-            color: #ffffff;
-            padding: 3px 9px;
-            border-radius: 4px;
-            font-size: 6.5pt;
-            font-weight: 500;
-            letter-spacing: 0;
-        }
-        
-        /* The arc, scaled down with the chip. It is now the only colour in the
-           mark, which is enough: one small warm curve against a hairline box
-           reads as considered, where a filled block reads as an advertisement. */
-        .cv-footer-verify::before {
-            content: '';
-            position: absolute;
-            left: -8px;
-            bottom: -8px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #f59f22;
         }
 
-        /* Above the arc, or the mark sits behind its own decoration. */
-        .cv-footer-verify svg,
-        .cv-footer-verify span {
-            position: relative;
-            z-index: 1;
+        .cv-footer-logo {
+            width: 11px;
+            height: 11px;
+            object-fit: contain;
+            /* Printers drop images that look decorative unless told otherwise. */
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
-        .cv-footer-verify svg {
-            width: 10px;
-            height: 10px;
-            color: #ffffff;
-        }
-        
-        .cv-footer-date {
+        .cv-footer-brand a {
             color: #94a3b8;
-            font-size: 7pt;
+            text-decoration: none;
         }
+
         
         @media print {
             .cv-footer {
@@ -968,15 +908,11 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                of the three templates the CV is wearing. Forced, because a
                printer drops backgrounds by default and a white tick on a
                dropped blue would vanish into the page. */
-            .cv-footer-verify {
-                background: #0640a3 !important;
-                color: #ffffff !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            .cv-footer-verify::before {
-                background: #f59f22 !important;
+            /* The mark and the address are the only things left down there, and
+               a printer drops both by default because they read as decoration. */
+            .cv-footer-who,
+            .cv-footer-brand a {
+                color: #94a3b8 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -1206,54 +1142,28 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
     </main>
     
     <!-- Jobmington Branding Footer -->
-    <footer class="cv-footer">
-        <div class="cv-footer-brand">
-            <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-8" alt="Jobmington" class="cv-footer-logo">
-            <?php /* The chip on the right now says where this came from, so
-                     repeating it here would be the same sentence twice across
-                     one footer. This side carries the address instead, which is
-                     the useful half: somewhere for a reader to actually go. */ ?>
-            <span class="cv-footer-text">
-                <a href="<?= SITE_URL ?>" target="_blank">jobmington.com</a>
-            </span>
-        </div>
-        <div class="cv-footer-verify">
-            <svg fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
-            <?php /* "Verified Profile" was the wrong claim. Jobmington has not
-                     checked anybody's employment history, and a CV going to an
-                     employer must not imply that it has. What this mark can
-                     honestly attest is where the document was made, so that is
-                     what it says. The span exists so it can sit above the arc. */ ?>
-            <span>Built on Jobmington</span>
-        </div>
-        <span class="cv-footer-date">Generated <?= date('M Y') ?></span>
-    </footer>
-
     <?php
     /*
-     * The running line, on every printed page.
+     * One strip at the foot of every printed sheet.
      *
-     * Not our mark repeated. Recruiters print CVs and the pages get separated
-     * on a desk, and a page two that does not say whose it is gets binned. So
-     * what repeats is the candidate's name, which serves them, rather than the
-     * Jobmington chip, which would only serve us and three times over.
+     * It carries the person's name on the left, because recruiters print CVs
+     * and the pages get separated on a desk, and a page two that does not say
+     * whose it is gets binned. On the right it carries the mark and the
+     * address, and nothing else: no panel, no rule, no chip, no date.
      *
-     * Screen-hidden: on screen the whole document scrolls as one and a line
-     * pinned to the window bottom would just sit on top of the content.
+     * A repeating element has to be quiet or it becomes the loudest thing in a
+     * document that belongs to somebody else. That is the whole reason the
+     * blue chip could not simply be duplicated.
      */
     $runningName = trim((string) ($cv['full_name'] ?? ''));
-    if ($runningName !== ''):
     ?>
-    <div class="cv-running" aria-hidden="true">
-        <span><?= e($runningName) ?></span>
-        <?php if (!empty($cv['headline'])): ?>
-            <span class="cv-running-sep">&middot;</span>
-            <span><?= e($cv['headline']) ?></span>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
+    <footer class="cv-footer" aria-hidden="true">
+        <span class="cv-footer-who"><?= e($runningName) ?></span>
+        <span class="cv-footer-brand">
+            <img src="<?= SITE_URL ?>/assets/images/badge.png?v=logo-8" alt="" class="cv-footer-logo">
+            <a href="<?= SITE_URL ?>" target="_blank">jobmington.com</a>
+        </span>
+    </footer>
     <!-- JOBMINGTON_CV_BUILDER_EXPORT cv_id:<?= $cvId ?> user:<?= $userId ?> generated:<?= date('Y-m-d') ?> -->
     
 </div>
