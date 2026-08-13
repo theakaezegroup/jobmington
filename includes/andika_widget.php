@@ -49,6 +49,20 @@ function jm_andika_launcher(): void
 
     $base = defined('SITE_URL') ? rtrim(SITE_URL, '/') : '/jobmington';
     $mark = $base . '/assets/images/pwa-icon-192.png?v=brand-30';
+
+    /*
+     * Whether they are signed in has to be settled here, on the server, before
+     * the panel offers anyone a text box.
+     *
+     * Andika's API calls Session::requireLogin(), which sends a 302 to the
+     * login page rather than a JSON 401. A fetch follows that redirect, gets
+     * HTML back with a 200, and fails on parse. Handled naively that surfaces
+     * as a network error, so a signed-out person would type a question, wait,
+     * and be told their connection is broken. Better to say so before they
+     * type.
+     */
+    $signedIn = class_exists('Session') && Session::isLoggedIn();
+    $loginUrl = $base . '/auth/login.php?redirect=' . urlencode($_SERVER['REQUEST_URI'] ?? '/');
     ?>
     <style>
         #jm-ak-launcher {
@@ -91,7 +105,12 @@ function jm_andika_launcher(): void
     </button>
 
     <script>
-    window.JM_ANDIKA = { base: <?= json_encode($base) ?>, mark: <?= json_encode($mark) ?> };
+    window.JM_ANDIKA = {
+        base: <?= json_encode($base) ?>,
+        mark: <?= json_encode($mark) ?>,
+        signedIn: <?= $signedIn ? 'true' : 'false' ?>,
+        loginUrl: <?= json_encode($loginUrl) ?>
+    };
     (function () {
         var btn = document.getElementById('jm-ak-launcher');
         if (!btn) { return; }

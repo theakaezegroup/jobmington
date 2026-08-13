@@ -129,6 +129,24 @@
     function paintEmpty() {
         var wrap = document.createElement('div');
         wrap.className = 'jm-ak-empty';
+
+        /*
+         * Signed out, this says so instead of offering a text box. Andika's API
+         * redirects rather than returning 401, so a question typed here would
+         * come back looking like a network failure. Saying it up front is the
+         * difference between a closed door and a broken one.
+         */
+        if (cfg.signedIn === false) {
+            wrap.innerHTML =
+                '<img class="jm-ak-empty-mark" src="' + esc(cfg.mark || '') + '" alt="">' +
+                '<h3>Meet Andika</h3>' +
+                '<p>Your career assistant, free with a Jobmington account. ' +
+                'Ask it about applications, interviews, salaries or switching fields.</p>' +
+                '<a class="jm-ak-cta" href="' + esc(cfg.loginUrl || '') + '">Sign in to start</a>';
+            thread.appendChild(wrap);
+            return;
+        }
+
         wrap.innerHTML =
             '<img class="jm-ak-empty-mark" src="' + esc(cfg.mark || '') + '" alt="">' +
             '<h3>Hi, I am Andika</h3>' +
@@ -172,6 +190,20 @@
         toBottom();
     }
 
+    /* Their message is still on screen and still saved, so signing in and
+       coming back finds the thread where they left it. */
+    function signedOut() {
+        cfg.signedIn = false;
+        var el = document.createElement('div');
+        el.className = 'jm-ak-msg err';
+        el.innerHTML = 'Your session ended. <a href="' + esc(cfg.loginUrl || '') + '">Sign in</a> and your conversation will still be here.';
+        thread.appendChild(el);
+        input.disabled = true;
+        input.placeholder = 'Sign in to continue';
+        sendBtn.disabled = true;
+        toBottom();
+    }
+
     function send(text) {
         text = (text || '').trim();
         if (!text || busy) { return; }
@@ -196,19 +228,35 @@
             body: JSON.stringify({ message: text, tool: 'chat' }),
             signal: abort.signal
         }).then(function (r) {
-            return r.json().then(function (d) { return { ok: r.ok, status: r.status, data: d }; });
+            /*
+             * A session that ended mid-conversation does not come back as 401.
+             * requireLogin sends a 302 to the login page, fetch follows it, and
+             * what arrives is HTML with a 200. Parsing that as JSON throws, and
+             * a throw here is indistinguishable from the network being down
+             * unless we look first. So look: a redirect, or a body that is not
+             * JSON, means signed out, and it should say so.
+             */
+            var type = r.headers.get('content-type') || '';
+            if (r.redirected || type.indexOf('json') === -1) {
+                return { signedOut: true };
+            }
+            return r.json().then(function (d) {
+                return { ok: r.ok, status: r.status, data: d };
+            }, function () {
+                return { unreadable: true };
+            });
         }).then(function (res) {
             typing(false);
             setBusy(false);
-            if (res.status === 401) {
-                fail('Please sign in to keep talking to Andika.');
+            if (res.signedOut || res.status === 401) {
+                signedOut();
                 return;
             }
             if (res.status === 403) {
                 fail('Andika is not available on your account right now.');
                 return;
             }
-            if (!res.ok || !res.data || !res.data.success || !res.data.reply) {
+            if (res.unreadable || !res.ok || !res.data || !res.data.success || !res.data.reply) {
                 fail('Andika could not answer that. Try again in a moment.');
                 return;
             }
@@ -281,6 +329,13 @@
         });
 
         document.addEventListener('keydown', onEsc);
+
+        if (cfg.signedIn === false) {
+            input.disabled = true;
+            input.placeholder = 'Sign in to talk to Andika';
+            sendBtn.disabled = true;
+        }
+
         resume();
         paintThread();
     }

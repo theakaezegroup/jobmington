@@ -245,6 +245,24 @@
 
 .jm-ak-seed:focus-visible { outline: 2px solid var(--ak-blue); outline-offset: 1px; }
 
+/* Signed out: one clear way forward instead of a text box that cannot work. */
+.jm-ak-cta {
+    display: inline-block;
+    background: var(--ak-blue);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 10px 20px;
+    border-radius: 11px;
+    transition: background .15s, transform .12s;
+}
+
+.jm-ak-cta:hover { background: var(--ak-blue-deep); transform: translateY(-1px); }
+.jm-ak-cta:focus-visible { outline: 2px solid var(--ak-amber); outline-offset: 2px; }
+
+.jm-ak-input:disabled { cursor: not-allowed; }
+
 /* ── Typing ─────────────────────────────────────────────────────── */
 
 .jm-ak-typing {
