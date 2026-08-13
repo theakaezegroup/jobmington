@@ -23,11 +23,11 @@ if (!Session::isLoggedIn()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Please log in to use the CV analyser.']);
     exit;
+}
 
 // The tool gate, after the sign-in check: a signed-out caller should be told
 // they are signed out, not that a tool they cannot even see is locked.
 jm_require_tool_api('cv_builder');
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
