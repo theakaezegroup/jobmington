@@ -49,6 +49,12 @@ require_once __DIR__ . '/../includes/ai-header.php';
         --color-secondary: #FFE135;
         --color-accent: #FF9800;
         --color-canvas: #f3f4f8;
+        /* Retouch tokens, matching the panel so the two read as one product. */
+        --line-soft: #e4eaf3;
+        --line-soft-strong: #cfdcee;
+        --lift-1: 0 1px 2px rgba(6, 20, 38, .05);
+        --lift-2: 0 6px 18px -8px rgba(6, 20, 38, .16), 0 1px 3px rgba(6, 20, 38, .05);
+        --lift-3: 0 14px 34px -12px rgba(6, 20, 38, .24), 0 2px 6px rgba(6, 20, 38, .06);
         --color-surface: #ffffff;
         
         /* Legacy mappings for compatibility */
@@ -76,9 +82,9 @@ require_once __DIR__ . '/../includes/ai-header.php';
         --semantic-error: #dc2626;
         
         /* Legacy border tokens, softened by the final brand shell below */
-        --border-standard: 2px solid var(--color-ink);
+        --border-standard: 1px solid var(--line-soft);
         --border-subtle: 1px solid rgba(5, 27, 59, 0.1);
-        --border-default: 2px solid var(--color-ink);
+        --border-default: 1px solid var(--line-soft);
         --border-glass: var(--border-subtle);
         --shadow-standard: 4px 4px 0px 0px var(--color-ink);
         --shadow-hover: 6px 6px 0px 0px var(--color-ink);
@@ -119,8 +125,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid var(--color-ink);
-        box-shadow: 2px 2px 0px 0px var(--color-ink);
+        border: 1px solid var(--line-soft);
+        box-shadow: var(--lift-1);
         flex-shrink: 0;
         position: relative;
     }
@@ -221,7 +227,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         flex-direction: column; 
         flex-shrink: 0;
         background: var(--color-surface);
-        border-right: 2px solid var(--color-ink);
+        border-right: 1px solid var(--line-soft);
         overflow-y: auto; 
         padding-top: 20px; 
         padding-bottom: 100px;
@@ -233,7 +239,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .glass-panel.right-panel { 
         width: 320px; 
         border-right: none; 
-        border-left: 2px solid var(--color-ink); 
+        border-left: 1px solid var(--line-soft); 
         padding: 24px 20px 100px 20px;
         direction: ltr; /* Keep scrollbar on right for right panel */
         background: var(--color-canvas); /* Soft wash for card contrast */
@@ -306,16 +312,16 @@ require_once __DIR__ . '/../includes/ai-header.php';
 
     .hud-widget {
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         padding: 18px;
         border-radius: 8px;
         margin-bottom: 20px; /* Increased for breathability */
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
         transition: all 0.15s ease;
     }
     .hud-widget:hover {
-        transform: translate(-2px, -2px);
-        box-shadow: 5px 5px 0px 0px var(--color-ink);
+        transform: translateY(-2px);
+        box-shadow: var(--lift-3);
     }
     
     .hud-widget:last-child {
@@ -326,7 +332,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .strength-bar-bg {
         height: 10px;
         background: #e2e8f0;
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         border-radius: 2px;
         overflow: hidden;
         margin-bottom: 8px;
@@ -335,7 +341,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .strength-bar-fill {
         height: 100%;
         background: var(--color-primary);
-        border-right: 2px solid var(--color-ink);
+        border-right: 1px solid var(--line-soft);
     }
     .strength-label {
         display: flex;
@@ -353,7 +359,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
     }
     .quick-action-btn {
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         padding: 12px 8px;
         border-radius: 6px;
         display: flex;
@@ -367,7 +373,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         text-transform: uppercase;
         letter-spacing: 0.05em;
         transition: all 0.15s ease;
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
     }
     .quick-action-btn:hover {
         transform: translate(-1.5px, -1.5px);
@@ -380,7 +386,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
-        border-bottom: 2px solid var(--color-ink);
+        border-bottom: 1px solid var(--line-soft);
         font-size: 0.8rem;
         font-weight: 700;
         color: var(--color-ink);
@@ -548,7 +554,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         background: var(--color-secondary); 
         color: var(--color-ink); 
         border-color: var(--color-ink);
-        box-shadow: 2px 2px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-1);
     }
     .nav-item.active .icon { color: var(--color-ink) !important; opacity: 1; }
     
@@ -566,15 +572,15 @@ require_once __DIR__ . '/../includes/ai-header.php';
         gap: 8px; 
         cursor: pointer; 
         transition: all 0.15s ease;
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
         font-family: 'Futura Cyrillic Demi';
     }
     .new-chat-btn:hover { 
-        transform: translate(-1px, -1px);
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
+        transform: translateY(-1px);
+        box-shadow: var(--lift-2);
     }
 
     /* --- CENTER STAGE --- */
@@ -654,8 +660,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
         align-items: center;
         justify-content: center;
         color: white;
-        border: 2px solid var(--color-ink);
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
+        border: 1px solid var(--line-soft);
+        box-shadow: var(--lift-2);
         flex-shrink: 0;
         position: relative;
     }
@@ -745,19 +751,20 @@ require_once __DIR__ . '/../includes/ai-header.php';
     
     .input-wrapper {
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         border-radius: 8px;
         padding: 6px 8px 6px 16px;
         display: flex;
         align-items: center;
         gap: 6px;
         transition: all 0.2s ease;
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
     }
     
     .input-wrapper:focus-within {
-        transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0px 0px var(--color-ink);
+        border-color: #a9c2e6;
+        box-shadow: 0 0 0 3px rgba(6, 64, 163, .09);
+        transform: none;
     }
     
     .input-wrapper input {
@@ -806,7 +813,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         width: 42px;
         height: 42px;
         border-radius: 8px;
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         background: var(--color-primary);
         color: white;
         cursor: pointer;
@@ -815,17 +822,17 @@ require_once __DIR__ . '/../includes/ai-header.php';
         justify-content: center;
         transition: all 0.15s ease;
         font-size: 0.95rem;
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
     }
     
     .send-action:hover {
-        transform: translate(-2px, -2px);
-        box-shadow: 5px 5px 0px 0px var(--color-ink);
+        transform: translateY(-2px);
+        box-shadow: var(--lift-3);
     }
     
     .send-action:active {
         transform: translate(0, 0);
-        box-shadow: 2px 2px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-1);
     }
     
     .send-action.is-loading {
@@ -852,20 +859,20 @@ require_once __DIR__ . '/../includes/ai-header.php';
         gap: 6px;
         padding: 10px 16px;
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         border-radius: 8px;
         color: var(--color-ink);
         font-size: 0.8125rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.15s ease;
-        box-shadow: 2px 2px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-1);
     }
     
     .chip:hover {
         background: var(--color-secondary);
-        transform: translate(-1px, -1px);
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        transform: translateY(-1px);
+        box-shadow: var(--lift-2);
     }
     
     .chip .icon {
@@ -912,14 +919,14 @@ require_once __DIR__ . '/../includes/ai-header.php';
         border-radius: 4px;
         margin-bottom: 6px;
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         cursor: pointer;
         transition: all 0.15s ease;
-        box-shadow: 2px 2px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-1);
     }
     .match-item:hover {
-        transform: translate(-1px, -1px);
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        transform: translateY(-1px);
+        box-shadow: var(--lift-2);
         background: var(--color-canvas);
     }
     .match-title {
@@ -972,7 +979,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         color: var(--color-ink);
         opacity: 0.6;
         font-size: 0.85rem;
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
         margin: 20px 0;
     }
     
@@ -1006,18 +1013,19 @@ require_once __DIR__ . '/../includes/ai-header.php';
     }
     
     .chat-messages .msg-user {
-        background: var(--color-surface);
-        padding: 14px 18px;
-        border-radius: 8px;
-        margin-left: 15%;
-        margin-bottom: 24px;
+        background: var(--color-primary);
+        color: #fff;
+        padding: 11px 16px;
+        border-radius: 16px 16px 5px 16px;
+        margin-left: 22%;
+        margin-bottom: 22px;
         font-size: 0.9375rem;
         line-height: 1.6;
-        border: 2px solid var(--color-ink);
-        color: var(--color-ink);
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
-        font-weight: 500;
+        font-weight: 400;
+        border: 0;
+        box-shadow: none;
         position: relative;
+        overflow-wrap: anywhere;
     }
     
     .chat-messages .msg-ai {
@@ -1038,8 +1046,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
         justify-content: center;
         color: white;
         font-size: 0.9rem;
-        border: 2px solid var(--color-ink);
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        border: 1px solid var(--line-soft);
+        box-shadow: var(--lift-2);
         position: relative;
     }
     
@@ -1182,8 +1190,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
         border-radius: 8px;
         overflow-x: auto;
         margin: 20px 0;
-        border: 2px solid var(--color-ink);
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
+        border: 1px solid var(--line-soft);
+        box-shadow: var(--lift-2);
     }
     .chat-messages .msg-ai .ai-text pre code {
         background: none;
@@ -1204,7 +1212,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
     /* Copy button at bottom */
     .copy-btn {
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         color: var(--color-ink);
         padding: 8px 14px;
         border-radius: 4px;
@@ -1216,7 +1224,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
         align-items: center;
         gap: 6px;
         margin-top: 16px;
-        box-shadow: 2px 2px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-1);
         font-family: 'Futura Cyrillic Demi';
         font-weight: 600;
         text-transform: uppercase;
@@ -1224,8 +1232,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .chat-messages .msg-ai:hover .copy-btn { opacity: 1; }
     .copy-btn:hover { 
         background: var(--color-secondary); 
-        transform: translate(-1px, -1px);
-        box-shadow: 3px 3px 0px 0px var(--color-ink);
+        transform: translateY(-1px);
+        box-shadow: var(--lift-2);
     }
     .copy-btn.copied { 
         background: var(--semantic-success); 
@@ -1290,7 +1298,7 @@ require_once __DIR__ . '/../includes/ai-header.php';
     
     .tool-card {
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
+        border: 1px solid var(--line-soft);
         border-radius: 8px;
         padding: 16px;
         display: flex;
@@ -1298,12 +1306,12 @@ require_once __DIR__ . '/../includes/ai-header.php';
         gap: 12px;
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: 4px 4px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-2);
     }
     
     .tool-card:hover {
-        transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0px 0px var(--color-ink);
+        transform: translateY(-2px);
+        box-shadow: var(--lift-3);
         background: var(--color-secondary);
     }
     
@@ -1401,8 +1409,8 @@ require_once __DIR__ . '/../includes/ai-header.php';
         padding: 16px 20px;
         border-radius: 8px;
         background: var(--color-surface);
-        border: 2px solid var(--color-ink);
-        box-shadow: 6px 6px 0px 0px var(--color-ink);
+        border: 1px solid var(--line-soft);
+        box-shadow: var(--lift-3);
         min-width: 300px;
         max-width: 420px;
         pointer-events: auto;
@@ -1515,9 +1523,9 @@ require_once __DIR__ . '/../includes/ai-header.php';
     
     .modal-dialog {
         background: var(--color-surface);
-        border: 3px solid var(--color-ink);
+        border: 1px solid var(--line-soft-strong);
         border-radius: 8px;
-        box-shadow: 12px 12px 0px 0px var(--color-ink);
+        box-shadow: var(--lift-3);
         max-width: 420px;
         width: 100%;
         transform: scale(0.95) translateY(-10px);
@@ -1785,8 +1793,6 @@ require_once __DIR__ . '/../includes/ai-header.php';
     .send-btn { background: var(--text-main); color: var(--bg-app); margin-left: 8px; }
 
     /* --- BUBBLES --- */
-    .bubble-user { background: var(--bubble-user); padding: 14px 20px; border-radius: 18px 18px 4px 18px; max-width: 85%; margin-left: auto; margin-bottom: 24px; border: 1px solid var(--border-glass); }
-    .bubble-ai { width: 100%; margin-bottom: 32px; display: flex; gap: 16px; font-size: 1rem; line-height: 1.7; }
     .ai-avatar { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #303030, #1a1a1a); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; border: 1px solid rgba(255,255,255,0.1); }
 
     /* --- HUD --- */
