@@ -640,11 +640,12 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             background: #fbfdff;
         }
 
-        .cv-footer-verify {
-            background: var(--cv-accent);
-            color: #ffffff;
-        }
-        
+        /* The verification chip used to be declared twice, here and again 160
+           lines further down, and the two disagreed. Whichever came last won,
+           which is a coin toss every time either is edited, and is how it came
+           to be white text on an invalid background. One declaration now, and
+           it is the later one. */
+
         /* Print Styles - A4 exact */
         @media print {
             body {
@@ -810,28 +811,33 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
         .cv-footer-verify {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             position: relative;
             overflow: hidden;
-            background: #0640a3;
-            color: #ffffff;
-            padding: 5px 11px;
-            border-radius: 5px;
-            font-size: 7pt;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            /* Quiet. This is a CV: the document belongs to the person applying,
+               and a solid blue block in uppercase competes with their name for
+               the first thing an employer notices. A hairline chip says the
+               same thing and waits to be looked at. */
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 3px 9px 3px 8px;
+            border-radius: 4px;
+            font-size: 6.5pt;
+            font-weight: 500;
+            letter-spacing: 0;
         }
         
-        /* The arc: about 60% of the chip's height, offset so roughly a third
-           of the corner carries yellow. Proportion is the rule, not the pixels. */
+        /* The arc, scaled down with the chip. It is now the only colour in the
+           mark, which is enough: one small warm curve against a hairline box
+           reads as considered, where a filled block reads as an advertisement. */
         .cv-footer-verify::before {
             content: '';
             position: absolute;
-            left: -13px;
-            bottom: -13px;
-            width: 22px;
-            height: 22px;
+            left: -8px;
+            bottom: -8px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: #f59f22;
         }
@@ -843,10 +849,12 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
             z-index: 1;
         }
 
+        /* The tick keeps the brand blue. On a white chip it is the one mark
+           that has to be legible at 6.5pt, and grey would lose it. */
         .cv-footer-verify svg {
-            width: 12px;
-            height: 12px;
-            color: #ffffff;
+            width: 10px;
+            height: 10px;
+            color: #0640a3;
         }
         
         .cv-footer-date {
@@ -861,17 +869,27 @@ $cvLocation = $cv['location'] ?? $cv['city'] ?? '';
                 print-color-adjust: exact !important;
             }
             
-            /* Brand blue on paper too, not the template's accent. This mark
-               says where the document came from, so it should look the same
-               whichever of the three templates the CV is wearing. */
+            /* The same quiet chip on paper, not the template's accent. This
+               mark says where the document came from, so it looks the same
+               whichever of the three templates the CV is wearing. Only the arc
+               and the tick need forcing: a printer drops backgrounds by
+               default and those two carry the whole thing. */
             .cv-footer-verify {
-                background: #0640a3 !important;
+                background: #ffffff !important;
+                border-color: #e2e8f0 !important;
+                color: #64748b !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
 
             .cv-footer-verify::before {
                 background: #f59f22 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .cv-footer-verify svg {
+                color: #0640a3 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
