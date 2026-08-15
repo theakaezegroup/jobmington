@@ -18,10 +18,10 @@ $pageTitle = 'Employers | ' . SITE_NAME;
 <!doctype html>
 <html lang="en">
 <head>
-    <?php require_once __DIR__ . '/../includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php require_once __DIR__ . '/../includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
     <meta name="description" content="Post jobs on Jobmington, manage applications, and hire African talent from one simple employer workspace.">
     <title><?= e($pageTitle) ?></title>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>

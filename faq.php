@@ -34,10 +34,10 @@ $faqs = [
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php require_once __DIR__ . '/includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php require_once __DIR__ . '/includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
     <title>FAQ | Jobmington</title>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
