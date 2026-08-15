@@ -155,6 +155,11 @@ define('PRICE_BUNDLE_JOB_TOOLKIT',        (int)(getenv('PRICE_BUNDLE_JOB_TOOLKIT
 // CBN mid-market rate, 2026: ~1,600 NGN/USD
 define('NGN_USD_RATE', (int)(getenv('NGN_USD_RATE') ?: 1600));
 
+// ── Advertising: Meta (Facebook) pixel ────────────────────────────────────────
+// Blank switches the pixel off entirely. Set FB_PIXEL_ID in .env, not here, so
+// the id stays out of git. See includes/pixel.php.
+define('FB_PIXEL_ID', trim((string)(getenv('FB_PIXEL_ID') ?: '')));
+
 // User Types
 define('USER_TYPE_SEEKER', 'seeker');
 define('USER_TYPE_EMPLOYER', 'employer');

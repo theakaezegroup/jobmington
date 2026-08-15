@@ -115,6 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$existingApplication) {
                 error_log('Job-apply seed award failed: ' . $e->getMessage());
             }
 
+            // Advertising conversion. The job title, not the applicant.
+            require_once __DIR__ . '/../includes/pixel.php';
+            jm_pixel_track('Lead', [
+                'content_name'     => (string) ($job['title'] ?? ''),
+                'content_category' => 'job_application',
+            ]);
+
             if (!empty($job['employer_user_id'])) {
                 sendNotification(
                     (int) $job['employer_user_id'],

@@ -179,6 +179,8 @@ $shareImage = SITE_URL . '/assets/images/og-cover.png?v=brand-15';
 <!doctype html>
 <html lang="en">
 <head>
+    <?php require_once __DIR__ . '/includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="<?= e($pageDescription) ?>">

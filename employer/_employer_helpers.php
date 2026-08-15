@@ -80,6 +80,7 @@ function jm_employer_header(string $pageTitle, string $active = ''): void {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= e($pageTitle) ?></title>
+        <?php require_once __DIR__ . '/../includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicDemi.woff2" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="/jobmington/assets/fonts/FuturaCyrillicBook.woff2" crossorigin>
         <link rel="stylesheet" href="/jobmington/assets/css/minimal-jobmington.css?v=brand-30">

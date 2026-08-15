@@ -172,7 +172,15 @@ try {
     Session::remove('talent_access_purchase');
     
     $pdo->commit();
-    
+
+    // Advertising conversion, in the currency Paystack charged.
+    require_once __DIR__ . '/../includes/pixel.php';
+    jm_pixel_track('Purchase', [
+        'value'        => round((float) ($purchaseInfo['amount'] ?? ($plan['price_cash'] ?? 0)), 2),
+        'currency'     => 'NGN',
+        'content_name' => 'talent_access',
+    ]);
+
     // Redirect to success
     header('Location: ' . SITE_URL . '/employer/talent-pool.php?success=1');
     exit;

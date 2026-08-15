@@ -59,6 +59,15 @@ try {
 
             $pdo->commit();
 
+            // Advertising conversion. Reported in Naira because that is what
+            // Paystack actually charged, whatever the page led with.
+            require_once __DIR__ . '/../includes/pixel.php';
+            jm_pixel_track('Purchase', [
+                'value'        => round($amountNgn, 2),
+                'currency'     => 'NGN',
+                'content_name' => 'seeker_premium_' . $plan,
+            ]);
+
             $userRow = $pdo->prepare("SELECT email, full_name FROM users WHERE user_id = ? LIMIT 1");
             $userRow->execute([$userId]);
             $userRow = $userRow->fetch();

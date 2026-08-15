@@ -696,6 +696,7 @@ function jm_jobs_header(string $pageTitle, string $active = 'jobs', array $meta 
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title><?= e($pageTitle) ?></title>
+        <?php require_once __DIR__ . '/../includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
         <meta name="description" content="<?= e($desc) ?>">
         <?php if ($canonical !== ''): ?><link rel="canonical" href="<?= e($canonical) ?>"><?php endif; ?>
 

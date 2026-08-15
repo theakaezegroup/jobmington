@@ -76,6 +76,14 @@ try {
             ]);
 
             $pdo->commit();
+
+            // Advertising conversion, in the currency Paystack charged.
+            require_once __DIR__ . '/../includes/pixel.php';
+            jm_pixel_track('Purchase', [
+                'value'        => round((float) ($transaction['amount'] ?? 0), 2),
+                'currency'     => 'NGN',
+                'content_name' => 'job_posting',
+            ]);
         } catch (Throwable $e) {
             $pdo->rollBack();
             throw $e;

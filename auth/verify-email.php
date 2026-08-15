@@ -146,6 +146,13 @@ if ($token !== '') {
             }
         }
 
+        // Advertising conversion. First verification only, and queued rather
+        // than fired here because every path out of this page is a redirect.
+        if (!$alreadyDone) {
+            require_once __DIR__ . '/../includes/pixel.php';
+            jm_pixel_track('CompleteRegistration');
+        }
+
         $verified = true;
 
         $isThisPerson = Session::isLoggedIn() && Session::userId() === (int) $user['user_id'];
@@ -185,6 +192,8 @@ $pageTitle = 'Verify Email | ' . SITE_NAME;
 <!doctype html>
 <html lang="en">
 <head>
+    <?php require_once __DIR__ . '/../includes/pixel.php'; jm_pixel_head($cspNonce ?? null); ?>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle) ?></title>

@@ -3,6 +3,8 @@
  * Clean AI product shell for Andika and CV Roast.
  */
 
+require_once __DIR__ . '/pixel.php';
+
 $aiPageTitle = $pageTitle ?? SITE_NAME;
 $activeAIPage = $activeAIPage ?? '';
 
@@ -49,6 +51,9 @@ $dashboardUrl = class_exists('Session') && Session::isAdmin()
     <link rel="manifest" href="/jobmington/manifest.json?v=brand-29">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= e($aiPageTitle) ?></title>
+
+    <?php jm_pixel_head($cspNonce ?? null); ?>
+
     <meta name="description" content="<?= e($jmShareDesc) ?>">
     <link rel="canonical" href="<?= e($jmShareUrl) ?>">
 

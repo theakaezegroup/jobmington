@@ -52,6 +52,14 @@ try {
 
             $pdo->commit();
 
+            // Advertising conversion, in the currency Paystack charged.
+            require_once __DIR__ . '/../includes/pixel.php';
+            jm_pixel_track('Purchase', [
+                'value'        => round((float) ($txn['amount'] ?? 0), 2),
+                'currency'     => 'NGN',
+                'content_name' => 'credits_' . $credits,
+            ]);
+
             $msg = "Payment successful! {$credits} credit" . ($credits !== 1 ? 's' : '') . " added to your account.";
             Session::flash('success', $msg);
 

@@ -57,6 +57,7 @@ final class HeaderConfig {
 }
 
 require_once __DIR__ . '/navigation.php';
+require_once __DIR__ . '/pixel.php';
 
 // 3. LOAD DATA
 $headerConfig = HeaderConfig::getInstance();
@@ -648,7 +649,9 @@ ob_start();
     <link rel="shortcut icon" type="image/png" href="/jobmington/assets/images/favicon.png?v=fav-1">
     <link rel="apple-touch-icon" href="/jobmington/assets/images/pwa-icon-192.png?v=brand-10">
     <title><?= htmlspecialchars($headerConfig->title) ?></title>
-    
+
+    <?php jm_pixel_head($cspNonce); ?>
+
     <!-- Premium Design System -->
     <link rel="stylesheet" href="/jobmington/assets/css/premium-design-system.css?v=brand-10">
     <script src="/jobmington/assets/js/jm-image-compress.js?v=brand-15" defer></script>
